@@ -2,7 +2,7 @@ import * as monaco from 'monaco-editor';
 // Force-include common Monaco language contributions so Rollup bundles them
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.js';
 import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.js';
-import 'monaco-editor/esm/vs/basic-languages/json/json.js';
+import 'monaco-editor/esm/vs/language/json/monaco.contribution';
 import 'monaco-editor/esm/vs/basic-languages/html/html.js';
 import 'monaco-editor/esm/vs/basic-languages/css/css.js';
 import 'monaco-editor/esm/vs/basic-languages/markdown/markdown.js';

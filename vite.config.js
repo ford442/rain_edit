@@ -31,5 +31,16 @@ export default defineConfig({
       // allow access to parent folder so we can reuse images from the original repo
       allow: ['..']
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        }
+      }
+    }
   }
 });
