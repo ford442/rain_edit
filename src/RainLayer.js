@@ -1,5 +1,5 @@
-import vertSrc from './shaders/simple.vert';
-import fragSrc from './shaders/water.frag';
+import vertSrc from './shaders/simple.vert?glslify';
+import fragSrc from './shaders/water.frag?glslify';
 
 function createShader(gl, type, src){
   const shader = gl.createShader(type);

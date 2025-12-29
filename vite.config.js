@@ -1,11 +1,30 @@
 import { defineConfig } from 'vite';
-import monacoEditorPlugin from 'vite-plugin-monaco-editor';
-import glslify from 'rollup-plugin-glslify';
+import { readFileSync } from 'fs';
+import glslify from 'glslify';
+
+// Simple Vite plugin to compile shader files via glslify when imported with `?glslify`
+function glslifyPlugin() {
+  return {
+    name: 'glslify-transform',
+    transform(code, id) {
+      if (!id.endsWith('?glslify')) return null;
+      const filePath = id.replace(/\?glslify$/, '');
+      const src = readFileSync(filePath, 'utf8');
+      // glslify can process a file path using glslify.file or compile a source string
+      // Try file-based first, fallback to compile.
+      try {
+        const processed = glslify.file ? glslify.file(filePath).toString() : glslify(src);
+        return `export default ${JSON.stringify(processed)};`;
+      } catch (err) {
+        this.error('glslify processing failed for ' + filePath + ': ' + err.message);
+      }
+    }
+  };
+}
 
 export default defineConfig({
   plugins: [
-    monacoEditorPlugin(),
-    glslify()
+    glslifyPlugin()
   ],
   server: {
     fs: {

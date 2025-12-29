@@ -1,9 +1,9 @@
 import * as monaco from 'monaco-editor';
 import RainLayer from './RainLayer';
 import Raindrops from '../../ra1n/src/raindrops.js';
-import backFrag from './shaders/water-back.frag';
-import frontFrag from './shaders/water.frag';
-import vertSrc from './shaders/simple.vert';
+import backFrag from './shaders/water-back.frag?glslify';
+import frontFrag from './shaders/water.frag?glslify';
+import vertSrc from './shaders/simple.vert?glslify';
 
 const editorEl = document.getElementById('editor');
 const backCanvas = document.getElementById('rain-back');
@@ -34,13 +34,10 @@ function resizeCanvases(){
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
 
-// create a Raindrops instance (re-uses original simulation)
-const dpi = window.devicePixelRatio || 1;
-const raindrops = new Raindrops(backCanvas.width, backCanvas.height, dpi, new Image(), new Image());
-
 // create layers (async init)
 let bgLayer = null;
 let fgLayer = null;
+let raindrops = null;
 
 // helper to load image (tries to reuse parent repo assets)
 function awaitImage(src){
@@ -51,8 +48,14 @@ function awaitImage(src){
 }
 
 async function initLayers(){
-  const bgImg = await awaitImage('/ra1n/img/weather/texture-rain-bg.png');
-  const fgImg = await awaitImage('/ra1n/img/weather/texture-rain-fg.png');
+  // load texture and drop images; attempt to use copied public images first
+  const bgImg = await awaitImage('/img/texture-rain-bg.png') || await awaitImage('/ra1n/img/weather/texture-rain-bg.png');
+  const fgImg = await awaitImage('/img/texture-rain-fg.png') || await awaitImage('/ra1n/img/weather/texture-rain-fg.png');
+  const dropAlpha = await awaitImage('/img/drop-alpha.png') || await awaitImage('/ra1n/img/drop-alpha.png');
+  const dropColor = await awaitImage('/img/drop-color.png') || await awaitImage('/ra1n/img/drop-color.png');
+
+  const dpi = window.devicePixelRatio || 1;
+  raindrops = new Raindrops(backCanvas.width, backCanvas.height, dpi, dropAlpha, dropColor);
 
   bgLayer = new RainLayer(backCanvas, { vertex: vertSrc, fragment: backFrag, textures: { u_waterMap: raindrops.canvas, u_textureBg: bgImg }, options: {} });
   fgLayer = new RainLayer(frontCanvas, { vertex: vertSrc, fragment: frontFrag, textures: { u_waterMap: raindrops.canvas, u_textureFg: fgImg, u_textureBg: bgImg }, options: {} });
@@ -79,13 +82,13 @@ document.addEventListener('mousemove', (e) => {
   const rect = editorEl.getBoundingClientRect();
   const x = ( (e.clientX - rect.left) / rect.width ) * 2 - 1;
   const y = ( (e.clientY - rect.top) / rect.height ) * 2 - 1;
-  bgLayer.setParallax(x*0.4, y*0.4);
-  fgLayer.setParallax(x, y);
+  if(bgLayer) bgLayer.setParallax(x*0.4, y*0.4);
+  if(fgLayer) fgLayer.setParallax(x, y);
 });
 
 // controls
-document.getElementById('toggle-back').addEventListener('change', (e) => bgLayer.setVisible(e.target.checked));
-document.getElementById('toggle-front').addEventListener('change', (e) => fgLayer.setVisible(e.target.checked));
+document.getElementById('toggle-back').addEventListener('change', (e) => { if(bgLayer) bgLayer.setVisible(e.target.checked); });
+document.getElementById('toggle-front').addEventListener('change', (e) => { if(fgLayer) fgLayer.setVisible(e.target.checked); });
 document.getElementById('toggle-front-on-top').addEventListener('change', (e) => {
   if(e.target.checked){
     frontCanvas.style.zIndex = 2; editorEl.style.zIndex = 1;
@@ -93,5 +96,3 @@ document.getElementById('toggle-front-on-top').addEventListener('change', (e) =>
     frontCanvas.style.zIndex = 0; editorEl.style.zIndex = 1;
   }
 });
-
-animate();
