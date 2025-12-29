@@ -49,10 +49,10 @@ function awaitImage(src){
 
 async function initLayers(){
   // load texture and drop images; attempt to use copied public images first
-  const bgImg = await awaitImage('/img/texture-rain-bg.png') || await awaitImage('/ra1n/img/weather/texture-rain-bg.png');
-  const fgImg = await awaitImage('/img/texture-rain-fg.png') || await awaitImage('/ra1n/img/weather/texture-rain-fg.png');
-  const dropAlpha = await awaitImage('/img/drop-alpha.png') || await awaitImage('/ra1n/img/drop-alpha.png');
-  const dropColor = await awaitImage('/img/drop-color.png') || await awaitImage('/ra1n/img/drop-color.png');
+  const bgImg = await awaitImage('./img/texture-rain-bg.png') || await awaitImage('/ra1n/img/weather/texture-rain-bg.png');
+  const fgImg = await awaitImage('./img/texture-rain-fg.png') || await awaitImage('/ra1n/img/weather/texture-rain-fg.png');
+  const dropAlpha = await awaitImage('./img/drop-alpha.png') || await awaitImage('/ra1n/img/drop-alpha.png');
+  const dropColor = await awaitImage('./img/drop-color.png') || await awaitImage('/ra1n/img/drop-color.png');
 
   const dpi = window.devicePixelRatio || 1;
   raindrops = new Raindrops(backCanvas.width, backCanvas.height, dpi, dropAlpha, dropColor);
