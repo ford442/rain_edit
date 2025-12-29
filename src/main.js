@@ -1,14 +1,10 @@
 import * as monaco from 'monaco-editor';
-// Import workers as URLs using Vite's ?worker&url syntax
+// Import editor worker as URL using Vite's ?worker&url syntax
 import editorWorkerUrl from 'monaco-editor/esm/vs/editor/editor.worker.js?worker&url';
-import jsonWorkerUrl from 'monaco-editor/esm/vs/language/json/json.worker.js?worker&url';
 
 // Configure Monaco Environment to use web workers
 self.MonacoEnvironment = {
-  getWorker(_, label) {
-    if (label === 'json') {
-      return new Worker(jsonWorkerUrl, { type: 'module' });
-    }
+  getWorker() {
     return new Worker(editorWorkerUrl, { type: 'module' });
   }
 };
@@ -16,7 +12,6 @@ self.MonacoEnvironment = {
 // Force-include common Monaco language contributions so Rollup bundles them
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.js';
 import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.js';
-import 'monaco-editor/esm/vs/language/json/monaco.contribution';
 import 'monaco-editor/esm/vs/basic-languages/html/html.js';
 import 'monaco-editor/esm/vs/basic-languages/css/css.js';
 import 'monaco-editor/esm/vs/basic-languages/markdown/markdown.js';
