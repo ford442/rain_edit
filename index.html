@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>rain-2 — Monaco + dual rain layers</title>
+    <link rel="stylesheet" href="/src/styles.css">
+  </head>
+  <body>
+    <div id="app">
+      <div id="container">
+        <div id="editor"></div>
+        <canvas id="rain-back" class="rain-canvas"></canvas>
+        <canvas id="rain-front" class="rain-canvas"></canvas>
+      </div>
+
+      <div id="controls" class="controls">
+        <label><input id="toggle-back" type="checkbox" checked> Back rain</label>
+        <label><input id="toggle-front" type="checkbox" checked> Front rain</label>
+        <label><input id="toggle-front-on-top" type="checkbox" checked> Front layer on top of editor</label>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

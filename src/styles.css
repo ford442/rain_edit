@@ -1,0 +1,10 @@
+*{box-sizing:border-box;margin:0;padding:0}
+html,body,#app{height:100%}
+#container{position:relative;height:80vh;border:1px solid #ddd}
+#editor{position:absolute;top:0;left:0;right:0;bottom:0}
+.rain-canvas{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
+#rain-back{z-index:0}
+#editor{z-index:1}
+#rain-front{z-index:2}
+.controls{padding:12px}
+.controls label{margin-right:12px}

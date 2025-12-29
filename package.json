@@ -1,0 +1,19 @@
+{
+  "name": "rain-2",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.43.0",
+    "glslify": "^7.1.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "vite-plugin-monaco-editor": "^4.0.0",
+    "rollup-plugin-glslify": "^0.2.0"
+  }
+}
