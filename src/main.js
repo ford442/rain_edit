@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor';
 import RainLayer from './RainLayer';
-import Raindrops from '../../ra1n/src/raindrops.js';
+import Raindrops from './vendor/raindrops.js';
 import backFrag from './shaders/water-back.frag?glslify';
 import frontFrag from './shaders/water.frag?glslify';
 import vertSrc from './shaders/simple.vert?glslify';
