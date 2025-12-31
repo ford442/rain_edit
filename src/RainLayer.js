@@ -33,6 +33,10 @@ export default class RainLayer{
   constructor(canvas, {vertex=vertSrc, fragment=fragSrc, textures={}, options={}}={}){
     this.canvas = canvas;
     this.gl = canvas.getContext('webgl');
+    if (!this.gl) {
+      console.error('WebGL not supported or context lost.');
+      return;
+    }
     this.vertexSrc = vertex;
     this.fragmentSrc = fragment;
     this.program = createProgram(this.gl, this.vertexSrc, this.fragmentSrc);
@@ -46,6 +50,7 @@ export default class RainLayer{
   }
   _initBuffers(){
     const gl = this.gl;
+    if (!gl) return;
     const vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     const vertices = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
@@ -54,6 +59,7 @@ export default class RainLayer{
   }
   _setupDefaultUniforms(){
     const gl = this.gl;
+    if (!gl) return;
     gl.useProgram(this.program);
     this.uniforms = {};
     const getU = (name) => gl.getUniformLocation(this.program, name);
@@ -72,11 +78,13 @@ export default class RainLayer{
   }
   setParallax(x,y){
     const gl = this.gl;
+    if (!gl) return;
     gl.useProgram(this.program);
     gl.uniform2f(this.uniforms.u_parallax, x, y);
   }
   setUniform(name, value){
     const gl = this.gl;
+    if (!gl) return;
     const u = this.uniforms[name];
     if(!u) return;
     gl.useProgram(this.program);
@@ -85,6 +93,7 @@ export default class RainLayer{
   }
   bindTexture(uniformName, image){
     const gl = this.gl;
+    if (!gl) return;
     // create or update texture object
     let tex = this.textures[uniformName];
     if(!tex){
@@ -104,6 +113,7 @@ export default class RainLayer{
   }
   _bindTexturesForDraw(){
     const gl = this.gl;
+    if (!gl) return;
     gl.useProgram(this.program);
     let i = 0;
     for(const name in this.textures){
@@ -116,6 +126,7 @@ export default class RainLayer{
   }
   render(){
     const gl = this.gl;
+    if (!gl) return;
     gl.viewport(0,0,this.canvas.width,this.canvas.height);
     gl.clearColor(0,0,0,0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -132,6 +143,6 @@ export default class RainLayer{
   }
   destroy(){
     const gl = this.gl;
-    gl.deleteProgram(this.program);
+    if (gl) gl.deleteProgram(this.program);
   }
 }
