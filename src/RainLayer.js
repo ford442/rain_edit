@@ -46,6 +46,9 @@ export default class RainLayer{
     Object.keys(textures).forEach((k,i)=>{
       this.bindTexture(k, textures[k]);
     });
+    Object.keys(options).forEach((k)=>{
+      this.setUniform(k, options[k]);
+    });
     this.running = false;
   }
   _initBuffers(){
@@ -69,6 +72,17 @@ export default class RainLayer{
     this.uniforms.u_textureFg = getU('u_textureFg');
     this.uniforms.u_textureBg = getU('u_textureBg');
     this.uniforms.u_waterMap = getU('u_waterMap');
+
+    this.uniforms.u_renderShine = getU('u_renderShine');
+    this.uniforms.u_renderShadow = getU('u_renderShadow');
+    this.uniforms.u_minRefraction = getU('u_minRefraction');
+    this.uniforms.u_refractionDelta = getU('u_refractionDelta');
+    this.uniforms.u_alphaMultiply = getU('u_alphaMultiply');
+    this.uniforms.u_alphaSubtract = getU('u_alphaSubtract');
+    this.uniforms.u_parallaxFg = getU('u_parallaxFg');
+    this.uniforms.u_parallaxBg = getU('u_parallaxBg');
+    this.uniforms.u_textureRatio = getU('u_textureRatio');
+    this.uniforms.u_textureShine = getU('u_textureShine');
   }
   setSize(w,h){
     this.canvas.width = w;
@@ -88,8 +102,9 @@ export default class RainLayer{
     const u = this.uniforms[name];
     if(!u) return;
     gl.useProgram(this.program);
-    if(typeof value === 'number') gl.uniform1f(u, value);
-    else if(value.length === 2) gl.uniform2f(u, value[0], value[1]);
+    if(typeof value === 'boolean') gl.uniform1i(u, value ? 1 : 0);
+    else if(typeof value === 'number') gl.uniform1f(u, value);
+    else if(Array.isArray(value) && value.length === 2) gl.uniform2f(u, value[0], value[1]);
   }
   bindTexture(uniformName, image){
     const gl = this.gl;

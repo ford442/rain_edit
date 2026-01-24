@@ -230,7 +230,6 @@ Raindrops.prototype={
     timeScale*=this.options.globalTimeScale;
     this.lastRender=now;
     this.updateDrops(timeScale);
-    requestAnimationFrame(this.update.bind(this));
   }
 };
 export default Raindrops;
