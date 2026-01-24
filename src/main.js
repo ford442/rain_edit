@@ -42,10 +42,19 @@ const backCanvas = document.getElementById('rain-back');
 const frontCanvas = document.getElementById('rain-front');
 
 // create Monaco editor
+monaco.editor.defineTheme('transparent-vs-light', {
+  base: 'vs',
+  inherit: true,
+  rules: [],
+  colors: {
+    'editor.background': '#00000000'
+  }
+});
+
 const editor = monaco.editor.create(editorEl, {
   value: ['// rain-2 demo','function hello(){','  console.log("hello world");','}'].join('\n'),
   language: 'javascript',
-  theme: 'vs-light',
+  theme: 'transparent-vs-light',
   automaticLayout: true
 });
 
