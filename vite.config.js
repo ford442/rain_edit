@@ -23,6 +23,7 @@ function glslifyPlugin() {
 }
 
 export default defineConfig({
+  base: './',
   plugins: [
     glslifyPlugin()
   ],
