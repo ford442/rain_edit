@@ -97,5 +97,5 @@ void main() {
         vec4 border=vec4(0., 0., 0., borderAlpha);
         fg=blend(border, fg);
     }
-    gl_FragColor = blend(bg, fg);
+    gl_FragColor = fg;
 }

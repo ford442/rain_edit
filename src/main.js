@@ -89,8 +89,20 @@ async function initLayers(){
   const dpi = window.devicePixelRatio || 1;
   raindrops = new Raindrops(backCanvas.width, backCanvas.height, dpi, dropAlpha, dropColor);
 
-  bgLayer = new RainLayer(backCanvas, { vertex: vertSrc, fragment: backFrag, textures: { u_waterMap: raindrops.canvas, u_textureBg: bgImg }, options: {} });
-  fgLayer = new RainLayer(frontCanvas, { vertex: vertSrc, fragment: frontFrag, textures: { u_waterMap: raindrops.canvas, u_textureFg: fgImg, u_textureBg: bgImg }, options: {} });
+  const options = {
+    u_brightness: 1.0,
+    u_alphaMultiply: 6.0,
+    u_alphaSubtract: 5.0,
+    u_minRefraction: 256.0,
+    u_refractionDelta: 24.0,
+    u_renderShine: false,
+    u_renderShadow: true,
+    u_parallaxFg: 20.0,
+    u_parallaxBg: 5.0,
+    u_textureRatio: bgImg.width / bgImg.height,
+  };
+  bgLayer = new RainLayer(backCanvas, { vertex: vertSrc, fragment: backFrag, textures: { u_waterMap: raindrops.canvas, u_textureBg: bgImg }, options: { u_brightness: 1.0 } });
+  fgLayer = new RainLayer(frontCanvas, { vertex: vertSrc, fragment: frontFrag, textures: { u_waterMap: raindrops.canvas, u_textureFg: fgImg, u_textureBg: bgImg }, options });
 
   // simple animation loop
   function animate(){
