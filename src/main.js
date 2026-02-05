@@ -149,3 +149,9 @@ document.getElementById('toggle-front-on-top').addEventListener('change', (e) =>
     frontCanvas.style.zIndex = 0; editorEl.style.zIndex = 1;
   }
 });
+
+const opacitySlider = document.getElementById('editor-opacity');
+opacitySlider.addEventListener('input', (e) => {
+  editorEl.style.opacity = e.target.value;
+});
+editorEl.style.opacity = opacitySlider.value;
