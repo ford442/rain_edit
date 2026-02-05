@@ -155,3 +155,51 @@ opacitySlider.addEventListener('input', (e) => {
   editorEl.style.opacity = e.target.value;
 });
 editorEl.style.opacity = opacitySlider.value;
+
+// New controls: Storm Intensity & Focus Mode
+const intensitySlider = document.getElementById('storm-intensity');
+intensitySlider.addEventListener('input', (e) => {
+  const val = parseInt(e.target.value, 10);
+  if (raindrops) {
+    raindrops.options.rainChance = val / 100;
+    raindrops.options.dropletsRate = val * 2;
+  }
+});
+
+let focusMode = false;
+document.getElementById('focus-mode').addEventListener('change', (e) => {
+  focusMode = e.target.checked;
+});
+
+editor.onDidChangeCursorPosition((e) => {
+  if (!focusMode || !raindrops) return;
+
+  // Get the cursor position in editor coordinates
+  const position = e.position;
+  const scrolledVisiblePosition = editor.getScrolledVisiblePosition(position);
+
+  if (scrolledVisiblePosition) {
+    // The scrolledVisiblePosition is relative to the editor's content content area.
+    // We need to map it to the canvas coordinates.
+    // Raindrops expects logical pixels (CSS pixels), so we don't multiply by DPR here
+    // because Raindrops handles density internally via this.dropletsPixelDensity and this.scale
+    // Wait, let's verify. clearDroplets(x, y, r) uses (x-r)*density*scale.
+    // If scale is DPR, and density is 1.
+    // If we pass logical pixels, it becomes logical * DPR, which matches physical pixels on canvas.
+    // Yes, that seems correct.
+
+    // We need to add the editor's offset if any (it is at 0,0 relative to container)
+    // scrolledVisiblePosition is relative to the editor instance viewport.
+
+    // Just to be safe, let's use a slightly larger radius for the "wiper" effect
+    const x = scrolledVisiblePosition.left;
+    const y = scrolledVisiblePosition.top;
+
+    // Clear droplets around the cursor
+    raindrops.clearDroplets(x, y, 100);
+
+    // Also clear a bit more for the line
+    // raindrops.clearDroplets(x + 20, y, 80);
+    // raindrops.clearDroplets(x - 20, y, 80);
+  }
+});
