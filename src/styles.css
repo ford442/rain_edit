@@ -1,39 +1,119 @@
-*{box-sizing:border-box;margin:0;padding:0}
-html,body,#app{height:100vh;width:100vw;overflow:hidden}
-#container{position:relative;width:100%;height:100%;border:none}
-#editor{position:absolute;top:0;left:0;right:0;bottom:0}
-.rain-canvas{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
-#rain-back{z-index:0}
-#editor{z-index:1}
-#rain-front{z-index:2}
-.controls{
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+#container { position: relative; width: 100%; height: 100%; border: none; background: #000; }
+
+#editor { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
+.rain-canvas { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+#rain-back { z-index: 0; }
+#rain-front { z-index: 2; }
+
+/* Fog Layer */
+#fog-layer {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 300px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 8px;
-  padding: 20px;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1; /* On top of editor (DOM order) */
+  backdrop-filter: blur(var(--blur, 0px));
+  -webkit-backdrop-filter: blur(var(--blur, 0px));
+  transition: backdrop-filter 0.5s ease;
+}
+
+/* Lightning Layer */
+#lightning-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   z-index: 10;
+  background: white;
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition: opacity 0.05s ease-out;
+}
+
+/* Dock UI */
+#dock {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+  background: rgba(10, 10, 15, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  z-index: 20;
+  color: #eee;
+  font-size: 13px;
+  user-select: none;
 }
-.controls label{
-  display: block;
-  margin-bottom: 15px;
-  font-size: 14px;
+
+.dock-title {
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+  opacity: 0.8;
+  margin-right: 10px;
+  font-size: 12px;
 }
-.controls input[type="range"], .controls input[type="checkbox"] {
-  display: block;
-  width: 100%;
-  margin-top: 5px;
+
+.dock-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  padding-right: 20px;
 }
-.controls input[type="checkbox"] {
-  width: auto;
-  display: inline-block;
-  margin-top: 0;
-  margin-right: 8px;
+.dock-group:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.icon {
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 80px;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.dock-toggles {
+  display: flex;
+  gap: 15px;
+}
+
+.dock-toggles label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.dock-toggles label:hover {
+  opacity: 1;
+}
+
+input[type="checkbox"] {
+  accent-color: #00e5ff; /* Cyan accent */
 }

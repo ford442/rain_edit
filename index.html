@@ -10,17 +10,28 @@
     <div id="app">
       <div id="container">
         <div id="editor"></div>
+        <div id="fog-layer"></div>
         <canvas id="rain-back" class="rain-canvas"></canvas>
         <canvas id="rain-front" class="rain-canvas"></canvas>
+        <div id="lightning-layer"></div>
       </div>
 
-      <div id="controls" class="controls">
-        <label>Opacity <input id="editor-opacity" type="range" min="0" max="1" step="0.05" value="1"></label>
-        <label>Storm Intensity <input id="storm-intensity" type="range" min="0" max="100" value="30"></label>
-        <label><input id="toggle-back" type="checkbox" checked> Back rain</label>
-        <label><input id="toggle-front" type="checkbox" checked> Front rain</label>
-        <label><input id="toggle-front-on-top" type="checkbox" checked> Front layer on top of editor</label>
-        <label><input id="focus-mode" type="checkbox"> Focus Mode (Wiper)</label>
+      <div id="dock">
+        <div class="dock-title">RAIN EDIT</div>
+        <div class="dock-group">
+          <span class="icon">⛈️</span>
+          <input id="storm-intensity" type="range" min="0" max="100" value="30" title="Storm Intensity">
+        </div>
+        <div class="dock-group">
+          <span class="icon">👁️</span>
+          <input id="editor-opacity" type="range" min="0" max="1" step="0.05" value="1" title="Editor Opacity">
+        </div>
+        <div class="dock-toggles">
+           <label title="Back Rain"><input id="toggle-back" type="checkbox" checked> Bg</label>
+           <label title="Front Rain"><input id="toggle-front" type="checkbox" checked> Fg</label>
+           <label title="Front Rain on Top"><input id="toggle-front-on-top" type="checkbox" checked> Layer</label>
+           <label title="Focus Mode"><input id="focus-mode" type="checkbox"> Focus</label>
+        </div>
       </div>
     </div>
 
