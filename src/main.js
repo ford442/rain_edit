@@ -203,3 +203,74 @@ editor.onDidChangeCursorPosition((e) => {
     // raindrops.clearDroplets(x - 20, y, 80);
   }
 });
+
+// --- Fog / Condensation Logic ---
+const fogLayer = document.getElementById('fog-layer');
+let lastActivity = Date.now();
+let fogBlur = 0;
+
+function updateFog() {
+  const now = Date.now();
+  const timeSinceActivity = now - lastActivity;
+
+  // If idle for more than 2 seconds, start fogging up
+  if (timeSinceActivity > 2000) {
+    // Increase blur slowly up to 5px
+    if (fogBlur < 5) {
+      fogBlur += 0.02;
+    }
+  } else {
+    // Clear fog immediately on activity
+    fogBlur = 0;
+  }
+
+  // Apply to DOM
+  if (fogLayer) {
+    fogLayer.style.setProperty('--blur', Math.min(fogBlur, 5).toFixed(2) + 'px');
+  }
+
+  requestAnimationFrame(updateFog);
+}
+updateFog();
+
+// Reset activity on interactions
+['mousemove', 'keydown', 'mousedown', 'wheel'].forEach(evt => {
+  window.addEventListener(evt, () => {
+    lastActivity = Date.now();
+    fogBlur = 0;
+    if(fogLayer) fogLayer.style.setProperty('--blur', '0px');
+  });
+});
+
+
+// --- Lightning Logic ---
+const lightningLayer = document.getElementById('lightning-layer');
+
+function triggerLightning() {
+  if (!lightningLayer) return;
+
+  // Flash brightness
+  const brightness = 0.6 + Math.random() * 0.4; // 0.6 to 1.0 opacity
+  lightningLayer.style.opacity = brightness;
+
+  // Also briefly increase background rain brightness?
+  // We can't easily access the shader uniform from here without refactoring,
+  // but the overlay div does a good job.
+
+  // Fade out quickly
+  setTimeout(() => {
+    lightningLayer.style.opacity = 0;
+  }, 50 + Math.random() * 100);
+
+  // Schedule next strike
+  scheduleLightning();
+}
+
+function scheduleLightning() {
+  // Random time between 10s and 30s
+  const delay = 10000 + Math.random() * 20000;
+  setTimeout(triggerLightning, delay);
+}
+
+// Start lightning loop
+scheduleLightning();
