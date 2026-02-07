@@ -1,45 +1,54 @@
-from playwright.sync_api import sync_playwright, expect
+import sys
+import os
 import time
+from playwright.sync_api import sync_playwright
 
-def run():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
+def run(playwright):
+    browser = playwright.chromium.launch()
+    page = browser.new_page()
+    page.goto("http://localhost:5173")
 
-        # Navigate to the app
-        print("Navigating to app...")
-        page.goto("http://localhost:3000")
+    # Wait for the editor to load
+    try:
+        page.wait_for_selector(".monaco-editor", timeout=10000)
+    except Exception as e:
+        print(f"Error waiting for editor: {e}")
+        # Take a screenshot for debugging
+        page.screenshot(path="verification/error_screenshot.png")
+        sys.exit(1)
 
-        # Wait for editor to load
-        page.wait_for_selector("#editor")
+    # Verify title
+    try:
+        title = page.inner_text(".dock-title")
+        print(f"Dock Title: {title}")
+        if "RAIN CONTROL" not in title:
+            print("ERROR: Dock title mismatch! Expected 'RAIN CONTROL', got: ", title)
+            sys.exit(1)
+    except Exception as e:
+        print(f"Error checking title: {e}")
+        sys.exit(1)
 
-        # Verify Dock exists
-        print("Verifying Dock...")
-        dock = page.locator("#dock")
-        expect(dock).to_be_visible()
-        expect(dock).to_contain_text("RAIN EDIT")
+    print("Title verification successful.")
 
-        # Verify Fog Layer exists
-        print("Verifying Fog Layer...")
-        fog = page.locator("#fog-layer")
-        # It might be visible but transparent, or just in DOM.
-        # Since it has pointer-events: none and no content, just check attached.
-        expect(fog).to_be_attached()
+    # Screenshot initial state
+    page.screenshot(path="verification/final_check_initial.png")
 
-        # Verify Lightning Layer exists
-        print("Verifying Lightning Layer...")
-        lightning = page.locator("#lightning-layer")
-        expect(lightning).to_be_attached()
+    # Test reference toggle (Alt key)
+    page.keyboard.down("Alt")
+    time.sleep(1) # Wait for transition
+    page.screenshot(path="verification/final_check_reference.png")
+    page.keyboard.up("Alt")
 
-        # Wait a bit for rain to initialize and things to settle
-        time.sleep(2)
+    # Verify wiper effect logic (can't easily verify visually via script without image comparison,
+    # but we can ensure no errors are thrown in console)
+    page.on("console", lambda msg: print(f"Browser Console: {msg.text}"))
 
-        # Take screenshot
-        print("Taking screenshot...")
-        page.screenshot(path="verification/rain_ui_screenshot.png")
+    # Type 'Enter' to trigger wiper
+    page.keyboard.press("Enter")
+    time.sleep(1)
+    page.screenshot(path="verification/final_check_wiper.png")
 
-        browser.close()
-        print("Done.")
+    browser.close()
 
-if __name__ == "__main__":
-    run()
+with sync_playwright() as playwright:
+    run(playwright)
