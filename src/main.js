@@ -40,6 +40,19 @@ import vertSrc from './shaders/simple.vert?glslify';
 const editorEl = document.getElementById('editor');
 const backCanvas = document.getElementById('rain-back');
 const frontCanvas = document.getElementById('rain-front');
+const referenceLayer = document.getElementById('reference-layer');
+if (referenceLayer) {
+  referenceLayer.innerText = `// REFERENCE LAYER
+// Use this space for documentation, specs, or notes.
+// It sits behind the rain but remains readable.
+// Toggle visibility with Alt key.
+//
+// API Reference:
+// - raindrops.clearDroplets(x, y, r)
+// - render(time)
+// - update()
+`.trim();
+}
 
 // create Monaco editor
 monaco.editor.defineTheme('transparent-vs-light', {
@@ -137,6 +150,12 @@ document.addEventListener('mousemove', (e) => {
   const y = ( (e.clientY - rect.top) / rect.height ) * 2 - 1;
   if(bgLayer) bgLayer.setParallax(x*0.4, y*0.4);
   if(fgLayer) fgLayer.setParallax(x, y);
+
+  // Update fog mask position for "wiping" effect
+  if (fogLayer) {
+    fogLayer.style.setProperty('--mouse-x', e.clientX + 'px');
+    fogLayer.style.setProperty('--mouse-y', e.clientY + 'px');
+  }
 });
 
 // controls
@@ -169,6 +188,30 @@ intensitySlider.addEventListener('input', (e) => {
 let focusMode = false;
 document.getElementById('focus-mode').addEventListener('change', (e) => {
   focusMode = e.target.checked;
+});
+
+editor.onKeyDown((e) => {
+  if (e.keyCode === monaco.KeyCode.Enter) {
+    if (!raindrops) return;
+
+    const position = editor.getPosition();
+    // We want the position of the line we just left or the new one?
+    // Usually Enter creates a new line. We probably want to wipe the line we were on or the new empty space.
+    // Let's wipe the Y position of the cursor.
+    const scrolledVisiblePosition = editor.getScrolledVisiblePosition(position);
+
+    if (scrolledVisiblePosition) {
+        const y = scrolledVisiblePosition.top;
+        const width = editorEl.clientWidth;
+        const step = 40;
+        for (let x = 0; x < width; x += step) {
+             // Wiping animation
+             setTimeout(() => {
+                 raindrops.clearDroplets(x, y + 10, 50);
+             }, x * 0.5);
+        }
+    }
+  }
 });
 
 editor.onDidChangeCursorPosition((e) => {
@@ -274,3 +317,58 @@ function scheduleLightning() {
 
 // Start lightning loop
 scheduleLightning();
+
+// --- Reference Layer Logic ---
+const referenceInput = document.getElementById('reference-input');
+if (referenceInput && referenceLayer) {
+    referenceInput.value = referenceLayer.innerText;
+    referenceInput.addEventListener('input', (e) => {
+        referenceLayer.innerText = e.target.value;
+    });
+}
+
+let isAltDown = false;
+document.addEventListener('keydown', (e) => {
+    // Toggle on Alt key
+    if (e.key === 'Alt') {
+        if (!isAltDown) {
+            isAltDown = true;
+            toggleReferenceMode(true);
+        }
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'Alt') {
+        isAltDown = false;
+        toggleReferenceMode(false);
+    }
+});
+
+function toggleReferenceMode(active) {
+    if (active) {
+        // Hide editor, show reference
+        editorEl.style.opacity = '0.05';
+        editorEl.style.pointerEvents = 'none';
+
+        if (referenceLayer) {
+            referenceLayer.style.opacity = '0.9';
+            referenceLayer.style.filter = 'blur(0px)';
+            referenceLayer.style.background = 'rgba(0,0,0,0.6)'; // Darken bg to read better
+        }
+        // Clear fog temporarily
+        if (fogLayer) fogLayer.style.opacity = '0';
+
+    } else {
+        // Restore
+        editorEl.style.opacity = opacitySlider.value;
+        editorEl.style.pointerEvents = 'auto';
+
+        if (referenceLayer) {
+            referenceLayer.style.opacity = '0.2';
+            referenceLayer.style.filter = 'blur(2px)';
+            referenceLayer.style.background = 'radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, transparent 70%)';
+        }
+        if (fogLayer) fogLayer.style.opacity = '1';
+    }
+}
