@@ -42,15 +42,15 @@ const backCanvas = document.getElementById('rain-back');
 const frontCanvas = document.getElementById('rain-front');
 const referenceLayer = document.getElementById('reference-layer');
 if (referenceLayer) {
-  referenceLayer.innerText = `// REFERENCE LAYER
-// Use this space for documentation, specs, or notes.
-// It sits behind the rain but remains readable.
-// Toggle visibility with Alt key.
-//
-// API Reference:
-// - raindrops.clearDroplets(x, y, r)
-// - render(time)
-// - update()
+  referenceLayer.innerText = `# REFERENCE LAYER
+Use this space for documentation, specs, or notes.
+It sits behind the rain but remains readable.
+**Toggle visibility with Alt key.**
+
+## API Reference
+- \`raindrops.clearDroplets(x, y, r)\`
+- \`render(time)\`
+- \`update()\`
 `.trim();
 }
 
@@ -190,6 +190,23 @@ document.getElementById('focus-mode').addEventListener('change', (e) => {
   focusMode = e.target.checked;
 });
 
+// Blueprint Mode
+document.getElementById('blueprint-mode').addEventListener('change', (e) => {
+  if (e.target.checked) {
+      if (referenceLayer) {
+        referenceLayer.classList.add('blueprint-mode');
+        // Make editor slightly more transparent in blueprint mode
+        editorEl.style.opacity = '0.7';
+      }
+  } else {
+      if (referenceLayer) {
+        referenceLayer.classList.remove('blueprint-mode');
+        // Restore opacity (or reset to slider value)
+        editorEl.style.opacity = opacitySlider.value;
+      }
+  }
+});
+
 editor.onKeyDown((e) => {
   if (e.keyCode === monaco.KeyCode.Enter) {
     if (!raindrops) return;
@@ -272,6 +289,18 @@ function updateFog() {
     fogLayer.style.setProperty('--blur', Math.min(fogBlur, 5).toFixed(2) + 'px');
   }
 
+  // Idle Blur for Editor (Erosion effect)
+  if (editorEl) {
+    let editorBlur = 0;
+    if (timeSinceActivity > 4000) {
+        // Slowly blur the editor text as time passes
+        // Max blur 3px after ~10 seconds
+        const factor = (timeSinceActivity - 4000) / 6000;
+        editorBlur = Math.min(factor * 3, 3);
+    }
+    editorEl.style.filter = `blur(${editorBlur.toFixed(2)}px)`;
+  }
+
   requestAnimationFrame(updateFog);
 }
 updateFog();
@@ -282,6 +311,7 @@ updateFog();
     lastActivity = Date.now();
     fogBlur = 0;
     if(fogLayer) fogLayer.style.setProperty('--blur', '0px');
+    if(editorEl) editorEl.style.filter = 'blur(0px)';
   });
 });
 
@@ -319,11 +349,33 @@ function scheduleLightning() {
 scheduleLightning();
 
 // --- Reference Layer Logic ---
+function parseMarkdown(text) {
+  if(!text) return '';
+  // Basic sanitization
+  let safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  let html = safeText
+    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
+    .replace(/`(.*?)`/gim, '<code>$1</code>')
+    .replace(/^\- (.*$)/gim, '<div class="md-list-item">• $1</div>')
+    .replace(/\n/gim, '<br>');
+
+  return html;
+}
+
 const referenceInput = document.getElementById('reference-input');
 if (referenceInput && referenceLayer) {
-    referenceInput.value = referenceLayer.innerText;
+    // preserve initial text but render it as markdown
+    // We use innerText to get the source, assuming it was authored as markdown in the HTML
+    const initialText = referenceLayer.innerText;
+    referenceInput.value = initialText;
+    referenceLayer.innerHTML = parseMarkdown(initialText);
+
     referenceInput.addEventListener('input', (e) => {
-        referenceLayer.innerText = e.target.value;
+        referenceLayer.innerHTML = parseMarkdown(e.target.value);
     });
 }
 
