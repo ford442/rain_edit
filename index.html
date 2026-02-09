@@ -20,6 +20,10 @@
         <div id="lightning-layer"></div>
       </div>
 
+      <button id="dock-toggle" title="Toggle Controls" style="position: fixed; top: 20px; right: 20px; z-index: 25; width: 36px; height: 36px; background: rgba(16, 18, 27, 0.8); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); transition: all 0.2s;">
+        <span style="font-size: 18px;">⚙️</span>
+      </button>
+
       <div id="dock">
         <div class="dock-title">RAIN CONTROL</div>
 
@@ -36,6 +40,15 @@
         <div class="dock-group">
             <label><span class="icon">📝</span> Reference Text</label>
             <textarea id="reference-input" rows="3" placeholder="Paste reference here..."></textarea>
+        </div>
+
+        <div class="dock-group">
+          <label><span class="icon">🎨</span> Theme</label>
+          <select id="theme-select" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #c0c0d0; padding: 4px; font-family: inherit; font-size: 11px; width: 100%; margin-top: 5px; cursor: pointer;">
+             <option value="cyberpunk">Cyberpunk</option>
+             <option value="journal">Journal</option>
+             <option value="blueprint">Blueprint</option>
+          </select>
         </div>
 
         <div class="dock-toggles">

@@ -121,11 +121,11 @@ textarea:focus {
   position: fixed;
   top: 20px;
   right: 20px;
-  width: 220px;
+  width: 200px; /* Slightly narrower */
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 24px;
+  gap: 14px; /* Slightly tighter */
+  padding: 18px; /* Slightly less padding */
 
   /* Modern Glassmorphism */
   background: rgba(16, 18, 27, 0.65);
@@ -133,7 +133,7 @@ textarea:focus {
   -webkit-backdrop-filter: blur(20px) saturate(180%);
 
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06),
@@ -142,10 +142,17 @@ textarea:focus {
 
   z-index: 20;
   color: #a0a0b0;
-  font-size: 12px;
+  font-size: 11px;
   user-select: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: top right;
+  opacity: 0.9;
+}
+
+#dock.dock-collapsed {
+  transform: translateX(240px); /* Move off screen */
+  opacity: 0;
+  pointer-events: none;
 }
 
 #dock:hover {
@@ -154,7 +161,6 @@ textarea:focus {
   box-shadow:
     0 25px 50px -12px rgba(0, 0, 0, 0.6),
     inset 0 1px 1px rgba(255, 255, 255, 0.15);
-  transform: translateY(2px);
 }
 
 .dock-title {
@@ -274,4 +280,78 @@ input[type="checkbox"]:checked::after {
 }
 input[type="checkbox"]:hover {
   border-color: rgba(255,255,255,0.5);
+}
+
+/* Scattered Notes */
+.note-card {
+  position: absolute;
+  width: 320px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  padding: 24px;
+  border-radius: 4px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  transition: transform 0.1s linear; /* Smooth parallax */
+  pointer-events: auto; /* Allow interaction if needed */
+  border: 1px solid rgba(255,255,255,0.05);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #c0d0e0;
+}
+
+.note-card h1 { font-size: 18px; margin-bottom: 12px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
+.note-card h2 { font-size: 15px; margin-top: 16px; margin-bottom: 8px; color: #e0e0e0; }
+.note-card h3 { font-size: 14px; margin-top: 12px; margin-bottom: 4px; color: #d0d0d0; }
+
+/* --- Themes --- */
+
+/* Journal Theme */
+body.theme-journal #container {
+  filter: sepia(0.8) contrast(1.1) brightness(0.9);
+  background: #2b2520;
+}
+body.theme-journal .note-card {
+  background: #fdf6e3;
+  color: #333;
+  font-family: 'Courier New', Courier, serif;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body.theme-journal .note-card h1 { color: #5b4636; border-bottom: 2px solid #5b4636; text-shadow: none; }
+body.theme-journal .note-card h2 { color: #695d55; border-color: rgba(0,0,0,0.1); }
+body.theme-journal .note-card h3 { color: #7a6e66; }
+body.theme-journal .note-card code { background: rgba(0,0,0,0.05); color: #885544; }
+body.theme-journal textarea {
+    background: rgba(253, 246, 227, 0.9);
+    color: #333;
+    border: 1px solid #d0c0a0;
+}
+body.theme-journal #dock {
+    background: rgba(43, 37, 32, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Blueprint Theme */
+body.theme-blueprint #container {
+  background-color: #001529;
+  background-image:
+      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+body.theme-blueprint .note-card {
+  background: rgba(0, 40, 80, 0.8);
+  border: 1px solid rgba(0, 200, 255, 0.5);
+  color: #aaddff;
+  font-family: 'Courier New', monospace;
+  box-shadow: 0 0 15px rgba(0, 100, 200, 0.2);
+}
+body.theme-blueprint .note-card h1 { color: #fff; text-shadow: 0 0 5px #00e5ff; border-bottom: 1px dashed #00e5ff; }
+body.theme-blueprint .note-card h2 { border-color: rgba(0, 200, 255, 0.3); }
+body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
+    opacity: 0.6;
+    filter: hue-rotate(180deg) saturate(2);
 }

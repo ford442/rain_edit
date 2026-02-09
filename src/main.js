@@ -156,6 +156,17 @@ document.addEventListener('mousemove', (e) => {
     fogLayer.style.setProperty('--mouse-x', e.clientX + 'px');
     fogLayer.style.setProperty('--mouse-y', e.clientY + 'px');
   }
+
+  // Parallax for notes
+  const notes = document.querySelectorAll('.note-card');
+  notes.forEach(note => {
+      const depth = parseFloat(note.dataset.depth) || 1;
+      const initialRot = parseFloat(note.dataset.initialRot) || 0;
+      // move opposite to mouse
+      const moveX = -x * 30 * depth;
+      const moveY = -y * 30 * depth;
+      note.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${initialRot}deg)`;
+  });
 });
 
 // controls
@@ -349,21 +360,51 @@ function scheduleLightning() {
 scheduleLightning();
 
 // --- Reference Layer Logic ---
-function parseMarkdown(text) {
-  if(!text) return '';
-  // Basic sanitization
-  let safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function updateScatteredNotes(text) {
+  if (!referenceLayer) return;
+  referenceLayer.innerHTML = ''; // Clear existing
+  if (!text) return;
 
-  let html = safeText
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
-    .replace(/`(.*?)`/gim, '<code>$1</code>')
-    .replace(/^\- (.*$)/gim, '<div class="md-list-item">• $1</div>')
-    .replace(/\n/gim, '<br>');
+  // Split by headings (# ) or horizontal rules (---)
+  // We use a regex to look ahead for # at start of line, or ---
+  const parts = text.split(/(?:^|\n)(?=# )|(?:\n---)/g).filter(p => p && p.trim().length > 0);
 
-  return html;
+  parts.forEach((part, index) => {
+    // Basic markdown parsing for the part
+    let safeText = part.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    let html = safeText
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
+      .replace(/`(.*?)`/gim, '<code>$1</code>')
+      .replace(/^\- (.*$)/gim, '<div class="md-list-item">• $1</div>')
+      .replace(/\n/gim, '<br>');
+
+    const card = document.createElement('div');
+    card.className = 'note-card';
+    card.innerHTML = html;
+
+    // Deterministic random positioning based on index
+    const seed = index * 1337;
+    const rnd = (n) => {
+        const x = Math.sin(seed + n) * 10000;
+        return x - Math.floor(x);
+    };
+
+    const left = 10 + rnd(1) * 60; // 10% to 70%
+    const top = 10 + rnd(2) * 60; // 10% to 70%
+    const rot = -5 + rnd(3) * 10; // -5 to 5 deg
+    const depth = 0.5 + rnd(4) * 1.5; // 0.5 to 2.0
+
+    card.style.left = left + '%';
+    card.style.top = top + '%';
+    card.style.transform = `rotate(${rot}deg)`;
+    card.dataset.initialRot = rot; // Store for parallax
+    card.dataset.depth = depth;
+
+    referenceLayer.appendChild(card);
+  });
 }
 
 const referenceInput = document.getElementById('reference-input');
@@ -371,11 +412,14 @@ if (referenceInput && referenceLayer) {
     // preserve initial text but render it as markdown
     // We use innerText to get the source, assuming it was authored as markdown in the HTML
     const initialText = referenceLayer.innerText;
+    // Clear raw text to render cards
+    referenceLayer.innerText = '';
     referenceInput.value = initialText;
-    referenceLayer.innerHTML = parseMarkdown(initialText);
+
+    updateScatteredNotes(initialText);
 
     referenceInput.addEventListener('input', (e) => {
-        referenceLayer.innerHTML = parseMarkdown(e.target.value);
+        updateScatteredNotes(e.target.value);
     });
 }
 
@@ -423,4 +467,25 @@ function toggleReferenceMode(active) {
         }
         if (fogLayer) fogLayer.style.opacity = '1';
     }
+}
+
+// --- Theme Logic ---
+const themeSelect = document.getElementById('theme-select');
+if (themeSelect) {
+    themeSelect.addEventListener('change', (e) => {
+        const theme = e.target.value;
+        document.body.classList.remove('theme-journal', 'theme-blueprint', 'theme-cyberpunk');
+        if (theme !== 'cyberpunk') {
+            document.body.classList.add(`theme-${theme}`);
+        }
+    });
+}
+
+// --- Dock Toggle Logic ---
+const dock = document.getElementById('dock');
+const dockToggle = document.getElementById('dock-toggle');
+if (dock && dockToggle) {
+    dockToggle.addEventListener('click', () => {
+        dock.classList.toggle('dock-collapsed');
+    });
 }
