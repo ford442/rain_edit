@@ -21,18 +21,18 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: '
   position: absolute;
   inset: 0;
   z-index: 1;
-  pointer-events: none; /* Allow clicks to pass through by default */
+  pointer-events: none; /* Children have auto */
   overflow: hidden;
-  color: rgba(180, 200, 220, 0.5); /* Subtle blue-ish white */
+  color: rgba(180, 200, 220, 0.9);
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
   line-height: 1.6;
   padding: 40px;
   white-space: pre-wrap;
-  opacity: 0.2;
-  filter: blur(2px);
+  opacity: 0.95; /* Sharp by default */
+  /* No blur here, handled by overlay */
   transition: opacity 0.4s ease, filter 0.4s ease, background 0.4s ease;
-  background: radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, transparent 70%); /* Vignette */
+  background: radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, transparent 70%);
 }
 
 #reference-layer h1 { font-size: 24px; color: #fff; margin-bottom: 10px; font-weight: bold; text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
@@ -41,6 +41,31 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: '
 .md-list-item { margin-left: 20px; color: #b4c8dc; margin-bottom: 4px; }
 #reference-layer code { background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; color: #aaddff; }
 #reference-layer b { color: #fff; font-weight: bold; }
+
+/* Reference Overlay (Lantern Effect) */
+#reference-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* On top of reference layer (due to DOM order) but below editor */
+  pointer-events: none;
+  background: rgba(0,0,0,0.5); /* Dim the background notes */
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  /* Lantern Mask: Transparent hole at mouse, Black elsewhere */
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 120px, black 350px);
+  -webkit-mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 120px, black 350px);
+  transition: opacity 0.3s ease, background 0.3s ease;
+}
+
+#reference-overlay.lantern-inactive {
+    mask-image: none;
+    -webkit-mask-image: none;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+}
 
 /* Blueprint Mode */
 #reference-layer.blueprint-mode {
@@ -52,9 +77,7 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: '
   font-family: 'Courier New', Courier, monospace;
   color: #89cff0;
   text-shadow: 0 0 2px #89cff0;
-  opacity: 0.8 !important; /* Force visibility */
-  filter: blur(0px) !important;
-  z-index: 1; /* Keep it behind editor, but visible */
+  opacity: 1 !important;
 }
 
 #reference-layer.blueprint-mode h1,
@@ -121,11 +144,11 @@ textarea:focus {
   position: fixed;
   top: 20px;
   right: 20px;
-  width: 200px; /* Slightly narrower */
+  width: 200px;
   display: flex;
   flex-direction: column;
-  gap: 14px; /* Slightly tighter */
-  padding: 18px; /* Slightly less padding */
+  gap: 14px;
+  padding: 18px;
 
   /* Modern Glassmorphism */
   background: rgba(16, 18, 27, 0.65);
@@ -150,7 +173,7 @@ textarea:focus {
 }
 
 #dock.dock-collapsed {
-  transform: translateX(240px); /* Move off screen */
+  transform: translateX(240px);
   opacity: 0;
   pointer-events: none;
 }
@@ -286,15 +309,15 @@ input[type="checkbox"]:hover {
 .note-card {
   position: absolute;
   width: 320px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  background: rgba(30, 40, 50, 0.4); /* Glassier */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   padding: 24px;
-  border-radius: 4px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  transition: transform 0.1s linear; /* Smooth parallax */
-  pointer-events: auto; /* Allow interaction if needed */
-  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  transition: transform 0.1s linear;
+  pointer-events: auto;
+  border: 1px solid rgba(255,255,255,0.08);
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   color: #c0d0e0;
@@ -303,6 +326,31 @@ input[type="checkbox"]:hover {
 .note-card h1 { font-size: 18px; margin-bottom: 12px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
 .note-card h2 { font-size: 15px; margin-top: 16px; margin-bottom: 8px; color: #e0e0e0; }
 .note-card h3 { font-size: 14px; margin-top: 12px; margin-bottom: 4px; color: #d0d0d0; }
+
+.note-card pre {
+    background: rgba(0,0,0,0.3);
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 8px 0;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.note-card code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #aaddff;
+}
+.note-card blockquote {
+    border-left: 3px solid rgba(0, 229, 255, 0.5);
+    padding-left: 12px;
+    margin: 8px 0;
+    color: #aaddff;
+    font-style: italic;
+    background: rgba(0, 229, 255, 0.05);
+    padding: 4px 4px 4px 12px;
+    border-radius: 0 4px 4px 0;
+}
+
 
 /* --- Themes --- */
 

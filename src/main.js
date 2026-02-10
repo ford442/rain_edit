@@ -33,6 +33,7 @@ self.MonacoEnvironment = {
 
 import RainLayer from './RainLayer';
 import Raindrops from './vendor/raindrops.js';
+import { ReferenceManager } from './ReferenceManager.js'; // New import
 import backFrag from './shaders/water-back.frag?glslify';
 import frontFrag from './shaders/water.frag?glslify';
 import vertSrc from './shaders/simple.vert?glslify';
@@ -41,8 +42,14 @@ const editorEl = document.getElementById('editor');
 const backCanvas = document.getElementById('rain-back');
 const frontCanvas = document.getElementById('rain-front');
 const referenceLayer = document.getElementById('reference-layer');
+const referenceOverlay = document.getElementById('reference-overlay');
+
+// Initialize Reference Manager
+const referenceManager = new ReferenceManager(referenceLayer, referenceOverlay);
+
 if (referenceLayer) {
-  referenceLayer.innerText = `# REFERENCE LAYER
+  // Set initial text
+  const initialMarkdown = `# REFERENCE LAYER
 Use this space for documentation, specs, or notes.
 It sits behind the rain but remains readable.
 **Toggle visibility with Alt key.**
@@ -51,7 +58,18 @@ It sits behind the rain but remains readable.
 - \`raindrops.clearDroplets(x, y, r)\`
 - \`render(time)\`
 - \`update()\`
+
+> "Rain is just confetti from the sky."
+
+\`\`\`javascript
+function example() {
+  return true;
+}
+\`\`\`
 `.trim();
+
+  // We don't set innerText directly anymore, we rely on manager
+  referenceManager.update(initialMarkdown);
 }
 
 // create Monaco editor
@@ -157,16 +175,7 @@ document.addEventListener('mousemove', (e) => {
     fogLayer.style.setProperty('--mouse-y', e.clientY + 'px');
   }
 
-  // Parallax for notes
-  const notes = document.querySelectorAll('.note-card');
-  notes.forEach(note => {
-      const depth = parseFloat(note.dataset.depth) || 1;
-      const initialRot = parseFloat(note.dataset.initialRot) || 0;
-      // move opposite to mouse
-      const moveX = -x * 30 * depth;
-      const moveY = -y * 30 * depth;
-      note.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${initialRot}deg)`;
-  });
+  // Note: ReferenceManager handles its own mousemove for lantern effect and dragging
 });
 
 // controls
@@ -201,6 +210,60 @@ document.getElementById('focus-mode').addEventListener('change', (e) => {
   focusMode = e.target.checked;
 });
 
+// Lantern Mode Toggle
+const lanternToggle = document.getElementById('lantern-mode');
+if (lanternToggle) {
+    lanternToggle.addEventListener('change', (e) => {
+        referenceManager.setLanternMode(e.target.checked);
+    });
+}
+
+// Ghost Mode Logic
+let ghostMode = false;
+let ghostTimer = null;
+const ghostToggle = document.getElementById('ghost-mode');
+
+function resetGhostTimer() {
+    if (!ghostMode) return;
+    // Restore opacity on activity
+    if (editorEl.style.opacity !== opacitySlider.value) {
+        editorEl.style.opacity = opacitySlider.value;
+    }
+
+    clearTimeout(ghostTimer);
+    ghostTimer = setTimeout(() => {
+        editorEl.style.opacity = '0.05'; // Fade out significantly
+    }, 4000); // 4 seconds idle
+}
+
+if (ghostToggle) {
+    ghostToggle.addEventListener('change', (e) => {
+        ghostMode = e.target.checked;
+        if (!ghostMode) {
+            clearTimeout(ghostTimer);
+            editorEl.style.opacity = opacitySlider.value;
+        } else {
+            resetGhostTimer();
+        }
+    });
+}
+
+// Attach Ghost Mode reset to inputs
+['mousemove', 'keydown', 'mousedown', 'wheel'].forEach(evt => {
+  window.addEventListener(evt, () => {
+    resetGhostTimer();
+
+    // Existing Fog Reset
+    lastActivity = Date.now();
+    fogBlur = 0;
+    if(fogLayer) fogLayer.style.setProperty('--blur', '0px');
+    if(editorEl && !ghostMode) editorEl.style.filter = 'blur(0px)'; // Only clear blur if not ghosting?
+    // Actually fog blur is orthogonal to ghost opacity.
+    if(editorEl) editorEl.style.filter = 'blur(0px)';
+  });
+});
+
+
 // Blueprint Mode
 document.getElementById('blueprint-mode').addEventListener('change', (e) => {
   if (e.target.checked) {
@@ -223,9 +286,6 @@ editor.onKeyDown((e) => {
     if (!raindrops) return;
 
     const position = editor.getPosition();
-    // We want the position of the line we just left or the new one?
-    // Usually Enter creates a new line. We probably want to wipe the line we were on or the new empty space.
-    // Let's wipe the Y position of the cursor.
     const scrolledVisiblePosition = editor.getScrolledVisiblePosition(position);
 
     if (scrolledVisiblePosition) {
@@ -245,33 +305,13 @@ editor.onKeyDown((e) => {
 editor.onDidChangeCursorPosition((e) => {
   if (!focusMode || !raindrops) return;
 
-  // Get the cursor position in editor coordinates
   const position = e.position;
   const scrolledVisiblePosition = editor.getScrolledVisiblePosition(position);
 
   if (scrolledVisiblePosition) {
-    // The scrolledVisiblePosition is relative to the editor's content content area.
-    // We need to map it to the canvas coordinates.
-    // Raindrops expects logical pixels (CSS pixels), so we don't multiply by DPR here
-    // because Raindrops handles density internally via this.dropletsPixelDensity and this.scale
-    // Wait, let's verify. clearDroplets(x, y, r) uses (x-r)*density*scale.
-    // If scale is DPR, and density is 1.
-    // If we pass logical pixels, it becomes logical * DPR, which matches physical pixels on canvas.
-    // Yes, that seems correct.
-
-    // We need to add the editor's offset if any (it is at 0,0 relative to container)
-    // scrolledVisiblePosition is relative to the editor instance viewport.
-
-    // Just to be safe, let's use a slightly larger radius for the "wiper" effect
     const x = scrolledVisiblePosition.left;
     const y = scrolledVisiblePosition.top;
-
-    // Clear droplets around the cursor
     raindrops.clearDroplets(x, y, 100);
-
-    // Also clear a bit more for the line
-    // raindrops.clearDroplets(x + 20, y, 80);
-    // raindrops.clearDroplets(x - 20, y, 80);
   }
 });
 
@@ -286,146 +326,95 @@ function updateFog() {
 
   // If idle for more than 2 seconds, start fogging up
   if (timeSinceActivity > 2000) {
-    // Increase blur slowly up to 5px
     if (fogBlur < 5) {
       fogBlur += 0.02;
     }
   } else {
-    // Clear fog immediately on activity
     fogBlur = 0;
   }
 
-  // Apply to DOM
   if (fogLayer) {
     fogLayer.style.setProperty('--blur', Math.min(fogBlur, 5).toFixed(2) + 'px');
   }
 
   // Idle Blur for Editor (Erosion effect)
-  if (editorEl) {
+  // Disable this if Ghost Mode is active (conflict of interest: Blur vs Opacity)
+  if (editorEl && !ghostMode) {
     let editorBlur = 0;
     if (timeSinceActivity > 4000) {
-        // Slowly blur the editor text as time passes
-        // Max blur 3px after ~10 seconds
         const factor = (timeSinceActivity - 4000) / 6000;
         editorBlur = Math.min(factor * 3, 3);
     }
     editorEl.style.filter = `blur(${editorBlur.toFixed(2)}px)`;
+  } else if (editorEl && ghostMode) {
+      // In ghost mode, we don't blur, we fade (handled by ghostTimer)
+      editorEl.style.filter = 'none';
   }
 
   requestAnimationFrame(updateFog);
 }
 updateFog();
 
-// Reset activity on interactions
-['mousemove', 'keydown', 'mousedown', 'wheel'].forEach(evt => {
-  window.addEventListener(evt, () => {
-    lastActivity = Date.now();
-    fogBlur = 0;
-    if(fogLayer) fogLayer.style.setProperty('--blur', '0px');
-    if(editorEl) editorEl.style.filter = 'blur(0px)';
-  });
-});
-
-
 // --- Lightning Logic ---
 const lightningLayer = document.getElementById('lightning-layer');
 
 function triggerLightning() {
   if (!lightningLayer) return;
-
-  // Flash brightness
-  const brightness = 0.6 + Math.random() * 0.4; // 0.6 to 1.0 opacity
+  const brightness = 0.6 + Math.random() * 0.4;
   lightningLayer.style.opacity = brightness;
-
-  // Also briefly increase background rain brightness?
-  // We can't easily access the shader uniform from here without refactoring,
-  // but the overlay div does a good job.
-
-  // Fade out quickly
   setTimeout(() => {
     lightningLayer.style.opacity = 0;
   }, 50 + Math.random() * 100);
-
-  // Schedule next strike
   scheduleLightning();
 }
 
 function scheduleLightning() {
-  // Random time between 10s and 30s
   const delay = 10000 + Math.random() * 20000;
   setTimeout(triggerLightning, delay);
 }
-
-// Start lightning loop
 scheduleLightning();
 
-// --- Reference Layer Logic ---
-function updateScatteredNotes(text) {
-  if (!referenceLayer) return;
-  referenceLayer.innerHTML = ''; // Clear existing
-  if (!text) return;
-
-  // Split by headings (# ) or horizontal rules (---)
-  // We use a regex to look ahead for # at start of line, or ---
-  const parts = text.split(/(?:^|\n)(?=# )|(?:\n---)/g).filter(p => p && p.trim().length > 0);
-
-  parts.forEach((part, index) => {
-    // Basic markdown parsing for the part
-    let safeText = part.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    let html = safeText
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
-      .replace(/`(.*?)`/gim, '<code>$1</code>')
-      .replace(/^\- (.*$)/gim, '<div class="md-list-item">• $1</div>')
-      .replace(/\n/gim, '<br>');
-
-    const card = document.createElement('div');
-    card.className = 'note-card';
-    card.innerHTML = html;
-
-    // Deterministic random positioning based on index
-    const seed = index * 1337;
-    const rnd = (n) => {
-        const x = Math.sin(seed + n) * 10000;
-        return x - Math.floor(x);
-    };
-
-    const left = 10 + rnd(1) * 60; // 10% to 70%
-    const top = 10 + rnd(2) * 60; // 10% to 70%
-    const rot = -5 + rnd(3) * 10; // -5 to 5 deg
-    const depth = 0.5 + rnd(4) * 1.5; // 0.5 to 2.0
-
-    card.style.left = left + '%';
-    card.style.top = top + '%';
-    card.style.transform = `rotate(${rot}deg)`;
-    card.dataset.initialRot = rot; // Store for parallax
-    card.dataset.depth = depth;
-
-    referenceLayer.appendChild(card);
-  });
-}
-
+// --- Reference Input Logic ---
 const referenceInput = document.getElementById('reference-input');
-if (referenceInput && referenceLayer) {
-    // preserve initial text but render it as markdown
-    // We use innerText to get the source, assuming it was authored as markdown in the HTML
-    const initialText = referenceLayer.innerText;
-    // Clear raw text to render cards
-    referenceLayer.innerText = '';
-    referenceInput.value = initialText;
+if (referenceInput) {
+    // Populate input with initial text (re-extracted from Markdown if possible, or just default)
+    // Since we overwrote innerHTML, we can't get it back easily.
+    // But we know what we set.
+    referenceInput.value = referenceManager.layer ? referenceManager.layer.innerText : "";
 
-    updateScatteredNotes(initialText);
+    // Correction: We just set HTML content using markdown parser.
+    // innerText will strip tags.
+    // Let's just set the initial value to the markdown string we defined above.
+    // But wait, that string was local.
+    // Let's refactor to make it accessible or just set it here.
+    const initialMarkdown = `# REFERENCE LAYER
+Use this space for documentation, specs, or notes.
+It sits behind the rain but remains readable.
+**Toggle visibility with Alt key.**
+
+## API Reference
+- \`raindrops.clearDroplets(x, y, r)\`
+- \`render(time)\`
+- \`update()\`
+
+> "Rain is just confetti from the sky."
+
+\`\`\`javascript
+function example() {
+  return true;
+}
+\`\`\`
+`.trim();
+
+    referenceInput.value = initialMarkdown;
 
     referenceInput.addEventListener('input', (e) => {
-        updateScatteredNotes(e.target.value);
+        referenceManager.update(e.target.value);
     });
 }
 
 let isAltDown = false;
 document.addEventListener('keydown', (e) => {
-    // Toggle on Alt key
     if (e.key === 'Alt') {
         if (!isAltDown) {
             isAltDown = true;
@@ -443,28 +432,23 @@ document.addEventListener('keyup', (e) => {
 
 function toggleReferenceMode(active) {
     if (active) {
-        // Hide editor, show reference
+        // Hide editor, show reference CLEARLY
         editorEl.style.opacity = '0.05';
         editorEl.style.pointerEvents = 'none';
 
-        if (referenceLayer) {
-            referenceLayer.style.opacity = '0.9';
-            referenceLayer.style.filter = 'blur(0px)';
-            referenceLayer.style.background = 'rgba(0,0,0,0.6)'; // Darken bg to read better
-        }
-        // Clear fog temporarily
+        if (referenceOverlay) referenceOverlay.style.opacity = '0';
         if (fogLayer) fogLayer.style.opacity = '0';
 
     } else {
         // Restore
+        // Only restore opacity if NOT in ghost mode active state?
+        // If ghost mode is active and we are idle, opacity should be low.
+        // But pressing Alt is an activity... so opacity should come back.
+        // ResetGhostTimer handles this on keydown.
         editorEl.style.opacity = opacitySlider.value;
         editorEl.style.pointerEvents = 'auto';
 
-        if (referenceLayer) {
-            referenceLayer.style.opacity = '0.2';
-            referenceLayer.style.filter = 'blur(2px)';
-            referenceLayer.style.background = 'radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, transparent 70%)';
-        }
+        if (referenceOverlay) referenceOverlay.style.opacity = '1';
         if (fogLayer) fogLayer.style.opacity = '1';
     }
 }
