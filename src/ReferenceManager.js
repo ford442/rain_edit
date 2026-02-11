@@ -73,10 +73,13 @@ export class ReferenceManager {
     // Split by headings (# ) or horizontal rules (---)
     const parts = text.split(/(?:^|\n)(?=# )|(?:\n---)/g).filter(p => p && p.trim().length > 0);
 
+    const cols = 3;
+    const colWidth = 90 / cols;
+
     parts.forEach((part, index) => {
       const html = this.parseMarkdown(part);
       const card = document.createElement('div');
-      card.className = 'note-card';
+      card.className = 'note-card floating';
       card.innerHTML = html;
 
       // Deterministic random positioning based on index
@@ -86,14 +89,22 @@ export class ReferenceManager {
           return x - Math.floor(x);
       };
 
-      const left = 10 + rnd(1) * 60; // 10% to 70%
-      const top = 10 + rnd(2) * 60; // 10% to 70%
-      const rot = -5 + rnd(3) * 10; // -5 to 5 deg
-      const depth = 0.5 + rnd(4) * 1.5; // 0.5 to 2.0
+      // Grid Layout
+      const colIndex = index % cols;
+      const rowInCol = Math.floor(index / cols);
+
+      const left = 5 + (colIndex * colWidth) + rnd(1) * 5;
+      const top = 10 + (rowInCol * 40) + rnd(2) * 10;
+
+      const rot = -2 + rnd(3) * 4;
+      const depth = 0.8 + rnd(4) * 1.0;
+      const delay = rnd(5) * 5;
 
       card.style.left = left + '%';
       card.style.top = top + '%';
-      card.style.transform = `rotate(${rot}deg)`; // Initial transform, will be updated by mousemove
+      card.style.transform = `rotate(${rot}deg)`;
+      card.style.animationDelay = `${delay}s`;
+
       card.dataset.initialRot = rot;
       card.dataset.depth = depth;
 
@@ -103,21 +114,10 @@ export class ReferenceManager {
         if (e.altKey) {
             this.draggedNote = card;
             const rect = card.getBoundingClientRect();
-            // rect includes translate transform.
-            // When we set style.left, we are setting the base position.
-            // But visually the card is at rect.
-            // If we want the card to stay under the mouse, we need to account for the translate offset?
-            // Actually, simply:
             this.dragOffset = {
                 x: e.clientX - rect.left,
                 y: e.clientY - rect.top
             };
-            // However, rect.left includes the translate offset.
-            // When we set style.left later, that changes the base position.
-            // And translate is applied on top.
-            // So if translate is +10px, and we drag 1px.
-            // This works out because we use rect (visual pos) to calc offset.
-
             e.preventDefault();
         }
       });
@@ -128,6 +128,14 @@ export class ReferenceManager {
 
   parseMarkdown(text) {
     let safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // Process blockquotes first to avoid conflicts
+    safeText = safeText.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+
+    // Process list items - hacky single level support
+    // We replace lines starting with "- " with a div
+    safeText = safeText.replace(/^\- (.*$)/gim, '<div class="md-list-item">$1</div>');
+
     return safeText
       .replace(/^# (.*$)/gim, '<h1>$1</h1>')
       .replace(/^## (.*$)/gim, '<h2>$1</h2>')
@@ -135,8 +143,6 @@ export class ReferenceManager {
       .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
       .replace(/`(.*?)`/gim, '<code>$1</code>')
       .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
-      .replace(/^\- (.*$)/gim, '<div class="md-list-item">• $1</div>')
-      .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
       .replace(/\n/gim, '<br>');
   }
 

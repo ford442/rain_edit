@@ -34,6 +34,7 @@ self.MonacoEnvironment = {
 import RainLayer from './RainLayer';
 import Raindrops from './vendor/raindrops.js';
 import { ReferenceManager } from './ReferenceManager.js'; // New import
+import { FogManager } from './FogManager.js';
 import backFrag from './shaders/water-back.frag?glslify';
 import frontFrag from './shaders/water.frag?glslify';
 import vertSrc from './shaders/simple.vert?glslify';
@@ -43,9 +44,11 @@ const backCanvas = document.getElementById('rain-back');
 const frontCanvas = document.getElementById('rain-front');
 const referenceLayer = document.getElementById('reference-layer');
 const referenceOverlay = document.getElementById('reference-overlay');
+const fogLayerEl = document.getElementById('fog-layer');
 
-// Initialize Reference Manager
+// Initialize Managers
 const referenceManager = new ReferenceManager(referenceLayer, referenceOverlay);
+const fogManager = new FogManager(fogLayerEl);
 
 if (referenceLayer) {
   // Set initial text
@@ -153,6 +156,8 @@ async function initLayers(){
 
     if(bgLayer) bgLayer.render();
     if(fgLayer) fgLayer.render();
+
+    if(fogManager) fogManager.render();
     requestAnimationFrame(animate);
   }
 
@@ -170,9 +175,8 @@ document.addEventListener('mousemove', (e) => {
   if(fgLayer) fgLayer.setParallax(x, y);
 
   // Update fog mask position for "wiping" effect
-  if (fogLayer) {
-    fogLayer.style.setProperty('--mouse-x', e.clientX + 'px');
-    fogLayer.style.setProperty('--mouse-y', e.clientY + 'px');
+  if (fogManager) {
+    fogManager.clearFog(e.clientX, e.clientY, 60);
   }
 
   // Note: ReferenceManager handles its own mousemove for lantern effect and dragging
@@ -252,14 +256,9 @@ if (ghostToggle) {
 ['mousemove', 'keydown', 'mousedown', 'wheel'].forEach(evt => {
   window.addEventListener(evt, () => {
     resetGhostTimer();
-
-    // Existing Fog Reset
-    lastActivity = Date.now();
-    fogBlur = 0;
-    if(fogLayer) fogLayer.style.setProperty('--blur', '0px');
-    if(editorEl && !ghostMode) editorEl.style.filter = 'blur(0px)'; // Only clear blur if not ghosting?
-    // Actually fog blur is orthogonal to ghost opacity.
-    if(editorEl) editorEl.style.filter = 'blur(0px)';
+    // Fog is cleared by mousemove via FogManager directly
+    // Reset editor blur if any
+    if(editorEl) editorEl.style.filter = 'none';
   });
 });
 
@@ -316,44 +315,8 @@ editor.onDidChangeCursorPosition((e) => {
 });
 
 // --- Fog / Condensation Logic ---
-const fogLayer = document.getElementById('fog-layer');
-let lastActivity = Date.now();
-let fogBlur = 0;
-
-function updateFog() {
-  const now = Date.now();
-  const timeSinceActivity = now - lastActivity;
-
-  // If idle for more than 2 seconds, start fogging up
-  if (timeSinceActivity > 2000) {
-    if (fogBlur < 5) {
-      fogBlur += 0.02;
-    }
-  } else {
-    fogBlur = 0;
-  }
-
-  if (fogLayer) {
-    fogLayer.style.setProperty('--blur', Math.min(fogBlur, 5).toFixed(2) + 'px');
-  }
-
-  // Idle Blur for Editor (Erosion effect)
-  // Disable this if Ghost Mode is active (conflict of interest: Blur vs Opacity)
-  if (editorEl && !ghostMode) {
-    let editorBlur = 0;
-    if (timeSinceActivity > 4000) {
-        const factor = (timeSinceActivity - 4000) / 6000;
-        editorBlur = Math.min(factor * 3, 3);
-    }
-    editorEl.style.filter = `blur(${editorBlur.toFixed(2)}px)`;
-  } else if (editorEl && ghostMode) {
-      // In ghost mode, we don't blur, we fade (handled by ghostTimer)
-      editorEl.style.filter = 'none';
-  }
-
-  requestAnimationFrame(updateFog);
-}
-updateFog();
+// Handled by FogManager (canvas overlay)
+// Obscures entire view when idle, cleared by mouse.
 
 // --- Lightning Logic ---
 const lightningLayer = document.getElementById('lightning-layer');
@@ -437,7 +400,7 @@ function toggleReferenceMode(active) {
         editorEl.style.pointerEvents = 'none';
 
         if (referenceOverlay) referenceOverlay.style.opacity = '0';
-        if (fogLayer) fogLayer.style.opacity = '0';
+        if (fogLayerEl) fogLayerEl.style.opacity = '0';
 
     } else {
         // Restore
@@ -449,7 +412,7 @@ function toggleReferenceMode(active) {
         editorEl.style.pointerEvents = 'auto';
 
         if (referenceOverlay) referenceOverlay.style.opacity = '1';
-        if (fogLayer) fogLayer.style.opacity = '1';
+        if (fogLayerEl) fogLayerEl.style.opacity = '1';
     }
 }
 
