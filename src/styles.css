@@ -38,7 +38,8 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: '
 #reference-layer h1 { font-size: 24px; color: #fff; margin-bottom: 10px; font-weight: bold; text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
 #reference-layer h2 { font-size: 18px; color: #e0e0e0; margin-top: 20px; margin-bottom: 8px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
 #reference-layer h3 { font-size: 16px; color: #ccc; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
-.md-list-item { margin-left: 20px; color: #b4c8dc; margin-bottom: 4px; }
+.md-list-item { padding-left: 20px; color: #b4c8dc; margin-bottom: 4px; position: relative; }
+.md-list-item::before { content: "•"; position: absolute; left: 0; color: rgba(255,255,255,0.3); }
 #reference-layer code { background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; color: #aaddff; }
 #reference-layer b { color: #fff; font-weight: bold; }
 
@@ -151,11 +152,11 @@ textarea:focus {
   padding: 18px;
 
   /* Modern Glassmorphism */
-  background: rgba(16, 18, 27, 0.65);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(16, 18, 27, 0.4);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
 
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
@@ -189,7 +190,7 @@ textarea:focus {
 .dock-title {
   font-family: 'Inter', sans-serif;
   font-weight: 800;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   color: #fff;
   opacity: 1;
   font-size: 10px;
@@ -306,6 +307,15 @@ input[type="checkbox"]:hover {
 }
 
 /* Scattered Notes */
+@keyframes float {
+  from { margin-top: 0px; }
+  to { margin-top: -10px; }
+}
+
+.note-card.floating {
+  animation: float 6s ease-in-out infinite alternate;
+}
+
 .note-card {
   position: absolute;
   width: 320px;
@@ -323,7 +333,7 @@ input[type="checkbox"]:hover {
   color: #c0d0e0;
 }
 
-.note-card h1 { font-size: 18px; margin-bottom: 12px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
+.note-card h1 { font-size: 20px; margin-bottom: 12px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
 .note-card h2 { font-size: 15px; margin-top: 16px; margin-bottom: 8px; color: #e0e0e0; }
 .note-card h3 { font-size: 14px; margin-top: 12px; margin-bottom: 4px; color: #d0d0d0; }
 
