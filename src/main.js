@@ -47,8 +47,10 @@ const referenceOverlay = document.getElementById('reference-overlay');
 const fogLayerEl = document.getElementById('fog-layer');
 
 // Initialize Managers
-const referenceManager = new ReferenceManager(referenceLayer, referenceOverlay);
+const referenceManager = new ReferenceManager(referenceLayer, referenceOverlay, monaco);
 const fogManager = new FogManager(fogLayerEl);
+
+let focusDepth = 0; // 0 = Editor, 1 = Reference
 
 if (referenceLayer) {
   // Set initial text
@@ -195,9 +197,10 @@ document.getElementById('toggle-front-on-top').addEventListener('change', (e) =>
 
 const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
-  editorEl.style.opacity = e.target.value;
+  updateFocusVisuals();
 });
-editorEl.style.opacity = opacitySlider.value;
+// Initial set handled by updateFocusVisuals call later or manually
+// editorEl.style.opacity = opacitySlider.value;
 
 // New controls: Storm Intensity & Focus Mode
 const intensitySlider = document.getElementById('storm-intensity');
@@ -229,15 +232,19 @@ const ghostToggle = document.getElementById('ghost-mode');
 
 function resetGhostTimer() {
     if (!ghostMode) return;
+    if (focusDepth > 0.1) return; // Don't interfere if focusing on reference
+
     // Restore opacity on activity
     if (editorEl.style.opacity !== opacitySlider.value) {
-        editorEl.style.opacity = opacitySlider.value;
+        updateFocusVisuals();
     }
 
     clearTimeout(ghostTimer);
     ghostTimer = setTimeout(() => {
-        editorEl.style.opacity = '0.05'; // Fade out significantly
-    }, 4000); // 4 seconds idle
+        if (focusDepth < 0.1) {
+             editorEl.style.opacity = '0.05';
+        }
+    }, 4000);
 }
 
 if (ghostToggle) {
@@ -376,12 +383,47 @@ function example() {
     });
 }
 
+// --- Focus Depth Logic ---
+function setFocusDepth(depth) {
+    focusDepth = Math.max(0, Math.min(1, depth));
+    updateFocusVisuals();
+}
+
+function updateFocusVisuals() {
+    const maxOpacity = parseFloat(opacitySlider.value) || 1;
+    const targetEditorOpacity = maxOpacity * (1 - focusDepth * 0.95);
+
+    // Editor
+    editorEl.style.opacity = Math.max(0.02, targetEditorOpacity);
+    editorEl.style.filter = `blur(${focusDepth * 8}px)`;
+
+    // Pointer Events
+    if (focusDepth > 0.6) {
+        editorEl.style.pointerEvents = 'none';
+    } else {
+        editorEl.style.pointerEvents = 'auto';
+    }
+
+    // Reference Overlay
+    if (referenceOverlay) {
+        referenceOverlay.style.opacity = 1 - focusDepth;
+    }
+
+    // Fog
+    if (fogLayerEl) {
+        fogLayerEl.style.opacity = 1 - (focusDepth * 0.5);
+    }
+}
+
+// Initial Call
+updateFocusVisuals();
+
 let isAltDown = false;
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Alt') {
         if (!isAltDown) {
             isAltDown = true;
-            toggleReferenceMode(true);
+            setFocusDepth(1);
         }
     }
 });
@@ -389,32 +431,17 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => {
     if (e.key === 'Alt') {
         isAltDown = false;
-        toggleReferenceMode(false);
+        setFocusDepth(0);
     }
 });
 
-function toggleReferenceMode(active) {
-    if (active) {
-        // Hide editor, show reference CLEARLY
-        editorEl.style.opacity = '0.05';
-        editorEl.style.pointerEvents = 'none';
-
-        if (referenceOverlay) referenceOverlay.style.opacity = '0';
-        if (fogLayerEl) fogLayerEl.style.opacity = '0';
-
-    } else {
-        // Restore
-        // Only restore opacity if NOT in ghost mode active state?
-        // If ghost mode is active and we are idle, opacity should be low.
-        // But pressing Alt is an activity... so opacity should come back.
-        // ResetGhostTimer handles this on keydown.
-        editorEl.style.opacity = opacitySlider.value;
-        editorEl.style.pointerEvents = 'auto';
-
-        if (referenceOverlay) referenceOverlay.style.opacity = '1';
-        if (fogLayerEl) fogLayerEl.style.opacity = '1';
+window.addEventListener('wheel', (e) => {
+    if (e.altKey) {
+        e.preventDefault();
+        const delta = e.deltaY * 0.001;
+        setFocusDepth(focusDepth + delta);
     }
-}
+}, { passive: false });
 
 // --- Theme Logic ---
 const themeSelect = document.getElementById('theme-select');

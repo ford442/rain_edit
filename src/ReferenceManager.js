@@ -1,7 +1,8 @@
 export class ReferenceManager {
-  constructor(layerEl, overlayEl) {
+  constructor(layerEl, overlayEl, monacoInstance) {
     this.layer = layerEl;
     this.overlay = overlayEl;
+    this.monaco = monacoInstance;
     this.isLanternMode = true;
     this.mouseX = 0;
     this.mouseY = 0;
@@ -122,6 +123,40 @@ export class ReferenceManager {
         }
       });
 
+      // Collapse Logic
+      const headers = card.querySelectorAll('h1, h2, h3');
+      headers.forEach(header => {
+          header.style.cursor = 'pointer';
+          header.title = 'Click to collapse/expand';
+          header.addEventListener('click', (e) => {
+               if (!e.altKey) {
+                   card.classList.toggle('collapsed');
+               }
+          });
+      });
+
+      // Syntax Highlighting
+      if (this.monaco) {
+          const codeBlocks = card.querySelectorAll('pre code');
+          codeBlocks.forEach(async (block) => {
+              let lang = 'javascript';
+              // Check class for language
+              const classes = block.className.split(' ');
+              const langClass = classes.find(c => c.startsWith('language-'));
+              if (langClass) {
+                  lang = langClass.replace('language-', '');
+              }
+
+              const code = block.innerText;
+              try {
+                  const colorized = await this.monaco.editor.colorize(code, lang, {});
+                  block.innerHTML = colorized;
+              } catch (err) {
+                  console.warn('Colorize failed:', err);
+              }
+          });
+      }
+
       this.layer.appendChild(card);
     });
   }
@@ -142,7 +177,10 @@ export class ReferenceManager {
       .replace(/^### (.*$)/gim, '<h3>$1</h3>')
       .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
       .replace(/`(.*?)`/gim, '<code>$1</code>')
-      .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
+      .replace(/```(\w+)?\s*\n([\s\S]*?)```/gim, (match, lang, code) => {
+          return `<pre><code class="language-${lang || 'javascript'}">${code}</code></pre>`;
+      })
+      .replace(/```([\s\S]*?)```/gim, '<pre><code class="language-javascript">$1</code></pre>')
       .replace(/\n/gim, '<br>');
   }
 
