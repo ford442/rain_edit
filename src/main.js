@@ -149,6 +149,11 @@ async function initLayers(){
   bgLayer = new RainLayer(backCanvas, { vertex: vertSrc, fragment: backFrag, textures: { u_waterMap: raindrops.canvas, u_textureBg: bgImg }, options: { u_brightness: 1.0 } });
   fgLayer = new RainLayer(frontCanvas, { vertex: vertSrc, fragment: frontFrag, textures: { u_waterMap: raindrops.canvas, u_textureFg: fgImg, u_textureBg: bgImg }, options });
 
+  // Pass raindrops to reference manager for shield effect
+  if (referenceManager) {
+      referenceManager.setRaindrops(raindrops);
+  }
+
   // simple animation loop
   function animate(){
     raindrops.update(); // updates raindrops.canvas internally
@@ -301,7 +306,7 @@ editor.onKeyDown((e) => {
         for (let x = 0; x < width; x += step) {
              // Wiping animation
              setTimeout(() => {
-                 raindrops.clearDroplets(x, y + 10, 50);
+                 raindrops.clearDroplets(x, y + 10, 80);
              }, x * 0.5);
         }
     }
