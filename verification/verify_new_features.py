@@ -1,46 +1,80 @@
-import asyncio
-from playwright.async_api import async_playwright
-import os
+from playwright.sync_api import sync_playwright
+import time
 
-async def run():
-    async with async_playwright() as p:
-        browser = await p.chromium.launch()
-        page = await browser.new_page()
-        # Ensure the viewport is large enough
-        await page.set_viewport_size({"width": 1280, "height": 720})
+def run(playwright):
+    browser = playwright.chromium.launch()
+    page = browser.new_page()
+    page.goto("http://localhost:5173")
 
-        # Load the app
-        await page.goto("http://localhost:5173")
+    # Wait for editor
+    page.wait_for_selector(".monaco-editor", timeout=10000)
 
-        # Wait for the app to load
-        await page.wait_for_selector("#app")
+    # 1. Verify Task List Parsing
+    reference_input = page.locator("#reference-input")
+    # Make sure dock is visible/interactable. Dock has z-index 20, should be fine.
 
-        # Directly set the value using JS
-        text = """# Note 1
-This is the first note.
-
-# Note 2
-This is the second note.
-It should be somewhere else.
-
-# Note 3
-And a third note here.
+    test_md = """# Test
+- [ ] Todo item
+- [x] Done item
 """
-        await page.evaluate(f"""
-            const el = document.getElementById('reference-input');
-            el.value = `{text}`;
-            el.dispatchEvent(new Event('input'));
-        """)
+    # Fill input. This might be tricky if editor is capturing focus,
+    # but the dock is fixed on top.
+    reference_input.fill(test_md)
+    reference_input.dispatch_event("input") # Ensure event fires
 
-        # Show the reference layer (hold Alt)
-        await page.keyboard.down("Alt")
-        await page.wait_for_timeout(1000) # Wait for fade in/transition
-        await page.screenshot(path="verification/6_multiple_notes.png")
-        await page.keyboard.up("Alt")
+    time.sleep(1)
 
-        print("Verification complete. Check verification/6_multiple_notes.png")
+    # Check for checkboxes
+    checkboxes = page.locator(".md-list-item input[type='checkbox']")
+    count = checkboxes.count()
+    print(f"Found {count} checkboxes")
 
-        await browser.close()
+    if count != 2:
+        print("ERROR: Expected 2 checkboxes, found", count)
+    else:
+        print("Checkbox parsing verified.")
 
-if __name__ == "__main__":
-    asyncio.run(run())
+    # 2. Verify Spotlight
+    # We need to access the reference layer.
+    # Hold Alt to bring reference layer to front/disable editor pointer events
+    page.keyboard.down("Alt")
+    time.sleep(0.5) # Wait for transition
+
+    card = page.locator(".note-card").first
+    # Force click because the element might be moving (floating animation)
+    # But dblclick should work.
+    try:
+        card.dblclick(force=True)
+        print("Double clicked card.")
+    except Exception as e:
+        print(f"Double click failed: {e}")
+
+    page.keyboard.up("Alt")
+    time.sleep(0.5)
+
+    # Check if it has 'spotlight' class
+    # Spotlight class should persist even after releasing Alt?
+    # The code adds the class to the element. It doesn't remove it on Alt up.
+
+    classes = card.get_attribute("class")
+    print(f"Card classes after dblclick: {classes}")
+
+    if "spotlight" in classes:
+        print("Spotlight class added successfully.")
+    else:
+        print("ERROR: Spotlight class NOT added.")
+
+    # Take screenshot of spotlight
+    # We need to hold Alt again to see it clearly or if spotlight brings it to front?
+    # Spotlight makes z-index 100 !important. So it should be visible above editor?
+    # Editor is z-index 2. So yes.
+    page.screenshot(path="verification/spotlight_check.png")
+
+    # 3. Rain Shield
+    # Just verify no crash
+    page.mouse.move(300, 300)
+
+    browser.close()
+
+with sync_playwright() as playwright:
+    run(playwright)

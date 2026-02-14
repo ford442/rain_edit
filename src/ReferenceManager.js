@@ -7,12 +7,28 @@ export class ReferenceManager {
     this.isLanternMode = true;
     this.mouseX = 0;
     this.mouseY = 0;
+    this.raindrops = null; // Store raindrops instance
+
+    // Spotlight Layer
+    this.spotlightLayer = document.createElement('div');
+    this.spotlightLayer.id = 'spotlight-layer';
+    this.spotlightLayer.style.position = 'absolute';
+    this.spotlightLayer.style.inset = '0';
+    this.spotlightLayer.style.zIndex = '20'; // Above overlay and editor
+    this.spotlightLayer.style.pointerEvents = 'none'; // Allow clicks to pass through empty areas
+    if (this.layer && this.layer.parentElement) {
+        this.layer.parentElement.appendChild(this.spotlightLayer);
+    }
 
     // Draggable state
     this.draggedNote = null;
     this.dragOffset = { x: 0, y: 0 };
 
     this.initEvents();
+  }
+
+  setRaindrops(raindrops) {
+    this.raindrops = raindrops;
   }
 
   initEvents() {
@@ -58,8 +74,9 @@ export class ReferenceManager {
     const normY = (this.mouseY / h) * 2 - 1;
 
     // Apply to all notes
-    if (this.layer) {
-        const notes = this.layer.children;
+    const applyParallax = (container) => {
+        if (!container) return;
+        const notes = container.children;
         for (let note of notes) {
             if (!note.classList.contains('note-card')) continue;
 
@@ -71,8 +88,15 @@ export class ReferenceManager {
             const moveY = -normY * 30 * depth;
 
             note.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${initialRot}deg)`;
+            if (note.classList.contains('spotlight')) {
+                // Keep scale for spotlight
+                note.style.transform += ' scale(1.05)';
+            }
         }
-    }
+    };
+
+    applyParallax(this.layer);
+    applyParallax(this.spotlightLayer);
   }
 
   handleMouseUp() {
@@ -82,6 +106,8 @@ export class ReferenceManager {
   update(text) {
     if (!this.layer) return;
     this.layer.innerHTML = '';
+    if (this.spotlightLayer) this.spotlightLayer.innerHTML = '';
+
     if (!text) return;
 
     // Split by headings (# ) or horizontal rules (---)
@@ -175,6 +201,47 @@ export class ReferenceManager {
           });
       });
 
+      // Spotlight Logic
+      card.addEventListener('dblclick', () => {
+        const wasSpotlit = card.classList.contains('spotlight');
+
+        // Remove spotlight from all others and move back to layer
+        if (this.spotlightLayer) {
+            const currentSpotlights = Array.from(this.spotlightLayer.children);
+            currentSpotlights.forEach(c => {
+                c.classList.remove('spotlight');
+                // Remove scale transform part
+                // Actually parallax logic handles transform, we just need to re-trigger or wait for mousemove
+                this.layer.appendChild(c);
+            });
+        }
+
+        const notes = this.layer.querySelectorAll('.note-card');
+        notes.forEach(c => c.classList.remove('spotlight'));
+        this.layer.classList.remove('has-spotlight');
+
+        if (!wasSpotlit) {
+            card.classList.add('spotlight');
+            this.layer.classList.add('has-spotlight');
+            // Move to spotlight layer
+            if (this.spotlightLayer) {
+                this.spotlightLayer.appendChild(card);
+            }
+        } else {
+            // Already handled by moving back logic above if we clicked the same card?
+            // Wait, logic above moved ALL spotlights back.
+            // If we double clicked the SAME card, it was moved back, and class removed.
+            // So !wasSpotlit is false. So we do nothing more. Correct.
+        }
+      });
+
+      // Rain Shield Logic
+      card.addEventListener('mousemove', (e) => {
+        if (this.raindrops) {
+            this.raindrops.clearDroplets(e.clientX, e.clientY, 30);
+        }
+      });
+
       // Syntax Highlighting
       if (this.monaco) {
           const codeBlocks = card.querySelectorAll('pre code');
@@ -206,6 +273,10 @@ export class ReferenceManager {
 
     // Process blockquotes first to avoid conflicts
     safeText = safeText.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+
+    // Process task lists
+    safeText = safeText.replace(/^- \[x\] (.*$)/gim, '<div class="md-list-item checked"><input type="checkbox" checked disabled> $1</div>');
+    safeText = safeText.replace(/^- \[ \] (.*$)/gim, '<div class="md-list-item"><input type="checkbox" disabled> $1</div>');
 
     // Process list items - hacky single level support
     // We replace lines starting with "- " with a div

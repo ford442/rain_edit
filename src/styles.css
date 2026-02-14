@@ -45,6 +45,8 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: '
 #reference-layer h3 { font-size: 16px; color: #ccc; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
 .md-list-item { padding-left: 20px; color: #b4c8dc; margin-bottom: 4px; position: relative; }
 .md-list-item::before { content: "•"; position: absolute; left: 0; color: rgba(255,255,255,0.3); }
+.md-list-item input[type="checkbox"] { margin-right: 8px; accent-color: #00e5ff; cursor: pointer; }
+.md-list-item.checked { text-decoration: line-through; opacity: 0.7; }
 
 /* Task Items */
 .md-task-item { display: flex; align-items: center; gap: 8px; color: #b4c8dc; margin-bottom: 4px; }
@@ -341,17 +343,17 @@ input[type="checkbox"]:hover {
 .note-card {
   position: absolute;
   width: 340px;
-  background: rgba(16, 20, 30, 0.65);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(16, 20, 30, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   padding: 24px;
   border-radius: 12px;
   box-shadow:
-      0 8px 32px 0 rgba(0, 0, 0, 0.3),
+      0 10px 40px rgba(0,0,0,0.6),
       inset 0 1px 0 rgba(255,255,255,0.1);
-  transition: transform 0.1s linear, height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease;
+  transition: transform 0.1s linear, height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   pointer-events: auto;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255,255,255,0.15);
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   color: #c0d0e0;
@@ -359,6 +361,17 @@ input[type="checkbox"]:hover {
 }
 
 .note-card.spotlight {
+    z-index: 100 !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.1);
+    border-color: rgba(0, 229, 255, 0.5);
+    background: rgba(16, 20, 30, 0.9);
+}
+
+#reference-layer.has-spotlight .note-card:not(.spotlight) {
+    opacity: 0.3;
+    filter: blur(2px);
+    transform: scale(0.95);
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
