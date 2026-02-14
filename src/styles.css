@@ -35,6 +35,11 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: '
   background: radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, transparent 70%);
 }
 
+/* When a card is spotlighted, bring the whole layer to the front so it sits above the editor and overlay */
+#reference-layer.has-spotlight {
+    z-index: 15;
+}
+
 #reference-layer h1 { font-size: 24px; color: #fff; margin-bottom: 10px; font-weight: bold; text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
 #reference-layer h2 { font-size: 18px; color: #e0e0e0; margin-top: 20px; margin-bottom: 8px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
 #reference-layer h3 { font-size: 16px; color: #ccc; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
@@ -42,6 +47,23 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: '
 .md-list-item::before { content: "•"; position: absolute; left: 0; color: rgba(255,255,255,0.3); }
 .md-list-item input[type="checkbox"] { margin-right: 8px; accent-color: #00e5ff; cursor: pointer; }
 .md-list-item.checked { text-decoration: line-through; opacity: 0.7; }
+
+/* Task Items */
+.md-task-item { display: flex; align-items: center; gap: 8px; color: #b4c8dc; margin-bottom: 4px; }
+.md-task-item input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 14px; height: 14px;
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); border-radius: 3px;
+    cursor: pointer; position: relative; flex-shrink: 0;
+}
+.md-task-item input[type="checkbox"]:checked {
+    background: #00e5ff; border-color: #00e5ff;
+}
+.md-task-item input[type="checkbox"]:checked::after {
+    content: ''; position: absolute; top: 2px; left: 5px; width: 3px; height: 7px;
+    border: solid black; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+
 #reference-layer code { background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; color: #aaddff; }
 #reference-layer b { color: #fff; font-weight: bold; }
 
@@ -350,6 +372,25 @@ input[type="checkbox"]:hover {
     opacity: 0.3;
     filter: blur(2px);
     transform: scale(0.95);
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(1.1) !important;
+    z-index: 1000 !important;
+    width: 600px !important;
+    max-width: 90vw !important;
+    height: auto !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+    box-shadow: 0 0 100px rgba(0,0,0,0.8), 0 0 30px rgba(0, 229, 255, 0.2);
+    border-color: rgba(0, 229, 255, 0.5);
+    background: rgba(16, 20, 30, 0.85);
+    animation: none; /* Stop floating */
+}
+
+.note-card.dimmed {
+    opacity: 0.2;
+    filter: blur(2px);
     pointer-events: none;
 }
 

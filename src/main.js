@@ -134,6 +134,10 @@ async function initLayers(){
   const dpi = window.devicePixelRatio || 1;
   raindrops = new Raindrops(backCanvas.width, backCanvas.height, dpi, dropAlpha, dropColor);
 
+  if (referenceManager) {
+    referenceManager.setRaindrops(raindrops);
+  }
+
   const options = {
     u_brightness: 1.0,
     u_alphaMultiply: 6.0,

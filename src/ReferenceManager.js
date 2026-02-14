@@ -3,6 +3,7 @@ export class ReferenceManager {
     this.layer = layerEl;
     this.overlay = overlayEl;
     this.monaco = monacoInstance;
+    this.raindrops = null;
     this.isLanternMode = true;
     this.mouseX = 0;
     this.mouseY = 0;
@@ -35,9 +36,21 @@ export class ReferenceManager {
     window.addEventListener('mouseup', () => this.handleMouseUp());
   }
 
+  setRaindrops(raindrops) {
+    this.raindrops = raindrops;
+  }
+
   handleMouseMove(e) {
     this.mouseX = e.clientX;
     this.mouseY = e.clientY;
+
+    // Rain Interaction (Shield Effect)
+    if (this.raindrops) {
+        // Check if mouse is over a note card
+        if (e.target && e.target.closest('.note-card')) {
+            this.raindrops.clearDroplets(this.mouseX, this.mouseY, 80);
+        }
+    }
 
     // Lantern Mask Logic
     if (this.overlay) {
@@ -140,6 +153,8 @@ export class ReferenceManager {
         // Drag if Alt is pressed
         if (e.altKey) {
             this.draggedNote = card;
+            // Bring to front
+            card.style.zIndex = 100;
             const rect = card.getBoundingClientRect();
             this.dragOffset = {
                 x: e.clientX - rect.left,
@@ -147,6 +162,31 @@ export class ReferenceManager {
             };
             e.preventDefault();
         }
+      });
+
+      // Spotlight Logic
+      card.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          const wasSpotlight = card.classList.contains('spotlight');
+
+          // Clear all spotlights first
+          const allCards = this.layer.querySelectorAll('.note-card');
+          allCards.forEach(c => {
+              c.classList.remove('spotlight');
+              c.classList.remove('dimmed');
+              c.style.zIndex = ''; // Reset z-index
+          });
+
+          // Reset layer z-index
+          this.layer.classList.remove('has-spotlight');
+
+          if (!wasSpotlight) {
+              card.classList.add('spotlight');
+              this.layer.classList.add('has-spotlight');
+              allCards.forEach(c => {
+                  if (c !== card) c.classList.add('dimmed');
+              });
+          }
       });
 
       // Collapse Logic
@@ -240,6 +280,8 @@ export class ReferenceManager {
 
     // Process list items - hacky single level support
     // We replace lines starting with "- " with a div
+    safeText = safeText.replace(/^- \[ \] (.*$)/gim, '<div class="md-task-item"><input type="checkbox"> $1</div>');
+    safeText = safeText.replace(/^- \[x\] (.*$)/gim, '<div class="md-task-item"><input type="checkbox" checked> $1</div>');
     safeText = safeText.replace(/^\- (.*$)/gim, '<div class="md-list-item">$1</div>');
 
     return safeText
