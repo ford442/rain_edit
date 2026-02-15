@@ -7,7 +7,6 @@ export class ReferenceManager {
     this.isLanternMode = true;
     this.mouseX = 0;
     this.mouseY = 0;
-    this.raindrops = null; // Store raindrops instance
 
     // Spotlight Layer
     this.spotlightLayer = document.createElement('div');
@@ -34,10 +33,6 @@ export class ReferenceManager {
   initEvents() {
     window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
     window.addEventListener('mouseup', () => this.handleMouseUp());
-  }
-
-  setRaindrops(raindrops) {
-    this.raindrops = raindrops;
   }
 
   handleMouseMove(e) {
@@ -87,7 +82,11 @@ export class ReferenceManager {
             const moveX = -normX * 30 * depth;
             const moveY = -normY * 30 * depth;
 
-            note.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${initialRot}deg)`;
+            // 3D Tilt
+            const rotateX = -normY * 10;
+            const rotateY = normX * 10;
+
+            note.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
             if (note.classList.contains('spotlight')) {
                 // Keep scale for spotlight
                 note.style.transform += ' scale(1.05)';
@@ -138,12 +137,25 @@ export class ReferenceManager {
 
       const rot = -2 + rnd(3) * 4;
       const depth = 0.8 + rnd(4) * 1.0;
-      const delay = rnd(5) * 5;
 
       card.style.left = left + '%';
       card.style.top = top + '%';
       card.style.transform = `rotate(${rot}deg)`;
-      card.style.animationDelay = `${delay}s`;
+
+      // Animation Configuration
+      card.style.animationName = 'float-in, float';
+      card.style.animationDuration = `0.6s, 6s`;
+      card.style.animationTimingFunction = `ease-out, ease-in-out`;
+      card.style.animationIterationCount = `1, infinite`;
+      card.style.animationDirection = `normal, alternate`;
+      card.style.animationFillMode = `backwards, none`;
+
+      // Stagger entrance based on index, float delay is random
+      // entrance delay = index * 0.1s
+      // float delay = entrance delay + entrance duration + random bobbing offset
+      const entranceDelay = index * 0.1;
+      const floatDelay = entranceDelay + 0.6 + rnd(5);
+      card.style.animationDelay = `${entranceDelay}s, ${floatDelay}s`;
 
       card.dataset.initialRot = rot;
       card.dataset.depth = depth;
@@ -164,31 +176,6 @@ export class ReferenceManager {
         }
       });
 
-      // Spotlight Logic
-      card.addEventListener('dblclick', (e) => {
-          e.stopPropagation();
-          const wasSpotlight = card.classList.contains('spotlight');
-
-          // Clear all spotlights first
-          const allCards = this.layer.querySelectorAll('.note-card');
-          allCards.forEach(c => {
-              c.classList.remove('spotlight');
-              c.classList.remove('dimmed');
-              c.style.zIndex = ''; // Reset z-index
-          });
-
-          // Reset layer z-index
-          this.layer.classList.remove('has-spotlight');
-
-          if (!wasSpotlight) {
-              card.classList.add('spotlight');
-              this.layer.classList.add('has-spotlight');
-              allCards.forEach(c => {
-                  if (c !== card) c.classList.add('dimmed');
-              });
-          }
-      });
-
       // Collapse Logic
       const headers = card.querySelectorAll('h1, h2, h3');
       headers.forEach(header => {
@@ -202,7 +189,8 @@ export class ReferenceManager {
       });
 
       // Spotlight Logic
-      card.addEventListener('dblclick', () => {
+      card.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
         const wasSpotlit = card.classList.contains('spotlight');
 
         // Remove spotlight from all others and move back to layer
@@ -210,8 +198,6 @@ export class ReferenceManager {
             const currentSpotlights = Array.from(this.spotlightLayer.children);
             currentSpotlights.forEach(c => {
                 c.classList.remove('spotlight');
-                // Remove scale transform part
-                // Actually parallax logic handles transform, we just need to re-trigger or wait for mousemove
                 this.layer.appendChild(c);
             });
         }
@@ -227,11 +213,6 @@ export class ReferenceManager {
             if (this.spotlightLayer) {
                 this.spotlightLayer.appendChild(card);
             }
-        } else {
-            // Already handled by moving back logic above if we clicked the same card?
-            // Wait, logic above moved ALL spotlights back.
-            // If we double clicked the SAME card, it was moved back, and class removed.
-            // So !wasSpotlit is false. So we do nothing more. Correct.
         }
       });
 
