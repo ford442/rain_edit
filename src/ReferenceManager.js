@@ -22,6 +22,7 @@ export class ReferenceManager {
     // Draggable state
     this.draggedNote = null;
     this.dragOffset = { x: 0, y: 0 };
+    this.zIndexCounter = 50;
 
     this.initEvents();
   }
@@ -160,13 +161,17 @@ export class ReferenceManager {
       card.dataset.initialRot = rot;
       card.dataset.depth = depth;
 
+      // Bring to front on click (Z-Index Management)
+      card.addEventListener('mousedown', () => {
+         this.zIndexCounter++;
+         card.style.zIndex = this.zIndexCounter;
+      });
+
       // Add drag listener
       card.addEventListener('mousedown', (e) => {
         // Drag if Alt is pressed
         if (e.altKey) {
             this.draggedNote = card;
-            // Bring to front
-            card.style.zIndex = 100;
             const rect = card.getBoundingClientRect();
             this.dragOffset = {
                 x: e.clientX - rect.left,
@@ -203,12 +208,22 @@ export class ReferenceManager {
         }
 
         const notes = this.layer.querySelectorAll('.note-card');
-        notes.forEach(c => c.classList.remove('spotlight'));
+        notes.forEach(c => {
+            c.classList.remove('spotlight');
+            c.classList.remove('dimmed');
+        });
         this.layer.classList.remove('has-spotlight');
 
         if (!wasSpotlit) {
             card.classList.add('spotlight');
             this.layer.classList.add('has-spotlight');
+
+            // Dim others
+            const otherNotes = this.layer.querySelectorAll('.note-card');
+            otherNotes.forEach(c => {
+                 if (c !== card) c.classList.add('dimmed');
+            });
+
             // Move to spotlight layer
             if (this.spotlightLayer) {
                 this.spotlightLayer.appendChild(card);
@@ -263,7 +278,11 @@ export class ReferenceManager {
     // We replace lines starting with "- " with a div
     safeText = safeText.replace(/^- \[ \] (.*$)/gim, '<div class="md-task-item"><input type="checkbox"> $1</div>');
     safeText = safeText.replace(/^- \[x\] (.*$)/gim, '<div class="md-task-item"><input type="checkbox" checked> $1</div>');
-    safeText = safeText.replace(/^\- (.*$)/gim, '<div class="md-list-item">$1</div>');
+    // Improved list parsing with indentation support
+    safeText = safeText.replace(/^(\s*)- (.*$)/gim, (match, indent, content) => {
+        const padding = (indent.length * 10) + 20;
+        return `<div class="md-list-item" style="padding-left: ${padding}px">${content}</div>`;
+    });
 
     return safeText
       .replace(/^# (.*$)/gim, '<h1>$1</h1>')
