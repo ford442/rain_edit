@@ -7,7 +7,6 @@ export class ReferenceManager {
     this.isLanternMode = true;
     this.mouseX = 0;
     this.mouseY = 0;
-    this.raindrops = null; // Store raindrops instance
 
     // Spotlight Layer
     this.spotlightLayer = document.createElement('div');
@@ -84,7 +83,11 @@ export class ReferenceManager {
             const moveX = -normX * 30 * depth;
             const moveY = -normY * 30 * depth;
 
-            note.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${initialRot}deg)`;
+            // 3D Tilt
+            const rotateX = -normY * 10;
+            const rotateY = normX * 10;
+
+            note.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
             if (note.classList.contains('spotlight')) {
                 // Keep scale for spotlight
                 note.style.transform += ' scale(1.05)';
@@ -135,12 +138,25 @@ export class ReferenceManager {
 
       const rot = -2 + rnd(3) * 4;
       const depth = 0.8 + rnd(4) * 1.0;
-      const delay = rnd(5) * 5;
 
       card.style.left = left + '%';
       card.style.top = top + '%';
       card.style.transform = `rotate(${rot}deg)`;
-      card.style.animationDelay = `${delay}s`;
+
+      // Animation Configuration
+      card.style.animationName = 'float-in, float';
+      card.style.animationDuration = `0.6s, 6s`;
+      card.style.animationTimingFunction = `ease-out, ease-in-out`;
+      card.style.animationIterationCount = `1, infinite`;
+      card.style.animationDirection = `normal, alternate`;
+      card.style.animationFillMode = `backwards, none`;
+
+      // Stagger entrance based on index, float delay is random
+      // entrance delay = index * 0.1s
+      // float delay = entrance delay + entrance duration + random bobbing offset
+      const entranceDelay = index * 0.1;
+      const floatDelay = entranceDelay + 0.6 + rnd(5);
+      card.style.animationDelay = `${entranceDelay}s, ${floatDelay}s`;
 
       card.dataset.initialRot = rot;
       card.dataset.depth = depth;
