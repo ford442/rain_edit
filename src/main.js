@@ -52,9 +52,8 @@ const fogManager = new FogManager(fogLayerEl);
 
 let focusDepth = 0; // 0 = Editor, 1 = Reference
 
-if (referenceLayer) {
-  // Set initial text
-  const initialMarkdown = `# REFERENCE LAYER
+// Initial Text
+const INITIAL_MARKDOWN = `# REFERENCE LAYER
 Use this space for documentation, specs, or notes.
 It sits behind the rain but remains readable.
 **Toggle visibility with Alt key.**
@@ -73,8 +72,8 @@ function example() {
 \`\`\`
 `.trim();
 
-  // We don't set innerText directly anymore, we rely on manager
-  referenceManager.update(initialMarkdown);
+if (referenceLayer) {
+  referenceManager.update(INITIAL_MARKDOWN);
 }
 
 // create Monaco editor
@@ -190,7 +189,22 @@ document.addEventListener('mousemove', (e) => {
     fogManager.clearFog(e.clientX, e.clientY, 60);
   }
 
-  // Note: ReferenceManager handles its own mousemove for lantern effect and dragging
+  // Update CSS variables for X-Ray and Lantern
+  document.body.style.setProperty('--mouse-x', `${e.clientX}px`);
+  document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
+});
+
+// --- X-Ray Mode Logic ---
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Control' || e.key === 'Meta') {
+        editorEl.classList.add('x-ray-active');
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'Control' || e.key === 'Meta') {
+        editorEl.classList.remove('x-ray-active');
+    }
 });
 
 // controls
@@ -273,8 +287,8 @@ if (ghostToggle) {
   window.addEventListener(evt, () => {
     resetGhostTimer();
     // Fog is cleared by mousemove via FogManager directly
-    // Reset editor blur if any
-    if(editorEl) editorEl.style.filter = 'none';
+    // Reset editor blur only if NOT in focus depth mode
+    if(editorEl && focusDepth < 0.1) editorEl.style.filter = 'none';
   });
 });
 
@@ -356,36 +370,7 @@ scheduleLightning();
 // --- Reference Input Logic ---
 const referenceInput = document.getElementById('reference-input');
 if (referenceInput) {
-    // Populate input with initial text (re-extracted from Markdown if possible, or just default)
-    // Since we overwrote innerHTML, we can't get it back easily.
-    // But we know what we set.
-    referenceInput.value = referenceManager.layer ? referenceManager.layer.innerText : "";
-
-    // Correction: We just set HTML content using markdown parser.
-    // innerText will strip tags.
-    // Let's just set the initial value to the markdown string we defined above.
-    // But wait, that string was local.
-    // Let's refactor to make it accessible or just set it here.
-    const initialMarkdown = `# REFERENCE LAYER
-Use this space for documentation, specs, or notes.
-It sits behind the rain but remains readable.
-**Toggle visibility with Alt key.**
-
-## API Reference
-- \`raindrops.clearDroplets(x, y, r)\`
-- \`render(time)\`
-- \`update()\`
-
-> "Rain is just confetti from the sky."
-
-\`\`\`javascript
-function example() {
-  return true;
-}
-\`\`\`
-`.trim();
-
-    referenceInput.value = initialMarkdown;
+    referenceInput.value = INITIAL_MARKDOWN;
 
     referenceInput.addEventListener('input', (e) => {
         referenceManager.update(e.target.value);
@@ -393,6 +378,8 @@ function example() {
 }
 
 // --- Focus Depth Logic ---
+let userPreferredDepth = 1.0;
+
 function setFocusDepth(depth) {
     focusDepth = Math.max(0, Math.min(1, depth));
     updateFocusVisuals();
@@ -432,7 +419,7 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Alt') {
         if (!isAltDown) {
             isAltDown = true;
-            setFocusDepth(1);
+            setFocusDepth(userPreferredDepth);
         }
     }
 });
@@ -448,7 +435,12 @@ window.addEventListener('wheel', (e) => {
     if (e.altKey) {
         e.preventDefault();
         const delta = e.deltaY * 0.001;
-        setFocusDepth(focusDepth + delta);
+
+        // Adjust the preferred depth, clamping between 0.1 and 1
+        userPreferredDepth = Math.max(0.1, Math.min(1, userPreferredDepth + delta));
+
+        // Update current focus depth immediately if Alt is held
+        setFocusDepth(userPreferredDepth);
     }
 }, { passive: false });
 

@@ -23,6 +23,7 @@ export class ReferenceManager {
     // Draggable state
     this.draggedNote = null;
     this.dragOffset = { x: 0, y: 0 };
+    this.zIndexCounter = 50;
 
     this.initEvents();
   }
@@ -34,10 +35,6 @@ export class ReferenceManager {
   initEvents() {
     window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
     window.addEventListener('mouseup', () => this.handleMouseUp());
-  }
-
-  setRaindrops(raindrops) {
-    this.raindrops = raindrops;
   }
 
   handleMouseMove(e) {
@@ -148,13 +145,17 @@ export class ReferenceManager {
       card.dataset.initialRot = rot;
       card.dataset.depth = depth;
 
+      // Bring to front on click (Z-Index Management)
+      card.addEventListener('mousedown', () => {
+         this.zIndexCounter++;
+         card.style.zIndex = this.zIndexCounter;
+      });
+
       // Add drag listener
       card.addEventListener('mousedown', (e) => {
         // Drag if Alt is pressed
         if (e.altKey) {
             this.draggedNote = card;
-            // Bring to front
-            card.style.zIndex = 100;
             const rect = card.getBoundingClientRect();
             this.dragOffset = {
                 x: e.clientX - rect.left,
@@ -162,31 +163,6 @@ export class ReferenceManager {
             };
             e.preventDefault();
         }
-      });
-
-      // Spotlight Logic
-      card.addEventListener('dblclick', (e) => {
-          e.stopPropagation();
-          const wasSpotlight = card.classList.contains('spotlight');
-
-          // Clear all spotlights first
-          const allCards = this.layer.querySelectorAll('.note-card');
-          allCards.forEach(c => {
-              c.classList.remove('spotlight');
-              c.classList.remove('dimmed');
-              c.style.zIndex = ''; // Reset z-index
-          });
-
-          // Reset layer z-index
-          this.layer.classList.remove('has-spotlight');
-
-          if (!wasSpotlight) {
-              card.classList.add('spotlight');
-              this.layer.classList.add('has-spotlight');
-              allCards.forEach(c => {
-                  if (c !== card) c.classList.add('dimmed');
-              });
-          }
       });
 
       // Collapse Logic
@@ -202,7 +178,8 @@ export class ReferenceManager {
       });
 
       // Spotlight Logic
-      card.addEventListener('dblclick', () => {
+      card.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
         const wasSpotlit = card.classList.contains('spotlight');
 
         // Remove spotlight from all others and move back to layer
@@ -210,28 +187,31 @@ export class ReferenceManager {
             const currentSpotlights = Array.from(this.spotlightLayer.children);
             currentSpotlights.forEach(c => {
                 c.classList.remove('spotlight');
-                // Remove scale transform part
-                // Actually parallax logic handles transform, we just need to re-trigger or wait for mousemove
                 this.layer.appendChild(c);
             });
         }
 
         const notes = this.layer.querySelectorAll('.note-card');
-        notes.forEach(c => c.classList.remove('spotlight'));
+        notes.forEach(c => {
+            c.classList.remove('spotlight');
+            c.classList.remove('dimmed');
+        });
         this.layer.classList.remove('has-spotlight');
 
         if (!wasSpotlit) {
             card.classList.add('spotlight');
             this.layer.classList.add('has-spotlight');
+
+            // Dim others
+            const otherNotes = this.layer.querySelectorAll('.note-card');
+            otherNotes.forEach(c => {
+                 if (c !== card) c.classList.add('dimmed');
+            });
+
             // Move to spotlight layer
             if (this.spotlightLayer) {
                 this.spotlightLayer.appendChild(card);
             }
-        } else {
-            // Already handled by moving back logic above if we clicked the same card?
-            // Wait, logic above moved ALL spotlights back.
-            // If we double clicked the SAME card, it was moved back, and class removed.
-            // So !wasSpotlit is false. So we do nothing more. Correct.
         }
       });
 
@@ -282,7 +262,11 @@ export class ReferenceManager {
     // We replace lines starting with "- " with a div
     safeText = safeText.replace(/^- \[ \] (.*$)/gim, '<div class="md-task-item"><input type="checkbox"> $1</div>');
     safeText = safeText.replace(/^- \[x\] (.*$)/gim, '<div class="md-task-item"><input type="checkbox" checked> $1</div>');
-    safeText = safeText.replace(/^\- (.*$)/gim, '<div class="md-list-item">$1</div>');
+    // Improved list parsing with indentation support
+    safeText = safeText.replace(/^(\s*)- (.*$)/gim, (match, indent, content) => {
+        const padding = (indent.length * 10) + 20;
+        return `<div class="md-list-item" style="padding-left: ${padding}px">${content}</div>`;
+    });
 
     return safeText
       .replace(/^# (.*$)/gim, '<h1>$1</h1>')
