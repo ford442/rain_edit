@@ -402,9 +402,21 @@ function updateFocusVisuals() {
     const maxOpacity = parseFloat(opacitySlider.value) || 1;
     const targetEditorOpacity = maxOpacity * (1 - focusDepth * 0.95);
 
+    // Zoom Calculation
+    // When focusDepth = 1 (Reference focused), Reference scale = 1.05 (Zoom In), Editor scale = 0.95 (Zoom Out)
+    const refScale = 1 + (focusDepth * 0.08);
+    const editorScale = 1 - (focusDepth * 0.05);
+
     // Editor
     editorEl.style.opacity = Math.max(0.02, targetEditorOpacity);
     editorEl.style.filter = `blur(${focusDepth * 8}px)`;
+    editorEl.style.transform = `scale(${editorScale}) translateZ(0)`;
+
+    // Reference Layer
+    if (referenceLayer) {
+        // Use translateZ to force GPU acceleration
+        referenceLayer.style.transform = `scale(${refScale}) translateZ(0)`;
+    }
 
     // Pointer Events
     if (focusDepth > 0.6) {
@@ -472,3 +484,47 @@ if (dock && dockToggle) {
         dock.classList.toggle('dock-collapsed');
     });
 }
+
+// --- Typing Storm Logic ---
+let stormCharCount = 0;
+const STORM_decay = 4; // Chars per second decay
+const STORM_heavy = 30; // Accumulation threshold for heavy rain
+const STORM_intense = 80; // Accumulation threshold for lightning
+
+editor.onDidChangeModelContent((e) => {
+    e.changes.forEach(change => {
+        stormCharCount += change.text.length;
+    });
+});
+
+setInterval(() => {
+    if (stormCharCount > 0) {
+        stormCharCount = Math.max(0, stormCharCount - STORM_decay);
+    }
+
+    if (raindrops && intensitySlider) {
+        const baseRate = parseInt(intensitySlider.value, 10) * 2;
+        const baseChance = parseInt(intensitySlider.value, 10) / 100;
+
+        let multiplier = 1;
+
+        if (stormCharCount > STORM_intense) {
+            multiplier = 4.0;
+            // 20% chance of lightning every second during intense storm
+            if (Math.random() < 0.2) triggerLightning();
+        } else if (stormCharCount > STORM_heavy) {
+            multiplier = 2.0;
+        }
+
+        if (multiplier > 1) {
+            raindrops.options.dropletsRate = baseRate * multiplier;
+            raindrops.options.rainChance = Math.min(1, baseChance * multiplier);
+        } else {
+            // Revert to slider values
+            // We only need to reset if we were previously modified,
+            // but setting it every second ensures consistency.
+            raindrops.options.dropletsRate = baseRate;
+            raindrops.options.rainChance = baseChance;
+        }
+    }
+}, 1000);
