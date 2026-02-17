@@ -79,15 +79,22 @@ export class ReferenceManager {
             const depth = parseFloat(note.dataset.depth) || 1;
             const initialRot = parseFloat(note.dataset.initialRot) || 0;
 
-            // Move opposite to mouse
-            const moveX = -normX * 30 * depth;
-            const moveY = -normY * 30 * depth;
+            // Enhanced Parallax
+            const moveX = -normX * 50 * depth;
+            const moveY = -normY * 50 * depth;
 
-            // 3D Tilt
-            const rotateX = -normY * 10;
-            const rotateY = normX * 10;
+            // Enhanced Tilt
+            const rotateX = -normY * 12 * depth;
+            const rotateY = normX * 12 * depth;
+
+            // Depth Blur
+            const blurAmount = Math.max(0, (1.2 - depth) * 3);
 
             note.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+            if (!note.classList.contains('spotlight') && !note.classList.contains('dimmed')) {
+                note.style.filter = `blur(${blurAmount}px)`;
+            }
             if (note.classList.contains('spotlight')) {
                 // Keep scale for spotlight
                 note.style.transform += ' scale(1.05)';
@@ -137,7 +144,7 @@ export class ReferenceManager {
       const top = 10 + (rowInCol * 40) + rnd(2) * 10;
 
       const rot = -2 + rnd(3) * 4;
-      const depth = 0.8 + rnd(4) * 1.0;
+      const depth = 0.4 + rnd(4) * 0.8;
 
       card.style.left = left + '%';
       card.style.top = top + '%';
