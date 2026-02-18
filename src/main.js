@@ -165,6 +165,18 @@ async function initLayers(){
     if(bgLayer) bgLayer.bindTexture('u_waterMap', raindrops.canvas);
     if(fgLayer) fgLayer.bindTexture('u_waterMap', raindrops.canvas);
 
+    // Rain Shield (Focus)
+    if (referenceManager) {
+        const rect = referenceManager.getFocusedNoteRect();
+        if (rect) {
+            // Clear slightly larger area
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const radius = Math.max(rect.width, rect.height) / 1.8;
+            raindrops.clearDroplets(cx, cy, radius);
+        }
+    }
+
     if(bgLayer) bgLayer.render();
     if(fgLayer) fgLayer.render();
 
@@ -333,15 +345,22 @@ editor.onKeyDown((e) => {
 });
 
 editor.onDidChangeCursorPosition((e) => {
-  if (!focusMode || !raindrops) return;
-
   const position = e.position;
   const scrolledVisiblePosition = editor.getScrolledVisiblePosition(position);
 
   if (scrolledVisiblePosition) {
-    const x = scrolledVisiblePosition.left;
-    const y = scrolledVisiblePosition.top;
-    raindrops.clearDroplets(x, y, 100);
+      const x = scrolledVisiblePosition.left;
+      const y = scrolledVisiblePosition.top;
+
+      // Focus Peeking: Highlight note behind cursor
+      if (referenceManager) {
+          referenceManager.highlightNoteAt(x, y);
+      }
+
+      // Rain clearing (Focus Mode)
+      if (focusMode && raindrops) {
+          raindrops.clearDroplets(x, y, 100);
+      }
   }
 });
 
@@ -493,6 +512,10 @@ editor.onDidChangeModelContent((e) => {
 setInterval(() => {
     if (stormCharCount > 0) {
         stormCharCount = Math.max(0, stormCharCount - STORM_decay);
+    }
+
+    if (referenceManager) {
+        referenceManager.setStormIntensity(stormCharCount);
     }
 
     if (raindrops && intensitySlider) {
