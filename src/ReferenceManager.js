@@ -127,7 +127,11 @@ export class ReferenceManager {
       const html = this.parseMarkdown(part);
       const card = document.createElement('div');
       card.className = 'note-card floating';
-      card.innerHTML = html;
+
+      const content = document.createElement('div');
+      content.className = 'card-content';
+      content.innerHTML = html;
+      card.appendChild(content);
 
       // Deterministic random positioning based on index
       const seed = index * 1337;
@@ -304,6 +308,18 @@ export class ReferenceManager {
       .replace(/\n/gim, '<br>');
   }
 
+  setStormIntensity(level) {
+      if (!this.layer) return;
+      // Threshold for visual shaking
+      if (level > 40) {
+          this.layer.classList.add('storm-shaking');
+          if (this.spotlightLayer) this.spotlightLayer.classList.add('storm-shaking');
+      } else {
+          this.layer.classList.remove('storm-shaking');
+          if (this.spotlightLayer) this.spotlightLayer.classList.remove('storm-shaking');
+      }
+  }
+
   setLanternMode(enabled) {
       this.isLanternMode = enabled;
       if (this.overlay) {
@@ -315,5 +331,51 @@ export class ReferenceManager {
             this.overlay.classList.add('lantern-inactive');
           }
       }
+  }
+
+  getFocusedNoteRect() {
+      if (!this.layer) return null;
+      const focused = this.layer.querySelector('.focused-behind') ||
+                      (this.spotlightLayer && this.spotlightLayer.querySelector('.focused-behind'));
+      if (focused) {
+          return focused.getBoundingClientRect();
+      }
+      return null;
+  }
+
+  highlightNoteAt(x, y) {
+      if (!this.layer) return null;
+      let hit = null;
+
+      // Check main layer
+      const checkContainer = (container) => {
+          if (!container) return null;
+          const notes = container.children;
+          for (let note of notes) {
+              if (!note.classList.contains('note-card')) continue;
+              const rect = note.getBoundingClientRect();
+              if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                  return note;
+              }
+          }
+          return null;
+      }
+
+      hit = checkContainer(this.spotlightLayer) || checkContainer(this.layer);
+
+      // Reset all first
+      const allNotes = [
+          ...this.layer.querySelectorAll('.note-card'),
+          ...(this.spotlightLayer ? this.spotlightLayer.querySelectorAll('.note-card') : [])
+      ];
+
+      allNotes.forEach(n => {
+          if (n !== hit) n.classList.remove('focused-behind');
+      });
+
+      if (hit) {
+          hit.classList.add('focused-behind');
+      }
+      return hit;
   }
 }
