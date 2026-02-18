@@ -45,6 +45,7 @@ const frontCanvas = document.getElementById('rain-front');
 const referenceLayer = document.getElementById('reference-layer');
 const referenceOverlay = document.getElementById('reference-overlay');
 const fogLayerEl = document.getElementById('fog-layer');
+const vignetteLayer = document.getElementById('vignette-layer'); // Added
 
 // Initialize Managers
 const referenceManager = new ReferenceManager(referenceLayer, referenceOverlay, monaco);
@@ -519,4 +520,71 @@ setInterval(() => {
             raindrops.options.rainChance = baseChance;
         }
     }
+
+    // Hyper-Focus Vignette
+    if (vignetteLayer) {
+        const opacity = Math.min(1, stormCharCount / 60);
+        vignetteLayer.style.opacity = opacity;
+    }
+
 }, 1000);
+
+// --- Sonar Ping Logic ---
+let lastShiftTime = 0;
+let sonarActive = false;
+let sonarStartTime = 0;
+let sonarX = 0;
+let sonarY = 0;
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Shift') {
+        const now = Date.now();
+        if (now - lastShiftTime < 300) {
+            // Double Shift detected
+            triggerSonar();
+        }
+        lastShiftTime = now;
+    }
+});
+
+function triggerSonar() {
+    sonarActive = true;
+    sonarStartTime = Date.now();
+
+    // Get mouse position
+    // Use the last known mouse position from global listener if possible,
+    // but here we might need to rely on the CSS variables set by mousemove
+    const mx = parseFloat(document.body.style.getPropertyValue('--mouse-x')) || (window.innerWidth / 2);
+    const my = parseFloat(document.body.style.getPropertyValue('--mouse-y')) || (window.innerHeight / 2);
+
+    sonarX = mx;
+    sonarY = my;
+
+    editorEl.style.setProperty('--sonar-x', `${sonarX}px`);
+    editorEl.style.setProperty('--sonar-y', `${sonarY}px`);
+    editorEl.classList.add('sonar-active');
+
+    requestAnimationFrame(animateSonar);
+}
+
+function animateSonar() {
+    if (!sonarActive) return;
+
+    const now = Date.now();
+    const elapsed = now - sonarStartTime;
+    const duration = 1500;
+
+    if (elapsed > duration) {
+        sonarActive = false;
+        editorEl.classList.remove('sonar-active');
+        return;
+    }
+
+    // Easing out
+    const progress = elapsed / duration;
+    const radius = Math.max(window.innerWidth, window.innerHeight) * 1.5 * (1 - Math.pow(1 - progress, 3)); // cubic ease out
+
+    editorEl.style.setProperty('--sonar-radius', `${radius}px`);
+
+    requestAnimationFrame(animateSonar);
+}
