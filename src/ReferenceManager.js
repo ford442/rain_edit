@@ -378,4 +378,13 @@ export class ReferenceManager {
       }
       return hit;
   }
+
+  getCards() {
+      if (!this.layer) return [];
+      const cards = [
+          ...Array.from(this.layer.querySelectorAll('.note-card')),
+          ...(this.spotlightLayer ? Array.from(this.spotlightLayer.querySelectorAll('.note-card')) : [])
+      ];
+      return cards;
+  }
 }

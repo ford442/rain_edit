@@ -34,6 +34,7 @@ self.MonacoEnvironment = {
 import RainLayer from './RainLayer';
 import Raindrops from './vendor/raindrops.js';
 import { ReferenceManager } from './ReferenceManager.js'; // New import
+import { ConnectionManager } from './ConnectionManager.js';
 import { FogManager } from './FogManager.js';
 import backFrag from './shaders/water-back.frag?glslify';
 import frontFrag from './shaders/water.frag?glslify';
@@ -42,6 +43,7 @@ import vertSrc from './shaders/simple.vert?glslify';
 const editorEl = document.getElementById('editor');
 const backCanvas = document.getElementById('rain-back');
 const frontCanvas = document.getElementById('rain-front');
+const connectionsCanvas = document.getElementById('connections-layer');
 const referenceLayer = document.getElementById('reference-layer');
 const referenceOverlay = document.getElementById('reference-overlay');
 const fogLayerEl = document.getElementById('fog-layer');
@@ -49,6 +51,7 @@ const vignetteLayer = document.getElementById('vignette-layer'); // Added
 
 // Initialize Managers
 const referenceManager = new ReferenceManager(referenceLayer, referenceOverlay, monaco);
+const connectionManager = new ConnectionManager(connectionsCanvas, referenceManager);
 const fogManager = new FogManager(fogLayerEl);
 
 let focusDepth = 0; // 0 = Editor, 1 = Reference
@@ -164,6 +167,8 @@ async function initLayers(){
     // update texture bindings from the raindrops canvas
     if(bgLayer) bgLayer.bindTexture('u_waterMap', raindrops.canvas);
     if(fgLayer) fgLayer.bindTexture('u_waterMap', raindrops.canvas);
+
+    if (connectionManager) connectionManager.draw(performance.now() / 1000);
 
     // Rain Shield (Focus)
     if (referenceManager) {
@@ -611,3 +616,99 @@ function animateSonar() {
 
     requestAnimationFrame(animateSonar);
 }
+
+// --- Portal Comments Logic ---
+let portalLines = [];
+
+function scanPortals() {
+    const model = editor.getModel();
+    if (!model) return;
+    portalLines = [];
+    const lines = model.getLinesContent();
+    lines.forEach((line, index) => {
+        if (line.includes('// @portal')) {
+            portalLines.push(index + 1);
+        }
+    });
+    updatePortals();
+}
+
+function updatePortals() {
+    if (!editorEl) return;
+
+    // If no portals, we must clear inline styles so CSS classes (like X-Ray) work
+    if (portalLines.length === 0) {
+        editorEl.style.maskImage = '';
+        editorEl.style.webkitMaskImage = '';
+        editorEl.style.maskComposite = '';
+        editorEl.style.webkitMaskComposite = '';
+        return;
+    }
+
+    const portals = [];
+    portalLines.forEach(lineNumber => {
+        const pos = editor.getScrolledVisiblePosition({ lineNumber, column: 1 });
+        if (pos) {
+             // Offset to align with the comment roughly
+             portals.push({ x: pos.left + 60, y: pos.top + 10 });
+        }
+    });
+
+    if (portals.length > 0) {
+        const gradients = portals.map(p =>
+            `radial-gradient(circle at ${p.x}px ${p.y}px, transparent 0px, transparent 100px, black 150px)`
+        ).join(', ');
+
+        let finalMask = gradients;
+
+        // Manual X-Ray Composition
+        // Because setting inline style overrides the class-defined mask
+        if (editorEl.classList.contains('x-ray-active')) {
+             const mx = document.body.style.getPropertyValue('--mouse-x') || '50%';
+             const my = document.body.style.getPropertyValue('--mouse-y') || '50%';
+             finalMask += `, radial-gradient(circle at ${mx} ${my}, transparent 100px, black 250px)`;
+        }
+
+        editorEl.style.maskImage = finalMask;
+        editorEl.style.webkitMaskImage = finalMask;
+
+        // We use 'intersect' (or source-in) because we want the holes to persist.
+        // A hole is "transparent". The background is "black" (opaque).
+        // Intersection of (Transparent Hole A + Black) AND (Transparent Hole B + Black)
+        // = Transparent at A AND Transparent at B AND Black elsewhere.
+        // So 'intersect' combines holes correctly.
+        editorEl.style.maskComposite = 'intersect';
+        editorEl.style.webkitMaskComposite = 'source-in';
+    } else {
+        editorEl.style.maskImage = '';
+        editorEl.style.webkitMaskImage = '';
+        editorEl.style.maskComposite = '';
+        editorEl.style.webkitMaskComposite = '';
+    }
+}
+
+editor.onDidChangeModelContent(scanPortals);
+editor.onDidScrollChange(updatePortals);
+window.addEventListener('resize', updatePortals);
+
+// Trigger updates for X-Ray interaction
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Control' || e.key === 'Meta') {
+        // slight delay to allow classList update
+        requestAnimationFrame(updatePortals);
+    }
+});
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'Control' || e.key === 'Meta') {
+        requestAnimationFrame(updatePortals);
+    }
+});
+document.addEventListener('mousemove', () => {
+    // Only need to update if X-Ray is active AND we have portals (inline style is set)
+    if (editorEl.classList.contains('x-ray-active') && portalLines.length > 0) {
+        updatePortals();
+    }
+});
+
+// Initial scan
+scanPortals();
