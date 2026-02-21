@@ -4,6 +4,7 @@ export class ReferenceManager {
     this.overlay = overlayEl;
     this.monaco = monacoInstance;
     this.raindrops = null;
+    this.connectionManager = null;
     this.isLanternMode = true;
     this.mouseX = 0;
     this.mouseY = 0;
@@ -29,6 +30,10 @@ export class ReferenceManager {
 
   setRaindrops(raindrops) {
     this.raindrops = raindrops;
+  }
+
+  setConnectionManager(cm) {
+    this.connectionManager = cm;
   }
 
   initEvents() {
@@ -83,14 +88,15 @@ export class ReferenceManager {
             const moveX = -normX * 50 * depth;
             const moveY = -normY * 50 * depth;
 
-            // Enhanced Tilt
-            const rotateX = -normY * 12 * depth;
-            const rotateY = normX * 12 * depth;
+            // Enhanced Tilt (3D Depth)
+            const rotateX = -normY * 15 * depth;
+            const rotateY = normX * 15 * depth;
+            const translateZ = depth * 50; // Bring closer items more forward in Z space
 
             // Depth Blur
             const blurAmount = Math.max(0, (1.2 - depth) * 3);
 
-            note.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            note.style.transform = `translate3d(${moveX}px, ${moveY}px, ${translateZ}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
             if (!note.classList.contains('spotlight') && !note.classList.contains('dimmed')) {
                 note.style.filter = `blur(${blurAmount}px)`;
@@ -273,6 +279,21 @@ export class ReferenceManager {
 
       this.layer.appendChild(card);
     });
+
+    if (this.connectionManager) {
+        this.connectionManager.updateKeywords();
+    }
+  }
+
+  toggleRainStreaks(enable) {
+      const cards = this.getCards();
+      cards.forEach(card => {
+          if (enable) {
+              card.classList.add('rain-streaks');
+          } else {
+              card.classList.remove('rain-streaks');
+          }
+      });
   }
 
   parseMarkdown(text) {

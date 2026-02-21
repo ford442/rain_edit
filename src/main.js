@@ -52,6 +52,7 @@ const vignetteLayer = document.getElementById('vignette-layer'); // Added
 // Initialize Managers
 const referenceManager = new ReferenceManager(referenceLayer, referenceOverlay, monaco);
 const connectionManager = new ConnectionManager(connectionsCanvas, referenceManager);
+referenceManager.setConnectionManager(connectionManager);
 const fogManager = new FogManager(fogLayerEl);
 
 let focusDepth = 0; // 0 = Editor, 1 = Reference
@@ -366,6 +367,19 @@ editor.onDidChangeCursorPosition((e) => {
       if (focusMode && raindrops) {
           raindrops.clearDroplets(x, y, 100);
       }
+
+      // Focus Link: Connect cursor word to reference notes
+      const model = editor.getModel();
+      const wordAtPosition = model.getWordAtPosition(position);
+      if (connectionManager) {
+          if (wordAtPosition) {
+              // Adjust coordinates to be relative to the viewport/canvas
+              const rect = editorEl.getBoundingClientRect();
+              connectionManager.setEditorFocus(wordAtPosition.word, x + rect.left, y + rect.top + 10); // +10 for approximate line height center
+          } else {
+              connectionManager.setEditorFocus(null);
+          }
+      }
   }
 });
 
@@ -546,6 +560,11 @@ setInterval(() => {
             // but setting it every second ensures consistency.
             raindrops.options.dropletsRate = baseRate;
             raindrops.options.rainChance = baseChance;
+        }
+
+        // Toggle rain streaks on notes if intense
+        if (referenceManager) {
+            referenceManager.toggleRainStreaks(raindrops.options.rainChance > 0.5);
         }
     }
 

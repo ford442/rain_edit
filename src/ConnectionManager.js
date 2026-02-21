@@ -5,6 +5,8 @@ export class ConnectionManager {
         this.ctx = canvas.getContext('2d');
         this.width = canvas.width;
         this.height = canvas.height;
+        this.editorFocus = null; // { word: string, x: number, y: number }
+        this.cardKeywords = new Map(); // Map<HTMLElement, Set<string>>
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -17,26 +19,43 @@ export class ConnectionManager {
         this.canvas.height = this.height;
     }
 
+    setEditorFocus(word, x, y) {
+        if (!word || word.length < 3) {
+            this.editorFocus = null;
+        } else {
+            this.editorFocus = { word: word.toLowerCase(), x, y };
+        }
+    }
+
+    updateKeywords() {
+        const cards = this.referenceManager.getCards();
+        this.cardKeywords.clear();
+        cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            const words = text.split(/\W+/).filter(w => w.length > 3);
+            this.cardKeywords.set(card, new Set(words));
+        });
+    }
+
     draw(time) {
         if (!this.ctx) return;
         this.ctx.clearRect(0, 0, this.width, this.height);
 
         const cards = this.referenceManager.getCards();
-        if (cards.length < 2) return;
+        if (cards.length === 0) return;
 
-        // Extract keywords for each card
+        // If cache is empty but we have cards, update it
+        if (this.cardKeywords.size === 0 && cards.length > 0) {
+            this.updateKeywords();
+        }
+
+        // Map current positions
         const cardData = cards.map(card => {
             const rect = card.getBoundingClientRect();
-            // Get text, remove common words, find significant ones
-            // We ignore very short words
-            const text = card.innerText.toLowerCase();
-            const words = text.split(/\W+/).filter(w => w.length > 4);
-            const uniqueWords = new Set(words);
-
             return {
                 x: rect.left + rect.width / 2,
                 y: rect.top + rect.height / 2,
-                words: uniqueWords,
+                words: this.cardKeywords.get(card) || new Set(),
                 element: card
             };
         });
@@ -44,7 +63,7 @@ export class ConnectionManager {
         this.ctx.lineWidth = 1.5;
         this.ctx.lineCap = 'round';
 
-        // Draw connections
+        // Draw Inter-Card connections
         for (let i = 0; i < cardData.length; i++) {
             for (let j = i + 1; j < cardData.length; j++) {
                 const a = cardData[i];
@@ -52,8 +71,10 @@ export class ConnectionManager {
 
                 // Check intersection of words
                 let shared = 0;
-                for (let w of a.words) {
-                    if (b.words.has(w)) shared++;
+                // Optimization: Iterate over smaller set
+                const [small, large] = a.words.size < b.words.size ? [a.words, b.words] : [b.words, a.words];
+                for (let w of small) {
+                    if (large.has(w) && w.length > 4) shared++;
                 }
 
                 // Force connections if cards are very close (visual proximity)
@@ -91,6 +112,30 @@ export class ConnectionManager {
                     }
                 }
             }
+        }
+
+        // Draw Editor Focus Connections
+        if (this.editorFocus) {
+            const { word, x, y } = this.editorFocus;
+            cardData.forEach(node => {
+                if (node.words.has(word)) {
+                    // Draw connection
+                    const dist = Math.hypot(node.x - x, node.y - y);
+                    const opacity = Math.min(0.8, 1000 / (dist + 100)); // Fade with distance
+
+                    this.ctx.strokeStyle = `rgba(255, 200, 50, ${opacity})`; // Gold color
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, y);
+                    this.ctx.lineTo(node.x, node.y);
+                    this.ctx.stroke();
+                    this.ctx.lineWidth = 1.5;
+
+                    // Highlight the card slightly?
+                    // We can't easily modify DOM style from here efficiently every frame,
+                    // but the line itself is a good indicator.
+                }
+            });
         }
     }
 }
