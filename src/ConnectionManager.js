@@ -10,6 +10,11 @@ export class ConnectionManager {
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
+
+        this.radarCanvas = document.getElementById('radar-canvas');
+        if (this.radarCanvas) {
+            this.radarCtx = this.radarCanvas.getContext('2d');
+        }
     }
 
     resize() {
@@ -20,18 +25,52 @@ export class ConnectionManager {
     }
 
     setEditorFocus(word, x, y) {
+        if (!this.referenceManager) return;
+
+        // Clear previous highlights
+        const cards = this.referenceManager.getCards();
+        if (!cards) return;
+
+        cards.forEach(card => card.classList.remove('matched-card'));
+
         if (!word || word.length < 3) {
             this.editorFocus = null;
         } else {
             this.editorFocus = { word: word.toLowerCase(), x, y };
+
+            // Ensure cardKeywords is initialized
+            if (!this.cardKeywords) {
+                this.cardKeywords = new Map();
+            }
+
+            // Populate keywords if empty and we have cards
+            if (this.cardKeywords.size === 0 && cards.length > 0) {
+                 this.updateKeywords();
+            }
+
+            // Highlight matching cards
+            cards.forEach(card => {
+                const words = this.cardKeywords.get(card);
+                if (words && words.has(this.editorFocus.word)) {
+                    card.classList.add('matched-card');
+                }
+            });
         }
     }
 
     updateKeywords() {
+        if (!this.referenceManager) return;
         const cards = this.referenceManager.getCards();
-        this.cardKeywords.clear();
+        if (!cards) return;
+
+        if (!this.cardKeywords) {
+            this.cardKeywords = new Map();
+        } else {
+            this.cardKeywords.clear();
+        }
+
         cards.forEach(card => {
-            const text = card.innerText.toLowerCase();
+            const text = (card.innerText || "").toLowerCase();
             const words = text.split(/\W+/).filter(w => w.length > 3);
             this.cardKeywords.set(card, new Set(words));
         });
@@ -41,8 +80,14 @@ export class ConnectionManager {
         if (!this.ctx) return;
         this.ctx.clearRect(0, 0, this.width, this.height);
 
+        if (!this.referenceManager) return;
         const cards = this.referenceManager.getCards();
-        if (cards.length === 0) return;
+        if (!cards || cards.length === 0) return;
+
+        // Ensure keywords map is ready
+        if (!this.cardKeywords) {
+            this.cardKeywords = new Map();
+        }
 
         // If cache is empty but we have cards, update it
         if (this.cardKeywords.size === 0 && cards.length > 0) {
@@ -130,12 +175,54 @@ export class ConnectionManager {
                     this.ctx.lineTo(node.x, node.y);
                     this.ctx.stroke();
                     this.ctx.lineWidth = 1.5;
-
-                    // Highlight the card slightly?
-                    // We can't easily modify DOM style from here efficiently every frame,
-                    // but the line itself is a good indicator.
                 }
             });
         }
+    }
+
+    drawRadar(time) {
+        if (!this.radarCtx || !this.radarCanvas) return;
+
+        const w = this.radarCanvas.width;
+        const h = this.radarCanvas.height;
+        this.radarCtx.clearRect(0, 0, w, h);
+
+        if (!this.referenceManager) return;
+        const cards = this.referenceManager.getCards();
+        if (!cards || cards.length === 0) return;
+
+        // Draw grid lines
+        this.radarCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        this.radarCtx.lineWidth = 1;
+        this.radarCtx.beginPath();
+        this.radarCtx.moveTo(w/2, 0);
+        this.radarCtx.lineTo(w/2, h);
+        this.radarCtx.moveTo(0, h/2);
+        this.radarCtx.lineTo(w, h/2);
+        this.radarCtx.stroke();
+
+        cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            // Map screen coords to radar coords
+            const rx = (rect.left / window.innerWidth) * w;
+            const ry = (rect.top / window.innerHeight) * h;
+            const rw = Math.max(2, (rect.width / window.innerWidth) * w);
+            const rh = Math.max(2, (rect.height / window.innerHeight) * h);
+
+            let color = 'rgba(255, 255, 255, 0.3)';
+            if (card.classList.contains('matched-card')) {
+                color = '#00e5ff';
+            } else if (card.classList.contains('spotlight')) {
+                color = '#ff0055';
+            }
+
+            this.radarCtx.fillStyle = color;
+            this.radarCtx.fillRect(rx, ry, rw, rh);
+        });
+
+        // Draw Viewport "Scan" line
+        const scanY = ((time * 0.2) % 1) * h;
+        this.radarCtx.fillStyle = 'rgba(0, 229, 255, 0.1)';
+        this.radarCtx.fillRect(0, scanY, w, 2);
     }
 }

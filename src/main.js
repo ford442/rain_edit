@@ -169,7 +169,10 @@ async function initLayers(){
     if(bgLayer) bgLayer.bindTexture('u_waterMap', raindrops.canvas);
     if(fgLayer) fgLayer.bindTexture('u_waterMap', raindrops.canvas);
 
-    if (connectionManager) connectionManager.draw(performance.now() / 1000);
+    if (connectionManager) {
+        connectionManager.draw(performance.now() / 1000);
+        connectionManager.drawRadar(performance.now() / 1000);
+    }
 
     // Rain Shield (Focus)
     if (referenceManager) {
@@ -532,6 +535,13 @@ setInterval(() => {
     if (stormCharCount > 0) {
         stormCharCount = Math.max(0, stormCharCount - STORM_decay);
     }
+
+    // Dynamic Hue Logic
+    const baseHue = 180 + Math.min(100, stormCharCount);
+    const time = Date.now() / 1000;
+    const breathing = Math.sin(time) * 10;
+    const finalHue = baseHue + breathing;
+    document.documentElement.style.setProperty('--dynamic-hue', finalHue);
 
     if (referenceManager) {
         referenceManager.setStormIntensity(stormCharCount);
