@@ -6,6 +6,7 @@ export class ReferenceManager {
     this.raindrops = null;
     this.connectionManager = null;
     this.isLanternMode = true;
+    this.isLensMode = false;
     this.mouseX = 0;
     this.mouseY = 0;
 
@@ -93,10 +94,37 @@ export class ReferenceManager {
             const rotateY = normX * 15 * depth;
             const translateZ = depth * 50; // Bring closer items more forward in Z space
 
-            // Depth Blur
-            const blurAmount = Math.max(0, (1.2 - depth) * 3);
+            // Dynamic Depth of Field (Focus based on mouse proximity)
+            const rect = note.getBoundingClientRect();
+            const cardCenterX = rect.left + rect.width / 2;
+            const cardCenterY = rect.top + rect.height / 2;
+            const dist = Math.hypot(this.mouseX - cardCenterX, this.mouseY - cardCenterY);
 
-            note.style.transform = `translate3d(${moveX}px, ${moveY}px, ${translateZ}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            // Focus range: 300px radius. If in Lens Mode (checked externally or via prop), range increases.
+            // We'll use a property on ReferenceManager for lens mode if needed later,
+            // but for now standard dynamic focus is sufficient.
+            const focusRange = this.isLensMode ? 500 : 300;
+            const focusFactor = Math.max(0, 1 - dist / focusRange); // 0 to 1 (1 is closest)
+
+            // Base blur comes from depth, but proximity reduces it
+            let blurAmount = Math.max(0, (1.2 - depth) * 3);
+
+            // If Lens Mode is active, we want to aggressively sharpen
+            const sharpenFactor = this.isLensMode ? 1.0 : 0.8;
+            blurAmount = blurAmount * (1 - focusFactor * sharpenFactor);
+
+            // Subtle scale up when focused
+            const focusScale = 1 + (focusFactor * 0.05);
+
+            note.style.transform = `translate3d(${moveX}px, ${moveY}px, ${translateZ}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${focusScale})`;
+
+            // Lens Mode Opacity Logic
+            if (this.isLensMode && !note.classList.contains('spotlight')) {
+                // Fade out distant notes, bring focused one to full opacity
+                note.style.opacity = 0.3 + (focusFactor * 0.7);
+            } else if (!note.classList.contains('spotlight')) {
+                 note.style.opacity = ''; // Revert to CSS default
+            }
 
             if (!note.classList.contains('spotlight') && !note.classList.contains('dimmed')) {
                 note.style.filter = `blur(${blurAmount}px)`;

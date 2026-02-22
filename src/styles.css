@@ -78,6 +78,25 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: v
   mask-composite: intersect;
   -webkit-mask-composite: source-in;
 }
+
+#editor.lens-active {
+    mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 160px, black 320px);
+    -webkit-mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 160px, black 320px);
+}
+
+#editor.lens-active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.05) 150px, rgba(0, 229, 255, 0.3) 160px, transparent 165px);
+    mix-blend-mode: screen;
+    z-index: 100;
+}
+
+#editor .monaco-editor .view-lines {
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.2), 0 0 15px rgba(0, 229, 255, 0.1);
+}
 .rain-canvas { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
 #rain-back { z-index: 0; }
 #rain-front { z-index: 3; }
@@ -463,14 +482,16 @@ input[type="checkbox"]:hover {
 .note-card {
   position: absolute;
   width: 340px;
-  background: var(--bg-color-glass);
-  backdrop-filter: blur(24px) saturate(200%);
-  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  background-color: var(--bg-color-glass);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+  backdrop-filter: blur(12px) brightness(1.1) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) brightness(1.1) saturate(180%);
   padding: 24px;
   border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: transform 0.1s linear, height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.1s linear, height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, filter 0.3s ease;
   pointer-events: auto;
   font-family: var(--font-primary);
   font-size: 13px;
@@ -481,14 +502,16 @@ input[type="checkbox"]:hover {
   line-height: 1.5;
 }
 
+/* Subtle border gradient using pseudo-element */
 .note-card::before {
     content: '';
     position: absolute;
     inset: -1px;
-    background: linear-gradient(45deg, rgba(255,255,255,0.1), transparent 40%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05), transparent 60%);
     z-index: -1;
     border-radius: inherit;
     pointer-events: none;
+    opacity: 0.8;
 }
 
 .note-card.spotlight {
@@ -588,38 +611,43 @@ input[type="checkbox"]:hover {
 
 .note-card h1 {
   font-family: var(--font-primary);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   margin-bottom: 16px;
-  background: linear-gradient(90deg, #fff, #aaddff);
+  background: linear-gradient(90deg, #ffffff, #88ccff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  padding-bottom: 10px;
-  letter-spacing: -0.2px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  padding-bottom: 12px;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 10px rgba(0, 229, 255, 0.2);
 }
-.note-card h2 { font-family: var(--font-primary); font-size: 14px; margin-top: 20px; margin-bottom: 10px; color: #e0e0e0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; }
-.note-card h3 { font-family: var(--font-primary); font-size: 13px; margin-top: 16px; margin-bottom: 6px; color: #d0d0d0; font-weight: 600; }
+.note-card h2 { font-family: var(--font-primary); font-size: 15px; margin-top: 24px; margin-bottom: 12px; color: #e0e0ff; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+.note-card h3 { font-family: var(--font-primary); font-size: 14px; margin-top: 18px; margin-bottom: 8px; color: #d0d0e0; font-weight: 600; }
 
 .note-card pre {
-    background: rgba(0,0,0,0.6);
-    padding: 12px;
-    border-radius: 6px;
+    background: rgba(0, 5, 10, 0.4);
+    padding: 14px;
+    border-radius: 8px;
     overflow-x: auto;
-    margin: 12px 0;
-    border: 1px solid rgba(255,255,255,0.08);
+    margin: 16px 0;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
 }
 .note-card code {
     font-family: var(--font-mono);
     font-size: 12px;
-    color: #55ddff;
+    color: #77eeff;
     background: transparent;
     padding: 0;
+    text-shadow: 0 0 2px rgba(0, 229, 255, 0.3);
 }
 .note-card :not(pre) > code {
-    background: rgba(0,0,0,0.3);
-    padding: 2px 5px;
+    background: rgba(255,255,255,0.08);
+    padding: 3px 6px;
     border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.05);
+    color: #ccffff;
 }
 .note-card blockquote {
     border-left: 3px solid var(--accent-color);
