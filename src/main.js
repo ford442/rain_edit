@@ -49,6 +49,17 @@ const referenceOverlay = document.getElementById('reference-overlay');
 const fogLayerEl = document.getElementById('fog-layer');
 const vignetteLayer = document.getElementById('vignette-layer'); // Added
 
+// Create Portal Visual Layer
+const portalLayer = document.createElement('div');
+portalLayer.id = 'portal-visuals';
+portalLayer.style.position = 'absolute';
+portalLayer.style.inset = '0';
+portalLayer.style.pointerEvents = 'none';
+portalLayer.style.zIndex = '3'; // Above editor
+if (document.getElementById('container')) {
+    document.getElementById('container').appendChild(portalLayer);
+}
+
 // Initialize Managers
 const referenceManager = new ReferenceManager(referenceLayer, referenceOverlay, monaco);
 const connectionManager = new ConnectionManager(connectionsCanvas, referenceManager);
@@ -498,6 +509,27 @@ window.addEventListener('wheel', (e) => {
     }
 }, { passive: false });
 
+// --- Lens Mode Logic ---
+let isLensMode = false;
+document.addEventListener('keydown', (e) => {
+    // Shift + Alt to toggle Lens Mode
+    if (e.altKey && e.shiftKey && !e.repeat) {
+        isLensMode = !isLensMode;
+        if (referenceManager) {
+            referenceManager.isLensMode = isLensMode;
+        }
+        if (isLensMode) {
+            editorEl.classList.add('lens-active');
+        } else {
+            editorEl.classList.remove('lens-active');
+        }
+        // If we have portals, we need to update the composed mask immediately
+        if (typeof updatePortals === 'function') {
+            requestAnimationFrame(updatePortals);
+        }
+    }
+});
+
 // --- Theme Logic ---
 const themeSelect = document.getElementById('theme-select');
 if (themeSelect) {
@@ -643,6 +675,11 @@ function animateSonar() {
 
     editorEl.style.setProperty('--sonar-radius', `${radius}px`);
 
+    // Force update if portals exist (JS mask management active)
+    if (portalLines.length > 0) {
+        updatePortals();
+    }
+
     requestAnimationFrame(animateSonar);
 }
 
@@ -665,15 +702,7 @@ function scanPortals() {
 function updatePortals() {
     if (!editorEl) return;
 
-    // If no portals, we must clear inline styles so CSS classes (like X-Ray) work
-    if (portalLines.length === 0) {
-        editorEl.style.maskImage = '';
-        editorEl.style.webkitMaskImage = '';
-        editorEl.style.maskComposite = '';
-        editorEl.style.webkitMaskComposite = '';
-        return;
-    }
-
+    // 1. Collect Portals
     const portals = [];
     portalLines.forEach(lineNumber => {
         const pos = editor.getScrolledVisiblePosition({ lineNumber, column: 1 });
@@ -683,59 +712,111 @@ function updatePortals() {
         }
     });
 
-    if (portals.length > 0) {
-        const gradients = portals.map(p =>
-            `radial-gradient(circle at ${p.x}px ${p.y}px, transparent 0px, transparent 100px, black 150px)`
-        ).join(', ');
+    // Update Portal Visuals
+    if (portalLayer) {
+        portalLayer.innerHTML = '';
+        portals.forEach(p => {
+            const ring = document.createElement('div');
+            ring.className = 'portal-ring';
+            ring.style.position = 'absolute';
+            ring.style.left = (p.x - 50) + 'px';
+            ring.style.top = (p.y - 50) + 'px';
+            ring.style.width = '100px';
+            ring.style.height = '100px';
+            ring.style.borderRadius = '50%';
+            ring.style.boxShadow = '0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(0, 229, 255, 0.2)';
+            ring.style.border = '1px solid rgba(0, 229, 255, 0.3)';
+            ring.style.animation = 'pulse-ring 2s infinite ease-in-out';
+            portalLayer.appendChild(ring);
+        });
 
-        let finalMask = gradients;
-
-        // Manual X-Ray Composition
-        // Because setting inline style overrides the class-defined mask
-        if (editorEl.classList.contains('x-ray-active')) {
-             const mx = document.body.style.getPropertyValue('--mouse-x') || '50%';
-             const my = document.body.style.getPropertyValue('--mouse-y') || '50%';
-             finalMask += `, radial-gradient(circle at ${mx} ${my}, transparent 100px, black 250px)`;
+        if (!document.getElementById('portal-style')) {
+            const style = document.createElement('style');
+            style.id = 'portal-style';
+            style.textContent = `@keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 0.6; } 50% { transform: scale(1.05); opacity: 0.9; } 100% { transform: scale(0.95); opacity: 0.6; } }`;
+            document.head.appendChild(style);
         }
+    }
 
-        editorEl.style.maskImage = finalMask;
-        editorEl.style.webkitMaskImage = finalMask;
-
-        // We use 'intersect' (or source-in) because we want the holes to persist.
-        // A hole is "transparent". The background is "black" (opaque).
-        // Intersection of (Transparent Hole A + Black) AND (Transparent Hole B + Black)
-        // = Transparent at A AND Transparent at B AND Black elsewhere.
-        // So 'intersect' combines holes correctly.
-        editorEl.style.maskComposite = 'intersect';
-        editorEl.style.webkitMaskComposite = 'source-in';
-    } else {
+    // If no portals, we must clear inline styles so CSS classes work (unless we want to enforce JS masking always)
+    if (portals.length === 0) {
         editorEl.style.maskImage = '';
         editorEl.style.webkitMaskImage = '';
         editorEl.style.maskComposite = '';
         editorEl.style.webkitMaskComposite = '';
+        return;
     }
+
+    const maskLayers = [];
+
+    // Add Portal Holes
+    const portalGradients = portals.map(p =>
+        `radial-gradient(circle at ${p.x}px ${p.y}px, transparent 0px, transparent 100px, black 150px)`
+    ).join(', ');
+    if (portalGradients) maskLayers.push(portalGradients);
+
+    // 2. Add Interactive Mode Holes (X-Ray / Lens / Sonar)
+    // We must manually add these because inline styles override CSS classes
+    const isXRay = editorEl.classList.contains('x-ray-active');
+    const isLens = editorEl.classList.contains('lens-active');
+    const isSonar = editorEl.classList.contains('sonar-active');
+
+    const mx = document.body.style.getPropertyValue('--mouse-x') || '50%';
+    const my = document.body.style.getPropertyValue('--mouse-y') || '50%';
+
+    if (isLens) {
+         maskLayers.push(`radial-gradient(circle at ${mx} ${my}, transparent 160px, black 320px)`);
+    } else if (isXRay) {
+         maskLayers.push(`radial-gradient(circle at ${mx} ${my}, transparent 100px, black 250px)`);
+    }
+
+    if (isSonar) {
+        const sx = editorEl.style.getPropertyValue('--sonar-x') || '50%';
+        const sy = editorEl.style.getPropertyValue('--sonar-y') || '50%';
+        const sr = editorEl.style.getPropertyValue('--sonar-radius') || '0px';
+        // Sonar ring mask (transparent hole moving outwards)
+        maskLayers.push(`radial-gradient(circle at ${sx} ${sy}, black calc(${sr} - 150px), transparent ${sr}, black calc(${sr} + 150px))`);
+    }
+
+    if (maskLayers.length === 0) {
+        editorEl.style.maskImage = '';
+        editorEl.style.webkitMaskImage = '';
+        editorEl.style.maskComposite = '';
+        editorEl.style.webkitMaskComposite = '';
+        return;
+    }
+
+    const finalMask = maskLayers.join(', ');
+
+    editorEl.style.maskImage = finalMask;
+    editorEl.style.webkitMaskImage = finalMask;
+
+    // Use intersect to combine holes
+    editorEl.style.maskComposite = 'intersect';
+    editorEl.style.webkitMaskComposite = 'source-in';
 }
 
 editor.onDidChangeModelContent(scanPortals);
 editor.onDidScrollChange(updatePortals);
 window.addEventListener('resize', updatePortals);
 
-// Trigger updates for X-Ray interaction
+// Trigger updates for X-Ray / Lens interaction
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Control' || e.key === 'Meta') {
-        // slight delay to allow classList update
-        requestAnimationFrame(updatePortals);
-    }
+    // slight delay to allow classList update
+    requestAnimationFrame(updatePortals);
 });
 document.addEventListener('keyup', (e) => {
-    if (e.key === 'Control' || e.key === 'Meta') {
-        requestAnimationFrame(updatePortals);
-    }
+    requestAnimationFrame(updatePortals);
 });
 document.addEventListener('mousemove', () => {
-    // Only need to update if X-Ray is active AND we have portals (inline style is set)
-    if (editorEl.classList.contains('x-ray-active') && portalLines.length > 0) {
-        updatePortals();
+    // Only need to update if we have portals (inline style active)
+    if (portalLines.length > 0) {
+        const isXRay = editorEl.classList.contains('x-ray-active');
+        const isLens = editorEl.classList.contains('lens-active');
+        const isSonar = editorEl.classList.contains('sonar-active');
+        if (isXRay || isLens || isSonar) {
+            updatePortals();
+        }
     }
 });
 
