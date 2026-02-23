@@ -36,6 +36,7 @@ import Raindrops from './vendor/raindrops.js';
 import { ReferenceManager } from './ReferenceManager.js'; // New import
 import { ConnectionManager } from './ConnectionManager.js';
 import { FogManager } from './FogManager.js';
+import { HoloManager } from './HoloManager.js';
 import backFrag from './shaders/water-back.frag?glslify';
 import frontFrag from './shaders/water.frag?glslify';
 import vertSrc from './shaders/simple.vert?glslify';
@@ -46,6 +47,7 @@ const frontCanvas = document.getElementById('rain-front');
 const connectionsCanvas = document.getElementById('connections-layer');
 const referenceLayer = document.getElementById('reference-layer');
 const referenceOverlay = document.getElementById('reference-overlay');
+const holoLayerEl = document.getElementById('holo-layer');
 const fogLayerEl = document.getElementById('fog-layer');
 const vignetteLayer = document.getElementById('vignette-layer'); // Added
 
@@ -108,6 +110,9 @@ const editor = monaco.editor.create(editorEl, {
   theme: 'transparent-vs-light',
   automaticLayout: true
 });
+
+// Initialize HoloManager
+const holoManager = new HoloManager(editor, holoLayerEl);
 
 // set canvas size to match editor area
 function resizeCanvases(){

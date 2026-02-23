@@ -90,8 +90,8 @@ export class ReferenceManager {
             const moveY = -normY * 50 * depth;
 
             // Enhanced Tilt (3D Depth)
-            const rotateX = -normY * 15 * depth;
-            const rotateY = normX * 15 * depth;
+            const rotateX = -normY * 5 * depth;
+            const rotateY = normX * 5 * depth;
             const translateZ = depth * 50; // Bring closer items more forward in Z space
 
             // Dynamic Depth of Field (Focus based on mouse proximity)
@@ -326,6 +326,9 @@ export class ReferenceManager {
 
   parseMarkdown(text) {
     let safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // Process callouts
+    safeText = safeText.replace(/^> \[!NOTE\] (.*$)/gim, '<div class="callout note">$1</div>');
 
     // Process blockquotes first to avoid conflicts
     safeText = safeText.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
