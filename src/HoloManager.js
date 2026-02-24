@@ -32,7 +32,7 @@ export class HoloManager {
         lines.forEach((line, index) => {
             const lineNumber = index + 1;
             // Matches: // TODO: message, // FIXME: message, etc.
-            const match = line.match(/\/\/\s*(TODO|FIXME|NOTE|HOLO|OPTIMIZE):\s*(.*)/i);
+            const match = line.match(/\/\/\s*(TODO|FIXME|NOTE|HOLO|OPTIMIZE|BUG|WARN|INFO|HACK):\s*(.*)/i);
             if (match) {
                 holoItems.push({
                     lineNumber,
@@ -60,6 +60,11 @@ export class HoloManager {
             if (item.type === 'FIXME') icon = '🔧';
             if (item.type === 'NOTE') icon = 'ℹ';
             if (item.type === 'HOLO') icon = '💠';
+            if (item.type === 'BUG') icon = '🐞';
+            if (item.type === 'WARN') icon = '⚠️';
+            if (item.type === 'INFO') icon = 'ℹ️';
+            if (item.type === 'HACK') icon = '💻';
+            if (item.type === 'OPTIMIZE') icon = '🚀';
 
             // Escape HTML to prevent XSS
             const safeText = item.text
@@ -70,6 +75,14 @@ export class HoloManager {
                 .replace(/'/g, "&#039;");
 
             el.innerHTML = `<span class="holo-icon">${icon}</span> <span class="holo-label">${item.type}</span> <span class="holo-text">${safeText}</span>`;
+
+            // Interaction
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.editor.revealLineInCenter(item.lineNumber);
+                this.editor.setPosition({ lineNumber: item.lineNumber, column: 1 });
+                this.editor.focus();
+            });
 
             this.layer.appendChild(el);
             this.elements.push({ el, lineNumber: item.lineNumber });
