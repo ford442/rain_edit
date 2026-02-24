@@ -327,6 +327,32 @@ export class ReferenceManager {
   parseMarkdown(text) {
     let safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+    // Basic Table Support
+    // Looks for blocks starting with |
+    safeText = safeText.replace(/((?:^\|.*\|\r?\n?)+)/gm, (match) => {
+        const lines = match.trim().split(/\r?\n/);
+        if (lines.length < 2) return match; // Not a table
+
+        // Simple check for separator line (second line contains dashes/pipes)
+        if (!lines[1].includes('--')) return match;
+
+        let html = '<table class="md-table">';
+
+        // Header
+        const headers = lines[0].split('|').filter(c => c && c.trim()).map(c => c.trim());
+        html += '<thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead>';
+
+        // Body
+        html += '<tbody>';
+        for(let i = 2; i < lines.length; i++) {
+             const cols = lines[i].split('|').filter(c => c && c.trim()).map(c => c.trim());
+             if(cols.length === 0) continue;
+             html += '<tr>' + cols.map(c => `<td>${c}</td>`).join('') + '</tr>';
+        }
+        html += '</tbody></table>';
+        return html;
+    });
+
     // Process callouts
     safeText = safeText.replace(/^> \[!NOTE\] (.*$)/gim, '<div class="callout note">$1</div>');
 

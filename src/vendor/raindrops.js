@@ -97,6 +97,21 @@ Raindrops.prototype={
     if(this.drops.length>=this.options.maxDrops*this.areaMultiplier) return null;
     return Object.assign(Object.create(Drop),options);
   },
+  splash(x, y, count = 5) {
+    for (let i = 0; i < count; i++) {
+        const r = random(2, 5);
+        const drop = this.createDrop({
+          x: x + random(-20, 20),
+          y: y + random(-20, 20),
+          r: r,
+          momentum: 2 + random(2),
+          spreadX: 1.5,
+          spreadY: 1.5,
+          momentumX: random(-2, 2)
+        });
+        if (drop) this.drops.push(drop);
+    }
+  },
   addDrop(drop){
     if(this.drops.length>=this.options.maxDrops*this.areaMultiplier || drop == null) return false;
     this.drops.push(drop);

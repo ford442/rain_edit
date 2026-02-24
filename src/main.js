@@ -232,6 +232,12 @@ document.addEventListener('mousemove', (e) => {
   document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
 });
 
+document.addEventListener('mousedown', (e) => {
+    if (raindrops) {
+        raindrops.splash(e.clientX, e.clientY, 5);
+    }
+});
+
 // --- X-Ray Mode Logic ---
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Control' || e.key === 'Meta') {
