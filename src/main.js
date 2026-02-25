@@ -185,9 +185,14 @@ async function initLayers(){
     if(bgLayer) bgLayer.bindTexture('u_waterMap', raindrops.canvas);
     if(fgLayer) fgLayer.bindTexture('u_waterMap', raindrops.canvas);
 
+    const time = performance.now() / 1000;
     if (connectionManager) {
-        connectionManager.draw(performance.now() / 1000);
-        connectionManager.drawRadar(performance.now() / 1000);
+        connectionManager.draw(time);
+        connectionManager.drawRadar(time);
+    }
+
+    if (referenceManager) {
+        referenceManager.render(time);
     }
 
     // Rain Shield (Focus)
@@ -224,7 +229,7 @@ document.addEventListener('mousemove', (e) => {
 
   // Update fog mask position for "wiping" effect
   if (fogManager) {
-    fogManager.clearFog(e.clientX, e.clientY, 60);
+    fogManager.clearFogAt(e.clientX, e.clientY, 60);
   }
 
   // Update CSS variables for X-Ray and Lantern
@@ -391,6 +396,13 @@ editor.onDidChangeCursorPosition((e) => {
       // Rain clearing (Focus Mode)
       if (focusMode && raindrops) {
           raindrops.clearDroplets(x, y, 100);
+      }
+
+      // Fog clearing (Typing)
+      if (fogManager) {
+          // Adjust for relative coordinates if needed, but FogManager uses client rects
+          const rect = editorEl.getBoundingClientRect();
+          fogManager.clearFogAt(x + rect.left, y + rect.top, 80);
       }
 
       // Focus Link: Connect cursor word to reference notes
@@ -741,12 +753,6 @@ function updatePortals() {
             portalLayer.appendChild(ring);
         });
 
-        if (!document.getElementById('portal-style')) {
-            const style = document.createElement('style');
-            style.id = 'portal-style';
-            style.textContent = `@keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 0.6; } 50% { transform: scale(1.05); opacity: 0.9; } 100% { transform: scale(0.95); opacity: 0.6; } }`;
-            document.head.appendChild(style);
-        }
     }
 
     // If no portals, we must clear inline styles so CSS classes work (unless we want to enforce JS masking always)

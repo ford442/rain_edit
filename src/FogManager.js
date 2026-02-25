@@ -28,33 +28,57 @@ export class FogManager {
   }
 
   render() {
-    // Slowly add fog back
-    // We want a very subtle accumulation
-    // Save context state
+    // Slowly add fog back with noise
     this.ctx.save();
     this.ctx.globalCompositeOperation = 'source-over';
-    // Use a very low opacity white to simulate condensation building up
-    this.ctx.fillStyle = 'rgba(240, 245, 255, 0.008)';
+
+    // Fill with very low opacity white/blue
+    this.ctx.fillStyle = 'rgba(240, 245, 255, 0.005)';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Add noise grain
+    // We draw random tiny pixels to simulate organic condensation
+    for (let i = 0; i < 50; i++) {
+        const x = Math.random() * this.canvas.width;
+        const y = Math.random() * this.canvas.height;
+        const s = Math.random() * 2 + 1;
+        this.ctx.fillStyle = `rgba(255, 255, 255, 0.05)`;
+        this.ctx.fillRect(x, y, s, s);
+    }
+
     this.ctx.restore();
   }
 
-  clearFog(x, y, radius) {
+  clearFogAt(x, y, radius) {
     const rect = this.container.getBoundingClientRect();
     const relX = x - rect.left;
     const relY = y - rect.top;
 
     this.ctx.save();
     this.ctx.globalCompositeOperation = 'destination-out';
+
+    // Main clear
     this.ctx.beginPath();
     this.ctx.arc(relX, relY, radius, 0, Math.PI * 2);
     this.ctx.fill();
 
-    // Add a softer edge (optional, but multiple passes with different radii look better)
+    // Soft edge
     this.ctx.beginPath();
-    this.ctx.arc(relX, relY, radius * 1.2, 0, Math.PI * 2);
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Partial clear
+    this.ctx.arc(relX, relY, radius * 1.3, 0, Math.PI * 2);
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     this.ctx.fill();
+
+    // Irregularities (droplets running)
+    // Random chance to clear a "drip" downwards
+    if (Math.random() < 0.3) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(relX, relY + radius);
+        this.ctx.lineTo(relX + (Math.random() - 0.5) * 10, relY + radius + 20 + Math.random() * 30);
+        this.ctx.lineWidth = 5;
+        this.ctx.lineCap = 'round';
+        this.ctx.strokeStyle = 'rgba(0, 0, 0, 1.0)';
+        this.ctx.stroke();
+    }
 
     this.ctx.restore();
   }

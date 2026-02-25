@@ -109,6 +109,9 @@ export class ConnectionManager {
         this.ctx.lineCap = 'round';
 
         // Draw Inter-Card connections
+        this.ctx.setLineDash([2, 8]); // Subtle dash
+        this.ctx.lineDashOffset = -time * 5; // Slow movement
+
         for (let i = 0; i < cardData.length; i++) {
             for (let j = i + 1; j < cardData.length; j++) {
                 const a = cardData[i];
@@ -150,33 +153,51 @@ export class ConnectionManager {
                          const px = a.x + (b.x - a.x) * t;
                          const py = a.y + (b.y - a.y) * t;
 
+                         this.ctx.save();
+                         this.ctx.setLineDash([]);
                          this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.2})`;
                          this.ctx.beginPath();
                          this.ctx.arc(px, py, 2, 0, Math.PI * 2);
                          this.ctx.fill();
+                         this.ctx.restore();
                     }
                 }
             }
         }
 
-        // Draw Editor Focus Connections
+        // Draw Editor Focus Connections (Smart Lens)
         if (this.editorFocus) {
             const { word, x, y } = this.editorFocus;
+
+            this.ctx.setLineDash([8, 6]);
+            this.ctx.lineDashOffset = -time * 30; // Fast movement
+            this.ctx.shadowBlur = 10;
+            this.ctx.shadowColor = 'rgba(255, 215, 0, 0.8)'; // Gold glow
+
             cardData.forEach(node => {
                 if (node.words.has(word)) {
                     // Draw connection
                     const dist = Math.hypot(node.x - x, node.y - y);
-                    const opacity = Math.min(0.8, 1000 / (dist + 100)); // Fade with distance
+                    const opacity = Math.min(1.0, 1200 / (dist + 100)); // Fade with distance
 
-                    this.ctx.strokeStyle = `rgba(255, 200, 50, ${opacity})`; // Gold color
+                    this.ctx.strokeStyle = `rgba(255, 215, 0, ${opacity})`; // Gold color
                     this.ctx.lineWidth = 2;
                     this.ctx.beginPath();
                     this.ctx.moveTo(x, y);
-                    this.ctx.lineTo(node.x, node.y);
+
+                    // Bezier curve for more organic feel
+                    const cx = (x + node.x) / 2;
+                    const cy = (y + node.y) / 2 - 50;
+                    this.ctx.quadraticCurveTo(cx, cy, node.x, node.y);
+
                     this.ctx.stroke();
-                    this.ctx.lineWidth = 1.5;
                 }
             });
+
+            // Reset
+            this.ctx.setLineDash([]);
+            this.ctx.shadowBlur = 0;
+            this.ctx.shadowColor = 'transparent';
         }
     }
 
