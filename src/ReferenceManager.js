@@ -25,6 +25,7 @@ export class ReferenceManager {
     this.draggedNote = null;
     this.dragOffset = { x: 0, y: 0 };
     this.zIndexCounter = 50;
+    this.stormIntensity = 0;
 
     this.initEvents();
   }
@@ -69,15 +70,21 @@ export class ReferenceManager {
       this.draggedNote.style.top = `${y}px`;
     }
 
-    // Parallax Logic
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const normX = (this.mouseX / w) * 2 - 1;
-    const normY = (this.mouseY / h) * 2 - 1;
+    // Parallax is now handled in render loop for smoothness + breathing
+  }
 
-    // Apply to all notes
-    const applyParallax = (container) => {
+  render(time) {
+      this.updateParallax(this.layer, time);
+      if (this.spotlightLayer) this.updateParallax(this.spotlightLayer, time);
+  }
+
+  updateParallax(container, time) {
         if (!container) return;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        const normX = (this.mouseX / w) * 2 - 1;
+        const normY = (this.mouseY / h) * 2 - 1;
+
         const notes = container.children;
         for (let note of notes) {
             if (!note.classList.contains('note-card')) continue;
@@ -100,9 +107,6 @@ export class ReferenceManager {
             const cardCenterY = rect.top + rect.height / 2;
             const dist = Math.hypot(this.mouseX - cardCenterX, this.mouseY - cardCenterY);
 
-            // Focus range: 300px radius. If in Lens Mode (checked externally or via prop), range increases.
-            // We'll use a property on ReferenceManager for lens mode if needed later,
-            // but for now standard dynamic focus is sufficient.
             const focusRange = this.isLensMode ? 500 : 300;
             const focusFactor = Math.max(0, 1 - dist / focusRange); // 0 to 1 (1 is closest)
 
@@ -113,8 +117,12 @@ export class ReferenceManager {
             const sharpenFactor = this.isLensMode ? 1.0 : 0.8;
             blurAmount = blurAmount * (1 - focusFactor * sharpenFactor);
 
+            // Breathing Effect
+            // Scale oscillates based on time and storm intensity
+            const breathe = Math.sin(time * 2 + depth * 10) * 0.02 * this.stormIntensity;
+
             // Subtle scale up when focused
-            const focusScale = 1 + (focusFactor * 0.05);
+            const focusScale = 1 + (focusFactor * 0.05) + breathe;
 
             note.style.transform = `translate3d(${moveX}px, ${moveY}px, ${translateZ}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${focusScale})`;
 
@@ -134,10 +142,6 @@ export class ReferenceManager {
                 note.style.transform += ' scale(1.05)';
             }
         }
-    };
-
-    applyParallax(this.layer);
-    applyParallax(this.spotlightLayer);
   }
 
   handleMouseUp() {
@@ -327,26 +331,26 @@ export class ReferenceManager {
   parseMarkdown(text) {
     let safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // Basic Table Support
-    // Looks for blocks starting with |
+    // Enhanced Table Support
     safeText = safeText.replace(/((?:^\|.*\|\r?\n?)+)/gm, (match) => {
         const lines = match.trim().split(/\r?\n/);
-        if (lines.length < 2) return match; // Not a table
+        if (lines.length < 2) return match;
 
-        // Simple check for separator line (second line contains dashes/pipes)
-        if (!lines[1].includes('--')) return match;
+        // Separator check
+        if (!lines[1].match(/^[|\s-:.]+$/)) return match;
 
         let html = '<table class="md-table">';
 
         // Header
-        const headers = lines[0].split('|').filter(c => c && c.trim()).map(c => c.trim());
+        const headers = lines[0].replace(/^\||\|$/g, '').split('|').map(c => c.trim());
         html += '<thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead>';
 
         // Body
         html += '<tbody>';
         for(let i = 2; i < lines.length; i++) {
-             const cols = lines[i].split('|').filter(c => c && c.trim()).map(c => c.trim());
-             if(cols.length === 0) continue;
+             const row = lines[i].replace(/^\||\|$/g, '').trim();
+             if(!row) continue;
+             const cols = row.split('|').map(c => c.trim());
              html += '<tr>' + cols.map(c => `<td>${c}</td>`).join('') + '</tr>';
         }
         html += '</tbody></table>';
@@ -369,7 +373,11 @@ export class ReferenceManager {
     safeText = safeText.replace(/^- \[x\] (.*$)/gim, '<div class="md-task-item"><input type="checkbox" checked> $1</div>');
     // Improved list parsing with indentation support
     safeText = safeText.replace(/^(\s*)- (.*$)/gim, (match, indent, content) => {
-        const padding = (indent.length * 10) + 20;
+        let depth = 0;
+        for (let char of indent) {
+            depth += (char === '\t') ? 4 : 1;
+        }
+        const padding = (depth * 12) + 20; // Increased padding per level
         return `<div class="md-list-item" style="padding-left: ${padding}px">${content}</div>`;
     });
 
@@ -388,6 +396,8 @@ export class ReferenceManager {
 
   setStormIntensity(level) {
       if (!this.layer) return;
+      this.stormIntensity = Math.min(1, level / 60);
+
       // Threshold for visual shaking
       if (level > 40) {
           this.layer.classList.add('storm-shaking');
