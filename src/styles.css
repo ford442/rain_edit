@@ -55,6 +55,11 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: v
   z-index: 2;
   transition: filter 1s ease, opacity 0.5s ease;
 
+  /* Cyber Grid Background */
+  background-image:
+      radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+
   /* X-Ray Mode variables */
   --mouse-x: 50%;
   --mouse-y: 50%;
@@ -178,6 +183,18 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: v
   mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 120px, black 350px);
   -webkit-mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 120px, black 350px);
   transition: opacity 0.3s ease, background 0.3s ease;
+}
+
+/* Lantern Beam Effect */
+#reference-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(200,220,255,0.06) 0%, transparent 350px);
+    mix-blend-mode: screen;
+    z-index: 2;
+    opacity: 0.8;
 }
 
 #reference-overlay.lantern-inactive {
@@ -498,7 +515,7 @@ input[type="checkbox"]:hover {
   transition: transform 0.1s linear, height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, filter 0.3s ease;
   pointer-events: auto;
   font-family: 'Inter', sans-serif;
-  font-size: 13px;
+  font-size: 15px; /* Increased font size */
   color: var(--text-primary);
   overflow: hidden;
   transform-style: preserve-3d;
@@ -531,6 +548,34 @@ input[type="checkbox"]:hover {
     box-shadow: 0 0 25px var(--accent-color), inset 0 0 10px var(--accent-color) !important;
     transform: scale(1.03) !important;
     z-index: 50 !important;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Semantic Tag Styles */
+.note-card[data-tags*="#bug"] {
+    border-color: rgba(255, 50, 50, 0.4);
+    box-shadow: 0 8px 32px rgba(50, 0, 0, 0.3), inset 0 0 20px rgba(255, 0, 0, 0.05);
+}
+.note-card[data-tags*="#bug"]::before {
+    background: linear-gradient(135deg, rgba(255,50,50,0.1), transparent 60%);
+}
+
+.note-card[data-tags*="#todo"] {
+    border-color: rgba(255, 200, 50, 0.4);
+}
+.note-card[data-tags*="#todo"]::before {
+    background: linear-gradient(135deg, rgba(255,200,50,0.1), transparent 60%);
+}
+
+.note-card[data-tags*="#urgent"] {
+    border-color: rgba(255, 0, 0, 0.6);
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 rgba(255,0,0,0.2); }
+    50% { box-shadow: 0 0 20px rgba(255,0,0,0.4); }
+    100% { box-shadow: 0 0 0 rgba(255,0,0,0.2); }
 }
 
 #reference-layer.has-spotlight .note-card:not(.spotlight) {

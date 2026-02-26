@@ -5,6 +5,7 @@ export class ReferenceManager {
     this.monaco = monacoInstance;
     this.raindrops = null;
     this.connectionManager = null;
+    this.fogManager = null;
     this.isLanternMode = true;
     this.isLensMode = false;
     this.mouseX = 0;
@@ -38,6 +39,10 @@ export class ReferenceManager {
     this.connectionManager = cm;
   }
 
+  setFogManager(fm) {
+      this.fogManager = fm;
+  }
+
   initEvents() {
     window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
     window.addEventListener('mouseup', () => this.handleMouseUp());
@@ -68,6 +73,14 @@ export class ReferenceManager {
 
       this.draggedNote.style.left = `${x}px`;
       this.draggedNote.style.top = `${y}px`;
+
+      // Liquid Interface: Clear fog when dragging
+      if (this.fogManager) {
+          const rect = this.draggedNote.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          this.fogManager.clearFogAt(cx, cy, Math.max(rect.width, rect.height) / 1.5);
+      }
     }
 
     // Parallax is now handled in render loop for smoothness + breathing
@@ -89,16 +102,24 @@ export class ReferenceManager {
         for (let note of notes) {
             if (!note.classList.contains('note-card')) continue;
 
-            const depth = parseFloat(note.dataset.depth) || 1;
+            let depth = parseFloat(note.dataset.depth) || 1;
             const initialRot = parseFloat(note.dataset.initialRot) || 0;
+            const isMatched = note.classList.contains('matched-card');
+            const tags = note.dataset.tags || '';
+
+            // Semantic Layering Override
+            if (tags.includes('#bug')) depth = 0.2; // Very close
+            if (tags.includes('#urgent')) depth = 0.1;
+            if (tags.includes('#todo')) depth = 0.5;
 
             // Enhanced Parallax
             const moveX = -normX * 50 * depth;
             const moveY = -normY * 50 * depth;
 
             // Enhanced Tilt (3D Depth)
-            const rotateX = -normY * 5 * depth;
-            const rotateY = normX * 5 * depth;
+            // Closer items tilt more
+            const rotateX = -normY * (5 + (1-depth)*5);
+            const rotateY = normX * (5 + (1-depth)*5);
             const translateZ = depth * 50; // Bring closer items more forward in Z space
 
             // Dynamic Depth of Field (Focus based on mouse proximity)
@@ -117,17 +138,29 @@ export class ReferenceManager {
             const sharpenFactor = this.isLensMode ? 1.0 : 0.8;
             blurAmount = blurAmount * (1 - focusFactor * sharpenFactor);
 
+            // Smart Focus (Matched Card)
+            if (isMatched) {
+                blurAmount = 0; // Force sharp
+            }
+
             // Breathing Effect
             // Scale oscillates based on time and storm intensity
             const breathe = Math.sin(time * 2 + depth * 10) * 0.02 * this.stormIntensity;
 
             // Subtle scale up when focused
-            const focusScale = 1 + (focusFactor * 0.05) + breathe;
+            let focusScale = 1 + (focusFactor * 0.05) + breathe;
+
+            // Smart Focus Scale
+            if (isMatched) {
+                focusScale = 1.1; // Pop out
+            }
 
             note.style.transform = `translate3d(${moveX}px, ${moveY}px, ${translateZ}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${focusScale})`;
 
-            // Lens Mode Opacity Logic
-            if (this.isLensMode && !note.classList.contains('spotlight')) {
+            // Lens Mode & Smart Focus Opacity Logic
+            if (isMatched) {
+                note.style.opacity = 1;
+            } else if (this.isLensMode && !note.classList.contains('spotlight')) {
                 // Fade out distant notes, bring focused one to full opacity
                 note.style.opacity = 0.3 + (focusFactor * 0.7);
             } else if (!note.classList.contains('spotlight')) {
@@ -162,9 +195,13 @@ export class ReferenceManager {
     const colWidth = 90 / cols;
 
     parts.forEach((part, index) => {
+      // Extract tags
+      const tags = (part.match(/#[a-zA-Z0-9_]+/g) || []).join(' ');
+
       const html = this.parseMarkdown(part);
       const card = document.createElement('div');
       card.className = 'note-card floating';
+      if (tags) card.dataset.tags = tags;
 
       const content = document.createElement('div');
       content.className = 'card-content';

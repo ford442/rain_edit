@@ -33,7 +33,8 @@ export class FogManager {
     this.ctx.globalCompositeOperation = 'source-over';
 
     // Fill with very low opacity white/blue
-    this.ctx.fillStyle = 'rgba(240, 245, 255, 0.005)';
+    // Reduced opacity to 0.001 to slow down accumulation (approx 10s to full opacity)
+    this.ctx.fillStyle = 'rgba(240, 245, 255, 0.001)';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Add noise grain
@@ -50,6 +51,7 @@ export class FogManager {
   }
 
   clearFogAt(x, y, radius) {
+    if (!this.ctx) return;
     const rect = this.container.getBoundingClientRect();
     const relX = x - rect.left;
     const relY = y - rect.top;

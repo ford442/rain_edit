@@ -67,6 +67,7 @@ const referenceManager = new ReferenceManager(referenceLayer, referenceOverlay, 
 const connectionManager = new ConnectionManager(connectionsCanvas, referenceManager);
 referenceManager.setConnectionManager(connectionManager);
 const fogManager = new FogManager(fogLayerEl);
+referenceManager.setFogManager(fogManager);
 
 let focusDepth = 0; // 0 = Editor, 1 = Reference
 
