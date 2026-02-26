@@ -1,119 +1,87 @@
 from playwright.sync_api import sync_playwright
 
-def run(playwright):
-    browser = playwright.chromium.launch()
-    page = browser.new_page()
+def verify_innovations():
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        context = browser.new_context(viewport={'width': 1280, 'height': 800})
+        page = context.new_page()
 
-    # Assuming the server is running on localhost:5173
-    # If not, we might need to start it.
-    try:
-        page.goto("http://localhost:5173")
-    except Exception as e:
-        print(f"Failed to load page: {e}")
-        return
+        print("Navigating to app...")
+        try:
+            page.goto("http://localhost:5173/", timeout=60000)
+            page.wait_for_load_state("networkidle")
+            # Wait for reference input to be available
+            page.wait_for_selector("#reference-input", timeout=30000)
+        except Exception as e:
+            print(f"Failed to load: {e}")
+            return
 
-    # Wait for editor to load
-    page.wait_for_selector("#editor")
+        # 1. Verify Editor Grid
+        print("Verifying Editor Grid...")
+        # Check computed style for background-image
+        bg_image = page.evaluate("window.getComputedStyle(document.getElementById('editor')).backgroundImage")
+        if "radial-gradient" in bg_image:
+            print("PASS: Editor has radial-gradient background.")
+        else:
+            print(f"FAIL: Editor background is {bg_image}")
 
-    page.on("console", lambda msg: print(f"BROWSER: {msg.text}"))
+        # 2. Verify Semantic Layers
+        print("Verifying Semantic Layers...")
+        # Inject markdown with tags on separate cards
+        page.evaluate("""
+            const rm = document.querySelector('#reference-input');
+            if (rm) {
+                rm.value = "# Bug Note\\n#bug This is a bug note.\\n---\\n# Todo Note\\n#todo This is a todo note.";
+                rm.dispatchEvent(new Event('input'));
+            }
+        """)
+        page.wait_for_timeout(2000) # Wait for update
 
-    print("Page loaded.")
+        # Check for cards with tags
+        # We need to find the specific card that has the tag, not just any card if multiple exist (which they do)
+        bug_cards = page.locator(".note-card[data-tags*='#bug']")
+        todo_cards = page.locator(".note-card[data-tags*='#todo']")
 
-    # 1. Verify X-Ray Mode
-    print("Testing X-Ray Mode...")
-    page.keyboard.down("Control")
-    # Check if class is added
-    is_active = page.eval_on_selector("#editor", "el => el.classList.contains('x-ray-active')")
-    if is_active:
-        print("PASS: X-Ray class added on Control down.")
-    else:
-        print("FAIL: X-Ray class NOT added.")
+        if bug_cards.count() > 0:
+            print(f"Found {bug_cards.count()} bug cards.")
+            # Check style of the first bug card found
+            bug_card = bug_cards.first
+            border_color = bug_card.evaluate("el => window.getComputedStyle(el).borderColor")
+            print(f"Bug card border color: {border_color}")
+            # rgba(255, 50, 50, 0.4) is roughly rgb(255, 50, 50)
+            if "255, 50, 50" in border_color:
+                 print("PASS: Bug card has red border.")
+            else:
+                 print("FAIL: Bug card border color incorrect.")
+        else:
+            print("FAIL: No note card with #bug tag found.")
 
-    page.keyboard.up("Control")
-    is_active = page.eval_on_selector("#editor", "el => el.classList.contains('x-ray-active')")
-    if not is_active:
-        print("PASS: X-Ray class removed on Control up.")
-    else:
-        print("FAIL: X-Ray class NOT removed.")
+        if todo_cards.count() > 0:
+            print(f"Found {todo_cards.count()} todo cards.")
+            todo_card = todo_cards.first
+            border_color = todo_card.evaluate("el => window.getComputedStyle(el).borderColor")
+            print(f"Todo card border color: {border_color}")
+            if "255, 200, 50" in border_color:
+                print("PASS: Todo card has yellow border.")
+            else:
+                print("FAIL: Todo card border color incorrect.")
 
-    # 2. Verify Focus Depth (Alt Key)
-    print("Testing Focus Depth...")
-    initial_opacity = page.eval_on_selector("#editor", "el => getComputedStyle(el).opacity")
-    print(f"Initial Opacity: {initial_opacity}")
+        else:
+            print("FAIL: No note card with #todo tag found.")
 
-    page.keyboard.down("Alt")
-    # Wait a bit for transition? Logic is immediate set style, but CSS transition applies.
-    # We check the style attribute or computed style.
-    # The logic sets style.opacity directly.
+        # 3. Verify Lantern Beam
+        print("Verifying Lantern Beam...")
+        # Check computed style of pseudo-element
+        content = page.evaluate("window.getComputedStyle(document.getElementById('reference-overlay'), '::before').content")
+        if content != 'none':
+             print("PASS: #reference-overlay::before exists.")
+        else:
+             print("FAIL: #reference-overlay::before content is none.")
 
-    # We need to wait for JS to execute and transition to start/finish.
-    page.wait_for_timeout(600)
+        page.screenshot(path="verification/innovations_storm.png")
+        print("Screenshot saved.")
 
-    alt_opacity = page.eval_on_selector("#editor", "el => getComputedStyle(el).opacity")
-    print(f"Alt Opacity: {alt_opacity}")
+        browser.close()
 
-    if float(alt_opacity) < float(initial_opacity):
-        print("PASS: Editor opacity decreased on Alt down.")
-    else:
-        print("FAIL: Editor opacity did not decrease.")
-
-    # Test Scroll Adjustment
-    print("Testing Focus Depth Scroll...")
-    # Scroll up (negative deltaY) to decrease depth (increase opacity)?
-    # Logic: userPreferredDepth += delta. deltaY > 0 is scroll down.
-    # Scroll down -> increase depth -> decrease opacity.
-
-    page.mouse.wheel(0, 100) # Scroll down
-    page.wait_for_timeout(600)
-    scrolled_opacity = page.eval_on_selector("#editor", "el => getComputedStyle(el).opacity")
-    print(f"Scrolled Opacity: {scrolled_opacity}")
-
-    if float(scrolled_opacity) < float(alt_opacity):
-         print("PASS: Opacity decreased further on scroll down.")
-    else:
-         print(f"FAIL: Opacity did not decrease on scroll down (Old: {alt_opacity}, New: {scrolled_opacity})")
-
-    page.keyboard.up("Alt")
-    page.wait_for_timeout(600)
-    final_opacity = page.eval_on_selector("#editor", "el => getComputedStyle(el).opacity")
-    if float(final_opacity) > 0.9:
-        print("PASS: Opacity restored on Alt up.")
-    else:
-        print(f"FAIL: Opacity not restored (Current: {final_opacity})")
-
-    # 3. Verify List Parsing
-    print("Testing List Parsing...")
-    # Update text via reference input
-    # Find reference input in dock
-    # Dock might be collapsed? It starts expanded.
-
-    # Note: reference-input ID exists.
-    test_md = """# Test List
-- Item 1
-  - Indented Item
-"""
-    # JS update
-    page.evaluate(f"document.getElementById('reference-input').value = `{test_md}`")
-    page.evaluate("document.getElementById('reference-input').dispatchEvent(new Event('input'))")
-
-    page.wait_for_timeout(500)
-
-    # Check for .md-list-item
-    items = page.locator(".md-list-item")
-    count = items.count()
-    print(f"Found {count} list items.")
-
-    if count >= 1:
-        print("PASS: List items rendered.")
-        # Check indentation style
-        first_padding = items.first.evaluate("el => el.style.paddingLeft")
-        print(f"First item padding: {first_padding}")
-        if "20px" in first_padding:
-             print("PASS: Base indentation correct.")
-    else:
-        print("FAIL: No list items found.")
-
-    browser.close()
-
-with sync_playwright() as playwright:
-    run(playwright)
+if __name__ == "__main__":
+    verify_innovations()
