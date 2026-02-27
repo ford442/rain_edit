@@ -52,13 +52,13 @@ const fogLayerEl = document.getElementById('fog-layer');
 const vignetteLayer = document.getElementById('vignette-layer'); // Added
 
 // Create Portal Visual Layer
-const portalLayer = document.createElement('div');
+const portalLayer = document.getElementById('portal-visuals') || document.createElement('div');
 portalLayer.id = 'portal-visuals';
 portalLayer.style.position = 'absolute';
 portalLayer.style.inset = '0';
 portalLayer.style.pointerEvents = 'none';
 portalLayer.style.zIndex = '3'; // Above editor
-if (document.getElementById('container')) {
+if (document.getElementById('container') && !portalLayer.parentElement) {
     document.getElementById('container').appendChild(portalLayer);
 }
 
@@ -82,13 +82,18 @@ It sits behind the rain but remains readable.
 - \`render(time)\`
 - \`update()\`
 
-> "Rain is just confetti from the sky."
+> [!NOTE]
+> Rain is just confetti from the sky.
 
 \`\`\`javascript
 function example() {
   return true;
 }
 \`\`\`
+
+> [!WARN]
+> Heavy storms ahead.
+
 `.trim();
 
 if (referenceLayer) {
@@ -106,7 +111,7 @@ monaco.editor.defineTheme('transparent-vs-light', {
 });
 
 const editor = monaco.editor.create(editorEl, {
-  value: ['// rain-2 demo','function hello(){','  console.log("hello world");','}'].join('\n'),
+  value: ['// rain-2 demo','function hello(){','  console.log("hello world");','}','','// @portal'].join('\n'),
   language: 'javascript',
   theme: 'transparent-vs-light',
   automaticLayout: true
@@ -575,11 +580,55 @@ if (dock && dockToggle) {
     });
 }
 
+// --- Syntactic Atmosphere Logic ---
+function updateAtmosphere() {
+    if (!editor || !monaco) return;
+    const model = editor.getModel();
+    if (!model) return;
+
+    const markers = monaco.editor.getModelMarkers({ resource: model.uri });
+    let errorCount = 0;
+    let warningCount = 0;
+
+    markers.forEach(m => {
+        if (m.severity === monaco.MarkerSeverity.Error) errorCount++;
+        if (m.severity === monaco.MarkerSeverity.Warning) warningCount++;
+    });
+
+    let targetHue = 180; // Cyan (Calm)
+    let intensityMod = 0;
+
+    if (errorCount > 0) {
+        targetHue = 0; // Red (Danger)
+        intensityMod = Math.min(50, errorCount * 10);
+    } else if (warningCount > 0) {
+        targetHue = 40; // Orange (Warning)
+        intensityMod = Math.min(20, warningCount * 5);
+    }
+
+    // Smoothly interpolate hue (simple approach via CSS variable)
+    // We update --dynamic-hue base, which breathing effect builds upon
+    // Current base is set in the interval loop below, we can override it there
+    // or set a global modifier.
+
+    window.atmosphereHue = targetHue;
+    window.atmosphereIntensity = intensityMod;
+}
+
+// Check every 2 seconds or on change
+editor.onDidChangeModelDecorations(() => {
+    updateAtmosphere();
+});
+
+
 // --- Typing Storm Logic ---
 let stormCharCount = 0;
 const STORM_decay = 4; // Chars per second decay
 const STORM_heavy = 30; // Accumulation threshold for heavy rain
 const STORM_intense = 80; // Accumulation threshold for lightning
+
+window.atmosphereHue = 180;
+window.atmosphereIntensity = 0;
 
 editor.onDidChangeModelContent((e) => {
     e.changes.forEach(change => {
@@ -593,14 +642,24 @@ setInterval(() => {
     }
 
     // Dynamic Hue Logic
-    const baseHue = 180 + Math.min(100, stormCharCount);
+    // Blend Typing Hue (Blue/Purple) with Atmosphere Hue (Red/Orange)
+    // If atmosphere is active (errors), it takes precedence
+    let baseHue = window.atmosphereHue;
+    if (window.atmosphereHue === 180) {
+        // No errors, use typing intensity
+        baseHue = 180 + Math.min(100, stormCharCount);
+    }
+
     const time = Date.now() / 1000;
     const breathing = Math.sin(time) * 10;
     const finalHue = baseHue + breathing;
     document.documentElement.style.setProperty('--dynamic-hue', finalHue);
 
+    // Total Intensity
+    const totalIntensity = stormCharCount + (window.atmosphereIntensity || 0);
+
     if (referenceManager) {
-        referenceManager.setStormIntensity(stormCharCount);
+        referenceManager.setStormIntensity(totalIntensity);
     }
 
     if (raindrops && intensitySlider) {
@@ -609,11 +668,11 @@ setInterval(() => {
 
         let multiplier = 1;
 
-        if (stormCharCount > STORM_intense) {
+        if (totalIntensity > STORM_intense) {
             multiplier = 4.0;
             // 20% chance of lightning every second during intense storm
             if (Math.random() < 0.2) triggerLightning();
-        } else if (stormCharCount > STORM_heavy) {
+        } else if (totalIntensity > STORM_heavy) {
             multiplier = 2.0;
         }
 
@@ -622,8 +681,6 @@ setInterval(() => {
             raindrops.options.rainChance = Math.min(1, baseChance * multiplier);
         } else {
             // Revert to slider values
-            // We only need to reset if we were previously modified,
-            // but setting it every second ensures consistency.
             raindrops.options.dropletsRate = baseRate;
             raindrops.options.rainChance = baseChance;
         }
@@ -636,7 +693,7 @@ setInterval(() => {
 
     // Hyper-Focus Vignette
     if (vignetteLayer) {
-        const opacity = Math.min(1, stormCharCount / 60);
+        const opacity = Math.min(1, totalIntensity / 60);
         vignetteLayer.style.opacity = opacity;
     }
 
@@ -747,10 +804,6 @@ function updatePortals() {
             ring.style.top = (p.y - 50) + 'px';
             ring.style.width = '100px';
             ring.style.height = '100px';
-            ring.style.borderRadius = '50%';
-            ring.style.boxShadow = '0 0 20px rgba(0, 229, 255, 0.4), inset 0 0 10px rgba(0, 229, 255, 0.2)';
-            ring.style.border = '1px solid rgba(0, 229, 255, 0.3)';
-            ring.style.animation = 'pulse-ring 2s infinite ease-in-out';
             portalLayer.appendChild(ring);
         });
 
