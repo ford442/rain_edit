@@ -98,7 +98,16 @@ export class ReferenceManager {
         const normX = (this.mouseX / w) * 2 - 1;
         const normY = (this.mouseY / h) * 2 - 1;
 
-        const notes = container.children;
+        // Check if any card is matched to trigger Tunnel Mode
+        let hasMatch = false;
+        const notes = Array.from(container.children);
+        for (let note of notes) {
+            if (note.classList.contains('matched-card')) {
+                hasMatch = true;
+                break;
+            }
+        }
+
         for (let note of notes) {
             if (!note.classList.contains('note-card')) continue;
 
@@ -120,7 +129,16 @@ export class ReferenceManager {
             // Closer items tilt more
             const rotateX = -normY * (5 + (1-depth)*5);
             const rotateY = normX * (5 + (1-depth)*5);
-            const translateZ = depth * 50; // Bring closer items more forward in Z space
+
+            // --- Tunnel Effect Logic ---
+            let translateZ = depth * 50;
+            if (isMatched) {
+                // Fly towards screen
+                translateZ += 200;
+            } else if (hasMatch) {
+                // Push others back
+                translateZ -= 100;
+            }
 
             // Dynamic Depth of Field (Focus based on mouse proximity)
             const rect = note.getBoundingClientRect();
@@ -131,16 +149,19 @@ export class ReferenceManager {
             const focusRange = this.isLensMode ? 500 : 300;
             const focusFactor = Math.max(0, 1 - dist / focusRange); // 0 to 1 (1 is closest)
 
-            // Base blur comes from depth, but proximity reduces it
+            // Base blur comes from depth
             let blurAmount = Math.max(0, (1.2 - depth) * 3);
 
+            // Proximity reduces blur
             // If Lens Mode is active, we want to aggressively sharpen
             const sharpenFactor = this.isLensMode ? 1.0 : 0.8;
             blurAmount = blurAmount * (1 - focusFactor * sharpenFactor);
 
-            // Smart Focus (Matched Card)
+            // Tunnel Effect Blur
             if (isMatched) {
                 blurAmount = 0; // Force sharp
+            } else if (hasMatch) {
+                blurAmount += 4; // Blur background more
             }
 
             // Breathing Effect
@@ -160,6 +181,9 @@ export class ReferenceManager {
             // Lens Mode & Smart Focus Opacity Logic
             if (isMatched) {
                 note.style.opacity = 1;
+            } else if (hasMatch) {
+                // Tunnel fade
+                note.style.opacity = 0.3;
             } else if (this.isLensMode && !note.classList.contains('spotlight')) {
                 // Fade out distant notes, bring focused one to full opacity
                 note.style.opacity = 0.3 + (focusFactor * 0.7);
@@ -395,20 +419,20 @@ export class ReferenceManager {
     });
 
     // Process callouts
+    // Support [!NOTE], [!WARN], [!INFO]
     safeText = safeText.replace(/^> \[!NOTE\] (.*$)/gim, '<div class="callout note">$1</div>');
+    safeText = safeText.replace(/^> \[!WARN\] (.*$)/gim, '<div class="callout warn">$1</div>');
+    safeText = safeText.replace(/^> \[!INFO\] (.*$)/gim, '<div class="callout info">$1</div>');
 
-    // Process blockquotes first to avoid conflicts
-    safeText = safeText.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+    // Process blockquotes first to avoid conflicts (non-callout blockquotes)
+    safeText = safeText.replace(/^> (?!\[!)(.*$)/gim, '<blockquote>$1</blockquote>');
 
     // Process task lists
     safeText = safeText.replace(/^- \[x\] (.*$)/gim, '<div class="md-list-item checked"><input type="checkbox" checked disabled> $1</div>');
     safeText = safeText.replace(/^- \[ \] (.*$)/gim, '<div class="md-list-item"><input type="checkbox" disabled> $1</div>');
 
-    // Process list items - hacky single level support
-    // We replace lines starting with "- " with a div
-    safeText = safeText.replace(/^- \[ \] (.*$)/gim, '<div class="md-task-item"><input type="checkbox"> $1</div>');
-    safeText = safeText.replace(/^- \[x\] (.*$)/gim, '<div class="md-task-item"><input type="checkbox" checked> $1</div>');
     // Improved list parsing with indentation support
+    // Replaces "- content" with indented div
     safeText = safeText.replace(/^(\s*)- (.*$)/gim, (match, indent, content) => {
         let depth = 0;
         for (let char of indent) {
