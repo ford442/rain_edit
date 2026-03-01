@@ -40,7 +40,7 @@ def verify_visuals():
         card = page.locator(".note-card").first
         if card.count() > 0:
             # Move mouse to trigger hover style and maybe connections update
-            card.hover()
+            card.hover(force=True)
             page.wait_for_timeout(1000)
             page.screenshot(path="verification/card_hover.png")
             print("Captured card_hover.png")
