@@ -52,7 +52,7 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: v
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 2;
+  z-index: 5; /* default: depth 1 — middle between rain layers; JS will update dynamically */
   transition: filter 1s ease, opacity 0.5s ease;
 
   /* Cyber Grid Background */
@@ -104,8 +104,8 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: v
     text-shadow: 0 0 8px rgba(0, 229, 255, 0.2), 0 0 15px rgba(0, 229, 255, 0.1);
 }
 .rain-canvas { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
-#rain-back { z-index: 0; }
-#rain-front { z-index: 3; }
+#rain-back { z-index: 1; }
+#rain-front { z-index: 10; }
 
 #connections-layer {
   position: absolute;
@@ -1015,4 +1015,106 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
     margin-bottom: 4px;
     font-size: 11px;
     letter-spacing: 1px;
+}
+
+/* ─── Tabs Container ─────────────────────────────────────────────────────── */
+#tabs-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 220px; /* leave room for the dock on the right */
+  height: 36px;
+  z-index: 20; /* always on top — above both rain layers and the editor */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  background: rgba(10, 14, 22, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  user-select: none;
+}
+
+.tabs-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs-list::-webkit-scrollbar { display: none; }
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: rgba(192, 208, 224, 0.65);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.tab-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e8f0;
+}
+.tab-item.active {
+  background: rgba(0, 229, 255, 0.12);
+  border-color: rgba(0, 229, 255, 0.35);
+  color: #ffffff;
+}
+
+/* Depth badge — small indicator inside each tab */
+.tab-depth-badge {
+  display: inline-block;
+  font-size: 9px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: bold;
+  letter-spacing: 0;
+}
+.tab-depth-badge.depth-0 {
+  background: rgba(100, 120, 200, 0.3);
+  color: #8899ff;
+}
+.tab-depth-badge.depth-1 {
+  background: rgba(0, 180, 180, 0.3);
+  color: #00e5ff;
+}
+.tab-depth-badge.depth-2 {
+  background: rgba(180, 120, 0, 0.3);
+  color: #ffcc44;
+}
+
+/* Depth control buttons */
+.depth-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.depth-controls button {
+  padding: 3px 8px;
+  font-size: 10px;
+  font-family: var(--font-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
+  color: #c0d0e0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+.depth-controls button:hover {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.4);
+  color: #fff;
 }
