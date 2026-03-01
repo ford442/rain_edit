@@ -38,6 +38,8 @@ import { ConnectionManager } from './ConnectionManager.js';
 import { FogManager } from './FogManager.js';
 import { HoloManager } from './HoloManager.js';
 import { TabManager } from './TabManager.js';
+import { StorageAPI } from './StorageAPI.js';
+import { Cabinet3D } from './Cabinet3D.js';
 import backFrag from './shaders/water-back.frag?glslify';
 import frontFrag from './shaders/water.frag?glslify';
 import vertSrc from './shaders/simple.vert?glslify';
@@ -127,6 +129,14 @@ tabManager.setActive(initialFileId);
 
 // Initialize HoloManager
 const holoManager = new HoloManager(editor, holoLayerEl);
+
+// Initialize 3D File Cabinet
+const storageAPI = new StorageAPI();
+const cabinet3D  = new Cabinet3D(storageAPI, tabManager);
+const cabinetBtn = document.getElementById('btn-cabinet');
+if (cabinetBtn) {
+  cabinetBtn.addEventListener('click', () => cabinet3D.toggle());
+}
 
 // set canvas size to match editor area
 function resizeCanvases(){
