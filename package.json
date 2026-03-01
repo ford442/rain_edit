@@ -8,8 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "glslify": "^7.1.1",
     "monaco-editor": "^0.43.0",
-    "glslify": "^7.1.1"
+    "three": "^0.183.2"
   },
   "devDependencies": {
     "vite": "^5.0.0"
