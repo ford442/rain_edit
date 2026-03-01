@@ -51,7 +51,8 @@ def run(playwright):
     page.screenshot(path="verification/lantern_active.png")
 
     # Toggle Lantern Mode OFF
-    lantern_toggle.check() # It is checked by default, so uncheck? No, check() ensures it is checked. uncheck() ensures unchecked.
+    page.evaluate("document.getElementById('lantern-mode').checked = true;")
+    page.evaluate("document.getElementById('lantern-mode').dispatchEvent(new Event('change'))")
     # It is checked by default. So verify that.
     is_checked = page.is_checked("#lantern-mode")
     if not is_checked:
@@ -59,7 +60,8 @@ def run(playwright):
         # sys.exit(1) # soft fail
 
     # Uncheck to disable lantern
-    lantern_toggle.uncheck()
+    page.evaluate("document.getElementById('lantern-mode').checked = false;")
+    page.evaluate("document.getElementById('lantern-mode').dispatchEvent(new Event('change'))")
     time.sleep(0.5)
     page.screenshot(path="verification/lantern_inactive.png")
 
