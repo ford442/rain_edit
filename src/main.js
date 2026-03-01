@@ -37,6 +37,7 @@ import { ReferenceManager } from './ReferenceManager.js'; // New import
 import { ConnectionManager } from './ConnectionManager.js';
 import { FogManager } from './FogManager.js';
 import { HoloManager } from './HoloManager.js';
+import { TabManager } from './TabManager.js';
 import backFrag from './shaders/water-back.frag?glslify';
 import frontFrag from './shaders/water.frag?glslify';
 import vertSrc from './shaders/simple.vert?glslify';
@@ -100,7 +101,7 @@ if (referenceLayer) {
   referenceManager.update(INITIAL_MARKDOWN);
 }
 
-// create Monaco editor
+// create Monaco editor (no initial value — TabManager will supply the first model)
 monaco.editor.defineTheme('transparent-vs-light', {
   base: 'vs',
   inherit: true,
@@ -111,11 +112,18 @@ monaco.editor.defineTheme('transparent-vs-light', {
 });
 
 const editor = monaco.editor.create(editorEl, {
-  value: ['// rain-2 demo','function hello(){','  console.log("hello world");','}','','// @portal'].join('\n'),
-  language: 'javascript',
   theme: 'transparent-vs-light',
   automaticLayout: true
 });
+
+// Initialize TabManager
+const tabsContainerEl = document.getElementById('tabs-container');
+const tabManager = new TabManager(editor, monaco, editorEl, tabsContainerEl);
+
+// Add the initial demo file and make it active (depth 1 = middle, between rain layers)
+const INITIAL_CODE = ['// rain-2 demo','function hello(){','  console.log("hello world");','}','','// @portal'].join('\n');
+const initialFileId = tabManager.addFile('main.js', INITIAL_CODE, 'javascript');
+tabManager.setActive(initialFileId);
 
 // Initialize HoloManager
 const holoManager = new HoloManager(editor, holoLayerEl);
@@ -266,12 +274,12 @@ document.addEventListener('keyup', (e) => {
 document.getElementById('toggle-back').addEventListener('change', (e) => { if(bgLayer) bgLayer.setVisible(e.target.checked); });
 document.getElementById('toggle-front').addEventListener('change', (e) => { if(fgLayer) fgLayer.setVisible(e.target.checked); });
 document.getElementById('toggle-front-on-top').addEventListener('change', (e) => {
-  if(e.target.checked){
-    frontCanvas.style.zIndex = 2; editorEl.style.zIndex = 1;
-  } else {
-    frontCanvas.style.zIndex = 0; editorEl.style.zIndex = 1;
-  }
+  frontCanvas.style.zIndex = e.target.checked ? 10 : 0;
 });
+
+// Depth control buttons — push the active document backward or pull it forward
+document.getElementById('btn-depth-forward').addEventListener('click', () => { tabManager.adjustDepth(1); });
+document.getElementById('btn-depth-back').addEventListener('click', () => { tabManager.adjustDepth(-1); });
 
 const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
