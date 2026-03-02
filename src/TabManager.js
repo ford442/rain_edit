@@ -18,11 +18,12 @@ export class TabManager {
    * @param {HTMLElement} editorEl  - the #editor DOM node
    * @param {HTMLElement} tabsEl    - the #tabs-container DOM node
    */
-  constructor(editor, monacoApi, editorEl, tabsEl) {
+  constructor(editor, monacoApi, editorEl, tabsEl, imageViewerEl = null) {
     this.editor = editor;
     this.monaco = monacoApi;
     this.editorEl = editorEl;
     this.tabsEl = tabsEl;
+    this.imageViewerEl = imageViewerEl || document.getElementById('image-viewer');
     this.files = [];
     this.activeId = null;
     this._nextId = 1;
@@ -37,8 +38,14 @@ export class TabManager {
    */
   addFile(name, content = '', language = 'javascript') {
     const id = this._nextId++;
-    const model = this.monaco.editor.createModel(content, language);
-    this.files.push({ id, name, model, depth: 1 });
+    const isImage = language === 'image';
+
+    let model = null;
+    if (!isImage) {
+      model = this.monaco.editor.createModel(content, language);
+    }
+
+    this.files.push({ id, name, model, depth: 1, isImage, url: isImage ? content : null });
     this._renderTabs();
     return id;
   }
@@ -52,10 +59,24 @@ export class TabManager {
     const file = this.files.find(f => f.id === id);
     if (!file) return;
     this.activeId = id;
-    this.editor.setModel(file.model);
+
+    if (file.isImage) {
+      this.editorEl.style.display = 'none';
+      if (this.imageViewerEl) {
+        this.imageViewerEl.style.display = 'flex';
+        this.imageViewerEl.innerHTML = `<img src="${file.url}" alt="${file.name}" />`;
+      }
+    } else {
+      if (this.imageViewerEl) {
+        this.imageViewerEl.style.display = 'none';
+      }
+      this.editorEl.style.display = 'block';
+      this.editor.setModel(file.model);
+      this.editor.focus();
+    }
+
     this.applyDepth(file.depth);
     this._renderTabs();
-    this.editor.focus();
   }
 
   /**
@@ -67,6 +88,9 @@ export class TabManager {
   applyDepth(depthLevel) {
     const zIndex = DEPTH_Z_INDEX[depthLevel] ?? DEPTH_Z_INDEX[1];
     this.editorEl.style.zIndex = zIndex;
+    if (this.imageViewerEl) {
+      this.imageViewerEl.style.zIndex = zIndex;
+    }
   }
 
   /**
@@ -91,7 +115,9 @@ export class TabManager {
     this.files.forEach(file => {
       const tab = document.createElement('div');
       tab.className = 'tab-item' + (file.id === this.activeId ? ' active' : '');
-      tab.title = `${file.name} — ${DEPTH_TITLES[file.depth]}`;
+      tab.title = `${file.name} — ${DEPTH_TITLES[file.depth]}
+Drag to change depth`;
+      tab.draggable = true;
 
       const badge = document.createElement('span');
       badge.className = `tab-depth-badge depth-${file.depth}`;
@@ -104,8 +130,60 @@ export class TabManager {
 
       tab.appendChild(badge);
       tab.appendChild(nameEl);
+
       tab.addEventListener('click', () => this.setActive(file.id));
+
+      // Drag and Drop Logic
+      tab.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', file.id.toString());
+        tab.classList.add('dragging');
+      });
+
+      tab.addEventListener('dragend', () => {
+        tab.classList.remove('dragging');
+      });
+
       list.appendChild(tab);
     });
+
+    // Add dragover and drop handling to the body to catch drops anywhere
+    if (!this._dndInitialized) {
+      document.body.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Necessary to allow dropping
+      });
+
+      document.body.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const idStr = e.dataTransfer.getData('text/plain');
+        if (!idStr) return;
+
+        const id = parseInt(idStr, 10);
+        const file = this.files.find(f => f.id === id);
+        if (!file) return;
+
+        // Calculate new depth based on Y position
+        const y = e.clientY;
+        const h = window.innerHeight;
+
+        let newDepth = 1;
+        if (y < h * 0.33) {
+          newDepth = 2; // Top third -> Front layer
+        } else if (y > h * 0.66) {
+          newDepth = 0; // Bottom third -> Deep layer
+        } else {
+          newDepth = 1; // Middle third -> Middle layer
+        }
+
+        if (file.depth !== newDepth) {
+          file.depth = newDepth;
+          // Apply immediately if it's the active tab
+          if (file.id === this.activeId) {
+            this.applyDepth(newDepth);
+          }
+          this._renderTabs();
+        }
+      });
+      this._dndInitialized = true;
+    }
   }
 }
