@@ -1,80 +1,65 @@
 from playwright.sync_api import sync_playwright
-import time
 
-def run(playwright):
-    browser = playwright.chromium.launch()
-    page = browser.new_page()
-    page.goto("http://localhost:5173")
+def verify_features():
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        context = browser.new_context(viewport={'width': 1280, 'height': 800})
+        page = context.new_page()
 
-    # Wait for editor
-    page.wait_for_selector(".monaco-editor", timeout=10000)
+        print("Navigating to app...")
+        page.goto("http://localhost:5173/", timeout=60000)
+        page.wait_for_load_state("networkidle")
 
-    # 1. Verify Task List Parsing
-    reference_input = page.locator("#reference-input")
-    # Make sure dock is visible/interactable. Dock has z-index 20, should be fine.
+        # Wait for editor to load
+        page.wait_for_selector(".monaco-editor", timeout=30000)
 
-    test_md = """# Test
-- [ ] Todo item
-- [x] Done item
+        # 1. Inject code with keywords to trigger ConnectionManager
+        print("Injecting code...")
+        page.click(".monaco-editor")
+        page.keyboard.press("Control+A")
+        page.keyboard.press("Backspace")
+
+        # Let's type something that matches words in the default reference notes
+        # "confetti" and "sky" are in the default note
+        code = """
+function test() {
+  console.log("confetti sky");
+}
 """
-    # Fill input. This might be tricky if editor is capturing focus,
-    # but the dock is fixed on top.
-    reference_input.fill(test_md)
-    reference_input.dispatch_event("input") # Ensure event fires
+        page.keyboard.type(code)
 
-    time.sleep(1)
+        # 2. Trigger Semantic Magnifier (Lens Mode)
+        print("Triggering Lens Mode...")
+        # Press Shift+Alt
+        page.keyboard.down("Shift")
+        page.keyboard.down("Alt")
 
-    # Check for checkboxes
-    checkboxes = page.locator(".md-list-item input[type='checkbox']")
-    count = checkboxes.count()
-    print(f"Found {count} checkboxes")
+        # Move mouse near the center where the reference notes are
+        page.mouse.move(640, 400)
+        page.wait_for_timeout(1000) # Wait for animation/lens to settle
 
-    if count != 2:
-        print("ERROR: Expected 2 checkboxes, found", count)
-    else:
-        print("Checkbox parsing verified.")
+        # 3. Take screenshot
+        print("Taking screenshot...")
+        # Hide fog/rain layers for better visibility
+        page.evaluate("""
+            const fog = document.getElementById('fog-layer');
+            if (fog) fog.style.display = 'none';
 
-    # 2. Verify Spotlight
-    # We need to access the reference layer.
-    # Hold Alt to bring reference layer to front/disable editor pointer events
-    page.keyboard.down("Alt")
-    time.sleep(0.5) # Wait for transition
+            const rainFront = document.getElementById('rain-front');
+            if (rainFront) rainFront.style.display = 'none';
 
-    card = page.locator(".note-card").first
-    # Force click because the element might be moving (floating animation)
-    # But dblclick should work.
-    try:
-        card.dblclick(force=True)
-        print("Double clicked card.")
-    except Exception as e:
-        print(f"Double click failed: {e}")
+            const vignette = document.getElementById('vignette-layer');
+            if (vignette) vignette.style.display = 'none';
+        """)
 
-    page.keyboard.up("Alt")
-    time.sleep(0.5)
+        page.screenshot(path="verification/semantic_magnifier.png")
+        print("Screenshot taken: verification/semantic_magnifier.png")
 
-    # Check if it has 'spotlight' class
-    # Spotlight class should persist even after releasing Alt?
-    # The code adds the class to the element. It doesn't remove it on Alt up.
+        # Release keys
+        page.keyboard.up("Alt")
+        page.keyboard.up("Shift")
 
-    classes = card.get_attribute("class")
-    print(f"Card classes after dblclick: {classes}")
+        browser.close()
 
-    if "spotlight" in classes:
-        print("Spotlight class added successfully.")
-    else:
-        print("ERROR: Spotlight class NOT added.")
-
-    # Take screenshot of spotlight
-    # We need to hold Alt again to see it clearly or if spotlight brings it to front?
-    # Spotlight makes z-index 100 !important. So it should be visible above editor?
-    # Editor is z-index 2. So yes.
-    page.screenshot(path="verification/spotlight_check.png")
-
-    # 3. Rain Shield
-    # Just verify no crash
-    page.mouse.move(300, 300)
-
-    browser.close()
-
-with sync_playwright() as playwright:
-    run(playwright)
+if __name__ == "__main__":
+    verify_features()

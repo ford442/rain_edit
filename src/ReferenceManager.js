@@ -176,7 +176,35 @@ export class ReferenceManager {
                 focusScale = 1.1; // Pop out
             }
 
+            let zIndexOverride = '';
+
+            // Semantic Magnifier (Lens Mode Enhancement)
+            if (this.isLensMode && dist < 180 && !note.classList.contains('spotlight')) {
+                focusScale = 1.35;
+                blurAmount = 0;
+                zIndexOverride = '100';
+
+                // Temporarily un-collapse to peek
+                if (note.classList.contains('collapsed')) {
+                    note.classList.remove('collapsed');
+                    note.dataset.wasCollapsed = 'true';
+                }
+            } else {
+                // Restore collapse state if it was temporarily un-collapsed
+                if (note.dataset.wasCollapsed === 'true') {
+                    note.classList.add('collapsed');
+                    delete note.dataset.wasCollapsed;
+                }
+            }
+
             note.style.transform = `translate3d(${moveX}px, ${moveY}px, ${translateZ}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${focusScale})`;
+
+            if (zIndexOverride) {
+                note.style.zIndex = zIndexOverride;
+            } else if (!note.classList.contains('spotlight')) {
+                // Revert z-index override if any (though ReferenceManager handles z-index manually on mousedown)
+                if (note.style.zIndex === '100') note.style.zIndex = '';
+            }
 
             // Lens Mode & Smart Focus Opacity Logic
             if (isMatched) {
@@ -185,8 +213,12 @@ export class ReferenceManager {
                 // Tunnel fade
                 note.style.opacity = 0.3;
             } else if (this.isLensMode && !note.classList.contains('spotlight')) {
-                // Fade out distant notes, bring focused one to full opacity
-                note.style.opacity = 0.3 + (focusFactor * 0.7);
+                if (dist < 180) {
+                     note.style.opacity = 1; // Full opacity when magnifying
+                } else {
+                     // Fade out distant notes, bring focused one to full opacity
+                     note.style.opacity = 0.3 + (focusFactor * 0.7);
+                }
             } else if (!note.classList.contains('spotlight')) {
                  note.style.opacity = ''; // Revert to CSS default
             }

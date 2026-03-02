@@ -140,8 +140,8 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: v
     z-index: 15;
 }
 
-#reference-layer h1 { font-size: 24px; color: #fff; margin-bottom: 10px; font-weight: bold; text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
-#reference-layer h2 { font-size: 18px; color: #e0e0e0; margin-top: 20px; margin-bottom: 8px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
+#reference-layer h1 { font-size: 24px; color: #fff; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
+#reference-layer h2 { font-size: 18px; color: #e0e0e0; margin-top: 20px; margin-bottom: 8px; font-weight: 800; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
 #reference-layer h3 { font-size: 16px; color: #ccc; margin-top: 15px; margin-bottom: 5px; font-weight: bold; }
 .md-list-item { padding-left: 20px; color: #b4c8dc; margin-bottom: 4px; position: relative; }
 .md-list-item::before { content: "•"; position: absolute; left: 0; color: rgba(255,255,255,0.3); }
@@ -304,13 +304,13 @@ textarea:focus {
   overflow: hidden;
 
   /* Modern Glassmorphism */
-  background: var(--bg-color-glass);
-  backdrop-filter: blur(20px) saturate(200%);
-  -webkit-backdrop-filter: blur(20px) saturate(200%);
+  background: rgba(10, 15, 25, 0.7);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
 
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-top: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 28px;
+  border-radius: 24px;
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -501,7 +501,7 @@ input[type="checkbox"]:hover {
 .note-card {
   position: absolute;
   width: 340px;
-  background-color: rgba(20, 24, 35, 0.5); /* Darker base */
+  background-color: rgba(15, 20, 30, 0.6); /* Darker base */
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
   background-blend-mode: overlay;
 
@@ -509,15 +509,16 @@ input[type="checkbox"]:hover {
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
 
-  padding: 24px;
-  border-radius: 16px;
+  padding: 28px;
+  border-radius: 20px;
 
   /* Depth Shadow */
   box-shadow:
     0 16px 48px rgba(0, 0, 0, 0.4),
     0 4px 12px rgba(0, 0, 0, 0.2),
     0 0 0 1px rgba(255, 255, 255, 0.1), /* Inner light border */
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 2px 20px rgba(255, 255, 255, 0.05); /* inner glow */
 
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: transform 0.1s linear, height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, filter 0.3s ease;
@@ -536,11 +537,11 @@ input[type="checkbox"]:hover {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02), transparent 60%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.01), transparent 70%);
     z-index: -1;
     border-radius: inherit;
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.8;
 }
 
 .note-card.spotlight {
@@ -1023,13 +1024,13 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   top: 0;
   left: 0;
   right: 220px; /* leave room for the dock on the right */
-  height: 36px;
+  height: 40px;
   z-index: 20; /* always on top — above both rain layers and the editor */
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 0 8px;
-  background: rgba(10, 14, 22, 0.75);
+  background: rgba(8, 12, 18, 0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
