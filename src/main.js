@@ -120,7 +120,8 @@ const editor = monaco.editor.create(editorEl, {
 
 // Initialize TabManager
 const tabsContainerEl = document.getElementById('tabs-container');
-const tabManager = new TabManager(editor, monaco, editorEl, tabsContainerEl);
+const imageViewerEl = document.getElementById('image-viewer');
+const tabManager = new TabManager(editor, monaco, editorEl, tabsContainerEl, imageViewerEl);
 
 // Add the initial demo file and make it active (depth 1 = middle, between rain layers)
 const INITIAL_CODE = ['// rain-2 demo','function hello(){','  console.log("hello world");','}','','// @portal'].join('\n');
@@ -494,10 +495,20 @@ function updateFocusVisuals() {
     const refScale = 1 + (focusDepth * 0.08);
     const editorScale = 1 - (focusDepth * 0.05);
 
-    // Editor
-    editorEl.style.opacity = Math.max(0.02, targetEditorOpacity);
-    editorEl.style.filter = `blur(${focusDepth * 8}px)`;
-    editorEl.style.transform = `scale(${editorScale}) translateZ(0)`;
+    // Editor and Image Viewer
+    const targetOpacity = Math.max(0.02, targetEditorOpacity);
+    const filter = `blur(${focusDepth * 8}px)`;
+    const transform = `scale(${editorScale}) translateZ(0)`;
+
+    editorEl.style.opacity = targetOpacity;
+    editorEl.style.filter = filter;
+    editorEl.style.transform = transform;
+
+    if (document.getElementById('image-viewer')) {
+        document.getElementById('image-viewer').style.opacity = targetOpacity;
+        document.getElementById('image-viewer').style.filter = filter;
+        document.getElementById('image-viewer').style.transform = transform;
+    }
 
     // Reference Layer
     if (referenceLayer) {
@@ -508,8 +519,10 @@ function updateFocusVisuals() {
     // Pointer Events
     if (focusDepth > 0.6) {
         editorEl.style.pointerEvents = 'none';
+        if (document.getElementById('image-viewer')) document.getElementById('image-viewer').style.pointerEvents = 'none';
     } else {
         editorEl.style.pointerEvents = 'auto';
+        if (document.getElementById('image-viewer')) document.getElementById('image-viewer').style.pointerEvents = 'auto';
     }
 
     // Reference Overlay
@@ -911,3 +924,6 @@ document.addEventListener('mousemove', () => {
 
 // Initial scan
 scanPortals();
+
+// Expose tabManager for testing
+window.tabManager = tabManager;

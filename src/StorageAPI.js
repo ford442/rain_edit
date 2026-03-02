@@ -13,7 +13,7 @@ const DEFAULT_BASE_URL =
 /**
  * Categories tracked in the remote storage.
  */
-export const STORAGE_CATEGORIES = ['songs', 'patterns', 'banks', 'samples', 'shaders', 'music'];
+export const STORAGE_CATEGORIES = ['songs', 'patterns', 'banks', 'samples', 'shaders', 'music', 'images'];
 
 export class StorageAPI {
   /**
