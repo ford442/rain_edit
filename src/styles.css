@@ -1021,20 +1021,34 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
 /* ─── Tabs Container ─────────────────────────────────────────────────────── */
 #tabs-container {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 220px; /* leave room for the dock on the right */
-  height: 40px;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 300px); /* Leave room for the dock if it expands */
+  height: 46px;
   z-index: 20; /* always on top — above both rain layers and the editor */
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 8px;
-  background: rgba(8, 12, 18, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 8px;
+  padding: 0 16px;
+
+  /* Glassmorphism pill style */
+  background: rgba(10, 15, 25, 0.65);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   user-select: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#tabs-container:hover {
+  background: rgba(15, 20, 30, 0.75);
+  border-color: rgba(0, 229, 255, 0.3);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 20px rgba(0, 229, 255, 0.15);
 }
 
 .tabs-list {
@@ -1153,4 +1167,61 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   transform: scale(1.05);
 }
 
-/* Optional visual feedback during drag over body could be added via JS class toggling */
+/* ─── Echo Layers (Ghost Documents) ──────────────────────────────────────── */
+#echo-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4; /* Below editor (5) */
+  overflow: hidden;
+  perspective: 1500px;
+  transform-style: preserve-3d;
+}
+
+.echo-document {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #00e5ff;
+  opacity: 0.08;
+  filter: blur(4px);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity, filter;
+  overflow: hidden;
+  /* Visual depth masking */
+  mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+}
+
+.echo-document pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* X-Ray Peek State */
+.echo-document.peek {
+  opacity: 0.6;
+  filter: blur(0px);
+  color: #fff;
+  text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
+  z-index: 10;
+  /* Push to front via scale, override Z translation locally in JS if needed, but scale works well */
+  transform: scale(1.05) translateZ(50px) !important;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+/* Main Editor Fade when peeking */
+.editor-peek-fade {
+  opacity: 0.15 !important;
+  filter: blur(3px) !important;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}

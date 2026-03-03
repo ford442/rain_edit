@@ -8,7 +8,7 @@ def verify_visuals():
         page = context.new_page()
 
         # Navigate
-        page.goto("http://localhost:5173")
+        page.goto("http://localhost:3000")
         page.wait_for_timeout(5000) # Wait for initial animations and rain
 
         # Screenshot 1: Basic UI with Cards and Connections
