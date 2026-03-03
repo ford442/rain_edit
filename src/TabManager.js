@@ -17,13 +17,15 @@ export class TabManager {
    * @param {typeof import('monaco-editor')} monacoApi
    * @param {HTMLElement} editorEl  - the #editor DOM node
    * @param {HTMLElement} tabsEl    - the #tabs-container DOM node
+   * @param {HTMLElement} echoLayerEl - the #echo-layer DOM node
    */
-  constructor(editor, monacoApi, editorEl, tabsEl, imageViewerEl = null) {
+  constructor(editor, monacoApi, editorEl, tabsEl, imageViewerEl = null, echoLayerEl = null) {
     this.editor = editor;
     this.monaco = monacoApi;
     this.editorEl = editorEl;
     this.tabsEl = tabsEl;
     this.imageViewerEl = imageViewerEl || document.getElementById('image-viewer');
+    this.echoLayerEl = echoLayerEl || document.getElementById('echo-layer');
     this.files = [];
     this.activeId = null;
     this._nextId = 1;
@@ -77,6 +79,7 @@ export class TabManager {
 
     this.applyDepth(file.depth);
     this._renderTabs();
+    this._renderEchoes();
   }
 
   /**
@@ -143,6 +146,29 @@ Drag to change depth`;
         tab.classList.remove('dragging');
       });
 
+      // X-Ray Peek Logic
+      if (file.id !== this.activeId) {
+        tab.addEventListener('mouseenter', () => {
+          if (this.echoLayerEl && this.editorEl) {
+            const echoEl = this.echoLayerEl.querySelector(`.echo-document[data-id="${file.id}"]`);
+            if (echoEl) {
+              echoEl.classList.add('peek');
+            }
+            this.editorEl.classList.add('editor-peek-fade');
+          }
+        });
+
+        tab.addEventListener('mouseleave', () => {
+          if (this.echoLayerEl && this.editorEl) {
+            const echoEl = this.echoLayerEl.querySelector(`.echo-document[data-id="${file.id}"]`);
+            if (echoEl) {
+              echoEl.classList.remove('peek');
+            }
+            this.editorEl.classList.remove('editor-peek-fade');
+          }
+        });
+      }
+
       list.appendChild(tab);
     });
 
@@ -185,5 +211,40 @@ Drag to change depth`;
       });
       this._dndInitialized = true;
     }
+  }
+
+  /** Render inactive files as blurred background echoes. */
+  _renderEchoes() {
+    if (!this.echoLayerEl) return;
+    this.echoLayerEl.innerHTML = '';
+
+    const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+
+    inactiveFiles.forEach((file, index) => {
+      const el = document.createElement('div');
+      el.className = 'echo-document';
+      el.dataset.id = file.id;
+
+      // Extract text or show image placeholder
+      let contentStr = '';
+      if (file.isImage) {
+        contentStr = `[IMAGE: ${file.name}]`;
+      } else {
+        contentStr = file.model.getValue().substring(0, 1000);
+      }
+
+      const pre = document.createElement('pre');
+      const code = document.createElement('code');
+      code.textContent = contentStr;
+      pre.appendChild(code);
+      el.appendChild(pre);
+
+      // Create a visual stack offset based on its position in the array
+      // Parallax will handle further transformation later.
+      const depthOffset = (index + 1) * 2;
+      el.style.transform = `translateZ(-${depthOffset * 10}px) translateY(${depthOffset * 2}px) translateX(${depthOffset * 2}px)`;
+
+      this.echoLayerEl.appendChild(el);
+    });
   }
 }

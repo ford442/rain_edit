@@ -51,6 +51,7 @@ const connectionsCanvas = document.getElementById('connections-layer');
 const referenceLayer = document.getElementById('reference-layer');
 const referenceOverlay = document.getElementById('reference-overlay');
 const holoLayerEl = document.getElementById('holo-layer');
+const echoLayerEl = document.getElementById('echo-layer');
 const fogLayerEl = document.getElementById('fog-layer');
 const vignetteLayer = document.getElementById('vignette-layer'); // Added
 
@@ -121,7 +122,7 @@ const editor = monaco.editor.create(editorEl, {
 // Initialize TabManager
 const tabsContainerEl = document.getElementById('tabs-container');
 const imageViewerEl = document.getElementById('image-viewer');
-const tabManager = new TabManager(editor, monaco, editorEl, tabsContainerEl, imageViewerEl);
+const tabManager = new TabManager(editor, monaco, editorEl, tabsContainerEl, imageViewerEl, echoLayerEl);
 
 // Add the initial demo file and make it active (depth 1 = middle, between rain layers)
 const INITIAL_CODE = ['// rain-2 demo','function hello(){','  console.log("hello world");','}','','// @portal'].join('\n');
@@ -260,6 +261,21 @@ document.addEventListener('mousemove', (e) => {
   // Update CSS variables for X-Ray and Lantern
   document.body.style.setProperty('--mouse-x', `${e.clientX}px`);
   document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
+
+  // Parallax for Echo Layers (Ghost Documents)
+  if (echoLayerEl) {
+    const echoes = echoLayerEl.querySelectorAll('.echo-document');
+    echoes.forEach((echo, index) => {
+      // Don't apply parallax if peeking (handled by CSS)
+      if (echo.classList.contains('peek')) return;
+
+      const depthOffset = (index + 1) * 2;
+      const moveX = -x * 20 * depthOffset;
+      const moveY = -y * 20 * depthOffset;
+
+      echo.style.transform = `translateZ(-${depthOffset * 10}px) translateY(${depthOffset * 2 + moveY}px) translateX(${depthOffset * 2 + moveX}px)`;
+    });
+  }
 });
 
 document.addEventListener('mousedown', (e) => {
