@@ -191,6 +191,24 @@ export class ConnectionManager {
                     this.ctx.quadraticCurveTo(cx, cy, node.x, node.y);
 
                     this.ctx.stroke();
+
+                    // Data Flow animation
+                    const flowTime = (time * 2) % 1;
+                    const t = flowTime; // t from 0 to 1
+
+                    // Quadratic bezier point formula: P(t) = (1-t)^2*P0 + 2*(1-t)*t*P1 + t^2*P2
+                    const px = (1 - t) * (1 - t) * x + 2 * (1 - t) * t * cx + t * t * node.x;
+                    const py = (1 - t) * (1 - t) * y + 2 * (1 - t) * t * cy + t * t * node.y;
+
+                    this.ctx.save();
+                    this.ctx.setLineDash([]);
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.3})`;
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.shadowColor = 'rgba(255, 255, 255, 1)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(px, py, 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
                 }
             });
 
