@@ -3,7 +3,7 @@ import time
 import re
 
 def test_ghost_tabs(page: Page):
-    page.goto("http://localhost:3000")
+    page.goto("http://localhost:5173")
 
     # Wait for the editor to load
     page.wait_for_selector("#editor")

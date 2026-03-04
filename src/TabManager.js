@@ -244,6 +244,24 @@ Drag to change depth`;
       const depthOffset = (index + 1) * 2;
       el.style.transform = `translateZ(-${depthOffset * 10}px) translateY(${depthOffset * 2}px) translateX(${depthOffset * 2}px)`;
 
+      // Add click listener to switch to this document
+      el.addEventListener('click', () => {
+          this.setActive(file.id);
+      });
+
+      // Add hover listener to fade editor
+      el.addEventListener('mouseenter', () => {
+          if (this.editorEl) {
+              this.editorEl.classList.add('editor-peek-fade');
+          }
+      });
+
+      el.addEventListener('mouseleave', () => {
+          if (this.editorEl) {
+              this.editorEl.classList.remove('editor-peek-fade');
+          }
+      });
+
       this.echoLayerEl.appendChild(el);
     });
   }

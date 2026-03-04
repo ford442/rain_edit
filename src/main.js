@@ -752,6 +752,7 @@ let sonarActive = false;
 let sonarStartTime = 0;
 let sonarX = 0;
 let sonarY = 0;
+let cachedSonarTargets = [];
 
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Shift') {
@@ -781,6 +782,27 @@ function triggerSonar() {
     editorEl.style.setProperty('--sonar-y', `${sonarY}px`);
     editorEl.classList.add('sonar-active');
 
+
+    cachedSonarTargets = [];
+    document.querySelectorAll('.note-card').forEach(card => {
+        const rect = card.getBoundingClientRect();
+        cachedSonarTargets.push({
+            el: card,
+            cx: rect.left + rect.width / 2,
+            cy: rect.top + rect.height / 2
+        });
+    });
+    if (echoLayerEl) {
+        echoLayerEl.querySelectorAll('.echo-document').forEach(echo => {
+            const rect = echo.getBoundingClientRect();
+            cachedSonarTargets.push({
+                el: echo,
+                cx: rect.left + rect.width / 2,
+                cy: rect.top + rect.height / 2
+            });
+        });
+    }
+
     requestAnimationFrame(animateSonar);
 }
 
@@ -794,6 +816,8 @@ function animateSonar() {
     if (elapsed > duration) {
         sonarActive = false;
         editorEl.classList.remove('sonar-active');
+        // Clear sonar-hit classes
+        document.querySelectorAll('.sonar-hit').forEach(el => el.classList.remove('sonar-hit'));
         return;
     }
 
@@ -802,6 +826,18 @@ function animateSonar() {
     const radius = Math.max(window.innerWidth, window.innerHeight) * 1.5 * (1 - Math.pow(1 - progress, 3)); // cubic ease out
 
     editorEl.style.setProperty('--sonar-radius', `${radius}px`);
+
+    // Semantic Sonar: highlight elements as the ring passes over them
+    const thickness = 150; // Match the mask thickness
+
+    cachedSonarTargets.forEach(target => {
+        const dist = Math.sqrt(Math.pow(target.cx - sonarX, 2) + Math.pow(target.cy - sonarY, 2));
+        if (Math.abs(dist - radius) < thickness) {
+            target.el.classList.add('sonar-hit');
+        } else {
+            target.el.classList.remove('sonar-hit');
+        }
+    });
 
     // Force update if portals exist (JS mask management active)
     if (portalLines.length > 0) {
