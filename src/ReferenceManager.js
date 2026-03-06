@@ -46,6 +46,30 @@ export class ReferenceManager {
   initEvents() {
     window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
     window.addEventListener('mouseup', () => this.handleMouseUp());
+    // Use capture phase for dblclick to intercept it before normal cards handle it and call stopPropagation()
+    window.addEventListener('dblclick', (e) => this.handleGlobalDoubleClick(e), true);
+  }
+
+  handleGlobalDoubleClick(e) {
+      if (e.shiftKey) {
+          // Check for frosted cards under the mouse cursor to un-frost them,
+          // since they have pointer-events: none and won't receive normal events.
+          const cards = this.getCards().filter(c => c.classList.contains('frosted'));
+          // Sort by z-index descending to get the top-most card
+          cards.sort((a, b) => parseInt(b.style.zIndex || 0) - parseInt(a.style.zIndex || 0));
+
+          for (let card of cards) {
+              const rect = card.getBoundingClientRect();
+              if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                  e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                  card.classList.remove('frosted');
+                  // Stop capturing early to prevent frosting the card underneath
+                  e.stopPropagation();
+                  e.preventDefault();
+                  return; // Un-frost only the top-most hit
+              }
+          }
+      }
   }
 
   handleMouseMove(e) {
@@ -129,6 +153,12 @@ export class ReferenceManager {
             // Closer items tilt more
             const rotateX = -normY * (5 + (1-depth)*5);
             const rotateY = normX * (5 + (1-depth)*5);
+
+            // Depth-Aware Lighting
+            // Calculate light based on how the card faces the light source (assumed top-left or centered)
+            // normX and normY tell us the mouse position. The card tilts towards the mouse.
+            const lightIntensity = ((rotateX * 0.05) + (rotateY * 0.05)) * (1.5 - depth);
+            const brightness = 1 + Math.max(0, lightIntensity); // Only brighten, don't darken too much
 
             // --- Tunnel Effect Logic ---
             let translateZ = depth * 50;
@@ -224,9 +254,9 @@ export class ReferenceManager {
             }
 
             if (!note.classList.contains('spotlight') && !note.classList.contains('dimmed')) {
-                note.style.filter = `blur(${blurAmount}px)`;
-            }
-            if (note.classList.contains('spotlight')) {
+                note.style.filter = `blur(${blurAmount}px) brightness(${brightness})`;
+            } else if (note.classList.contains('spotlight')) {
+                note.style.filter = `brightness(${brightness})`;
                 // Keep scale for spotlight
                 note.style.transform += ' scale(1.05)';
             }
@@ -335,9 +365,18 @@ export class ReferenceManager {
           });
       });
 
-      // Spotlight Logic
+      // Spotlight / Frosting Logic
       card.addEventListener('dblclick', (e) => {
         e.stopPropagation();
+
+        if (e.shiftKey) {
+            // Toggle Frosted State
+            // Note: Once frosted, pointer-events are disabled, so un-frosting is
+            // handled by the global handleGlobalDoubleClick listener.
+            card.classList.add('frosted');
+            return; // Prevent spotlight
+        }
+
         const wasSpotlit = card.classList.contains('spotlight');
 
         // Remove spotlight from all others and move back to layer
