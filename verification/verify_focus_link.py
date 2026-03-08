@@ -9,7 +9,7 @@ def run(playwright):
     page.on("console", lambda msg: print(f"CONSOLE: {msg.text}"))
 
     print("Navigating to app...")
-    page.goto("http://localhost:5173")
+    page.goto("http://localhost:3000")
 
     # Wait for editor to load
     page.wait_for_selector(".monaco-editor")

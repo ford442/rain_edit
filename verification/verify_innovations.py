@@ -8,7 +8,7 @@ def verify_innovations():
 
         print("Navigating to app...")
         try:
-            page.goto("http://localhost:5173/", timeout=60000)
+            page.goto("http://localhost:3000/", timeout=60000)
             page.wait_for_load_state("networkidle")
             # Wait for reference input to be available
             page.wait_for_selector("#reference-input", timeout=30000)

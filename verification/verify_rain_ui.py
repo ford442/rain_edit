@@ -6,7 +6,7 @@ from playwright.sync_api import sync_playwright
 def run(playwright):
     browser = playwright.chromium.launch()
     page = browser.new_page()
-    page.goto("http://localhost:5173")
+    page.goto("http://localhost:3000")
 
     # Wait for the editor to load
     try:

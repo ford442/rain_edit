@@ -7,7 +7,7 @@ def verify_features():
         page = context.new_page()
 
         print("Navigating to app...")
-        page.goto("http://localhost:5173/", timeout=60000)
+        page.goto("http://localhost:3000/", timeout=60000)
         page.wait_for_load_state("networkidle")
 
         # Wait for editor to load

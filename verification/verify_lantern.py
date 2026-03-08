@@ -7,7 +7,7 @@ def run(playwright):
     browser = playwright.chromium.launch()
     page = browser.new_page()
     try:
-        page.goto("http://localhost:5173")
+        page.goto("http://localhost:3000")
     except Exception as e:
         print(f"Error loading page: {e}")
         sys.exit(1)

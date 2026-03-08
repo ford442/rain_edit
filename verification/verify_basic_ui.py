@@ -6,7 +6,7 @@ def run_verification():
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         try:
-            page.goto("http://localhost:5173")
+            page.goto("http://localhost:3000")
             page.wait_for_selector("#editor", timeout=5000)
 
             # Check for main elements

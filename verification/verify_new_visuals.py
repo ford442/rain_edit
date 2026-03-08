@@ -7,7 +7,7 @@ def run(playwright):
     page.set_viewport_size({"width": 1280, "height": 720})
 
     try:
-        page.goto("http://localhost:5173")
+        page.goto("http://localhost:3000")
     except Exception as e:
         print(f"Failed to load page: {e}")
         return

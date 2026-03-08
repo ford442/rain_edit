@@ -5,7 +5,7 @@ def run(playwright):
     browser = playwright.chromium.launch()
     page = browser.new_page()
     page.set_viewport_size({"width": 1280, "height": 800})
-    page.goto("http://localhost:5173")
+    page.goto("http://localhost:3000")
 
     # Wait for app
     page.wait_for_selector("#app")

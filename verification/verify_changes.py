@@ -10,7 +10,7 @@ def verify_ui():
         # Navigate to the app
         print("Navigating to app...")
         try:
-            page.goto("http://localhost:5173/", timeout=60000)
+            page.goto("http://localhost:3000/", timeout=60000)
             page.wait_for_load_state("networkidle")
         except Exception as e:
             print(f"Failed to load page: {e}")
