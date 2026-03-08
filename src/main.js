@@ -48,6 +48,7 @@ const editorEl = document.getElementById('editor');
 const backCanvas = document.getElementById('rain-back');
 const frontCanvas = document.getElementById('rain-front');
 const connectionsCanvas = document.getElementById('connections-layer');
+const matrixLayer = document.getElementById('matrix-layer');
 const referenceLayer = document.getElementById('reference-layer');
 const referenceOverlay = document.getElementById('reference-overlay');
 const holoLayerEl = document.getElementById('holo-layer');
@@ -153,9 +154,80 @@ function resizeCanvases(){
   frontCanvas.height = rect.height * dpr;
   frontCanvas.style.width = rect.width + 'px';
   frontCanvas.style.height = rect.height + 'px';
+
+  if (matrixLayer) {
+    matrixLayer.width = rect.width * dpr;
+    matrixLayer.height = rect.height * dpr;
+    matrixLayer.style.width = rect.width + 'px';
+    matrixLayer.style.height = rect.height + 'px';
+    initMatrixRain();
+  }
 }
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
+
+// --- Matrix Rain Logic ---
+let matrixCols = [];
+let matrixCtx = null;
+let matrixActive = true;
+
+function initMatrixRain() {
+  if (!matrixLayer) return;
+  matrixCtx = matrixLayer.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const fontSize = 16 * dpr;
+  const columns = Math.floor(matrixLayer.width / fontSize);
+
+  // Initialize drops if they haven't been or if the number of columns changed significantly
+  if (matrixCols.length === 0 || Math.abs(matrixCols.length - columns) > 5) {
+      matrixCols = [];
+      for (let i = 0; i < columns; i++) {
+        matrixCols[i] = Math.random() * -100; // Start off-screen
+      }
+  }
+}
+
+function drawMatrix() {
+    if (!matrixLayer || !matrixCtx || !matrixActive) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const fontSize = 16 * dpr;
+
+    // Draw a semi-transparent black rectangle to create the fade effect
+    matrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    matrixCtx.fillRect(0, 0, matrixLayer.width, matrixLayer.height);
+
+    matrixCtx.fillStyle = '#0f0'; // Basic green, will be overridden
+    matrixCtx.font = fontSize + 'px "JetBrains Mono", monospace';
+    matrixCtx.textAlign = 'center';
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?';
+
+    for (let i = 0; i < matrixCols.length; i++) {
+        const text = chars.charAt(Math.floor(Math.random() * chars.length));
+        const x = i * fontSize + fontSize / 2;
+        const y = matrixCols[i] * fontSize;
+
+        // Random cyan/green colors
+        const hue = 160 + Math.random() * 40; // 160-200 cyan/green
+        const lightness = 40 + Math.random() * 40; // 40-80%
+        matrixCtx.fillStyle = `hsl(${hue}, 100%, ${lightness}%)`;
+
+        // First character brighter
+        if (Math.random() > 0.95) {
+            matrixCtx.fillStyle = '#fff';
+        }
+
+        matrixCtx.fillText(text, x, y);
+
+        // Reset drop to top randomly
+        if (y > matrixLayer.height && Math.random() > 0.975) {
+            matrixCols[i] = 0;
+        }
+
+        matrixCols[i] += 0.5 + Math.random() * 0.5; // Varying speeds
+    }
+}
 
 // create layers (async init)
 let bgLayer = null;
@@ -237,6 +309,7 @@ async function initLayers(){
     if(fgLayer) fgLayer.render();
 
     if(fogManager) fogManager.render();
+    drawMatrix();
     requestAnimationFrame(animate);
   }
 
