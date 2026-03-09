@@ -33,6 +33,7 @@
         <div class="depth-controls">
           <button id="btn-depth-forward" title="Bring Forward — increase z-depth">⬆️ Bring Forward</button>
           <button id="btn-depth-back" title="Push Back — decrease z-depth">⬇️ Push Back</button>
+          <button id="btn-cascade-view" title="Toggle Cascade View">🌊 Cascade View</button>
         </div>
       </div>
 
@@ -85,17 +86,17 @@
       bottom: 24px;
       right: 24px;
       z-index: 40;
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(10, 15, 25, 0.8);
+      border: 1px solid rgba(0, 229, 255, 0.3);
       color: #c0d0e0;
       font-family: inherit;
       font-size: 13px;
-      padding: 8px 16px;
-      border-radius: 8px;
+      padding: 10px 20px;
+      border-radius: 16px;
       cursor: pointer;
       backdrop-filter: blur(6px);
       transition: background 0.2s;
-    ">🗄️ File Cabinet</button>
+    " onmouseover="this.style.background='rgba(0, 229, 255, 0.15)'" onmouseout="this.style.background='rgba(10, 15, 25, 0.8)'">🗄️ File Cabinet</button>
 
     <script type="module" src="/src/main.js"></script>
   </body>

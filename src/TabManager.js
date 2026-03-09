@@ -29,6 +29,21 @@ export class TabManager {
     this.files = [];
     this.activeId = null;
     this._nextId = 1;
+    this.isCascadeView = false;
+  }
+
+  toggleCascadeView() {
+    this.isCascadeView = !this.isCascadeView;
+    document.body.classList.toggle('cascade-active', this.isCascadeView);
+    const btn = document.getElementById('btn-cascade-view');
+    if (btn) {
+        if (this.isCascadeView) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    }
+    this._renderEchoes();
   }
 
   /**
@@ -153,6 +168,12 @@ Drag to change depth`;
             const echoEl = this.echoLayerEl.querySelector(`.echo-document[data-id="${file.id}"]`);
             if (echoEl) {
               echoEl.classList.add('peek');
+              // Support CSS vars approach for transform
+              if (!this.isCascadeView) {
+                  echoEl.style.setProperty('--tx', '0px');
+                  echoEl.style.setProperty('--ty', '0px');
+                  echoEl.style.setProperty('--tz', '50px');
+              }
             }
             this.editorEl.classList.add('editor-peek-fade');
           }
@@ -163,6 +184,11 @@ Drag to change depth`;
             const echoEl = this.echoLayerEl.querySelector(`.echo-document[data-id="${file.id}"]`);
             if (echoEl) {
               echoEl.classList.remove('peek');
+              // Restore CSS vars
+              if (!this.isCascadeView) {
+                  const depthOffset = parseInt(echoEl.dataset.index || 0) + 1;
+                  echoEl.style.setProperty('--tz', `-${depthOffset * 10}px`);
+              }
             }
             this.editorEl.classList.remove('editor-peek-fade');
           }
@@ -224,6 +250,7 @@ Drag to change depth`;
       const el = document.createElement('div');
       el.className = 'echo-document';
       el.dataset.id = file.id;
+      el.dataset.index = index; // Store for CSS vars restore later
 
       // Extract text or show image placeholder
       let contentStr = '';
@@ -239,10 +266,23 @@ Drag to change depth`;
       pre.appendChild(code);
       el.appendChild(pre);
 
-      // Create a visual stack offset based on its position in the array
-      // Parallax will handle further transformation later.
-      const depthOffset = (index + 1) * 2;
-      el.style.transform = `translateZ(-${depthOffset * 10}px) translateY(${depthOffset * 2}px) translateX(${depthOffset * 2}px)`;
+      if (this.isCascadeView) {
+        // Cascade positions
+        const vw = window.innerWidth;
+        const tx = (vw * 0.3) + (index * 40);
+        const ty = index * 20;
+        const tz = -index * 50;
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+      } else {
+        // Original Parallax depth offsets
+        const depthOffset = (index + 1) * 2;
+        // tx/ty will be overwritten by mousemove, but we set initial values here
+        el.style.setProperty('--tx', `${depthOffset * 2}px`);
+        el.style.setProperty('--ty', `${depthOffset * 2}px`);
+        el.style.setProperty('--tz', `-${depthOffset * 10}px`);
+      }
 
       // Add click listener to switch to this document
       el.addEventListener('click', () => {

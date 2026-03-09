@@ -167,9 +167,9 @@ window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
 
 // --- Matrix Rain Logic ---
-let matrixCols = [];
-let matrixCtx = null;
-let matrixActive = true;
+var matrixCols = [];
+var matrixCtx = null;
+var matrixActive = true;
 
 function initMatrixRain() {
   if (!matrixLayer) return;
@@ -179,7 +179,7 @@ function initMatrixRain() {
   const columns = Math.floor(matrixLayer.width / fontSize);
 
   // Initialize drops if they haven't been or if the number of columns changed significantly
-  if (matrixCols.length === 0 || Math.abs(matrixCols.length - columns) > 5) {
+  if (!matrixCols || matrixCols.length === 0 || Math.abs(matrixCols.length - columns) > 5) {
       matrixCols = [];
       for (let i = 0; i < columns; i++) {
         matrixCols[i] = Math.random() * -100; // Start off-screen
@@ -336,7 +336,7 @@ document.addEventListener('mousemove', (e) => {
   document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
 
   // Parallax for Echo Layers (Ghost Documents)
-  if (echoLayerEl) {
+  if (echoLayerEl && !tabManager.isCascadeView) {
     const echoes = echoLayerEl.querySelectorAll('.echo-document');
     echoes.forEach((echo, index) => {
       // Don't apply parallax if peeking (handled by CSS)
@@ -346,7 +346,8 @@ document.addEventListener('mousemove', (e) => {
       const moveX = -x * 20 * depthOffset;
       const moveY = -y * 20 * depthOffset;
 
-      echo.style.transform = `translateZ(-${depthOffset * 10}px) translateY(${depthOffset * 2 + moveY}px) translateX(${depthOffset * 2 + moveX}px)`;
+      echo.style.setProperty('--tx', `${depthOffset * 2 + moveX}px`);
+      echo.style.setProperty('--ty', `${depthOffset * 2 + moveY}px`);
     });
   }
 });
@@ -380,6 +381,11 @@ document.getElementById('toggle-front-on-top').addEventListener('change', (e) =>
 // Depth control buttons — push the active document backward or pull it forward
 document.getElementById('btn-depth-forward').addEventListener('click', () => { tabManager.adjustDepth(1); });
 document.getElementById('btn-depth-back').addEventListener('click', () => { tabManager.adjustDepth(-1); });
+
+const btnCascade = document.getElementById('btn-cascade-view');
+if (btnCascade) {
+    btnCascade.addEventListener('click', () => { tabManager.toggleCascadeView(); });
+}
 
 const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
@@ -522,13 +528,49 @@ editor.onDidChangeCursorPosition((e) => {
       // Focus Link: Connect cursor word to reference notes
       const model = editor.getModel();
       const wordAtPosition = model.getWordAtPosition(position);
+
+      let currentWord = null;
+      if (wordAtPosition) {
+          currentWord = wordAtPosition.word;
+      }
+
       if (connectionManager) {
-          if (wordAtPosition) {
+          if (currentWord) {
               // Adjust coordinates to be relative to the viewport/canvas
               const rect = editorEl.getBoundingClientRect();
-              connectionManager.setEditorFocus(wordAtPosition.word, x + rect.left, y + rect.top + 10); // +10 for approximate line height center
+              connectionManager.setEditorFocus(currentWord, x + rect.left, y + rect.top + 10); // +10 for approximate line height center
           } else {
               connectionManager.setEditorFocus(null);
+          }
+      }
+
+      // Semantic Resonance: highlight echo documents matching the word
+      if (echoLayerEl) {
+          const echoes = echoLayerEl.querySelectorAll('.echo-document');
+          echoes.forEach(echo => {
+              echo.classList.remove('resonance-hit');
+          });
+
+          if (currentWord && currentWord.length > 3) {
+              const lowerWord = currentWord.toLowerCase();
+
+              tabManager.files.forEach(file => {
+                  if (file.id !== tabManager.activeId) {
+                      let content = '';
+                      if (file.isImage) {
+                          content = file.name.toLowerCase();
+                      } else if (file.model) {
+                          content = file.model.getValue().toLowerCase();
+                      }
+
+                      if (content.includes(lowerWord)) {
+                          const echoEl = echoLayerEl.querySelector(`.echo-document[data-id="${file.id}"]`);
+                          if (echoEl) {
+                              echoEl.classList.add('resonance-hit');
+                          }
+                      }
+                  }
+              });
           }
       }
   }

@@ -8,7 +8,7 @@ def verify_ui():
 
         # Navigate to the app
         print("Navigating to app...")
-        page.goto("http://localhost:5173")
+        page.goto("http://localhost:3000")
 
         # Wait for the editor to load
         print("Waiting for editor...")

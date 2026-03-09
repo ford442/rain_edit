@@ -5,7 +5,7 @@ import os
 def run(playwright):
     browser = playwright.chromium.launch()
     page = browser.new_page()
-    page.goto("http://localhost:5173")
+    page.goto("http://localhost:3000")
 
     # Wait for editor
     page.wait_for_selector(".monaco-editor", state="visible")
