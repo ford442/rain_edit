@@ -369,12 +369,14 @@ document.addEventListener('mousedown', (e) => {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Control' || e.key === 'Meta') {
         editorEl.classList.add('x-ray-active');
+        document.body.classList.add('x-ray-active');
     }
 });
 
 document.addEventListener('keyup', (e) => {
     if (e.key === 'Control' || e.key === 'Meta') {
         editorEl.classList.remove('x-ray-active');
+        document.body.classList.remove('x-ray-active');
     }
 });
 
@@ -728,6 +730,7 @@ document.addEventListener('keydown', (e) => {
         if (!isAltDown) {
             isAltDown = true;
             setFocusDepth(userPreferredDepth);
+            document.body.classList.add('alt-focus-active');
         }
     }
 });
@@ -736,9 +739,11 @@ document.addEventListener('keyup', (e) => {
     if (e.key === 'Alt') {
         isAltDown = false;
         setFocusDepth(0);
+        document.body.classList.remove('alt-focus-active');
     }
 });
 
+let stackZ = 0;
 window.addEventListener('wheel', (e) => {
     if (e.altKey) {
         e.preventDefault();
@@ -749,8 +754,48 @@ window.addEventListener('wheel', (e) => {
 
         // Update current focus depth immediately if Alt is held
         setFocusDepth(userPreferredDepth);
+    } else if (e.shiftKey && !tabManager.isCascadeView) {
+        e.preventDefault();
+        const delta = e.deltaY * 0.5;
+        stackZ += delta;
+
+        // Clamp scroll stack depth roughly to available echoes
+        const maxDepth = (tabManager.files.length * 50) + 100;
+        stackZ = Math.max(0, Math.min(maxDepth, stackZ));
+
+        if (echoLayerEl) {
+            echoLayerEl.style.setProperty('--stack-z', `${stackZ}px`);
+
+            // Highlight intersecting documents
+            const echoes = echoLayerEl.querySelectorAll('.echo-document');
+            echoes.forEach(echo => {
+                // Original Z position (from TabManager: index * 50)
+                const docZ = parseInt(echo.dataset.index || 0) * 50;
+
+                // If stackZ is near docZ, it's intersecting the viewing plane
+                const distance = Math.abs(docZ - stackZ);
+                if (distance < 25) {
+                    echo.classList.add('z-intersect');
+                } else {
+                    echo.classList.remove('z-intersect');
+                }
+            });
+        }
     }
 }, { passive: false });
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'Shift') {
+        stackZ = 0;
+        if (echoLayerEl) {
+            echoLayerEl.style.setProperty('--stack-z', '0px');
+            const echoes = echoLayerEl.querySelectorAll('.echo-document');
+            echoes.forEach(echo => {
+                echo.classList.remove('z-intersect');
+            });
+        }
+    }
+});
 
 // --- Lens Mode Logic ---
 let isLensMode = false;
