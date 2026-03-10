@@ -926,6 +926,42 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
 .holo-label { font-weight: bold; opacity: 1; letter-spacing: 0.5px; }
 .holo-text { opacity: 0.8; margin-left: 4px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px;}
 
+/* Neon Scatter Layer */
+#neon-scatter-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6; /* Above editor, below front rain */
+  mix-blend-mode: overlay;
+  opacity: 0.15;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), hsla(var(--dynamic-hue, 180), 100%, 70%, 0.8) 0%, transparent 400px);
+  transition: opacity 0.5s ease;
+}
+
+/* Heat Distortion */
+.heat-active {
+  filter: url(#heat-haze) blur(4px) !important;
+  animation: heat-shimmer 2s linear infinite alternate;
+}
+
+@keyframes heat-shimmer {
+  from { transform: scale(1) translateY(0); }
+  to { transform: scale(1.02) translateY(-2px); }
+}
+
+/* Glitch for distant echoes */
+@keyframes distant-glitch {
+  0% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateY(var(--ry, 0deg)); opacity: 0.08; filter: blur(4px) hue-rotate(0deg); }
+  10% { transform: translate3d(calc(var(--tx, 0px) - 2px), calc(var(--ty, 0px) + 2px), var(--tz, 0px)) rotateY(var(--ry, 0deg)); opacity: 0.15; filter: blur(3px) hue-rotate(90deg); }
+  12% { transform: translate3d(calc(var(--tx, 0px) + 3px), calc(var(--ty, 0px) - 1px), var(--tz, 0px)) rotateY(var(--ry, 0deg)); opacity: 0.05; filter: blur(5px) hue-rotate(-90deg); }
+  14% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateY(var(--ry, 0deg)); opacity: 0.08; filter: blur(4px) hue-rotate(0deg); }
+  100% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateY(var(--ry, 0deg)); opacity: 0.08; filter: blur(4px) hue-rotate(0deg); }
+}
+
+.echo-document.distant-echo {
+  animation: distant-glitch 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
+}
+
 /* Scanline Overlay */
 @keyframes scanline {
   0% { transform: translateY(0); }
