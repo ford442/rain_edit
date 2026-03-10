@@ -55,6 +55,7 @@ const holoLayerEl = document.getElementById('holo-layer');
 const echoLayerEl = document.getElementById('echo-layer');
 const fogLayerEl = document.getElementById('fog-layer');
 const vignetteLayer = document.getElementById('vignette-layer'); // Added
+const neonScatterLayer = document.getElementById('neon-scatter-layer');
 
 // Create Portal Visual Layer
 const portalLayer = document.getElementById('portal-visuals') || document.createElement('div');
@@ -335,6 +336,12 @@ document.addEventListener('mousemove', (e) => {
   document.body.style.setProperty('--mouse-x', `${e.clientX}px`);
   document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
 
+  // Update Neon Scatter Layer position
+  if (neonScatterLayer) {
+    neonScatterLayer.style.setProperty('--mouse-x', `${e.clientX}px`);
+    neonScatterLayer.style.setProperty('--mouse-y', `${e.clientY}px`);
+  }
+
   // Parallax for Echo Layers (Ghost Documents)
   if (echoLayerEl && !tabManager.isCascadeView) {
     const echoes = echoLayerEl.querySelectorAll('.echo-document');
@@ -414,6 +421,51 @@ const lanternToggle = document.getElementById('lantern-mode');
 if (lanternToggle) {
     lanternToggle.addEventListener('change', (e) => {
         referenceManager.setLanternMode(e.target.checked);
+    });
+}
+
+// Wiper Mode Logic
+let wiperMode = false;
+let wiperAnimationId = null;
+let wiperX = 0;
+let wiperDirection = 1;
+
+const wiperToggle = document.getElementById('wiper-mode');
+
+function animateWiper() {
+  if (!wiperMode || !raindrops) return;
+
+  const w = window.innerWidth;
+  const speed = 15;
+  wiperX += speed * wiperDirection;
+
+  if (wiperX > w + 100) {
+      wiperDirection = -1;
+  } else if (wiperX < -100) {
+      wiperDirection = 1;
+  }
+
+  // Clear droplets along a vertical line
+  const h = window.innerHeight;
+  for (let y = 0; y < h; y += 30) {
+      raindrops.clearDroplets(wiperX, y, 60);
+      if (fogManager) {
+          fogManager.clearFogAt(wiperX, y, 80);
+      }
+  }
+
+  wiperAnimationId = requestAnimationFrame(animateWiper);
+}
+
+if (wiperToggle) {
+    wiperToggle.addEventListener('change', (e) => {
+        wiperMode = e.target.checked;
+        if (wiperMode) {
+            wiperX = wiperDirection === 1 ? -100 : window.innerWidth + 100;
+            animateWiper();
+        } else {
+            cancelAnimationFrame(wiperAnimationId);
+        }
     });
 }
 
@@ -819,6 +871,15 @@ setInterval(() => {
 
     // Total Intensity
     const totalIntensity = stormCharCount + (window.atmosphereIntensity || 0);
+
+    // Heat Distortion logic
+    if (totalIntensity > 150) {
+        if (echoLayerEl) echoLayerEl.classList.add('heat-active');
+        if (referenceLayer) referenceLayer.classList.add('heat-active');
+    } else {
+        if (echoLayerEl) echoLayerEl.classList.remove('heat-active');
+        if (referenceLayer) referenceLayer.classList.remove('heat-active');
+    }
 
     if (referenceManager) {
         referenceManager.setStormIntensity(totalIntensity);

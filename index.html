@@ -21,6 +21,7 @@
         <div id="echo-layer"></div>
         <div id="editor"></div>
         <div id="image-viewer"></div>
+        <div id="neon-scatter-layer"></div>
         <div id="scanline-overlay"></div>
         <canvas id="rain-front" class="rain-canvas"></canvas>
         <div id="fog-layer"></div>
@@ -76,11 +77,20 @@
            <label title="Blueprint Mode"><input id="blueprint-mode" type="checkbox"> Blueprint Mode</label>
            <label title="Lantern Mode"><input id="lantern-mode" type="checkbox" checked> Lantern Mode</label>
            <label title="Ghost Mode"><input id="ghost-mode" type="checkbox"> Ghost Mode</label>
+           <label title="Wiper Mode"><input id="wiper-mode" type="checkbox"> Wiper Mode</label>
         </div>
       </div>
     </div>
 
     <!-- 3D File Cabinet toggle button -->
+    <!-- Heat Distortion SVG -->
+    <svg style="position: absolute; width: 0; height: 0;">
+      <filter id="heat-haze">
+        <feTurbulence type="fractalNoise" baseFrequency="0.015 0.05" numOctaves="2" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
+
     <button id="btn-cabinet" title="Open 3D File Cabinet" style="
       position: fixed;
       bottom: 24px;

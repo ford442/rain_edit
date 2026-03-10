@@ -282,6 +282,11 @@ Drag to change depth`;
         el.style.setProperty('--tx', `${depthOffset * 2}px`);
         el.style.setProperty('--ty', `${depthOffset * 2}px`);
         el.style.setProperty('--tz', `-${depthOffset * 10}px`);
+
+        // Glitch distant echoes
+        if (index > 2) {
+            el.classList.add('distant-echo');
+        }
       }
 
       // Add click listener to switch to this document
