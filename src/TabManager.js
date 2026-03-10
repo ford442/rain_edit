@@ -266,6 +266,17 @@ Drag to change depth`;
       pre.appendChild(code);
       el.appendChild(pre);
 
+      // Calculate Exploded Orbit View variables
+      const totalEchoes = inactiveFiles.length;
+      if (totalEchoes > 0) {
+          const angle = (index / totalEchoes) * Math.PI * 2;
+          const radius = 300; // Orbit radius
+          const explodeX = Math.cos(angle) * radius;
+          const explodeY = Math.sin(angle) * radius;
+          el.style.setProperty('--explode-x', `${explodeX}px`);
+          el.style.setProperty('--explode-y', `${explodeY}px`);
+      }
+
       if (this.isCascadeView) {
         // Cascade positions
         const vw = window.innerWidth;
@@ -281,7 +292,8 @@ Drag to change depth`;
         // tx/ty will be overwritten by mousemove, but we set initial values here
         el.style.setProperty('--tx', `${depthOffset * 2}px`);
         el.style.setProperty('--ty', `${depthOffset * 2}px`);
-        el.style.setProperty('--tz', `-${depthOffset * 10}px`);
+        // Add var(--stack-z) for the MRI scroll effect
+        el.style.setProperty('--tz', `calc(-${index * 50}px + var(--stack-z, 0px))`);
 
         // Glitch distant echoes
         if (index > 2) {
