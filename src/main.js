@@ -76,6 +76,7 @@ const fogManager = new FogManager(fogLayerEl);
 referenceManager.setFogManager(fogManager);
 
 let focusDepth = 0; // 0 = Editor, 1 = Reference
+let isMagnifierMode = false; // Magnifier tool state
 
 // Initial Text
 const INITIAL_MARKDOWN = `# REFERENCE LAYER
@@ -356,6 +357,22 @@ document.addEventListener('mousemove', (e) => {
       echo.style.setProperty('--tx', `${depthOffset * 2 + moveX}px`);
       echo.style.setProperty('--ty', `${depthOffset * 2 + moveY}px`);
     });
+
+    // Magnifying Glass Logic
+    if (isMagnifierMode) {
+      echoes.forEach(echo => {
+        const echoRect = echo.getBoundingClientRect();
+        const centerX = echoRect.left + echoRect.width / 2;
+        const centerY = echoRect.top + echoRect.height / 2;
+        const dist = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
+
+        if (dist < 200) {
+          echo.classList.add('magnifier-active');
+        } else {
+          echo.classList.remove('magnifier-active');
+        }
+      });
+    }
   }
 });
 
@@ -741,6 +758,30 @@ document.addEventListener('keyup', (e) => {
         setFocusDepth(0);
         document.body.classList.remove('alt-focus-active');
     }
+});
+
+// --- Magnifier Tool Logic ---
+document.addEventListener('keydown', (e) => {
+  if (e.metaKey && e.shiftKey && !e.repeat) {
+    isMagnifierMode = true;
+    editorEl.classList.add('x-ray-active'); // Re-use x-ray hole effect for the editor
+  }
+});
+
+document.addEventListener('keyup', (e) => {
+  if (e.key === 'Meta' || e.key === 'Shift') {
+    isMagnifierMode = false;
+    // Don't remove x-ray-active if the normal X-Ray shortcut (just Meta) is still held
+    if (!e.metaKey && !e.ctrlKey) {
+        editorEl.classList.remove('x-ray-active');
+    }
+
+    if (echoLayerEl) {
+      echoLayerEl.querySelectorAll('.echo-document').forEach(echo => {
+        echo.classList.remove('magnifier-active');
+      });
+    }
+  }
 });
 
 let stackZ = 0;
