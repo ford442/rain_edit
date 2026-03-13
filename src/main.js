@@ -108,18 +108,31 @@ if (referenceLayer) {
 }
 
 // create Monaco editor (no initial value — TabManager will supply the first model)
-monaco.editor.defineTheme('transparent-vs-light', {
-  base: 'vs',
+monaco.editor.defineTheme('transparent-vs-dark', {
+  base: 'vs-dark',
   inherit: true,
-  rules: [],
+  rules: [
+    { token: 'comment', foreground: '556677', fontStyle: 'italic' },
+    { token: 'keyword', foreground: '00e5ff', fontStyle: 'bold' }
+  ],
   colors: {
-    'editor.background': '#00000000'
+    'editor.background': '#00000000',
+    'editor.lineHighlightBackground': '#00e5ff11',
+    'editorCursor.foreground': '#00e5ff',
+    'editor.selectionBackground': '#00e5ff44'
   }
 });
 
 const editor = monaco.editor.create(editorEl, {
-  theme: 'transparent-vs-light',
-  automaticLayout: true
+  theme: 'transparent-vs-dark',
+  automaticLayout: true,
+  fontFamily: 'JetBrains Mono',
+  fontSize: 14,
+  minimap: { enabled: false },
+  scrollbar: {
+    vertical: 'hidden',
+    horizontal: 'hidden'
+  }
 });
 
 // Initialize TabManager
@@ -488,6 +501,14 @@ if (wiperToggle) {
     });
 }
 
+// Ghost Peeking Custom Event Bridge
+document.addEventListener('echo-peek', (e) => {
+    if (fogManager && e.detail) {
+        // Clear fog significantly where the user is peeking at an echo document
+        fogManager.clearFogAt(e.detail.x, e.detail.y, 120);
+    }
+});
+
 // Ghost Mode Logic
 let ghostMode = false;
 let ghostTimer = null;
@@ -620,6 +641,11 @@ editor.onDidChangeCursorPosition((e) => {
           const echoes = echoLayerEl.querySelectorAll('.echo-document');
           echoes.forEach(echo => {
               echo.classList.remove('resonance-hit');
+              // Remove magnetic surfacing local overrides if they exist
+              if (echo.style.getPropertyValue('--tz-override')) {
+                  echo.style.removeProperty('--tz-override');
+                  echo.style.setProperty('--tz', echo.dataset.originalTz || '0px');
+              }
           });
 
           if (currentWord && currentWord.length > 3) {
@@ -638,6 +664,13 @@ editor.onDidChangeCursorPosition((e) => {
                           const echoEl = echoLayerEl.querySelector(`.echo-document[data-id="${file.id}"]`);
                           if (echoEl) {
                               echoEl.classList.add('resonance-hit');
+                              // Magnetic Surfacing: Pull the matched document forward in Z-space
+                              if (!echoEl.dataset.originalTz) {
+                                  echoEl.dataset.originalTz = echoEl.style.getPropertyValue('--tz') || '0px';
+                              }
+                              // Override the tz variable to pull it physically closer before the pulse animation takes over
+                              echoEl.style.setProperty('--tz-override', '1');
+                              echoEl.style.setProperty('--tz', '30px');
                           }
                       }
                   }

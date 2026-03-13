@@ -23,7 +23,7 @@ export class FogManager {
     this.ctx.scale(dpr, dpr);
 
     // Initial fill
-    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'; // Start foggy
+    this.ctx.fillStyle = 'rgba(10, 15, 25, 0.9)'; // Start foggy
     this.ctx.fillRect(0, 0, rect.width, rect.height);
   }
 
@@ -34,7 +34,7 @@ export class FogManager {
 
     // Fill with very low opacity white/blue
     // Reduced opacity to 0.001 to slow down accumulation (approx 10s to full opacity)
-    this.ctx.fillStyle = 'rgba(240, 245, 255, 0.001)';
+    this.ctx.fillStyle = 'rgba(10, 15, 30, 0.002)';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Add noise grain
