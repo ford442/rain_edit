@@ -77,6 +77,20 @@ export class TabManager {
     if (!file) return;
     this.activeId = id;
 
+    // Trigger Depth-Swap animation
+    const targetEl = file.isImage ? this.imageViewerEl : this.editorEl;
+    if (targetEl) {
+        targetEl.classList.remove('depth-swap-active');
+        // Force reflow
+        void targetEl.offsetWidth;
+        targetEl.classList.add('depth-swap-active');
+
+        // Clean up animation class
+        setTimeout(() => {
+            targetEl.classList.remove('depth-swap-active');
+        }, 600);
+    }
+
     if (file.isImage) {
       this.editorEl.style.display = 'none';
       if (this.imageViewerEl) {
@@ -163,7 +177,7 @@ Drag to change depth`;
 
       // X-Ray Peek Logic
       if (file.id !== this.activeId) {
-        tab.addEventListener('mouseenter', () => {
+        tab.addEventListener('mouseenter', (e) => {
           if (this.echoLayerEl && this.editorEl) {
             const echoEl = this.echoLayerEl.querySelector(`.echo-document[data-id="${file.id}"]`);
             if (echoEl) {
@@ -172,8 +186,15 @@ Drag to change depth`;
               if (!this.isCascadeView) {
                   echoEl.style.setProperty('--tx', '0px');
                   echoEl.style.setProperty('--ty', '0px');
-                  echoEl.style.setProperty('--tz', '50px');
+                  echoEl.style.setProperty('--tz', '100px'); // Pull forward more significantly
               }
+
+              // Dispatch event to clear fog where the document roughly sits
+              const rect = echoEl.getBoundingClientRect();
+              const evt = new CustomEvent('echo-peek', {
+                detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+              });
+              document.dispatchEvent(evt);
             }
             this.editorEl.classList.add('editor-peek-fade');
           }
@@ -186,8 +207,8 @@ Drag to change depth`;
               echoEl.classList.remove('peek');
               // Restore CSS vars
               if (!this.isCascadeView) {
-                  const depthOffset = parseInt(echoEl.dataset.index || 0) + 1;
-                  echoEl.style.setProperty('--tz', `-${depthOffset * 10}px`);
+                  const index = parseInt(echoEl.dataset.index || 0);
+                  echoEl.style.setProperty('--tz', `calc(-${index * 50}px + var(--stack-z, 0px))`);
               }
             }
             this.editorEl.classList.remove('editor-peek-fade');
@@ -306,16 +327,49 @@ Drag to change depth`;
           this.setActive(file.id);
       });
 
+      // Add header for sci-fi glass pane identifier
+      const header = document.createElement('div');
+      header.className = 'echo-header';
+      header.textContent = file.name;
+      header.style.position = 'absolute';
+      header.style.top = '0';
+      header.style.left = '0';
+      header.style.width = '100%';
+      header.style.padding = '8px 16px';
+      header.style.background = 'rgba(0, 229, 255, 0.1)';
+      header.style.borderBottom = '1px solid rgba(0, 229, 255, 0.2)';
+      header.style.fontWeight = 'bold';
+      header.style.letterSpacing = '1px';
+      header.style.textTransform = 'uppercase';
+      el.appendChild(header);
+
+      pre.style.marginTop = '30px'; // Offset for header
+
       // Add hover listener to fade editor
-      el.addEventListener('mouseenter', () => {
+      el.addEventListener('mouseenter', (e) => {
           if (this.editorEl) {
               this.editorEl.classList.add('editor-peek-fade');
+              // Bring forward while hovering the doc itself
+              if (!this.isCascadeView) {
+                  el.style.setProperty('--tz', '100px');
+              }
+              // Dispatch event to clear fog
+              const rect = el.getBoundingClientRect();
+              const evt = new CustomEvent('echo-peek', {
+                detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+              });
+              document.dispatchEvent(evt);
           }
       });
 
       el.addEventListener('mouseleave', () => {
           if (this.editorEl) {
               this.editorEl.classList.remove('editor-peek-fade');
+              // Restore Z
+              if (!this.isCascadeView) {
+                  const idx = parseInt(el.dataset.index || 0);
+                  el.style.setProperty('--tz', `calc(-${idx * 50}px + var(--stack-z, 0px))`);
+              }
           }
       });
 
