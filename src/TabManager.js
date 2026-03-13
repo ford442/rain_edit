@@ -273,6 +273,12 @@ Drag to change depth`;
       el.dataset.id = file.id;
       el.dataset.index = index; // Store for CSS vars restore later
 
+      // Add a header so users know what this file is
+      const header = document.createElement('div');
+      header.className = 'echo-header';
+      header.textContent = file.name;
+      el.appendChild(header);
+
       // Extract text or show image placeholder
       let contentStr = '';
       if (file.isImage) {
