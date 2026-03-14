@@ -274,10 +274,10 @@ Drag to change depth`;
       el.dataset.index = index; // Store for CSS vars restore later
 
       // Add a header so users know what this file is
-      const header = document.createElement('div');
-      header.className = 'echo-header';
-      header.textContent = file.name;
-      el.appendChild(header);
+      const echoHeader = document.createElement('div');
+      echoHeader.className = 'echo-header';
+      echoHeader.textContent = file.name;
+      el.appendChild(echoHeader);
 
       // Extract text or show image placeholder
       let contentStr = '';
@@ -328,26 +328,48 @@ Drag to change depth`;
         }
       }
 
-      // Add click listener to switch to this document
-      el.addEventListener('click', () => {
-          this.setActive(file.id);
+      let clickTimeout = null;
+
+      // Add double click listener to break through the active document
+      el.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          if (clickTimeout) {
+             clearTimeout(clickTimeout);
+             clickTimeout = null;
+          }
+          const isBreakthrough = el.classList.contains('breakthrough');
+          // Remove breakthrough from all other echoes
+          this.echoLayerEl.querySelectorAll('.echo-document').forEach(doc => {
+              doc.classList.remove('breakthrough');
+          });
+          if (!isBreakthrough) {
+              el.classList.add('breakthrough');
+          }
       });
 
-      // Add header for sci-fi glass pane identifier
-      const header = document.createElement('div');
-      header.className = 'echo-header';
-      header.textContent = file.name;
-      header.style.position = 'absolute';
-      header.style.top = '0';
-      header.style.left = '0';
-      header.style.width = '100%';
-      header.style.padding = '8px 16px';
-      header.style.background = 'rgba(0, 229, 255, 0.1)';
-      header.style.borderBottom = '1px solid rgba(0, 229, 255, 0.2)';
-      header.style.fontWeight = 'bold';
-      header.style.letterSpacing = '1px';
-      header.style.textTransform = 'uppercase';
-      el.appendChild(header);
+      // Add click listener to switch to this document
+      // We use a small timeout to distinguish single click from double click,
+      // preventing the active document from switching when the user is trying to double click.
+      el.addEventListener('click', (e) => {
+          if (e.detail === 1) { // single click only
+              clickTimeout = setTimeout(() => {
+                  this.setActive(file.id);
+                  clickTimeout = null;
+              }, 250); // wait 250ms to see if it's a double click
+          }
+      });
+
+      // Add sci-fi glass pane identifier styling to the existing header
+      echoHeader.style.position = 'absolute';
+      echoHeader.style.top = '0';
+      echoHeader.style.left = '0';
+      echoHeader.style.width = '100%';
+      echoHeader.style.padding = '8px 16px';
+      echoHeader.style.background = 'rgba(0, 229, 255, 0.1)';
+      echoHeader.style.borderBottom = '1px solid rgba(0, 229, 255, 0.2)';
+      echoHeader.style.fontWeight = 'bold';
+      echoHeader.style.letterSpacing = '1px';
+      echoHeader.style.textTransform = 'uppercase';
 
       pre.style.marginTop = '30px'; // Offset for header
 
