@@ -277,6 +277,33 @@ Drag to change depth`;
       const echoHeader = document.createElement('div');
       echoHeader.className = 'echo-header';
       echoHeader.textContent = file.name;
+
+      const peekBtn = document.createElement('button');
+      peekBtn.className = 'echo-peek-btn';
+      peekBtn.title = 'Peek Document';
+      peekBtn.textContent = '👁️';
+      echoHeader.appendChild(peekBtn);
+
+      peekBtn.addEventListener('click', (e) => {
+          e.stopPropagation(); // prevent click from making it active
+          const isPeeking = el.classList.contains('is-peeking');
+          if (isPeeking) {
+              el.classList.remove('is-peeking');
+              if (this.editorEl) this.editorEl.classList.remove('editor-peek-fade');
+          } else {
+              // Optionally un-peek others if only one peek at a time is desired:
+              // this.echoLayerEl.querySelectorAll('.is-peeking').forEach(doc => doc.classList.remove('is-peeking'));
+              el.classList.add('is-peeking');
+              if (this.editorEl) this.editorEl.classList.add('editor-peek-fade');
+
+              const rect = el.getBoundingClientRect();
+              const evt = new CustomEvent('echo-peek', {
+                detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+              });
+              document.dispatchEvent(evt);
+          }
+      });
+
       el.appendChild(echoHeader);
 
       // Extract text or show image placeholder
@@ -302,6 +329,28 @@ Drag to change depth`;
           const explodeY = Math.sin(angle) * radius;
           el.style.setProperty('--explode-x', `${explodeX}px`);
           el.style.setProperty('--explode-y', `${explodeY}px`);
+
+          // Expose Mode (Grid view) coordinates
+          const cols = Math.ceil(Math.sqrt(totalEchoes));
+          const rows = Math.ceil(totalEchoes / cols);
+
+          const col = index % cols;
+          const row = Math.floor(index / cols);
+
+          const exposeW = window.innerWidth * 0.7; // Spread width
+          const exposeH = window.innerHeight * 0.7; // Spread height
+
+          const spacingX = cols > 1 ? exposeW / (cols - 1) : 0;
+          const spacingY = rows > 1 ? exposeH / (rows - 1) : 0;
+
+          const offsetX = -exposeW / 2;
+          const offsetY = -exposeH / 2;
+
+          const exposeX = offsetX + (col * spacingX);
+          const exposeY = offsetY + (row * spacingY);
+
+          el.style.setProperty('--expose-tx', `${exposeX}px`);
+          el.style.setProperty('--expose-ty', `${exposeY}px`);
       }
 
       if (this.isCascadeView) {

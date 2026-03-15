@@ -1394,6 +1394,33 @@ body.x-ray-active #echo-layer {
     transition: all 0.1s ease-out;
 }
 
+/* Peek Button */
+.echo-peek-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+  padding: 4px;
+  margin-left: auto;
+}
+
+.echo-peek-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.echo-document.is-peeking {
+  z-index: 100 !important;
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(0, 0, 200px) scale(1.1) !important;
+  box-shadow: 0 0 100px rgba(0, 229, 255, 0.8), inset 0 0 50px rgba(0, 229, 255, 0.3) !important;
+  border-color: #00e5ff !important;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 /* Breakthrough State */
 .echo-document.breakthrough {
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), 300px) scale(1.1) !important;
@@ -1440,6 +1467,31 @@ body.alt-focus-active .echo-document:hover {
   box-shadow: 0 0 40px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
   border-color: rgba(0, 229, 255, 0.8);
   z-index: 30;
+}
+
+/* Expose Mode */
+body.expose-active #editor {
+  opacity: 0.1 !important;
+  filter: blur(8px) !important;
+  transform: scale(0.9) translateZ(-100px) !important;
+  pointer-events: none;
+}
+
+body.expose-active .echo-document {
+  opacity: 0.8 !important;
+  filter: blur(1px) !important;
+  transform: translate3d(var(--expose-tx, 0px), var(--expose-ty, 0px), 100px) scale(0.3) !important;
+  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 20;
+}
+
+body.expose-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--expose-tx, 0px), var(--expose-ty, 0px), 250px) scale(0.6) !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.8);
+  z-index: 30 !important;
 }
 
 /* Depth Swap Animation */
