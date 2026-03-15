@@ -509,6 +509,18 @@ document.addEventListener('echo-peek', (e) => {
     }
 });
 
+// Expose Mode Logic
+const exposeToggle = document.getElementById('expose-mode');
+if (exposeToggle) {
+    exposeToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            document.body.classList.add('expose-active');
+        } else {
+            document.body.classList.remove('expose-active');
+        }
+    });
+}
+
 // Ghost Mode Logic
 let ghostMode = false;
 let ghostTimer = null;
