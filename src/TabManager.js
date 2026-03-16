@@ -116,12 +116,42 @@ export class TabManager {
    * Does NOT mutate file state — call adjustDepth() or set file.depth directly
    * before calling this if you want to persist the change.
    * @param {0|1|2} depthLevel
+   * @param {number} oldDepthLevel
    */
-  applyDepth(depthLevel) {
+  applyDepth(depthLevel, oldDepthLevel = null) {
     const zIndex = DEPTH_Z_INDEX[depthLevel] ?? DEPTH_Z_INDEX[1];
     this.editorEl.style.zIndex = zIndex;
     if (this.imageViewerEl) {
       this.imageViewerEl.style.zIndex = zIndex;
+    }
+
+    if (oldDepthLevel !== null && oldDepthLevel !== depthLevel) {
+      // If we crossed the middle layer (depth 1), trigger a splash
+      // Entering or leaving depth 1 means we broke the water surface
+      if (oldDepthLevel === 1 || depthLevel === 1) {
+        const file = this.files.find(f => f.id === this.activeId);
+        const targetEl = (file && file.isImage) ? this.imageViewerEl : this.editorEl;
+
+        if (targetEl) {
+            const rect = targetEl.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+
+            // Add splash animation class
+            targetEl.classList.remove('rain-splash-active');
+            void targetEl.offsetWidth; // Force reflow
+            targetEl.classList.add('rain-splash-active');
+
+            setTimeout(() => {
+                targetEl.classList.remove('rain-splash-active');
+            }, 500);
+
+            const evt = new CustomEvent('document-splash', {
+                detail: { x, y, fileId: this.activeId }
+            });
+            document.dispatchEvent(evt);
+        }
+      }
     }
   }
 
@@ -133,8 +163,9 @@ export class TabManager {
   adjustDepth(delta) {
     const file = this.files.find(f => f.id === this.activeId);
     if (!file) return;
+    const oldDepth = file.depth;
     file.depth = Math.max(0, Math.min(2, file.depth + delta));
-    this.applyDepth(file.depth);
+    this.applyDepth(file.depth, oldDepth);
     this._renderTabs();
   }
 
@@ -248,10 +279,11 @@ Drag to change depth`;
         }
 
         if (file.depth !== newDepth) {
+          const oldDepth = file.depth;
           file.depth = newDepth;
           // Apply immediately if it's the active tab
           if (file.id === this.activeId) {
-            this.applyDepth(newDepth);
+            this.applyDepth(newDepth, oldDepth);
           }
           this._renderTabs();
         }
