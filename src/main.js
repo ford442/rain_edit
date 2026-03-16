@@ -509,6 +509,14 @@ document.addEventListener('echo-peek', (e) => {
     }
 });
 
+// Document Splash Custom Event Bridge
+document.addEventListener('document-splash', (e) => {
+    if (raindrops && e.detail) {
+        // Create a large splash effect
+        raindrops.splash(e.detail.x, e.detail.y, 15);
+    }
+});
+
 // Expose Mode Logic
 const exposeToggle = document.getElementById('expose-mode');
 if (exposeToggle) {

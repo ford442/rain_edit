@@ -1039,6 +1039,30 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
     100% { transform: scale(0.95); opacity: 0.6; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); }
 }
 
+/* Splash Animation */
+@keyframes rain-splash {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 229, 255, 0);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 40px rgba(0, 229, 255, 0.8), 0 0 80px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.5);
+    border-color: rgba(0, 229, 255, 1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 229, 255, 0);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.rain-splash-active {
+  animation: rain-splash 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+  z-index: 100 !important;
+}
+
 /* Editor Polish */
 .monaco-editor .margin {
     background: rgba(0, 0, 0, 0.1) !important;
