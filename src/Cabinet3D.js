@@ -274,6 +274,7 @@ export class Cabinet3D {
 
   /**
    * Populate file cubes around a category cube after the API responds.
+   * For shaders with coordinates, positions are mapped from coordinate (0-1000) to 3D space.
    * @param {number} catIndex
    * @param {Array}  files
    */
@@ -282,17 +283,38 @@ export class Cabinet3D {
     this._loadedCats.add(catIndex);
 
     const catMesh  = this._catMeshes[catIndex];
+    const catName = STORAGE_CATEGORIES[catIndex];
     const maxShown = Math.min(files.length, 32); // cap at 32 to keep geometry count manageable; remaining files are not lost — re-fetching the category always returns the full list
 
     const geo = new THREE.BoxGeometry(FILE_CUBE_SIZE, FILE_CUBE_SIZE, FILE_CUBE_SIZE);
 
     for (let i = 0; i < maxShown; i++) {
-      const phi   = Math.acos(1 - (2 * (i + 0.5)) / maxShown); // Fibonacci sphere
-      const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+      const fileData = files[i];
+      let x, y, z;
 
-      const x = FILE_ORBIT_R * Math.sin(phi) * Math.cos(theta);
-      const y = FILE_ORBIT_R * Math.sin(phi) * Math.sin(theta);
-      const z = FILE_ORBIT_R * Math.cos(phi);
+      // Check if file has a coordinate (for shaders) - maps 0-1000 to 3D position
+      if (fileData.coordinate !== undefined && fileData.coordinate !== null) {
+        // Map coordinate (0-1000) to a spherical shell position
+        const coord = Math.max(0, Math.min(1000, fileData.coordinate));
+        const normalizedCoord = coord / 1000; // 0 to 1
+        
+        // Create a spiral distribution based on coordinate
+        const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // Golden angle for even distribution
+        const theta = normalizedCoord * Math.PI * 4; // 2 full rotations
+        const phi = goldenAngle * i;
+        
+        x = FILE_ORBIT_R * Math.sin(theta) * Math.cos(phi);
+        y = FILE_ORBIT_R * Math.sin(theta) * Math.sin(phi);
+        z = FILE_ORBIT_R * Math.cos(theta);
+      } else {
+        // Default Fibonacci sphere distribution
+        const phi   = Math.acos(1 - (2 * (i + 0.5)) / maxShown);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+
+        x = FILE_ORBIT_R * Math.sin(phi) * Math.cos(theta);
+        y = FILE_ORBIT_R * Math.sin(phi) * Math.sin(theta);
+        z = FILE_ORBIT_R * Math.cos(phi);
+      }
 
       const mat  = new THREE.MeshStandardMaterial({
         color: CATEGORY_COLORS[catIndex % CATEGORY_COLORS.length],
@@ -304,7 +326,7 @@ export class Cabinet3D {
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(x, y, z);
-      mesh.userData = { type: 'file', catIndex, fileData: files[i] };
+      mesh.userData = { type: 'file', catIndex, fileData, catName };
       catMesh.add(mesh); // parented to the category cube
       this._fileMeshes.push(mesh);
     }
@@ -373,7 +395,7 @@ export class Cabinet3D {
     // Lazy-load files for this category
     if (!this._loadedCats.has(catIndex)) {
       this.storageAPI
-        .fetchCategory(catName)
+        .getCategoryFiles(catName)
         .then((files) => {
           const list = Array.isArray(files) ? files : (files.items || files.data || []);
           this._buildFileCubes(catIndex, list);
@@ -389,6 +411,7 @@ export class Cabinet3D {
 
   /**
    * Open a file in the Monaco editor via TabManager.
+   * Dispatches 'fileCubeClicked' event for main.js to handle with depth focus logic.
    * @param {number} catIndex
    * @param {object} fileData - Metadata object from the API.
    */
@@ -397,43 +420,19 @@ export class Cabinet3D {
     const id      = fileData.id || fileData._id || fileData.name || 'unknown';
     const filename = fileData.filename || fileData.name || `${catName}-${id}`;
 
-    // For images, we can construct the direct URL to the backend
-    const isImage = catName === 'images' ||
-                    filename.toLowerCase().endsWith('.png') ||
-                    filename.toLowerCase().endsWith('.jpg') ||
-                    filename.toLowerCase().endsWith('.jpeg') ||
-                    filename.toLowerCase().endsWith('.gif') ||
-                    filename.toLowerCase().endsWith('.webp');
+    // Dispatch custom event for main.js to handle with depth focus
+    const event = new CustomEvent('fileCubeClicked', {
+      detail: { 
+        id, 
+        type: catName, 
+        name: filename,
+        fileData,
+        catIndex
+      }
+    });
+    window.dispatchEvent(event);
 
-    this._hint.textContent = `Fetching ${id}…`;
-
-    if (isImage) {
-      // For images, we just construct the URL and open it directly
-      const url = `${this.storageAPI.baseUrl}/api/songs/${encodeURIComponent(id)}`;
-      this.tabManager.addFile(filename, url, 'image');
-      const newId = this.tabManager.files.length > 0
-        ? this.tabManager.files[this.tabManager.files.length - 1].id
-        : null;
-      if (newId !== null) this.tabManager.setActive(newId);
-      this.hide();
-      return;
-    }
-
-    this.storageAPI
-      .fetchFileContent(id, catName)
-      .then((data) => {
-        const content  = data.code || data.content || data.text || JSON.stringify(data, null, 2);
-        const language = this._detectLanguage(catName, data);
-        this.tabManager.addFile(filename, content, language);
-        const newId = this.tabManager.files.length > 0
-          ? this.tabManager.files[this.tabManager.files.length - 1].id
-          : null;
-        if (newId !== null) this.tabManager.setActive(newId);
-        this.hide();
-      })
-      .catch(() => {
-        this._hint.textContent = `Could not fetch file (check backend URL)`;
-      });
+    this._hint.textContent = `Opening ${filename}…`;
   }
 
   /**

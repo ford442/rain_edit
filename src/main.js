@@ -156,6 +156,53 @@ if (cabinetBtn) {
   cabinetBtn.addEventListener('click', () => cabinet3D.toggle());
 }
 
+// Listen for 3D Cabinet file cube clicks with depth focus logic
+window.addEventListener('fileCubeClicked', async (e) => {
+  const { id, type, name } = e.detail;
+  
+  console.log(`Fetching ${type}: ${name}...`);
+  // Show loading cursor
+  document.body.style.cursor = 'wait';
+
+  try {
+    // 1. Fetch the code/json from the backend
+    const fileData = await storageAPI.getFileContent(id, type);
+    
+    // 2. Add it to the Tab Manager
+    const newFileId = tabManager.addFile(name, fileData.content, fileData.language);
+    
+    // 3. DEPTH FOCUS LOGIC (The Immersive Step)
+    // Push all current tabs backward into the rain (Depth 1)
+    tabManager.files.forEach(file => {
+      if (file.id !== newFileId) {
+        file.depth = 1; // Pushed into the middle rain layer
+      }
+    });
+
+    // Pull the newly opened file completely to the front (Depth 2)
+    const newFile = tabManager.files.find(f => f.id === newFileId);
+    if (newFile) {
+      newFile.depth = 2; // Unobscured by rain
+    }
+
+    // Apply the visual depth to the editor container immediately
+    tabManager.setActive(newFileId);
+    tabManager.applyDepth(2);
+    
+    // 4. Update Backend Play Count
+    storageAPI.recordPlay(id, type);
+
+    // 5. Hide the 3D Cabinet so the user can see the editor
+    cabinet3D.hide();
+
+  } catch (error) {
+    console.error('Failed to load file:', error);
+    alert(`Failed to load ${name}. Check console for details.`);
+  } finally {
+    document.body.style.cursor = 'default';
+  }
+});
+
 // set canvas size to match editor area
 function resizeCanvases(){
   const rect = editorEl.getBoundingClientRect();
