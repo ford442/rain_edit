@@ -334,10 +334,31 @@ async function initLayers(){
 initLayers();
 
 // parallax from mouse
+let isFlashlightActive = false;
+
+document.addEventListener('mousedown', (e) => {
+    // Middle mouse button activates Flashlight mode
+    if (e.button === 1) {
+        isFlashlightActive = true;
+        e.preventDefault(); // Prevent default middle-click scroll behavior
+    }
+});
+
+document.addEventListener('mouseup', (e) => {
+    if (e.button === 1) {
+        isFlashlightActive = false;
+    }
+});
+
 document.addEventListener('mousemove', (e) => {
   const rect = editorEl.getBoundingClientRect();
   const x = ( (e.clientX - rect.left) / rect.width ) * 2 - 1;
   const y = ( (e.clientY - rect.top) / rect.height ) * 2 - 1;
+
+  // Flashlight Effect: clear a large area of fog
+  if (isFlashlightActive && fogManager) {
+      fogManager.clearFogAt(e.clientX, e.clientY, 250);
+  }
   if(bgLayer) bgLayer.setParallax(x*0.4, y*0.4);
   if(fgLayer) fgLayer.setParallax(x, y);
 
@@ -676,6 +697,7 @@ editor.onDidChangeCursorPosition((e) => {
 
           if (currentWord && currentWord.length > 3) {
               const lowerWord = currentWord.toLowerCase();
+              let matchedEchoes = [];
 
               tabManager.files.forEach(file => {
                   if (file.id !== tabManager.activeId) {
@@ -697,10 +719,19 @@ editor.onDidChangeCursorPosition((e) => {
                               // Override the tz variable to pull it physically closer before the pulse animation takes over
                               echoEl.style.setProperty('--tz-override', '1');
                               echoEl.style.setProperty('--tz', '30px');
+                              matchedEchoes.push(echoEl.getBoundingClientRect());
                           }
                       }
                   }
               });
+
+              if (connectionManager) {
+                  connectionManager.setEchoFocus(matchedEchoes);
+              }
+          } else {
+              if (connectionManager) {
+                  connectionManager.setEchoFocus([]);
+              }
           }
       }
   }

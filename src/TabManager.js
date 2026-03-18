@@ -305,6 +305,12 @@ Drag to change depth`;
       el.dataset.id = file.id;
       el.dataset.index = index; // Store for CSS vars restore later
 
+      let tint = '0deg'; // default cyan
+      if (file.name.endsWith('.js')) tint = '60deg'; // yellow
+      else if (file.name.endsWith('.css')) tint = '200deg'; // blue
+      else if (file.name.endsWith('.html') || file.name.endsWith('.md')) tint = '320deg'; // pink/orange
+      el.style.setProperty('--echo-tint', tint);
+
       // Add a header so users know what this file is
       const echoHeader = document.createElement('div');
       echoHeader.className = 'echo-header';
@@ -351,6 +357,16 @@ Drag to change depth`;
       code.textContent = contentStr;
       pre.appendChild(code);
       el.appendChild(pre);
+
+      // Ghost Scroll feature: allow scrolling without bringing document to front
+      pre.addEventListener('wheel', (e) => {
+        e.stopPropagation(); // prevent main editor from scrolling
+        // Dispatch echo-peek to clear fog locally
+        const evt = new CustomEvent('echo-peek', {
+          detail: { x: e.clientX, y: e.clientY }
+        });
+        document.dispatchEvent(evt);
+      });
 
       // Calculate Exploded Orbit View variables
       const totalEchoes = inactiveFiles.length;
