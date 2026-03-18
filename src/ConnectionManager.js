@@ -7,6 +7,7 @@ export class ConnectionManager {
         this.height = canvas.height;
         this.editorFocus = null; // { word: string, x: number, y: number }
         this.cardKeywords = new Map(); // Map<HTMLElement, Set<string>>
+        this.echoTargets = []; // Array of DOMRects for matched echo documents
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -76,90 +77,96 @@ export class ConnectionManager {
         });
     }
 
+    setEchoFocus(targets) {
+        this.echoTargets = targets || [];
+    }
+
     draw(time) {
         if (!this.ctx) return;
         this.ctx.clearRect(0, 0, this.width, this.height);
 
-        if (!this.referenceManager) return;
-        const cards = this.referenceManager.getCards();
-        if (!cards || cards.length === 0) return;
+        // ... we don't return early if no cards exist, because we might still draw echo targets
+        const cards = this.referenceManager ? this.referenceManager.getCards() : [];
+        let cardData = [];
 
-        // Ensure keywords map is ready
-        if (!this.cardKeywords) {
-            this.cardKeywords = new Map();
-        }
+        if (cards && cards.length > 0) {
+            // Ensure keywords map is ready
+            if (!this.cardKeywords) {
+                this.cardKeywords = new Map();
+            }
 
-        // If cache is empty but we have cards, update it
-        if (this.cardKeywords.size === 0 && cards.length > 0) {
-            this.updateKeywords();
-        }
+            // If cache is empty but we have cards, update it
+            if (this.cardKeywords.size === 0) {
+                this.updateKeywords();
+            }
 
-        // Map current positions
-        const cardData = cards.map(card => {
-            const rect = card.getBoundingClientRect();
-            return {
-                x: rect.left + rect.width / 2,
-                y: rect.top + rect.height / 2,
-                words: this.cardKeywords.get(card) || new Set(),
-                element: card
-            };
-        });
+            // Map current positions
+            cardData = cards.map(card => {
+                const rect = card.getBoundingClientRect();
+                return {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2,
+                    words: this.cardKeywords.get(card) || new Set(),
+                    element: card
+                };
+            });
 
-        this.ctx.lineWidth = 1.5;
-        this.ctx.lineCap = 'round';
+            this.ctx.lineWidth = 1.5;
+            this.ctx.lineCap = 'round';
 
-        // Draw Inter-Card connections
-        this.ctx.setLineDash([2, 8]); // Subtle dash
-        this.ctx.lineDashOffset = -time * 5; // Slow movement
+            // Draw Inter-Card connections
+            this.ctx.setLineDash([2, 8]); // Subtle dash
+            this.ctx.lineDashOffset = -time * 5; // Slow movement
 
-        for (let i = 0; i < cardData.length; i++) {
-            for (let j = i + 1; j < cardData.length; j++) {
-                const a = cardData[i];
-                const b = cardData[j];
+            for (let i = 0; i < cardData.length; i++) {
+                for (let j = i + 1; j < cardData.length; j++) {
+                    const a = cardData[i];
+                    const b = cardData[j];
 
-                // Check intersection of words
-                let shared = 0;
-                // Optimization: Iterate over smaller set
-                const [small, large] = a.words.size < b.words.size ? [a.words, b.words] : [b.words, a.words];
-                for (let w of small) {
-                    if (large.has(w) && w.length > 4) shared++;
-                }
+                    // Check intersection of words
+                    let shared = 0;
+                    // Optimization: Iterate over smaller set
+                    const [small, large] = a.words.size < b.words.size ? [a.words, b.words] : [b.words, a.words];
+                    for (let w of small) {
+                        if (large.has(w) && w.length > 4) shared++;
+                    }
 
-                // Force connections if cards are very close (visual proximity)
-                const dx = a.x - b.x;
-                const dy = a.y - b.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 300) {
-                    shared += 1; // Boost proximity
-                }
+                    // Force connections if cards are very close (visual proximity)
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 300) {
+                        shared += 1; // Boost proximity
+                    }
 
-                if (shared > 0) {
-                    // Calculate opacity based on shared count and time
-                    // Pulse
-                    const baseOpacity = Math.min(0.4, shared * 0.15);
-                    const pulse = (Math.sin(time * 2 + i * 13 + j * 7) * 0.3 + 0.7);
-                    const opacity = baseOpacity * pulse;
+                    if (shared > 0) {
+                        // Calculate opacity based on shared count and time
+                        // Pulse
+                        const baseOpacity = Math.min(0.4, shared * 0.15);
+                        const pulse = (Math.sin(time * 2 + i * 13 + j * 7) * 0.3 + 0.7);
+                        const opacity = baseOpacity * pulse;
 
-                    this.ctx.strokeStyle = `rgba(0, 229, 255, ${opacity})`;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(a.x, a.y);
-                    this.ctx.lineTo(b.x, b.y);
-                    this.ctx.stroke();
+                        this.ctx.strokeStyle = `rgba(0, 229, 255, ${opacity})`;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(a.x, a.y);
+                        this.ctx.lineTo(b.x, b.y);
+                        this.ctx.stroke();
 
-                    // Draw "data packets" moving along the line occasionally
-                    const packetTime = (time + i + j) % 4; // 4 second cycle
-                    if (packetTime < 1) {
-                         const t = packetTime; // 0 to 1
-                         const px = a.x + (b.x - a.x) * t;
-                         const py = a.y + (b.y - a.y) * t;
+                        // Draw "data packets" moving along the line occasionally
+                        const packetTime = (time + i + j) % 4; // 4 second cycle
+                        if (packetTime < 1) {
+                             const t = packetTime; // 0 to 1
+                             const px = a.x + (b.x - a.x) * t;
+                             const py = a.y + (b.y - a.y) * t;
 
-                         this.ctx.save();
-                         this.ctx.setLineDash([]);
-                         this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.2})`;
-                         this.ctx.beginPath();
-                         this.ctx.arc(px, py, 2, 0, Math.PI * 2);
-                         this.ctx.fill();
-                         this.ctx.restore();
+                             this.ctx.save();
+                             this.ctx.setLineDash([]);
+                             this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.2})`;
+                             this.ctx.beginPath();
+                             this.ctx.arc(px, py, 2, 0, Math.PI * 2);
+                             this.ctx.fill();
+                             this.ctx.restore();
+                        }
                     }
                 }
             }
@@ -174,43 +181,61 @@ export class ConnectionManager {
             this.ctx.shadowBlur = 10;
             this.ctx.shadowColor = 'rgba(255, 215, 0, 0.8)'; // Gold glow
 
+            // Helper to draw a bezier flow line
+            const drawFlowLine = (targetX, targetY, isEcho = false) => {
+                const dist = Math.hypot(targetX - x, targetY - y);
+                // Reduce distance scaling for echoes to make them more visible across the screen
+                const opacity = isEcho ? Math.min(1.0, 1500 / (dist + 50)) : Math.min(1.0, 1200 / (dist + 100));
+
+                const strokeColor = isEcho ? `rgba(0, 229, 255, ${opacity})` : `rgba(255, 215, 0, ${opacity})`;
+
+                this.ctx.strokeStyle = strokeColor;
+                this.ctx.lineWidth = isEcho ? 1.5 : 2;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+
+                // Bezier curve for more organic feel
+                const cx = (x + targetX) / 2;
+                const cy = (y + targetY) / 2 - 50;
+                this.ctx.quadraticCurveTo(cx, cy, targetX, targetY);
+
+                this.ctx.stroke();
+
+                // Data Flow animation
+                const flowTime = (time * 2) % 1;
+                const t = flowTime; // t from 0 to 1
+
+                // Quadratic bezier point formula: P(t) = (1-t)^2*P0 + 2*(1-t)*t*P1 + t^2*P2
+                const px = (1 - t) * (1 - t) * x + 2 * (1 - t) * t * cx + t * t * targetX;
+                const py = (1 - t) * (1 - t) * y + 2 * (1 - t) * t * cy + t * t * targetY;
+
+                this.ctx.save();
+                this.ctx.setLineDash([]);
+                this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.3})`;
+                this.ctx.shadowBlur = 15;
+                this.ctx.shadowColor = 'rgba(255, 255, 255, 1)';
+                this.ctx.beginPath();
+                this.ctx.arc(px, py, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
+            };
+
+            // Draw lines to matched Reference Cards
             cardData.forEach(node => {
                 if (node.words.has(word)) {
-                    // Draw connection
-                    const dist = Math.hypot(node.x - x, node.y - y);
-                    const opacity = Math.min(1.0, 1200 / (dist + 100)); // Fade with distance
-
-                    this.ctx.strokeStyle = `rgba(255, 215, 0, ${opacity})`; // Gold color
-                    this.ctx.lineWidth = 2;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(x, y);
-
-                    // Bezier curve for more organic feel
-                    const cx = (x + node.x) / 2;
-                    const cy = (y + node.y) / 2 - 50;
-                    this.ctx.quadraticCurveTo(cx, cy, node.x, node.y);
-
-                    this.ctx.stroke();
-
-                    // Data Flow animation
-                    const flowTime = (time * 2) % 1;
-                    const t = flowTime; // t from 0 to 1
-
-                    // Quadratic bezier point formula: P(t) = (1-t)^2*P0 + 2*(1-t)*t*P1 + t^2*P2
-                    const px = (1 - t) * (1 - t) * x + 2 * (1 - t) * t * cx + t * t * node.x;
-                    const py = (1 - t) * (1 - t) * y + 2 * (1 - t) * t * cy + t * t * node.y;
-
-                    this.ctx.save();
-                    this.ctx.setLineDash([]);
-                    this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.3})`;
-                    this.ctx.shadowBlur = 15;
-                    this.ctx.shadowColor = 'rgba(255, 255, 255, 1)';
-                    this.ctx.beginPath();
-                    this.ctx.arc(px, py, 3, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    this.ctx.restore();
+                    drawFlowLine(node.x, node.y, false);
                 }
             });
+
+            // Draw lines to matched Echo Documents
+            if (this.echoTargets && this.echoTargets.length > 0) {
+                this.ctx.shadowColor = 'rgba(0, 229, 255, 0.8)'; // Cyan glow for echoes
+                this.echoTargets.forEach(rect => {
+                    const tx = rect.left + rect.width / 2;
+                    const ty = rect.top + rect.height / 2;
+                    drawFlowLine(tx, ty, true);
+                });
+            }
 
             // Reset
             this.ctx.setLineDash([]);
