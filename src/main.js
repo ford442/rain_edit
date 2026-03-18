@@ -369,6 +369,12 @@ document.addEventListener('mousemove', (e) => {
 
       echo.style.setProperty('--tx', `${depthOffset * 2 + moveX}px`);
       echo.style.setProperty('--ty', `${depthOffset * 2 + moveY}px`);
+
+      // Holographic Tilt
+      const rotX = y * 5 * depthOffset;
+      const rotY = -x * 5 * depthOffset;
+      echo.style.setProperty('--rot-x', `${rotX}deg`);
+      echo.style.setProperty('--rot-y', `${rotY}deg`);
     });
 
     // Magnifying Glass Logic
@@ -987,6 +993,19 @@ editor.onDidChangeModelContent((e) => {
     e.changes.forEach(change => {
         stormCharCount += change.text.length;
     });
+
+    // Innovate Keystroke Ripple Pulse
+    if (echoLayerEl) {
+        const echoes = echoLayerEl.querySelectorAll('.echo-document');
+        echoes.forEach(echo => {
+            echo.classList.remove('ripple-active');
+            void echo.offsetWidth; // Force reflow
+            echo.classList.add('ripple-active');
+            setTimeout(() => {
+                echo.classList.remove('ripple-active');
+            }, 500);
+        });
+    }
 });
 
 setInterval(() => {
