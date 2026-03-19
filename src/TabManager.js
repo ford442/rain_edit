@@ -30,14 +30,41 @@ export class TabManager {
     this.activeId = null;
     this._nextId = 1;
     this.isCascadeView = false;
+    this.isOrbitView = false;
   }
 
   toggleCascadeView() {
     this.isCascadeView = !this.isCascadeView;
+    if (this.isCascadeView) {
+      this.isOrbitView = false;
+      document.body.classList.remove('orbit-active');
+      const orbitBtn = document.getElementById('btn-orbit-view');
+      if (orbitBtn) orbitBtn.classList.remove('active');
+    }
     document.body.classList.toggle('cascade-active', this.isCascadeView);
     const btn = document.getElementById('btn-cascade-view');
     if (btn) {
         if (this.isCascadeView) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    }
+    this._renderEchoes();
+  }
+
+  toggleOrbitView() {
+    this.isOrbitView = !this.isOrbitView;
+    if (this.isOrbitView) {
+      this.isCascadeView = false;
+      document.body.classList.remove('cascade-active');
+      const cascadeBtn = document.getElementById('btn-cascade-view');
+      if (cascadeBtn) cascadeBtn.classList.remove('active');
+    }
+    document.body.classList.toggle('orbit-active', this.isOrbitView);
+    const btn = document.getElementById('btn-orbit-view');
+    if (btn) {
+        if (this.isOrbitView) {
             btn.classList.add('active');
         } else {
             btn.classList.remove('active');
@@ -401,7 +428,19 @@ Drag to change depth`;
           el.style.setProperty('--expose-ty', `${exposeY}px`);
       }
 
-      if (this.isCascadeView) {
+      if (this.isOrbitView) {
+        // Orbit View (3D Carousel Cylindrical) positions
+        const angle = (index / totalEchoes) * 360; // Degrees
+        const orbitRadius = Math.max(500, totalEchoes * 120); // Dynamic radius based on file count
+
+        el.style.setProperty('--orbit-rot-y', `${angle}deg`);
+        el.style.setProperty('--orbit-tz', `${orbitRadius}px`);
+
+        // Remove standard tx, ty offsets to center the carousel properly
+        el.style.setProperty('--tx', `0px`);
+        el.style.setProperty('--ty', `0px`);
+        el.style.setProperty('--tz', `0px`);
+      } else if (this.isCascadeView) {
         // Cascade positions
         const vw = window.innerWidth;
         const tx = (vw * 0.3) + (index * 40);
@@ -475,8 +514,13 @@ Drag to change depth`;
           if (this.editorEl) {
               this.editorEl.classList.add('editor-peek-fade');
               // Bring forward while hovering the doc itself
-              if (!this.isCascadeView) {
+              if (!this.isCascadeView && !this.isOrbitView) {
                   el.style.setProperty('--tz', '100px');
+              } else if (this.isOrbitView) {
+                  // Push out slightly to emphasize selection in orbit view
+                  const tEchoes = inactiveFiles.length;
+                  const oRad = Math.max(500, tEchoes * 120);
+                  el.style.setProperty('--orbit-tz', `${oRad + 100}px`);
               }
               // Dispatch event to clear fog
               const rect = el.getBoundingClientRect();
@@ -491,7 +535,11 @@ Drag to change depth`;
           if (this.editorEl) {
               this.editorEl.classList.remove('editor-peek-fade');
               // Restore Z
-              if (!this.isCascadeView) {
+              if (this.isOrbitView) {
+                  const tEchoes = inactiveFiles.length;
+                  const oRad = Math.max(500, tEchoes * 120);
+                  el.style.setProperty('--orbit-tz', `${oRad}px`);
+              } else if (!this.isCascadeView) {
                   const idx = parseInt(el.dataset.index || 0);
                   el.style.setProperty('--tz', `calc(-${idx * 50}px + var(--stack-z, 0px))`);
               }
