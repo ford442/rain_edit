@@ -427,6 +427,13 @@ document.addEventListener('mousemove', (e) => {
   // Parallax for Echo Layers (Ghost Documents)
   if (echoLayerEl && !tabManager.isCascadeView) {
     const echoes = echoLayerEl.querySelectorAll('.echo-document');
+
+    if (tabManager.isOrbitView) {
+      // Rotate entire echo layer based on horizontal mouse position
+      const orbitRot = -x * 360;
+      echoLayerEl.style.setProperty('--orbit-global-rot', `${orbitRot}deg`);
+    }
+
     echoes.forEach((echo, index) => {
       // Don't apply parallax if peeking (handled by CSS)
       if (echo.classList.contains('peek')) return;
@@ -498,6 +505,11 @@ document.getElementById('btn-depth-back').addEventListener('click', () => { tabM
 const btnCascade = document.getElementById('btn-cascade-view');
 if (btnCascade) {
     btnCascade.addEventListener('click', () => { tabManager.toggleCascadeView(); });
+}
+
+const btnOrbit = document.getElementById('btn-orbit-view');
+if (btnOrbit) {
+    btnOrbit.addEventListener('click', () => { tabManager.toggleOrbitView(); });
 }
 
 const opacitySlider = document.getElementById('editor-opacity');
@@ -1192,6 +1204,7 @@ function triggerSonar() {
 
     editorEl.style.setProperty('--sonar-x', `${sonarX}px`);
     editorEl.style.setProperty('--sonar-y', `${sonarY}px`);
+
     editorEl.classList.add('sonar-active');
 
 
