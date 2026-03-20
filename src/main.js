@@ -516,6 +516,13 @@ const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
   updateFocusVisuals();
 });
+
+// Link editor scrolling to echo layer for 3D parallax effect
+editor.onDidScrollChange((e) => {
+    if (echoLayerEl) {
+        echoLayerEl.style.setProperty('--editor-scroll-y', `${e.scrollTop}px`);
+    }
+});
 // Initial set handled by updateFocusVisuals call later or manually
 // editorEl.style.opacity = opacitySlider.value;
 
