@@ -338,6 +338,14 @@ Drag to change depth`;
       else if (file.name.endsWith('.html') || file.name.endsWith('.md')) tint = '320deg'; // pink/orange
       el.style.setProperty('--echo-tint', tint);
 
+      // Set parallax factor for vertical scrolling (deeper = moves slower)
+      const parallaxFactor = Math.max(0.05, 0.3 - (index * 0.08));
+      el.style.setProperty('--parallax-factor', parallaxFactor);
+
+      if (index === 0) {
+          el.classList.add('echo-recent');
+      }
+
       // Add a header so users know what this file is
       const echoHeader = document.createElement('div');
       echoHeader.className = 'echo-header';
