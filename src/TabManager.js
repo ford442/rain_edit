@@ -393,6 +393,19 @@ Drag to change depth`;
       pre.appendChild(code);
       el.appendChild(pre);
 
+      // Dynamic Opacity and Blur based on depth index via CSS variables
+      // (This avoids inline style specificity issues that break hover states)
+      const baseOpacity = Math.max(0.05, 0.4 - (index * 0.15));
+      const baseBlur = Math.min(10, 2 + (index * 2));
+      el.style.setProperty('--base-opacity', baseOpacity);
+      el.style.setProperty('--base-blur', `${baseBlur}px`);
+
+      // Add a CSS-animated scanning line effect to the document
+      const scanLine = document.createElement('div');
+      scanLine.className = 'scan-line';
+      scanLine.style.setProperty('--index', index);
+      el.appendChild(scanLine);
+
       // Ghost Scroll feature: allow scrolling without bringing document to front
       pre.addEventListener('wheel', (e) => {
         e.stopPropagation(); // prevent main editor from scrolling
