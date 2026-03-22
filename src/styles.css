@@ -1406,16 +1406,38 @@ body.x-ray-active #echo-layer {
   content: '';
   position: absolute;
   inset: -1px;
-  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0, 229, 255, 0.15) 0%, transparent 500px);
+  background: radial-gradient(circle at var(--mouse-local-x, 50%) var(--mouse-local-y, 50%), rgba(255, 255, 255, 0.15) 0%, transparent 150px);
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s ease;
+  mix-blend-mode: screen;
 }
 
 .echo-document:hover::before {
   opacity: 1;
+}
+
+.echo-document .scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+  animation: scan-line 4s linear infinite;
+  animation-delay: calc(var(--index, 0) * 0.5s);
+  z-index: 5;
+  pointer-events: none;
+}
+
+@keyframes scan-line {
+  0% { top: -10%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
 }
 
 .echo-document::after {
@@ -1546,8 +1568,8 @@ body.x-ray-active #echo-layer {
   color: #fff;
   text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
   z-index: 30 !important;
-  /* "Ghost Peeking" forward movement */
-  transform: translate3d(calc(var(--tx, 0px) * 0.5), calc(var(--ty, 0px) * 0.5), 100px) scale(1.05) !important;
+  /* "Ghost Peeking" forward movement and 3D tilt */
+  transform: translate3d(calc(var(--tx, 0px) * 0.5), calc(var(--ty, 0px) * 0.5), 150px) rotateX(var(--hover-rot-x, 0deg)) rotateY(var(--hover-rot-y, 0deg)) scale(1.1) !important;
   mask-image: none;
   -webkit-mask-image: none;
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(0, 229, 255, 0.15);
@@ -1661,6 +1683,33 @@ body.expose-active .echo-document:hover {
   z-index: 50;
   box-shadow: -20px 0 50px rgba(0,0,0,0.8);
   border-left: 2px solid rgba(0,229,255,0.8);
+}
+
+/* Scattered View */
+body.scattered-active #editor, body.scattered-active #image-viewer {
+  transform: scale(0.7) translateY(10%) translateZ(-50px);
+  filter: blur(3px);
+  opacity: 0.6;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.scattered-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1px);
+  transform: translate3d(var(--scatter-x, 0px), var(--scatter-y, 0px), var(--scatter-z, 0px)) rotateZ(var(--scatter-rot, 0deg));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+  z-index: 20;
+}
+
+body.scattered-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--scatter-x, 0px), var(--scatter-y, 0px), calc(var(--scatter-z, 0px) + 100px)) rotateZ(var(--scatter-rot, 0deg)) rotateX(var(--hover-rot-x, 0deg)) rotateY(var(--hover-rot-y, 0deg)) scale(1.15) !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.8);
+  z-index: 30 !important;
 }
 
 /* Orbit View */

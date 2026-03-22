@@ -512,6 +512,11 @@ if (btnOrbit) {
     btnOrbit.addEventListener('click', () => { tabManager.toggleOrbitView(); });
 }
 
+const btnScattered = document.getElementById('btn-scattered-view');
+if (btnScattered) {
+    btnScattered.addEventListener('click', () => { tabManager.toggleScatteredView(); });
+}
+
 const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
   updateFocusVisuals();
