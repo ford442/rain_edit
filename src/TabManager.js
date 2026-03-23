@@ -122,7 +122,7 @@ export class TabManager {
       model = this.monaco.editor.createModel(content, language);
     }
 
-    this.files.push({ id, name, model, depth: 1, isImage, url: isImage ? content : null });
+    this.files.push({ id, name, model, depth: 1, isImage, language, url: isImage ? content : null });
     this._renderTabs();
     return id;
   }
@@ -422,15 +422,29 @@ Drag to change depth`;
 
       const pre = document.createElement('pre');
       const code = document.createElement('code');
-      code.textContent = contentStr;
+      if (file.isImage) {
+          code.textContent = contentStr;
+      } else {
+          // Asynchronous syntax highlighting for background code blocks
+          code.textContent = 'Loading...'; // Placeholder
+          this.monaco.editor.colorize(contentStr, file.language || 'javascript', {}).then((html) => {
+              // Only update if the element is still in the DOM (the tab manager might have re-rendered)
+              if (el.isConnected) {
+                  code.innerHTML = html;
+              }
+          }).catch((err) => {
+              console.warn('Failed to colorize background document:', err);
+              code.textContent = contentStr; // Fallback to plain text
+          });
+      }
       pre.appendChild(code);
       el.appendChild(pre);
 
       // Add a CSS-animated scanning line effect to the document
-      const scanLine = document.createElement('div');
-      scanLine.className = 'scan-line';
-      scanLine.style.setProperty('--index', index);
-      el.appendChild(scanLine);
+      const scanLineDiv = document.createElement('div');
+      scanLineDiv.className = 'scan-line';
+      scanLineDiv.style.setProperty('--index', index);
+      el.appendChild(scanLineDiv);
 
       // Dynamic Opacity and Blur based on depth index via CSS variables
       // (This avoids inline style specificity issues that break hover states)

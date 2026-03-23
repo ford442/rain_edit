@@ -1364,24 +1364,25 @@ body.x-ray-active #echo-layer {
   overflow: hidden;
 
   /* Modern styling for obscured documents with noise texture */
-  background-color: rgba(8, 12, 20, 0.6);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(8, 12, 20, 0.8), rgba(8, 12, 20, 0.3));
+  background-color: rgba(10, 15, 25, 0.7);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(20, 30, 45, 0.9), rgba(10, 15, 25, 0.4));
   background-blend-mode: overlay;
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
 
-  border: 1px solid rgba(0, 229, 255, 0.15);
-  border-top: 1px solid rgba(0, 229, 255, 0.4);
-  border-left: 1px solid rgba(0, 229, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 24px;
   padding: 32px;
 
   /* Enhanced glowing edge and depth shadow */
   box-shadow:
-    0 25px 70px rgba(0, 0, 0, 0.9),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    inset 0 0 40px rgba(0, 229, 255, 0.08),
-    0 0 20px rgba(0, 229, 255, 0.1);
+    0 30px 80px rgba(0, 0, 0, 0.95),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    inset 0 0 60px rgba(0, 229, 255, 0.1),
+    inset 0 0 10px rgba(255, 255, 255, 0.05),
+    0 0 25px rgba(0, 229, 255, 0.15);
 
   transition: all 0.5s ease-out;
 
@@ -1489,16 +1490,21 @@ body.x-ray-active #echo-layer {
   margin: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
-  background: rgba(0, 5, 10, 0.4);
+  background: transparent;
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   font-family: var(--font-mono);
   color: #ccffff;
   overflow-y: auto;
   max-height: 100%;
   pointer-events: auto;
   scrollbar-width: none; /* Firefox */
+}
+
+.echo-document pre code {
+    background: transparent;
+    text-shadow: 0 0 5px currentColor;
 }
 
 .echo-document pre::-webkit-scrollbar {
@@ -1645,6 +1651,46 @@ body.expose-active .echo-document:hover {
   mask-image: none;
   -webkit-mask-image: none;
   transition: all 0.2s ease-out;
+}
+
+/* Semantic X-Ray Mode */
+body.semantic-xray-active .echo-document {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
+body.semantic-xray-active .echo-document pre {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+body.semantic-xray-active .echo-document .echo-header,
+body.semantic-xray-active .echo-document .scan-line {
+  display: none !important;
+}
+
+body.semantic-xray-active .echo-document pre code span {
+  opacity: 0.15;
+  transition: opacity 0.3s ease;
+}
+
+body.semantic-xray-active .echo-document pre code span.mtk4, /* keywords */
+body.semantic-xray-active .echo-document pre code span.mtk8, /* strings */
+body.semantic-xray-active .echo-document pre code span.mtk22 /* variables/functions */ {
+  opacity: 1 !important;
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor !important;
+  filter: brightness(1.5);
+}
+
+body.semantic-xray-active #editor {
+  opacity: 0.2 !important;
+  filter: blur(8px) !important;
+  transition: all 0.3s ease;
 }
 
 /* Main Editor Fade when peeking (3D Peel Effect) */

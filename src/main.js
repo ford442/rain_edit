@@ -482,12 +482,22 @@ document.addEventListener('keydown', (e) => {
         editorEl.classList.add('x-ray-active');
         document.body.classList.add('x-ray-active');
     }
+
+    // Semantic X-Ray toggle (Alt + Shift)
+    if (e.altKey && e.shiftKey) {
+        document.body.classList.add('semantic-xray-active');
+    }
 });
 
 document.addEventListener('keyup', (e) => {
     if (e.key === 'Control' || e.key === 'Meta') {
         editorEl.classList.remove('x-ray-active');
         document.body.classList.remove('x-ray-active');
+    }
+
+    // Semantic X-Ray toggle removal
+    if (!e.altKey || !e.shiftKey) {
+        document.body.classList.remove('semantic-xray-active');
     }
 });
 
