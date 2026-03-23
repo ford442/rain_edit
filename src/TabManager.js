@@ -31,15 +31,44 @@ export class TabManager {
     this._nextId = 1;
     this.isCascadeView = false;
     this.isOrbitView = false;
+    this.isScatteredView = false;
+  }
+
+  toggleScatteredView() {
+    this.isScatteredView = !this.isScatteredView;
+    if (this.isScatteredView) {
+      this.isCascadeView = false;
+      this.isOrbitView = false;
+      document.body.classList.remove('cascade-active');
+      document.body.classList.remove('orbit-active');
+      const cascadeBtn = document.getElementById('btn-cascade-view');
+      if (cascadeBtn) cascadeBtn.classList.remove('active');
+      const orbitBtn = document.getElementById('btn-orbit-view');
+      if (orbitBtn) orbitBtn.classList.remove('active');
+    }
+    document.body.classList.toggle('scattered-active', this.isScatteredView);
+    const btn = document.getElementById('btn-scattered-view');
+    if (btn) {
+        if (this.isScatteredView) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    }
+    this._renderEchoes();
   }
 
   toggleCascadeView() {
     this.isCascadeView = !this.isCascadeView;
     if (this.isCascadeView) {
       this.isOrbitView = false;
+      this.isScatteredView = false;
       document.body.classList.remove('orbit-active');
+      document.body.classList.remove('scattered-active');
       const orbitBtn = document.getElementById('btn-orbit-view');
       if (orbitBtn) orbitBtn.classList.remove('active');
+      const scatteredBtn = document.getElementById('btn-scattered-view');
+      if (scatteredBtn) scatteredBtn.classList.remove('active');
     }
     document.body.classList.toggle('cascade-active', this.isCascadeView);
     const btn = document.getElementById('btn-cascade-view');
@@ -57,9 +86,13 @@ export class TabManager {
     this.isOrbitView = !this.isOrbitView;
     if (this.isOrbitView) {
       this.isCascadeView = false;
+      this.isScatteredView = false;
       document.body.classList.remove('cascade-active');
+      document.body.classList.remove('scattered-active');
       const cascadeBtn = document.getElementById('btn-cascade-view');
       if (cascadeBtn) cascadeBtn.classList.remove('active');
+      const scatteredBtn = document.getElementById('btn-scattered-view');
+      if (scatteredBtn) scatteredBtn.classList.remove('active');
     }
     document.body.classList.toggle('orbit-active', this.isOrbitView);
     const btn = document.getElementById('btn-orbit-view');
@@ -393,6 +426,12 @@ Drag to change depth`;
       pre.appendChild(code);
       el.appendChild(pre);
 
+      // Add a CSS-animated scanning line effect to the document
+      const scanLine = document.createElement('div');
+      scanLine.className = 'scan-line';
+      scanLine.style.setProperty('--index', index);
+      el.appendChild(scanLine);
+
       // Dynamic Opacity and Blur based on depth index via CSS variables
       // (This avoids inline style specificity issues that break hover states)
       const baseOpacity = Math.max(0.05, 0.4 - (index * 0.15));
@@ -470,6 +509,34 @@ Drag to change depth`;
         el.style.setProperty('--tx', `${tx}px`);
         el.style.setProperty('--ty', `${ty}px`);
         el.style.setProperty('--tz', `${tz}px`);
+      } else if (this.isScatteredView) {
+        // Scattered View positions
+        const totalEchoes = inactiveFiles.length;
+
+        // Use a simple pseudo-random function based on index
+        const randomSeed = index * 12345.6789;
+        const randX = (Math.sin(randomSeed) * 0.5) + 0.5; // 0 to 1
+        const randY = (Math.cos(randomSeed * 1.5) * 0.5) + 0.5; // 0 to 1
+
+        const spreadW = window.innerWidth * 0.8;
+        const spreadH = window.innerHeight * 0.8;
+
+        const sx = (randX * spreadW) - (spreadW / 2);
+        const sy = (randY * spreadH) - (spreadH / 2);
+
+        // Further back ones are smaller/further
+        const sz = -100 - (index * 80);
+        const rotZ = (Math.sin(randomSeed * 2) * 20); // -20deg to 20deg
+
+        el.style.setProperty('--scatter-x', `${sx}px`);
+        el.style.setProperty('--scatter-y', `${sy}px`);
+        el.style.setProperty('--scatter-z', `${sz}px`);
+        el.style.setProperty('--scatter-rot', `${rotZ}deg`);
+
+        // Remove standard offsets
+        el.style.setProperty('--tx', `0px`);
+        el.style.setProperty('--ty', `0px`);
+        el.style.setProperty('--tz', `0px`);
       } else {
         // Original Parallax depth offsets
         const depthOffset = (index + 1) * 2;
@@ -530,18 +597,49 @@ Drag to change depth`;
 
       pre.style.marginTop = '30px'; // Offset for header
 
+      // Interactive 3D Card Hover Effect
+      el.addEventListener('mousemove', (e) => {
+          const rect = el.getBoundingClientRect();
+          const localX = e.clientX - rect.left;
+          const localY = e.clientY - rect.top;
+
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+
+          // -1 to 1 based on position from center
+          const normX = (localX - centerX) / centerX;
+          const normY = (localY - centerY) / centerY;
+
+          // Max tilt 15 degrees
+          const rotX = -normY * 15;
+          const rotY = normX * 15;
+
+          el.style.setProperty('--hover-rot-x', `${rotX}deg`);
+          el.style.setProperty('--hover-rot-y', `${rotY}deg`);
+
+          // Set local mouse variables for glossy reflection
+          const pctX = (localX / rect.width) * 100;
+          const pctY = (localY / rect.height) * 100;
+          el.style.setProperty('--mouse-local-x', `${pctX}%`);
+          el.style.setProperty('--mouse-local-y', `${pctY}%`);
+      });
+
       // Add hover listener to fade editor
       el.addEventListener('mouseenter', (e) => {
           if (this.editorEl) {
               this.editorEl.classList.add('editor-peek-fade');
               // Bring forward while hovering the doc itself
-              if (!this.isCascadeView && !this.isOrbitView) {
+              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView) {
                   el.style.setProperty('--tz', '100px');
               } else if (this.isOrbitView) {
                   // Push out slightly to emphasize selection in orbit view
                   const tEchoes = inactiveFiles.length;
                   const oRad = Math.max(500, tEchoes * 120);
                   el.style.setProperty('--orbit-tz', `${oRad + 100}px`);
+              } else if (this.isScatteredView) {
+                  // Bring forward slightly in scattered view
+                  const originalZ = parseFloat(el.style.getPropertyValue('--scatter-z') || '0');
+                  el.style.setProperty('--scatter-z', `${originalZ + 150}px`);
               }
               // Dispatch event to clear fog
               const rect = el.getBoundingClientRect();
@@ -553,6 +651,10 @@ Drag to change depth`;
       });
 
       el.addEventListener('mouseleave', () => {
+          // Reset 3D tilt
+          el.style.setProperty('--hover-rot-x', `0deg`);
+          el.style.setProperty('--hover-rot-y', `0deg`);
+
           if (this.editorEl) {
               this.editorEl.classList.remove('editor-peek-fade');
               // Restore Z
@@ -560,6 +662,11 @@ Drag to change depth`;
                   const tEchoes = inactiveFiles.length;
                   const oRad = Math.max(500, tEchoes * 120);
                   el.style.setProperty('--orbit-tz', `${oRad}px`);
+              } else if (this.isScatteredView) {
+                  // Restore scatter Z
+                  const index = parseInt(el.dataset.index || 0);
+                  const sz = -100 - (index * 80);
+                  el.style.setProperty('--scatter-z', `${sz}px`);
               } else if (!this.isCascadeView) {
                   const idx = parseInt(el.dataset.index || 0);
                   el.style.setProperty('--tz', `calc(-${idx * 50}px + var(--stack-z, 0px))`);
