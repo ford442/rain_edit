@@ -467,6 +467,41 @@ document.addEventListener('mousemove', (e) => {
         }
       });
     }
+
+    // Proximity Wake Logic
+    echoes.forEach(echo => {
+      // Skip if peeking or magnifier is active, let CSS handle it completely
+      if (echo.classList.contains('peek') || echo.classList.contains('magnifier-active') || echo.classList.contains('is-peeking')) {
+          echo.style.removeProperty('--wake-dist');
+          return;
+      }
+
+      const rect = echo.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      const dist = Math.sqrt(Math.pow(e.clientX - cx, 2) + Math.pow(e.clientY - cy, 2));
+
+      // Calculate a value from 0 (far) to 1 (cursor is dead center) based on a radius
+      const maxDist = 400; // How far the proximity wake reaches
+      let wakeFactor = 0;
+      if (dist < maxDist) {
+         wakeFactor = 1 - (dist / maxDist);
+         // Ease the wake factor so it's smooth
+         wakeFactor = Math.pow(wakeFactor, 1.5);
+      }
+
+      echo.style.setProperty('--wake-factor', wakeFactor.toFixed(3));
+
+      // Local mouse coords for Holographic Foil logic
+      if (dist < maxDist) {
+        const pctX = ((e.clientX - rect.left) / rect.width) * 100;
+        const pctY = ((e.clientY - rect.top) / rect.height) * 100;
+        echo.style.setProperty('--foil-x', `${pctX}%`);
+        echo.style.setProperty('--foil-y', `${pctY}%`);
+      }
+    });
+
   }
 });
 
