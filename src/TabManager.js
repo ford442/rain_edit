@@ -382,12 +382,23 @@ Drag to change depth`;
       // Add a header so users know what this file is
       const echoHeader = document.createElement('div');
       echoHeader.className = 'echo-header';
-      echoHeader.textContent = file.name;
+
+      const headerTitle = document.createElement('div');
+      headerTitle.className = 'echo-header-title';
+      headerTitle.innerHTML = `<span class="echo-file-icon">◈</span> <span class="echo-file-name">${file.name}</span> <span class="echo-file-lang">${file.language || 'text'}</span>`;
+
+      const headerStatus = document.createElement('div');
+      headerStatus.className = 'echo-header-status';
+      const randomHex = Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0').toUpperCase();
+      headerStatus.innerHTML = `<span class="echo-status-dot"></span>0x${randomHex}`;
 
       const peekBtn = document.createElement('button');
       peekBtn.className = 'echo-peek-btn';
       peekBtn.title = 'Peek Document';
       peekBtn.textContent = '👁️';
+
+      echoHeader.appendChild(headerTitle);
+      echoHeader.appendChild(headerStatus);
       echoHeader.appendChild(peekBtn);
 
       peekBtn.addEventListener('click', (e) => {
@@ -411,6 +422,19 @@ Drag to change depth`;
       });
 
       el.appendChild(echoHeader);
+
+      const bodyWrapper = document.createElement('div');
+      bodyWrapper.className = 'echo-body-wrapper';
+
+      const lineNumbers = document.createElement('div');
+      lineNumbers.className = 'echo-line-numbers';
+      let linesHtml = '';
+      const lineCount = file.isImage ? 1 : Math.min(40, file.model?.getLineCount ? file.model.getLineCount() : 40);
+      for(let i=1; i<=lineCount; i++) {
+         linesHtml += `<span>${i}</span>`;
+      }
+      lineNumbers.innerHTML = linesHtml;
+      bodyWrapper.appendChild(lineNumbers);
 
       // Extract text or show image placeholder
       let contentStr = '';
@@ -438,7 +462,20 @@ Drag to change depth`;
           });
       }
       pre.appendChild(code);
-      el.appendChild(pre);
+      bodyWrapper.appendChild(pre);
+
+      const minimap = document.createElement('div');
+      minimap.className = 'echo-minimap';
+      let minimapHtml = '';
+      for(let i=0; i<35; i++) {
+         const width = 20 + Math.random() * 80;
+         const opacity = 0.1 + Math.random() * 0.5;
+         minimapHtml += `<div class="minimap-block" style="width: ${width}%; opacity: ${opacity};"></div>`;
+      }
+      minimap.innerHTML = minimapHtml;
+      bodyWrapper.appendChild(minimap);
+
+      el.appendChild(bodyWrapper);
 
       // Add a CSS-animated scanning line effect to the document
       const scanLineDiv = document.createElement('div');
@@ -609,7 +646,8 @@ Drag to change depth`;
       echoHeader.style.letterSpacing = '1px';
       echoHeader.style.textTransform = 'uppercase';
 
-      pre.style.marginTop = '30px'; // Offset for header
+      bodyWrapper.style.marginTop = '40px'; // Offset for header
+      bodyWrapper.style.height = 'calc(100% - 40px)';
 
       // Interactive 3D Card Hover Effect
       el.addEventListener('mousemove', (e) => {
