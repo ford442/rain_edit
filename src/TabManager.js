@@ -32,76 +32,79 @@ export class TabManager {
     this.isCascadeView = false;
     this.isOrbitView = false;
     this.isScatteredView = false;
+    this.isIsometricView = false;
+    this.isStackView = false;
+  }
+
+  _deactivateAllViews() {
+    this.isCascadeView = false;
+    this.isOrbitView = false;
+    this.isScatteredView = false;
+    this.isIsometricView = false;
+    this.isStackView = false;
+    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active');
+    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove('active');
+    });
+  }
+
+  toggleStackView() {
+    const wasActive = this.isStackView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isStackView = true;
+      document.body.classList.add('stack-active');
+      const btn = document.getElementById('btn-stack-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleIsometricView() {
+    const wasActive = this.isIsometricView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isIsometricView = true;
+      document.body.classList.add('isometric-active');
+      const btn = document.getElementById('btn-isometric-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
   }
 
   toggleScatteredView() {
-    this.isScatteredView = !this.isScatteredView;
-    if (this.isScatteredView) {
-      this.isCascadeView = false;
-      this.isOrbitView = false;
-      document.body.classList.remove('cascade-active');
-      document.body.classList.remove('orbit-active');
-      const cascadeBtn = document.getElementById('btn-cascade-view');
-      if (cascadeBtn) cascadeBtn.classList.remove('active');
-      const orbitBtn = document.getElementById('btn-orbit-view');
-      if (orbitBtn) orbitBtn.classList.remove('active');
-    }
-    document.body.classList.toggle('scattered-active', this.isScatteredView);
-    const btn = document.getElementById('btn-scattered-view');
-    if (btn) {
-        if (this.isScatteredView) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
+    const wasActive = this.isScatteredView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isScatteredView = true;
+      document.body.classList.add('scattered-active');
+      const btn = document.getElementById('btn-scattered-view');
+      if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
   }
 
   toggleCascadeView() {
-    this.isCascadeView = !this.isCascadeView;
-    if (this.isCascadeView) {
-      this.isOrbitView = false;
-      this.isScatteredView = false;
-      document.body.classList.remove('orbit-active');
-      document.body.classList.remove('scattered-active');
-      const orbitBtn = document.getElementById('btn-orbit-view');
-      if (orbitBtn) orbitBtn.classList.remove('active');
-      const scatteredBtn = document.getElementById('btn-scattered-view');
-      if (scatteredBtn) scatteredBtn.classList.remove('active');
-    }
-    document.body.classList.toggle('cascade-active', this.isCascadeView);
-    const btn = document.getElementById('btn-cascade-view');
-    if (btn) {
-        if (this.isCascadeView) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
+    const wasActive = this.isCascadeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCascadeView = true;
+      document.body.classList.add('cascade-active');
+      const btn = document.getElementById('btn-cascade-view');
+      if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
   }
 
   toggleOrbitView() {
-    this.isOrbitView = !this.isOrbitView;
-    if (this.isOrbitView) {
-      this.isCascadeView = false;
-      this.isScatteredView = false;
-      document.body.classList.remove('cascade-active');
-      document.body.classList.remove('scattered-active');
-      const cascadeBtn = document.getElementById('btn-cascade-view');
-      if (cascadeBtn) cascadeBtn.classList.remove('active');
-      const scatteredBtn = document.getElementById('btn-scattered-view');
-      if (scatteredBtn) scatteredBtn.classList.remove('active');
-    }
-    document.body.classList.toggle('orbit-active', this.isOrbitView);
-    const btn = document.getElementById('btn-orbit-view');
-    if (btn) {
-        if (this.isOrbitView) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
+    const wasActive = this.isOrbitView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isOrbitView = true;
+      document.body.classList.add('orbit-active');
+      const btn = document.getElementById('btn-orbit-view');
+      if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
   }
@@ -466,6 +469,8 @@ Drag to change depth`;
 
       const minimap = document.createElement('div');
       minimap.className = 'echo-minimap';
+      minimap.style.transform = 'translateZ(30px)';
+      minimap.style.boxShadow = '-10px 10px 20px rgba(0,0,0,0.5)';
       let minimapHtml = '';
       for(let i=0; i<35; i++) {
          const width = 20 + Math.random() * 80;
@@ -560,6 +565,20 @@ Drag to change depth`;
         el.style.setProperty('--tx', `${tx}px`);
         el.style.setProperty('--ty', `${ty}px`);
         el.style.setProperty('--tz', `${tz}px`);
+      } else if (this.isStackView) {
+        // Time Machine Stack View
+        el.style.setProperty('--tx', `0px`);
+        el.style.setProperty('--ty', `0px`);
+        el.style.setProperty('--tz', `${-index * 300 + (parseFloat(document.getElementById('echo-layer').style.getPropertyValue('--stack-z')) || 0)}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
+      } else if (this.isIsometricView) {
+        // Simple stacked positioning for isometric view
+        el.style.setProperty('--tx', `0px`);
+        el.style.setProperty('--ty', `${index * 20}px`);
+        el.style.setProperty('--tz', `${index * 50}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
       } else if (this.isScatteredView) {
         // Scattered View positions
         const totalEchoes = inactiveFiles.length;
@@ -645,6 +664,8 @@ Drag to change depth`;
       echoHeader.style.fontWeight = 'bold';
       echoHeader.style.letterSpacing = '1px';
       echoHeader.style.textTransform = 'uppercase';
+      echoHeader.style.transform = 'translateZ(30px)';
+      echoHeader.style.boxShadow = '0 10px 20px rgba(0,0,0,0.5)';
 
       bodyWrapper.style.marginTop = '40px'; // Offset for header
       bodyWrapper.style.height = 'calc(100% - 40px)';

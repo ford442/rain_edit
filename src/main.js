@@ -562,6 +562,16 @@ if (btnScattered) {
     btnScattered.addEventListener('click', () => { tabManager.toggleScatteredView(); });
 }
 
+const btnIsometric = document.getElementById('btn-isometric-view');
+if (btnIsometric) {
+    btnIsometric.addEventListener('click', () => { tabManager.toggleIsometricView(); });
+}
+
+const btnStack = document.getElementById('btn-stack-view');
+if (btnStack) {
+    btnStack.addEventListener('click', () => { tabManager.toggleStackView(); });
+}
+
 const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
   updateFocusVisuals();
