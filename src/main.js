@@ -572,6 +572,16 @@ if (btnStack) {
     btnStack.addEventListener('click', () => { tabManager.toggleStackView(); });
 }
 
+const btnTunnel = document.getElementById('btn-tunnel-view');
+if (btnTunnel) {
+    btnTunnel.addEventListener('click', () => { tabManager.toggleTunnelView(); });
+}
+
+const btnGrid = document.getElementById('btn-grid-view');
+if (btnGrid) {
+    btnGrid.addEventListener('click', () => { tabManager.toggleGridView(); });
+}
+
 const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
   updateFocusVisuals();
@@ -747,6 +757,19 @@ document.getElementById('blueprint-mode').addEventListener('change', (e) => {
 editor.onKeyDown((e) => {
   if (e.keyCode === monaco.KeyCode.Enter) {
     if (!raindrops) return;
+
+    // Typing Shockwave Effect
+    if (echoLayerEl) {
+        const echoes = echoLayerEl.querySelectorAll('.echo-document');
+        echoes.forEach(echo => {
+            echo.classList.remove('shockwave-hit');
+            void echo.offsetWidth; // Force reflow
+            echo.classList.add('shockwave-hit');
+            setTimeout(() => {
+                echo.classList.remove('shockwave-hit');
+            }, 600); // match animation duration
+        });
+    }
 
     const position = editor.getPosition();
     const scrolledVisiblePosition = editor.getScrolledVisiblePosition(position);
