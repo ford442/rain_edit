@@ -34,6 +34,8 @@ export class TabManager {
     this.isScatteredView = false;
     this.isIsometricView = false;
     this.isStackView = false;
+    this.isTunnelView = false;
+    this.isGridView = false;
   }
 
   _deactivateAllViews() {
@@ -42,8 +44,10 @@ export class TabManager {
     this.isScatteredView = false;
     this.isIsometricView = false;
     this.isStackView = false;
-    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active');
-    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view'].forEach(id => {
+    this.isTunnelView = false;
+    this.isGridView = false;
+    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active');
+    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
     });
@@ -56,6 +60,30 @@ export class TabManager {
       this.isStackView = true;
       document.body.classList.add('stack-active');
       const btn = document.getElementById('btn-stack-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleTunnelView() {
+    const wasActive = this.isTunnelView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTunnelView = true;
+      document.body.classList.add('tunnel-active');
+      const btn = document.getElementById('btn-tunnel-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleGridView() {
+    const wasActive = this.isGridView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isGridView = true;
+      document.body.classList.add('grid-active');
+      const btn = document.getElementById('btn-grid-view');
       if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
@@ -544,7 +572,44 @@ Drag to change depth`;
           el.style.setProperty('--expose-ty', `${exposeY}px`);
       }
 
-      if (this.isOrbitView) {
+      if (this.isTunnelView) {
+        // Tunnel View: arrange into a 3D cylindrical tunnel leading backward
+        const angle = (index / totalEchoes) * Math.PI * 2 * 3; // Spiral
+        const radius = 400;
+        const tx = Math.cos(angle) * radius;
+        const ty = Math.sin(angle) * radius;
+        const tz = -index * 150;
+        const rotZ = (angle * 180) / Math.PI;
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-z', `${rotZ}deg`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
+      } else if (this.isGridView) {
+        // Grid View: neat 3D matrix-style wall
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const spacingX = 600;
+        const spacingY = 400;
+
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        const offsetX = -((cols - 1) * spacingX) / 2;
+        const offsetY = -((Math.ceil(totalEchoes / cols) - 1) * spacingY) / 2;
+
+        const tx = offsetX + col * spacingX;
+        const ty = offsetY + row * spacingY;
+        const tz = -300; // Push back slightly
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty('--rot-z', '0deg');
+      } else if (this.isOrbitView) {
         // Orbit View (3D Carousel Cylindrical) positions
         const angle = (index / totalEchoes) * 360; // Degrees
         const orbitRadius = Math.max(500, totalEchoes * 120); // Dynamic radius based on file count
