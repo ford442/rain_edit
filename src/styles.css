@@ -321,13 +321,11 @@ textarea:focus {
   overflow: hidden;
 
   /* Enhanced Modern Glassmorphism */
-  background: linear-gradient(145deg, rgba(25, 30, 45, 0.85), rgba(10, 15, 25, 0.65));
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(54px) saturate(220%);
+  background: linear-gradient(145deg, rgba(35, 40, 55, 0.95), rgba(20, 25, 35, 0.85));
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
 
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  border-top: 1px solid rgba(0, 229, 255, 0.4);
-  border-left: 1px solid rgba(0, 229, 255, 0.3);
+  border: 1px solid rgba(0, 255, 204, 0.4);
   border-radius: 16px;
   box-shadow:
     0 40px 100px rgba(0, 0, 0, 0.9),
@@ -351,10 +349,10 @@ textarea:focus {
   max-height: 85vh;
   border-color: rgba(0, 229, 255, 0.6);
   box-shadow:
-    0 45px 90px -10px rgba(0, 0, 0, 0.98),
+    0 50px 100px -10px rgba(0, 0, 0, 0.98),
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 0 45px rgba(0, 229, 255, 0.15),
-    0 0 60px rgba(0, 229, 255, 0.35); /* Subtle accent glow */
+    inset 0 0 45px rgba(0, 255, 204, 0.25),
+    0 0 60px rgba(0, 255, 204, 0.45); /* Subtle accent glow */
   border-radius: 20px;
 }
 
@@ -1214,11 +1212,11 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   font-weight: 600;
   font-family: var(--font-mono);
   color: rgba(220, 230, 255, 0.6);
-  background: linear-gradient(135deg, rgba(30, 40, 60, 0.4), rgba(15, 20, 30, 0.2));
+  background: linear-gradient(135deg, rgba(40, 50, 70, 0.5), rgba(25, 30, 40, 0.3));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(0, 229, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.3);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
@@ -1230,10 +1228,10 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   transform: translateY(-2px) scale(1.02);
 }
 .tab-item.active {
-  background: linear-gradient(180deg, rgba(0, 229, 255, 0.25), rgba(0, 229, 255, 0.1));
-  border-color: rgba(0, 229, 255, 0.7);
+  background: linear-gradient(180deg, rgba(0, 255, 204, 0.3), rgba(0, 255, 204, 0.15));
+  border-color: rgba(0, 255, 204, 0.8);
   color: #ffffff;
-  box-shadow: 0 12px 30px rgba(0, 229, 255, 0.25), inset 0 0 0 1px rgba(0, 229, 255, 0.4), 0 0 25px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 15px 40px rgba(0, 255, 204, 0.35), inset 0 0 0 1px rgba(0, 255, 204, 0.5), 0 0 35px rgba(0, 255, 204, 0.5);
   transform: translateY(-3px) scale(1.03);
   text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
 }
@@ -1806,6 +1804,17 @@ body.semantic-xray-active #editor {
   opacity: 0.2 !important;
   filter: blur(8px) !important;
   transition: all 0.3s ease;
+}
+
+/* Deep Search Hit State */
+.search-hit {
+  box-shadow: 0 0 80px rgba(255, 200, 0, 0.8), inset 0 0 40px rgba(255, 200, 0, 0.4) !important;
+  border-color: #ffc800 !important;
+  filter: blur(0px) brightness(1.5) !important;
+  opacity: 1 !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), 150px) scale(1.1) !important;
+  z-index: 100 !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* Main Editor Fade when peeking (3D Peel Effect) */
