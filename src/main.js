@@ -919,6 +919,55 @@ if (referenceInput) {
     });
 }
 
+// --- Deep Search Logic ---
+const globalSearch = document.getElementById('global-search');
+if (globalSearch) {
+    globalSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+
+        if (!searchTerm) {
+            // Clear all search hits
+            document.querySelectorAll('.echo-document.search-hit').forEach(el => {
+                el.classList.remove('search-hit');
+                if (el.style.getPropertyValue('--tz-override')) {
+                    el.style.removeProperty('--tz-override');
+                    el.style.setProperty('--tz', el.dataset.originalTz || '0px');
+                }
+            });
+            return;
+        }
+
+        tabManager.files.forEach(file => {
+            if (file.id === tabManager.activeId) return;
+
+            let content = '';
+            if (file.isImage) {
+                content = file.name.toLowerCase();
+            } else if (file.model) {
+                content = file.model.getValue().toLowerCase();
+            }
+
+            const echoEl = document.querySelector(`.echo-document[data-id="${file.id}"]`);
+            if (echoEl) {
+                if (content.includes(searchTerm)) {
+                    echoEl.classList.add('search-hit');
+                    if (!echoEl.dataset.originalTz) {
+                        echoEl.dataset.originalTz = echoEl.style.getPropertyValue('--tz') || '0px';
+                    }
+                    echoEl.style.setProperty('--tz-override', '1');
+                    echoEl.style.setProperty('--tz', '80px');
+                } else {
+                    echoEl.classList.remove('search-hit');
+                    if (echoEl.style.getPropertyValue('--tz-override')) {
+                        echoEl.style.removeProperty('--tz-override');
+                        echoEl.style.setProperty('--tz', echoEl.dataset.originalTz || '0px');
+                    }
+                }
+            }
+        });
+    });
+}
+
 // --- Focus Depth Logic ---
 let userPreferredDepth = 1.0;
 
