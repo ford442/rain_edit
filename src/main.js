@@ -1326,7 +1326,18 @@ document.addEventListener('keydown', (e) => {
         }
         lastShiftTime = now;
     }
+
+    // Ctrl+Space for Sonar Ping
+    if (e.ctrlKey && e.code === 'Space') {
+        e.preventDefault();
+        triggerSonar();
+    }
 });
+
+const btnSonar = document.getElementById('btn-sonar-ping');
+if (btnSonar) {
+    btnSonar.addEventListener('click', triggerSonar);
+}
 
 function triggerSonar() {
     sonarActive = true;
