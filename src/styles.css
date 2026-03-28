@@ -94,6 +94,42 @@ html, body, #app { height: 100vh; width: 100vw; overflow: hidden; font-family: v
   -webkit-mask-composite: source-in;
 }
 
+#editor.sonar-active::before {
+  content: '';
+  position: absolute;
+  top: var(--sonar-y, 50%);
+  left: var(--sonar-x, 50%);
+  width: calc(var(--sonar-radius, 0px) * 2);
+  height: calc(var(--sonar-radius, 0px) * 2);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(0, 229, 255, 0.5);
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.4), inset 0 0 20px rgba(0, 229, 255, 0.2);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.sonar-hit {
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) drop-shadow(0 0 15px rgba(0, 229, 255, 0.8)) !important;
+  transform: scale(1.05) translateZ(50px) !important;
+  z-index: 100 !important;
+  border-color: rgba(0, 229, 255, 1) !important;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.5), inset 0 0 20px rgba(0, 229, 255, 0.3) !important;
+}
+
+.echo-document.sonar-hit pre {
+  color: rgba(0, 229, 255, 1) !important;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+}
+
+.echo-document.sonar-hit .scan-line {
+  background: linear-gradient(to bottom, transparent, rgba(0, 229, 255, 0.8), transparent);
+  height: 20px;
+  animation-duration: 1s;
+}
+
 #editor.lens-active {
     mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 160px, black 320px);
     -webkit-mask-image: radial-gradient(circle at var(--mouse-x) var(--mouse-y), transparent 160px, black 320px);
@@ -321,16 +357,16 @@ textarea:focus {
   overflow: hidden;
 
   /* Enhanced Modern Glassmorphism */
-  background: linear-gradient(145deg, rgba(35, 40, 55, 0.95), rgba(20, 25, 35, 0.85));
-  backdrop-filter: blur(60px) saturate(200%);
-  -webkit-backdrop-filter: blur(60px) saturate(200%);
+  background: linear-gradient(145deg, rgba(20, 25, 35, 0.95), rgba(10, 15, 25, 0.85));
+  backdrop-filter: blur(80px) saturate(250%);
+  -webkit-backdrop-filter: blur(80px) saturate(250%);
 
-  border: 1px solid rgba(0, 255, 204, 0.4);
-  border-radius: 16px;
+  border: 1px solid rgba(0, 255, 204, 0.5);
+  border-radius: 24px;
   box-shadow:
-    0 40px 100px rgba(0, 0, 0, 0.9),
-    inset 0 1px 3px rgba(255, 255, 255, 0.3),
-    inset 0 0 50px rgba(0, 229, 255, 0.1);
+    0 50px 120px rgba(0, 0, 0, 0.95),
+    inset 0 1px 3px rgba(255, 255, 255, 0.4),
+    inset 0 0 60px rgba(0, 229, 255, 0.15);
 
   z-index: 20;
   color: var(--text-primary);
@@ -1167,17 +1203,17 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   padding: 8px 28px;
 
   /* Sleeker Glassmorphism pill style */
-  background: linear-gradient(135deg, rgba(8, 10, 14, 0.85), rgba(4, 6, 9, 0.7));
-  backdrop-filter: blur(64px) saturate(250%);
-  -webkit-backdrop-filter: blur(64px) saturate(250%);
+  background: linear-gradient(135deg, rgba(5, 7, 10, 0.95), rgba(2, 4, 6, 0.8));
+  backdrop-filter: blur(80px) saturate(300%);
+  -webkit-backdrop-filter: blur(80px) saturate(300%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: 1px solid rgba(255, 255, 255, 0.25);
   border-left: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 40px;
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.9),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    inset 0 0 30px rgba(0, 229, 255, 0.05);
+    0 30px 70px rgba(0, 0, 0, 0.95),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    inset 0 0 40px rgba(0, 229, 255, 0.1);
   user-select: none;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1681,17 +1717,17 @@ body.x-ray-active #echo-layer {
 /* X-Ray Peek State */
 .echo-document.peek,
 .echo-document:hover {
-  opacity: 0.9;
-  filter: blur(0px);
+  opacity: 1 !important;
+  filter: blur(0px) !important;
   color: #fff;
-  text-shadow: 0 0 15px rgba(0, 229, 255, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
-  z-index: 30 !important;
-  /* "Ghost Peeking" forward movement and 3D tilt */
-  transform: translate3d(calc(var(--tx, 0px) * 0.5), calc(var(--ty, 0px) * 0.5), 150px) rotateX(var(--hover-rot-x, 0deg)) rotateY(var(--hover-rot-y, 0deg)) scale(1.1) !important;
+  text-shadow: 0 0 15px rgba(0, 229, 255, 0.9), 0 0 5px rgba(255, 255, 255, 0.7);
+  z-index: 200 !important;
+  /* Magnetic Surfacing forward movement and 3D tilt */
+  transform: translate3d(calc(var(--tx, 0px) * 0.5), calc(var(--ty, 0px) * 0.5), 250px) rotateX(var(--hover-rot-x, 0deg)) rotateY(var(--hover-rot-y, 0deg)) scale(1.15) !important;
   mask-image: none;
   -webkit-mask-image: none;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(0, 229, 255, 0.15);
-  border-color: rgba(0, 229, 255, 0.6);
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.95), 0 0 40px rgba(0, 229, 255, 0.4), inset 0 0 40px rgba(0, 229, 255, 0.25);
+  border-color: rgba(0, 229, 255, 0.8);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
