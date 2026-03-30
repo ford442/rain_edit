@@ -361,12 +361,15 @@ textarea:focus {
   backdrop-filter: blur(80px) saturate(250%);
   -webkit-backdrop-filter: blur(80px) saturate(250%);
 
-  border: 1px solid rgba(0, 255, 204, 0.5);
-  border-radius: 24px;
+  border: 1px solid rgba(255, 0, 128, 0.5);
+  border-right: 2px solid rgba(0, 229, 255, 0.8);
+  border-bottom: 2px solid rgba(0, 229, 255, 0.8);
+  border-radius: 12px;
   box-shadow:
     0 50px 120px rgba(0, 0, 0, 0.95),
-    inset 0 1px 3px rgba(255, 255, 255, 0.4),
-    inset 0 0 60px rgba(0, 229, 255, 0.15);
+    inset 0 1px 3px rgba(255, 255, 255, 0.1),
+    inset 0 0 60px rgba(255, 0, 128, 0.15),
+    0 0 30px rgba(0, 229, 255, 0.2);
 
   z-index: 20;
   color: var(--text-primary);
@@ -383,13 +386,15 @@ textarea:focus {
   opacity: 1;
   max-width: 360px;
   max-height: 85vh;
-  border-color: rgba(0, 229, 255, 0.6);
+  border-color: rgba(255, 0, 128, 0.8);
+  border-right: 2px solid rgba(0, 229, 255, 1);
+  border-bottom: 2px solid rgba(0, 229, 255, 1);
   box-shadow:
     0 50px 100px -10px rgba(0, 0, 0, 0.98),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 0 45px rgba(0, 255, 204, 0.25),
-    0 0 60px rgba(0, 255, 204, 0.45); /* Subtle accent glow */
-  border-radius: 20px;
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 0 45px rgba(255, 0, 128, 0.25),
+    0 0 60px rgba(0, 229, 255, 0.45); /* Subtle accent glow */
+  border-radius: 12px;
 }
 
 /* Hide internals when collapsed */
@@ -1206,25 +1211,26 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   background: linear-gradient(135deg, rgba(5, 7, 10, 0.95), rgba(2, 4, 6, 0.8));
   backdrop-filter: blur(80px) saturate(300%);
   -webkit-backdrop-filter: blur(80px) saturate(300%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 40px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-top: 1px solid rgba(0, 229, 255, 0.5);
+  border-left: 1px solid rgba(0, 229, 255, 0.4);
+  border-radius: 12px;
   box-shadow:
     0 30px 70px rgba(0, 0, 0, 0.95),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3),
-    inset 0 0 40px rgba(0, 229, 255, 0.1);
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 0 40px rgba(0, 229, 255, 0.15),
+    0 0 20px rgba(0, 229, 255, 0.2);
   user-select: none;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 #tabs-container:hover {
   background: rgba(8, 12, 18, 0.95);
-  border-color: rgba(0, 229, 255, 0.6);
+  border-color: rgba(0, 229, 255, 0.8);
   box-shadow:
     0 40px 80px rgba(0, 0, 0, 0.95),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 0 60px rgba(0, 229, 255, 0.4);
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 60px rgba(0, 229, 255, 0.5);
 }
 
 .tabs-list {
@@ -1241,35 +1247,41 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 26px;
-  border-radius: 32px;
+  padding: 10px 24px;
+  border-radius: 8px; /* Sharper */
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   font-family: var(--font-mono);
-  color: rgba(220, 230, 255, 0.6);
-  background: linear-gradient(135deg, rgba(40, 50, 70, 0.5), rgba(25, 30, 40, 0.3));
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(0, 229, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  color: rgba(220, 230, 255, 0.7);
+  background: linear-gradient(135deg, rgba(20, 25, 35, 0.6), rgba(10, 15, 25, 0.4));
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-bottom: 2px solid rgba(0, 229, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.1);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .tab-item:hover {
-  background: linear-gradient(135deg, rgba(40, 50, 80, 0.6), rgba(20, 30, 45, 0.4));
-  border-color: rgba(0, 229, 255, 0.6);
+  background: linear-gradient(135deg, rgba(30, 40, 60, 0.7), rgba(15, 20, 35, 0.5));
+  border-color: rgba(0, 229, 255, 0.8);
+  border-bottom: 2px solid rgba(0, 229, 255, 0.6);
   color: #fff;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 0 25px rgba(0, 229, 255, 0.5);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9), inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 0 20px rgba(0, 229, 255, 0.6);
   transform: translateY(-2px) scale(1.02);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
 }
 .tab-item.active {
-  background: linear-gradient(180deg, rgba(0, 255, 204, 0.3), rgba(0, 255, 204, 0.15));
-  border-color: rgba(0, 255, 204, 0.8);
+  background: linear-gradient(180deg, rgba(255, 0, 128, 0.2), rgba(255, 0, 128, 0.05));
+  border-color: rgba(255, 0, 128, 0.9);
+  border-bottom: 2px solid rgba(255, 0, 128, 0.9);
   color: #ffffff;
-  box-shadow: 0 15px 40px rgba(0, 255, 204, 0.35), inset 0 0 0 1px rgba(0, 255, 204, 0.5), 0 0 35px rgba(0, 255, 204, 0.5);
-  transform: translateY(-3px) scale(1.03);
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+  box-shadow: 0 15px 40px rgba(255, 0, 128, 0.4), inset 0 0 10px rgba(255, 0, 128, 0.3), 0 0 30px rgba(255, 0, 128, 0.6);
+  transform: translateY(-3px) scale(1.05);
+  text-shadow: 0 0 8px rgba(255, 0, 128, 0.8), 0 0 15px rgba(255, 0, 128, 0.4);
 }
 
 /* Depth badge — small indicator inside each tab */
@@ -1404,10 +1416,10 @@ body.x-ray-active #echo-layer {
   backdrop-filter: blur(32px) saturate(200%);
   -webkit-backdrop-filter: blur(32px) saturate(200%);
 
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  border-top: 1px solid rgba(0, 229, 255, 0.3);
+  border-left: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 12px;
   padding: 32px;
 
   /* Enhanced glowing edge and depth shadow */
@@ -1778,10 +1790,12 @@ body.expose-active .echo-document:hover {
 
 /* Depth Swap Animation */
 @keyframes depth-swap {
-  0% { transform: scale(0.9) translateZ(-100px) skewX(-5deg); opacity: 0; filter: blur(10px) hue-rotate(90deg); }
-  30% { transform: scale(0.95) translateZ(-50px) skewX(5deg); opacity: 0.5; filter: blur(5px) hue-rotate(-90deg); }
-  60% { transform: scale(1.05) translateZ(40px) skewX(-2deg); opacity: 0.9; filter: blur(1px) hue-rotate(45deg); }
-  100% { transform: scale(1) translateZ(0) skewX(0deg); opacity: 1; filter: hue-rotate(0deg); }
+  0% { transform: scale(0.9) translateZ(-100px) skewX(-15deg); opacity: 0; filter: blur(10px) hue-rotate(90deg); text-shadow: -5px 0 0 red, 5px 0 0 cyan; }
+  20% { transform: scale(0.95) translateZ(-50px) skewX(10deg); opacity: 0.5; filter: blur(5px) hue-rotate(-90deg); text-shadow: 5px 0 0 red, -5px 0 0 cyan; }
+  40% { transform: scale(1.02) translateZ(10px) skewX(-5deg) translate(5px, -5px); opacity: 0.8; filter: blur(2px) hue-rotate(180deg); text-shadow: -3px -3px 0 magenta, 3px 3px 0 yellow; }
+  60% { transform: scale(1.05) translateZ(40px) skewX(2deg) translate(-5px, 5px); opacity: 0.9; filter: blur(1px) hue-rotate(45deg); text-shadow: 2px 2px 0 red, -2px -2px 0 cyan; }
+  80% { transform: scale(1.01) translateZ(10px) skewX(-1deg); opacity: 0.95; filter: blur(0px) hue-rotate(-20deg); text-shadow: -1px 0 0 red, 1px 0 0 cyan; }
+  100% { transform: scale(1) translateZ(0) skewX(0deg) translate(0, 0); opacity: 1; filter: hue-rotate(0deg); text-shadow: none; }
 }
 
 .depth-swap-active {

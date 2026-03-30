@@ -813,7 +813,7 @@ editor.onDidChangeCursorPosition((e) => {
           fogManager.clearFogAt(x + rect.left, y + rect.top, 80);
       }
 
-      // Focus Link: Connect cursor word to reference notes
+      // Focus Link: Connect cursor word to reference notes and cursor tether to echo layers
       const model = editor.getModel();
       const wordAtPosition = model.getWordAtPosition(position);
 
@@ -828,11 +828,14 @@ editor.onDidChangeCursorPosition((e) => {
               const rect = editorEl.getBoundingClientRect();
               connectionManager.setEditorFocus(currentWord, x + rect.left, y + rect.top + 10); // +10 for approximate line height center
           } else {
-              connectionManager.setEditorFocus(null);
+              // If no word, we can still pass a dummy word or empty to tether hovered/resonating documents if we want
+              // But setEditorFocus uses the word for highlighting cards. Let's pass the cursor coordinates anyway.
+              const rect = editorEl.getBoundingClientRect();
+              connectionManager.setEditorFocus("___CURSOR_TETHER___", x + rect.left, y + rect.top + 10);
           }
       }
 
-      // Semantic Resonance: highlight echo documents matching the word
+      // Semantic Resonance & Hover Cursor Tether: highlight echo documents matching the word
       if (echoLayerEl) {
           const echoes = echoLayerEl.querySelectorAll('.echo-document');
           echoes.forEach(echo => {
@@ -844,9 +847,11 @@ editor.onDidChangeCursorPosition((e) => {
               }
           });
 
+          let matchedEchoes = [];
+
+          // Add resonating files
           if (currentWord && currentWord.length > 3) {
               const lowerWord = currentWord.toLowerCase();
-              let matchedEchoes = [];
 
               tabManager.files.forEach(file => {
                   if (file.id !== tabManager.activeId) {
@@ -873,14 +878,17 @@ editor.onDidChangeCursorPosition((e) => {
                       }
                   }
               });
+          }
 
-              if (connectionManager) {
-                  connectionManager.setEchoFocus(matchedEchoes);
+          // Add currently hovered files for the tether feature
+          echoes.forEach(echoEl => {
+              if (echoEl.matches(':hover') && !echoEl.classList.contains('resonance-hit')) {
+                   matchedEchoes.push(echoEl.getBoundingClientRect());
               }
-          } else {
-              if (connectionManager) {
-                  connectionManager.setEchoFocus([]);
-              }
+          });
+
+          if (connectionManager) {
+              connectionManager.setEchoFocus(matchedEchoes);
           }
       }
   }
@@ -1242,17 +1250,23 @@ setInterval(() => {
         stormCharCount = Math.max(0, stormCharCount - STORM_decay);
     }
 
-    // Dynamic Hue Logic
-    // Blend Typing Hue (Blue/Purple) with Atmosphere Hue (Red/Orange)
+    // Dynamic Hue Logic (Atmospheric Breathing & Keystroke Pulse)
+    // Blend Typing Hue (Blue/Purple/Magenta) with Atmosphere Hue (Red/Orange)
     // If atmosphere is active (errors), it takes precedence
     let baseHue = window.atmosphereHue;
+    let breathIntensity = 10;
+
     if (window.atmosphereHue === 180) {
-        // No errors, use typing intensity
-        baseHue = 180 + Math.min(100, stormCharCount);
+        // No errors, use typing intensity to shift hue and intensify breathing
+        // Shift hue aggressively towards magenta (300) when typing fast
+        baseHue = 180 + Math.min(120, stormCharCount * 1.5);
+        breathIntensity = 10 + Math.min(30, stormCharCount);
     }
 
     const time = Date.now() / 1000;
-    const breathing = Math.sin(time) * 10;
+    // Faster heartbeat when typing intensely
+    const breathSpeed = 1 + Math.min(2, stormCharCount * 0.05);
+    const breathing = Math.sin(time * breathSpeed) * breathIntensity;
     const finalHue = baseHue + breathing;
     document.documentElement.style.setProperty('--dynamic-hue', finalHue);
 
