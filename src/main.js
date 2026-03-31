@@ -518,11 +518,91 @@ document.addEventListener('keydown', (e) => {
         document.body.classList.add('x-ray-active');
     }
 
-    // Semantic X-Ray toggle (Alt + Shift)
+    // Semantic X-Ray toggle (Alt + Shift) -> CHANGED TO HOLOGRAPHIC SIPHON MODE
     if (e.altKey && e.shiftKey) {
-        document.body.classList.add('semantic-xray-active');
+        document.body.classList.add('siphon-mode-active');
+        document.body.classList.remove('semantic-xray-active'); // Ensure old behavior is overridden or merged
     }
 });
+
+// Holographic Siphon Mode Logic - Listen for text selection (mouseup) inside echo documents
+document.addEventListener('mouseup', (e) => {
+    if (!document.body.classList.contains('siphon-mode-active')) return;
+
+    // Check if we selected text inside an echo document
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) return;
+
+    const selectedText = selection.toString();
+    if (!selectedText.trim()) return;
+
+    // Check if target is inside an echo document
+    let target = e.target;
+    let inEchoDoc = false;
+    while (target && target !== document.body) {
+        if (target.classList && target.classList.contains('echo-document')) {
+            inEchoDoc = true;
+            break;
+        }
+        target = target.parentElement;
+    }
+
+    if (inEchoDoc && window.editor) {
+        // Clear selection to prepare for next siphon
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        selection.removeAllRanges();
+
+        // Fire Siphon Packet Animation
+        fireSiphonPacket(selectedText, rect.left, rect.top);
+
+        // Inject into editor
+        const position = window.editor.getPosition();
+        if (position) {
+            window.editor.executeEdits("siphon", [{
+                range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+                text: selectedText,
+                forceMoveMarkers: true
+            }]);
+
+            // Visual feedback on the editor
+            document.body.classList.add('shockwave-hit');
+            setTimeout(() => document.body.classList.remove('shockwave-hit'), 400);
+        }
+    }
+});
+
+function fireSiphonPacket(text, startX, startY) {
+    const packet = document.createElement('div');
+    packet.className = 'siphon-packet';
+
+    // Truncate long text for visual
+    const displayStr = text.length > 20 ? text.substring(0, 20) + '...' : text;
+    packet.textContent = displayStr;
+
+    packet.style.left = startX + 'px';
+    packet.style.top = startY + 'px';
+
+    // Calculate destination (center of screen, approximating editor cursor if not known exactly in DOM coords)
+    // A better approach would be mapping editor coords, but center screen works as a general "suck into editor" effect
+    const destX = window.innerWidth / 2;
+    const destY = window.innerHeight / 2;
+
+    const dx = destX - startX;
+    const dy = destY - startY;
+
+    packet.style.setProperty('--dx', dx + 'px');
+    packet.style.setProperty('--dy', dy + 'px');
+
+    document.body.appendChild(packet);
+
+    // Clean up
+    setTimeout(() => {
+        if (packet.parentNode) {
+            packet.parentNode.removeChild(packet);
+        }
+    }, 600);
+}
 
 document.addEventListener('keyup', (e) => {
     if (e.key === 'Control' || e.key === 'Meta') {
@@ -533,6 +613,7 @@ document.addEventListener('keyup', (e) => {
     // Semantic X-Ray toggle removal
     if (!e.altKey || !e.shiftKey) {
         document.body.classList.remove('semantic-xray-active');
+        document.body.classList.remove('siphon-mode-active');
     }
 });
 
@@ -1351,6 +1432,68 @@ document.addEventListener('keydown', (e) => {
 const btnSonar = document.getElementById('btn-sonar-ping');
 if (btnSonar) {
     btnSonar.addEventListener('click', triggerSonar);
+}
+
+// 3D Z-Axis Scanner Logic
+const btnZScan = document.getElementById('btn-z-scan');
+if (btnZScan) {
+    btnZScan.addEventListener('click', triggerZScan);
+}
+
+function triggerZScan() {
+    const scannerPlane = document.getElementById('z-scanner-plane');
+    if (!scannerPlane) return;
+
+    // Reset and start animation
+    scannerPlane.classList.remove('scanning');
+    void scannerPlane.offsetWidth; // Force reflow
+    scannerPlane.classList.add('scanning');
+
+    const echoes = document.querySelectorAll('.echo-document');
+
+    // Approximate depth matching based on CSS structure and vars
+    echoes.forEach((echo) => {
+        let z = 0;
+        const tzStyle = echo.style.getPropertyValue('--tz');
+
+        if (tzStyle && tzStyle.includes('px')) {
+            const match = tzStyle.match(/(-?\d+)/);
+            if (match && !tzStyle.includes('calc')) {
+                z = parseInt(match[0], 10);
+            } else {
+                const idx = parseInt(echo.dataset.index || 0);
+                z = -(idx * 50) + (window.stackZ || 0); // approximation
+            }
+        }
+
+        // Scan starts at Z=+200, ends at Z=-2000 over 4000ms. Total distance 2200px.
+        // It travels at 2200px / 3800ms ≈ 0.57 px/ms.
+        // Time to reach Z = (200 - Z) / 0.57
+        const totalZDistance = 2200;
+        const distFromStart = 200 - z;
+        let delayMs = (distFromStart / totalZDistance) * 3800;
+
+        // Clamp to positive, valid timeout bounds
+        if (delayMs < 0) delayMs = 100;
+        if (delayMs > 4000) delayMs = 4000;
+
+        setTimeout(() => {
+            echo.classList.add('z-scan-hit');
+
+            // Highlight text slightly more by playing with tint
+            const currentTint = echo.style.getPropertyValue('--echo-tint') || '0deg';
+            echo.style.setProperty('--scan-temp-color', 'rgba(255, 0, 128, 1)');
+
+            setTimeout(() => {
+                echo.classList.remove('z-scan-hit');
+            }, 800);
+        }, delayMs);
+    });
+
+    // Clean up scanner class
+    setTimeout(() => {
+        scannerPlane.classList.remove('scanning');
+    }, 4500);
 }
 
 function triggerSonar() {
