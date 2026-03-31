@@ -518,7 +518,7 @@ Drag to change depth`;
 
       // Dynamic Opacity and Blur based on depth index via CSS variables
       // (This avoids inline style specificity issues that break hover states)
-      const baseOpacity = Math.max(0.05, 0.4 - (index * 0.15));
+      const baseOpacity = Math.max(0.1, 0.6 - (index * 0.15));
       const baseBlur = Math.min(10, 2 + (index * 2));
       el.style.setProperty('--base-opacity', baseOpacity);
       el.style.setProperty('--base-blur', `${baseBlur}px`);
