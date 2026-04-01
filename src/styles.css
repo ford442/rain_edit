@@ -340,6 +340,13 @@ textarea:focus {
   transition: opacity 0.5s ease;
 }
 
+/* Border Glow Animation */
+@keyframes borderGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* Dock UI */
 #dock {
   position: fixed;
@@ -361,9 +368,7 @@ textarea:focus {
   backdrop-filter: blur(80px) saturate(250%);
   -webkit-backdrop-filter: blur(80px) saturate(250%);
 
-  border: 1px solid rgba(255, 0, 128, 0.5);
-  border-right: 2px solid rgba(0, 229, 255, 0.8);
-  border-bottom: 2px solid rgba(0, 229, 255, 0.8);
+  border: 1px solid transparent; /* Replaced by animated border */
   border-radius: 12px;
   box-shadow:
     0 50px 120px rgba(0, 0, 0, 0.95),
@@ -382,13 +387,27 @@ textarea:focus {
   max-height: 64px;
 }
 
+#dock::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px;
+  background: linear-gradient(45deg, rgba(255, 0, 128, 0.5), rgba(0, 229, 255, 0.8), rgba(255, 0, 128, 0.5));
+  background-size: 200% 200%;
+  animation: borderGlow 4s linear infinite;
+  z-index: -1;
+  opacity: 0.7;
+  transition: opacity 0.5s ease;
+}
+
+#dock:hover::before, #dock.dock-expanded::before {
+  opacity: 1;
+}
+
 #dock:hover, #dock.dock-expanded {
   opacity: 1;
   max-width: 360px;
   max-height: 85vh;
-  border-color: rgba(255, 0, 128, 0.8);
-  border-right: 2px solid rgba(0, 229, 255, 1);
-  border-bottom: 2px solid rgba(0, 229, 255, 1);
   box-shadow:
     0 50px 100px -10px rgba(0, 0, 0, 0.98),
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
@@ -1211,9 +1230,7 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   background: linear-gradient(135deg, rgba(5, 7, 10, 0.95), rgba(2, 4, 6, 0.8));
   backdrop-filter: blur(80px) saturate(300%);
   -webkit-backdrop-filter: blur(80px) saturate(300%);
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  border-top: 1px solid rgba(0, 229, 255, 0.5);
-  border-left: 1px solid rgba(0, 229, 255, 0.4);
+  border: 1px solid transparent;
   border-radius: 12px;
   box-shadow:
     0 30px 70px rgba(0, 0, 0, 0.95),
@@ -1224,9 +1241,25 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+#tabs-container::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.4), rgba(255, 0, 128, 0.4), rgba(0, 229, 255, 0.4));
+  background-size: 200% 200%;
+  animation: borderGlow 6s linear infinite;
+  z-index: -1;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+
+#tabs-container:hover::before {
+  opacity: 1;
+}
+
 #tabs-container:hover {
   background: rgba(8, 12, 18, 0.95);
-  border-color: rgba(0, 229, 255, 0.8);
   box-shadow:
     0 40px 80px rgba(0, 0, 0, 0.95),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
@@ -1275,13 +1308,13 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
 }
 .tab-item.active {
-  background: linear-gradient(180deg, rgba(255, 0, 128, 0.2), rgba(255, 0, 128, 0.05));
-  border-color: rgba(255, 0, 128, 0.9);
-  border-bottom: 2px solid rgba(255, 0, 128, 0.9);
+  background: linear-gradient(180deg, rgba(255, 0, 128, 0.3), rgba(255, 0, 128, 0.1));
+  border-color: rgba(255, 0, 128, 1);
+  border-bottom: 2px solid rgba(255, 0, 128, 1);
   color: #ffffff;
-  box-shadow: 0 15px 40px rgba(255, 0, 128, 0.4), inset 0 0 10px rgba(255, 0, 128, 0.3), 0 0 30px rgba(255, 0, 128, 0.6);
+  box-shadow: 0 15px 50px rgba(255, 0, 128, 0.6), inset 0 0 20px rgba(255, 0, 128, 0.5), 0 0 40px rgba(255, 0, 128, 0.8);
   transform: translateY(-3px) scale(1.05);
-  text-shadow: 0 0 8px rgba(255, 0, 128, 0.8), 0 0 15px rgba(255, 0, 128, 0.4);
+  text-shadow: 0 0 10px #fff, 0 0 20px rgba(255, 0, 128, 1);
 }
 
 /* Depth badge — small indicator inside each tab */
@@ -1468,6 +1501,30 @@ body.x-ray-active #echo-layer {
   mask-composite: exclude;
   pointer-events: none;
   z-index: 10;
+}
+
+/* Hex Overlay (Dot Matrix) */
+.echo-document .hex-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(0, 229, 255, 0.2) 1px, transparent 1px);
+  background-size: 10px 10px;
+  opacity: calc(var(--wake) * 0.5);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Light Leak Effect */
+.echo-document .light-leak {
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(from var(--mouse-local-x, 0deg) at var(--mouse-local-x, 50%) var(--mouse-local-y, 50%), transparent 0deg, hsla(var(--echo-tint, 0deg), 100%, 70%, 0.1) 60deg, transparent 120deg);
+  opacity: var(--wake);
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: screen;
+  transition: opacity 0.3s ease;
 }
 
 /* New Holographic Glare element, sits above pre, uses mix-blend-mode */
@@ -1932,6 +1989,65 @@ body.scattered-active .echo-document:hover {
   z-index: 30 !important;
 }
 
+/* Helix View */
+body.helix-active #editor, body.helix-active #image-viewer {
+  transform: scale(0.65) translateZ(-100px) translateY(10%);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.helix-active #echo-layer {
+  perspective: 1500px;
+  transform-style: preserve-3d;
+  transform: rotateY(var(--helix-global-rot, 0deg));
+  transition: transform 0.1s linear;
+}
+
+body.helix-active .echo-document {
+  opacity: 0.7;
+  filter: blur(2px);
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateY(var(--rot-y, 0deg));
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.helix-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 150px)) rotateY(0deg) scale(1.15) !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.8);
+  z-index: 30 !important;
+}
+
+/* Pinboard View */
+body.pinboard-active #editor, body.pinboard-active #image-viewer {
+  transform: scale(0.7) translateY(10%) translateZ(-50px);
+  filter: blur(3px);
+  opacity: 0.6;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.pinboard-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.pinboard-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 100px)) rotateZ(0deg) scale(1.1) !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.8);
+  z-index: 30 !important;
+}
+
 /* Orbit View */
 .orbit-active #editor, .orbit-active #image-viewer {
   transform: scale(0.65) translateY(-20%);
@@ -2194,6 +2310,22 @@ body.siphon-mode-active .echo-document *::selection {
     background: rgba(255, 0, 128, 0.5);
     color: #fff;
     text-shadow: 0 0 5px #ff0080;
+}
+
+/* Typing Particle Effect */
+.typing-particle {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+  z-index: 100;
+  animation: particle-fly 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes particle-fly {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+  100% { transform: translate3d(var(--px), var(--py), -300px) scale(0); opacity: 0; }
 }
 
 /* Siphon Data Packet Animation */

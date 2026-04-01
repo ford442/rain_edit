@@ -434,6 +434,12 @@ document.addEventListener('mousemove', (e) => {
       echoLayerEl.style.setProperty('--orbit-global-rot', `${orbitRot}deg`);
     }
 
+    if (tabManager.isHelixView) {
+      // Rotate entire echo layer based on horizontal mouse position
+      const helixRot = -x * 360;
+      echoLayerEl.style.setProperty('--helix-global-rot', `${helixRot}deg`);
+    }
+
     echoes.forEach((echo, index) => {
       // Don't apply parallax if peeking (handled by CSS)
       if (echo.classList.contains('peek')) return;
@@ -661,6 +667,16 @@ if (btnTunnel) {
 const btnGrid = document.getElementById('btn-grid-view');
 if (btnGrid) {
     btnGrid.addEventListener('click', () => { tabManager.toggleGridView(); });
+}
+
+const btnHelix = document.getElementById('btn-helix-view');
+if (btnHelix) {
+    btnHelix.addEventListener('click', () => { tabManager.toggleHelixView(); });
+}
+
+const btnPinboard = document.getElementById('btn-pinboard-view');
+if (btnPinboard) {
+    btnPinboard.addEventListener('click', () => { tabManager.togglePinboardView(); });
 }
 
 const opacitySlider = document.getElementById('editor-opacity');
@@ -1307,9 +1323,56 @@ const STORM_intense = 80; // Accumulation threshold for lightning
 window.atmosphereHue = 180;
 window.atmosphereIntensity = 0;
 
+function createTypingParticle(x, y) {
+    if (!echoLayerEl) return;
+    const particle = document.createElement('div');
+    particle.className = 'typing-particle';
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+
+    // Randomize particle target destination slightly
+    const dx = (Math.random() - 0.5) * 200;
+    const dy = (Math.random() - 0.5) * 200;
+
+    particle.style.setProperty('--px', `${dx}px`);
+    particle.style.setProperty('--py', `${dy}px`);
+
+    // Random size
+    const size = Math.random() * 4 + 2;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+
+    echoLayerEl.appendChild(particle);
+
+    setTimeout(() => {
+        if (particle.parentNode) {
+            particle.parentNode.removeChild(particle);
+        }
+    }, 800);
+}
+
 editor.onDidChangeModelContent((e) => {
     e.changes.forEach(change => {
         stormCharCount += change.text.length;
+
+        // Typing Particle Emitter
+        if (change.text.length > 0) {
+            const position = editor.getPosition();
+            if (position) {
+                const scrolledVisiblePosition = editor.getScrolledVisiblePosition(position);
+                if (scrolledVisiblePosition) {
+                    const rect = editorEl.getBoundingClientRect();
+                    const x = scrolledVisiblePosition.left + rect.left;
+                    const y = scrolledVisiblePosition.top + rect.top + 10;
+
+                    // Create 1-3 particles per keystroke
+                    const particleCount = Math.floor(Math.random() * 3) + 1;
+                    for (let i = 0; i < particleCount; i++) {
+                        createTypingParticle(x, y);
+                    }
+                }
+            }
+        }
     });
 
     // Innovate Keystroke Ripple Pulse
