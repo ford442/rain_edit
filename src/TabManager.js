@@ -36,6 +36,8 @@ export class TabManager {
     this.isStackView = false;
     this.isTunnelView = false;
     this.isGridView = false;
+    this.isHelixView = false;
+    this.isPinboardView = false;
   }
 
   _deactivateAllViews() {
@@ -46,11 +48,37 @@ export class TabManager {
     this.isStackView = false;
     this.isTunnelView = false;
     this.isGridView = false;
-    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active');
-    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view'].forEach(id => {
+    this.isHelixView = false;
+    this.isPinboardView = false;
+    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active');
+    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
     });
+  }
+
+  toggleHelixView() {
+    const wasActive = this.isHelixView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHelixView = true;
+      document.body.classList.add('helix-active');
+      const btn = document.getElementById('btn-helix-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  togglePinboardView() {
+    const wasActive = this.isPinboardView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isPinboardView = true;
+      document.body.classList.add('pinboard-active');
+      const btn = document.getElementById('btn-pinboard-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
   }
 
   toggleStackView() {
@@ -529,6 +557,14 @@ Drag to change depth`;
       scanLine.style.setProperty('--index', index);
       el.appendChild(scanLine);
 
+      const hexOverlay = document.createElement('div');
+      hexOverlay.className = 'hex-overlay';
+      el.appendChild(hexOverlay);
+
+      const lightLeak = document.createElement('div');
+      lightLeak.className = 'light-leak';
+      el.appendChild(lightLeak);
+
       // Ghost Scroll feature: allow scrolling without bringing document to front
       pre.addEventListener('wheel', (e) => {
         e.stopPropagation(); // prevent main editor from scrolling
@@ -642,6 +678,57 @@ Drag to change depth`;
         el.style.setProperty('--tx', `0px`);
         el.style.setProperty('--ty', `${index * 20}px`);
         el.style.setProperty('--tz', `${index * 50}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
+      } else if (this.isHelixView) {
+        // Helix View positions
+        const totalEchoes = inactiveFiles.length;
+        const indexRatio = index / Math.max(1, totalEchoes - 1);
+        const yRange = window.innerHeight * 0.8;
+        const radius = 300;
+        const cycles = 2; // Number of full rotations
+
+        const angle = indexRatio * Math.PI * 2 * cycles;
+
+        const tx = Math.cos(angle) * radius;
+        const ty = (indexRatio * yRange) - (yRange / 2);
+        const tz = Math.sin(angle) * radius - 200; // Push back a bit
+
+        const rotY = -(angle * 180 / Math.PI) + 90; // Face inwards/outwards appropriately
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-z', '0deg');
+      } else if (this.isPinboardView) {
+        // Pinboard View positions (Organic spread on a wall)
+        const totalEchoes = inactiveFiles.length;
+        const spreadW = window.innerWidth * 0.8;
+        const spreadH = window.innerHeight * 0.8;
+
+        // Use a grid-like base with random offsets for organic feel
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        const cellW = spreadW / Math.max(1, cols);
+        const cellH = spreadH / Math.max(1, Math.ceil(totalEchoes / cols));
+
+        const randomSeedX = Math.sin(index * 123) * 0.5;
+        const randomSeedY = Math.cos(index * 456) * 0.5;
+
+        const tx = (col * cellW) - (spreadW / 2) + (cellW / 2) + (randomSeedX * cellW * 0.5);
+        const ty = (row * cellH) - (spreadH / 2) + (cellH / 2) + (randomSeedY * cellH * 0.5);
+        const tz = -150 + (Math.sin(index * 789) * 50); // slight depth variation
+
+        const rotZ = Math.sin(index * 111) * 15; // -15 to 15 deg tilt
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-z', `${rotZ}deg`);
         el.style.setProperty('--rot-x', '0deg');
         el.style.setProperty('--rot-y', '0deg');
       } else if (this.isScatteredView) {
@@ -767,7 +854,7 @@ Drag to change depth`;
           if (this.editorEl) {
               this.editorEl.classList.add('editor-peek-fade');
               // Bring forward while hovering the doc itself
-              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView) {
+              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView) {
                   el.style.setProperty('--tz', '100px');
               } else if (this.isOrbitView) {
                   // Push out slightly to emphasize selection in orbit view
@@ -778,6 +865,13 @@ Drag to change depth`;
                   // Bring forward slightly in scattered view
                   const originalZ = parseFloat(el.style.getPropertyValue('--scatter-z') || '0');
                   el.style.setProperty('--scatter-z', `${originalZ + 150}px`);
+              } else if (this.isPinboardView || this.isHelixView) {
+                  // Pop out for pinboard/helix
+                  const tz = parseFloat(el.style.getPropertyValue('--tz')) || 0;
+                  el.style.setProperty('--tz', `${tz + 150}px`);
+                  if (this.isPinboardView) {
+                      el.style.setProperty('--rot-z', '0deg');
+                  }
               }
               // Dispatch event to clear fog
               const rect = el.getBoundingClientRect();
@@ -805,6 +899,22 @@ Drag to change depth`;
                   const index = parseInt(el.dataset.index || 0);
                   const sz = -100 - (index * 80);
                   el.style.setProperty('--scatter-z', `${sz}px`);
+              } else if (this.isPinboardView) {
+                  const index = parseInt(el.dataset.index || 0);
+                  const tz = -150 + (Math.sin(index * 789) * 50);
+                  const rotZ = Math.sin(index * 111) * 15;
+                  el.style.setProperty('--tz', `${tz}px`);
+                  el.style.setProperty('--rot-z', `${rotZ}deg`);
+              } else if (this.isHelixView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = inactiveFiles.length;
+                  const index = parseInt(el.dataset.index || 0);
+                  const indexRatio = index / Math.max(1, totalEchoes - 1);
+                  const radius = 300;
+                  const cycles = 2;
+                  const angle = indexRatio * Math.PI * 2 * cycles;
+                  const tz = Math.sin(angle) * radius - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
               } else if (!this.isCascadeView) {
                   const idx = parseInt(el.dataset.index || 0);
                   el.style.setProperty('--tz', `calc(-${idx * 50}px + var(--stack-z, 0px))`);
