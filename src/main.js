@@ -679,6 +679,11 @@ if (btnPinboard) {
     btnPinboard.addEventListener('click', () => { tabManager.togglePinboardView(); });
 }
 
+const btnVortex = document.getElementById('btn-vortex-view');
+if (btnVortex) {
+    btnVortex.addEventListener('click', () => { tabManager.toggleVortexView(); });
+}
+
 const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
   updateFocusVisuals();
