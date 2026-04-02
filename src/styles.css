@@ -2022,6 +2022,43 @@ body.helix-active .echo-document:hover {
   z-index: 30 !important;
 }
 
+/* Vortex View */
+body.vortex-active #editor, body.vortex-active #image-viewer {
+  transform: scale(0.6) translateY(10%) translateZ(-50px);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.vortex-active #echo-layer {
+  perspective: 1800px;
+  transform-style: preserve-3d;
+  animation: vortex-spin 60s linear infinite;
+}
+
+@keyframes vortex-spin {
+  from { transform: rotateZ(0deg); }
+  to { transform: rotateZ(360deg); }
+}
+
+body.vortex-active .echo-document {
+  opacity: 0.7;
+  filter: blur(2px);
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.vortex-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) rotateZ(0deg) scale(1.1) !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.8);
+  z-index: 30 !important;
+}
+
 /* Pinboard View */
 body.pinboard-active #editor, body.pinboard-active #image-viewer {
   transform: scale(0.7) translateY(10%) translateZ(-50px);
@@ -2249,13 +2286,13 @@ body.stack-active .echo-document:hover {
 
 /* --- Shockwave Animation --- */
 @keyframes shockwave {
-  0% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) scale(1); filter: blur(var(--base-blur, 4px)) brightness(1); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95); }
-  20% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) - 150px)) scale(0.95); filter: blur(calc(var(--base-blur, 4px) + 6px)) brightness(2); box-shadow: 0 0 60px rgba(0, 229, 255, 0.8), inset 0 0 40px rgba(0, 229, 255, 0.5); border-color: rgba(255, 255, 255, 0.8); }
-  100% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) scale(1); filter: blur(var(--base-blur, 4px)) brightness(1); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95); }
+  0% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateZ(var(--rot-z, 0deg)) scale(1); filter: blur(var(--base-blur, 4px)) brightness(1); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95); }
+  20% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) - 250px)) rotateZ(var(--rot-z, 0deg)) scale(0.9); filter: blur(calc(var(--base-blur, 4px) + 8px)) brightness(2.5); box-shadow: 0 0 80px rgba(0, 229, 255, 1), inset 0 0 60px rgba(0, 229, 255, 0.8); border-color: rgba(255, 255, 255, 1); }
+  100% { transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateZ(var(--rot-z, 0deg)) scale(1); filter: blur(var(--base-blur, 4px)) brightness(1); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95); }
 }
 
 .shockwave-hit {
-  animation: shockwave 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+  animation: shockwave 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
 }
 
 /* --- Magnetic Attraction for X-Ray Peek --- */
