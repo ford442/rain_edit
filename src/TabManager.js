@@ -39,6 +39,7 @@ export class TabManager {
     this.isHelixView = false;
     this.isPinboardView = false;
     this.isVortexView = false;
+    this.isConstellationView = false;
   }
 
   _deactivateAllViews() {
@@ -52,8 +53,9 @@ export class TabManager {
     this.isHelixView = false;
     this.isPinboardView = false;
     this.isVortexView = false;
-    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active', 'vortex-active');
-    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view', 'btn-vortex-view'].forEach(id => {
+    this.isConstellationView = false;
+    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active', 'vortex-active', 'constellation-active');
+    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view', 'btn-vortex-view', 'btn-constellation-view'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
     });
@@ -66,6 +68,18 @@ export class TabManager {
       this.isHelixView = true;
       document.body.classList.add('helix-active');
       const btn = document.getElementById('btn-helix-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleConstellationView() {
+    const wasActive = this.isConstellationView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isConstellationView = true;
+      document.body.classList.add('constellation-active');
+      const btn = document.getElementById('btn-constellation-view');
       if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
@@ -300,6 +314,20 @@ export class TabManager {
     file.depth = Math.max(0, Math.min(2, file.depth + delta));
     this.applyDepth(file.depth, oldDepth);
     this._renderTabs();
+
+    // Add snap animation if depth changed
+    if (oldDepth !== file.depth && this.echoLayerEl) {
+        // Trigger snap animation on the background documents
+        const targetEl = file.isImage ? this.imageViewerEl : this.editorEl;
+        if (targetEl) {
+            targetEl.classList.remove('echo-snap-active');
+            void targetEl.offsetWidth; // Force reflow
+            targetEl.classList.add('echo-snap-active');
+            setTimeout(() => {
+                targetEl.classList.remove('echo-snap-active');
+            }, 500);
+        }
+    }
   }
 
   /** Re-render the tab list inside tabsEl. */
@@ -560,8 +588,8 @@ Drag to change depth`;
 
       // Dynamic Opacity and Blur based on depth index via CSS variables
       // (This avoids inline style specificity issues that break hover states)
-      const baseOpacity = Math.max(0.1, 0.6 - (index * 0.15));
-      const baseBlur = Math.min(10, 2 + (index * 2));
+      const baseOpacity = Math.max(0.05, 0.7 - (index * 0.2));
+      const baseBlur = Math.min(15, 3 + (index * 3));
       el.style.setProperty('--base-opacity', baseOpacity);
       el.style.setProperty('--base-blur', `${baseBlur}px`);
 
@@ -716,6 +744,28 @@ Drag to change depth`;
         el.style.setProperty('--rot-y', `${rotY}deg`);
         el.style.setProperty('--rot-x', '0deg');
         el.style.setProperty('--rot-z', '0deg');
+      } else if (this.isConstellationView) {
+        // Constellation View: Map to a 3D spherical point cloud
+        const totalEchoes = inactiveFiles.length;
+        const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+
+        const radius = 400 + (Math.sin(index * 123) * 100); // 400-500 radius with some jitter
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200; // Offset back
+
+        // Random tilt for constellation nodes
+        const rotX = (Math.sin(index * 22) * 20);
+        const rotY = (Math.cos(index * 33) * 20);
+        const rotZ = (Math.sin(index * 44) * 20);
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', `${rotX}deg`);
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-z', `${rotZ}deg`);
       } else if (this.isVortexView) {
         // Vortex View positions
         const totalEchoes = inactiveFiles.length;
