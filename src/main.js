@@ -684,6 +684,11 @@ if (btnVortex) {
     btnVortex.addEventListener('click', () => { tabManager.toggleVortexView(); });
 }
 
+const btnConstellation = document.getElementById('btn-constellation-view');
+if (btnConstellation) {
+    btnConstellation.addEventListener('click', () => { tabManager.toggleConstellationView(); });
+}
+
 const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
   updateFocusVisuals();
