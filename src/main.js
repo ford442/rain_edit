@@ -774,8 +774,16 @@ if (wiperToggle) {
 // Ghost Peeking Custom Event Bridge
 document.addEventListener('echo-peek', (e) => {
     if (fogManager && e.detail) {
-        // Clear fog significantly where the user is peeking at an echo document
-        fogManager.clearFogAt(e.detail.x, e.detail.y, 120);
+        // Focus Spotlight logic
+        const radius = e.detail.radius || 120;
+
+        // Heavily clear fog where user is peeking
+        fogManager.clearFogAt(e.detail.x, e.detail.y, radius, e.detail.isFocusSpotlight);
+
+        // If it's the full focus spotlight, clear rain too
+        if (e.detail.isFocusSpotlight && raindrops) {
+            raindrops.clearDroplets(e.detail.x, e.detail.y, radius);
+        }
     }
 });
 
@@ -980,7 +988,17 @@ editor.onDidChangeCursorPosition((e) => {
                               // Override the tz variable to pull it physically closer before the pulse animation takes over
                               echoEl.style.setProperty('--tz-override', '1');
                               echoEl.style.setProperty('--tz', '30px');
-                              matchedEchoes.push(echoEl.getBoundingClientRect());
+
+                              // Semantic Depth Linking: Provide the depth level to the connection manager
+                              const rect = echoEl.getBoundingClientRect();
+                              matchedEchoes.push({
+                                  left: rect.left,
+                                  top: rect.top,
+                                  width: rect.width,
+                                  height: rect.height,
+                                  depthIndex: parseInt(echoEl.dataset.index || 0, 10),
+                                  isHovered: false
+                              });
                           }
                       }
                   }
@@ -990,7 +1008,15 @@ editor.onDidChangeCursorPosition((e) => {
           // Add currently hovered files for the tether feature
           echoes.forEach(echoEl => {
               if (echoEl.matches(':hover') && !echoEl.classList.contains('resonance-hit')) {
-                   matchedEchoes.push(echoEl.getBoundingClientRect());
+                   const rect = echoEl.getBoundingClientRect();
+                   matchedEchoes.push({
+                       left: rect.left,
+                       top: rect.top,
+                       width: rect.width,
+                       height: rect.height,
+                       depthIndex: parseInt(echoEl.dataset.index || 0, 10),
+                       isHovered: true
+                   });
               }
           });
 
@@ -1189,7 +1215,35 @@ document.addEventListener('keyup', (e) => {
 
 let stackZ = 0;
 window.addEventListener('wheel', (e) => {
-    if (e.altKey) {
+    // "Layered Depth Explorer" feature mapped to Shift+Alt
+    if (e.shiftKey && e.altKey && !tabManager.isCascadeView) {
+        e.preventDefault();
+        const delta = e.deltaY * 0.8; // Faster scroll
+        stackZ += delta;
+
+        // Clamp scroll stack depth roughly to available echoes with some padding
+        const maxDepth = (tabManager.files.length * 50) + 200;
+        stackZ = Math.max(-100, Math.min(maxDepth, stackZ));
+
+        if (echoLayerEl) {
+            echoLayerEl.style.setProperty('--stack-z', `${stackZ}px`);
+
+            // Highlight intersecting documents (Layered Depth Explorer visual feedback)
+            const echoes = echoLayerEl.querySelectorAll('.echo-document');
+            echoes.forEach(echo => {
+                // Original Z position (from TabManager: index * 50)
+                const docZ = parseInt(echo.dataset.index || 0) * 50;
+
+                // If stackZ is near docZ, it's intersecting the viewing plane
+                const distance = Math.abs(docZ - stackZ);
+                if (distance < 40) {
+                    echo.classList.add('z-intersect');
+                } else {
+                    echo.classList.remove('z-intersect');
+                }
+            });
+        }
+    } else if (e.altKey) {
         e.preventDefault();
         const delta = e.deltaY * 0.001;
 
@@ -1198,45 +1252,21 @@ window.addEventListener('wheel', (e) => {
 
         // Update current focus depth immediately if Alt is held
         setFocusDepth(userPreferredDepth);
-    } else if (e.shiftKey && !tabManager.isCascadeView) {
-        e.preventDefault();
-        const delta = e.deltaY * 0.5;
-        stackZ += delta;
-
-        // Clamp scroll stack depth roughly to available echoes
-        const maxDepth = (tabManager.files.length * 50) + 100;
-        stackZ = Math.max(0, Math.min(maxDepth, stackZ));
-
-        if (echoLayerEl) {
-            echoLayerEl.style.setProperty('--stack-z', `${stackZ}px`);
-
-            // Highlight intersecting documents
-            const echoes = echoLayerEl.querySelectorAll('.echo-document');
-            echoes.forEach(echo => {
-                // Original Z position (from TabManager: index * 50)
-                const docZ = parseInt(echo.dataset.index || 0) * 50;
-
-                // If stackZ is near docZ, it's intersecting the viewing plane
-                const distance = Math.abs(docZ - stackZ);
-                if (distance < 25) {
-                    echo.classList.add('z-intersect');
-                } else {
-                    echo.classList.remove('z-intersect');
-                }
-            });
-        }
     }
 }, { passive: false });
 
 document.addEventListener('keyup', (e) => {
-    if (e.key === 'Shift') {
-        stackZ = 0;
-        if (echoLayerEl) {
-            echoLayerEl.style.setProperty('--stack-z', '0px');
-            const echoes = echoLayerEl.querySelectorAll('.echo-document');
-            echoes.forEach(echo => {
-                echo.classList.remove('z-intersect');
-            });
+    if (e.key === 'Shift' || e.key === 'Alt') {
+        // Only reset if BOTH are not held
+        if (!e.shiftKey || !e.altKey) {
+            stackZ = 0;
+            if (echoLayerEl) {
+                echoLayerEl.style.setProperty('--stack-z', '0px');
+                const echoes = echoLayerEl.querySelectorAll('.echo-document');
+                echoes.forEach(echo => {
+                    echo.classList.remove('z-intersect');
+                });
+            }
         }
     }
 });
