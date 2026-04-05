@@ -562,6 +562,44 @@ Drag to change depth`;
               code.textContent = contentStr; // Fallback to plain text
           });
       }
+
+      // Allow drag & drop for Holographic Siphon
+      pre.draggable = true;
+      pre.addEventListener('dragstart', (e) => {
+          if (!document.body.classList.contains('siphon-mode-active')) {
+              e.preventDefault();
+              return;
+          }
+
+          const selection = window.getSelection();
+          let text = selection.toString();
+
+          if (!text) {
+              // If no text is selected, fallback to the whole content or a snippet
+              text = code.textContent.substring(0, 500);
+          }
+
+          e.dataTransfer.setData('text/plain', text);
+          e.dataTransfer.effectAllowed = 'copy';
+
+          // Optional: Add a custom drag image
+          const dragImg = document.createElement('div');
+          dragImg.style.position = 'absolute';
+          dragImg.style.top = '-1000px';
+          dragImg.style.color = '#00e5ff';
+          dragImg.style.background = 'rgba(0, 0, 0, 0.8)';
+          dragImg.style.padding = '8px';
+          dragImg.style.border = '1px solid #00e5ff';
+          dragImg.textContent = text.length > 20 ? text.substring(0, 20) + '...' : text;
+          document.body.appendChild(dragImg);
+
+          e.dataTransfer.setDragImage(dragImg, 0, 0);
+
+          setTimeout(() => {
+              if (dragImg.parentNode) dragImg.parentNode.removeChild(dragImg);
+          }, 100);
+      });
+
       pre.appendChild(code);
       bodyWrapper.appendChild(pre);
 

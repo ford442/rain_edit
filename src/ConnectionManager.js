@@ -281,6 +281,57 @@ export class ConnectionManager {
                 });
             }
 
+            // Draw Semantic 3D Threading between the echo targets themselves
+            if (this.echoTargets && this.echoTargets.length > 1) {
+                // We only thread echoes that are semantic (not just hovered)
+                const semanticEchoes = this.echoTargets.filter(t => !t.isHovered);
+
+                for (let i = 0; i < semanticEchoes.length; i++) {
+                    for (let j = i + 1; j < semanticEchoes.length; j++) {
+                        const a = semanticEchoes[i];
+                        const b = semanticEchoes[j];
+
+                        const ax = a.left + a.width / 2;
+                        const ay = a.top + a.height / 2;
+                        const bx = b.left + b.width / 2;
+                        const by = b.top + b.height / 2;
+
+                        const dist = Math.hypot(ax - bx, ay - by);
+                        const opacity = Math.min(0.6, 800 / (dist + 50));
+
+                        this.ctx.strokeStyle = `rgba(255, 0, 128, ${opacity})`; // Neon pink threads
+                        this.ctx.lineWidth = 1.5;
+                        this.ctx.shadowColor = 'rgba(255, 0, 128, 0.8)';
+                        this.ctx.shadowBlur = 10;
+
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(ax, ay);
+
+                        // Bezier curve that droops slightly based on distance to simulate physical threads
+                        const cx = (ax + bx) / 2;
+                        const cy = ((ay + by) / 2) + Math.min(100, dist * 0.2);
+
+                        this.ctx.quadraticCurveTo(cx, cy, bx, by);
+                        this.ctx.stroke();
+
+                        // Data packet along the thread
+                        const flowTime = ((time * 1.5) + i * 0.3 + j * 0.7) % 1;
+                        const px = (1 - flowTime) * (1 - flowTime) * ax + 2 * (1 - flowTime) * flowTime * cx + flowTime * flowTime * bx;
+                        const py = (1 - flowTime) * (1 - flowTime) * ay + 2 * (1 - flowTime) * flowTime * cy + flowTime * flowTime * by;
+
+                        this.ctx.save();
+                        this.ctx.setLineDash([]);
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.4})`;
+                        this.ctx.shadowBlur = 15;
+                        this.ctx.shadowColor = 'rgba(255, 255, 255, 1)';
+                        this.ctx.beginPath();
+                        this.ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.restore();
+                    }
+                }
+            }
+
             // Reset
             this.ctx.setLineDash([]);
             this.ctx.shadowBlur = 0;

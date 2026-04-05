@@ -532,6 +532,47 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Holographic Siphon Mode Logic - Listen for text selection (mouseup) inside echo documents
+// Holographic Siphon Drag & Drop Drop logic
+editorEl.addEventListener('dragover', (e) => {
+    if (document.body.classList.contains('siphon-mode-active')) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    }
+});
+
+editorEl.addEventListener('drop', (e) => {
+    if (!document.body.classList.contains('siphon-mode-active')) return;
+
+    e.preventDefault();
+    const selectedText = e.dataTransfer.getData('text/plain');
+    if (!selectedText || !selectedText.trim()) return;
+
+    if (window.editor) {
+        // Find the target position from the drop coordinates
+        const targetPosition = window.editor.getTargetAtClientPoint(e.clientX, e.clientY);
+
+        let position = window.editor.getPosition();
+        if (targetPosition && targetPosition.position) {
+            position = targetPosition.position;
+        }
+
+        // Fire Siphon Packet Animation from cursor to drop location
+        fireSiphonPacket(selectedText, e.clientX, e.clientY - 100);
+
+        if (position) {
+            window.editor.executeEdits("siphon-drop", [{
+                range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+                text: selectedText,
+                forceMoveMarkers: true
+            }]);
+
+            // Visual feedback on the editor
+            document.body.classList.add('shockwave-hit');
+            setTimeout(() => document.body.classList.remove('shockwave-hit'), 400);
+        }
+    }
+});
+
 document.addEventListener('mouseup', (e) => {
     if (!document.body.classList.contains('siphon-mode-active')) return;
 
@@ -1078,6 +1119,8 @@ if (globalSearch) {
             return;
         }
 
+        let matchedEchoes = [];
+
         tabManager.files.forEach(file => {
             if (file.id === tabManager.activeId) return;
 
@@ -1097,6 +1140,16 @@ if (globalSearch) {
                     }
                     echoEl.style.setProperty('--tz-override', '1');
                     echoEl.style.setProperty('--tz', '80px');
+
+                    const rect = echoEl.getBoundingClientRect();
+                    matchedEchoes.push({
+                        left: rect.left,
+                        top: rect.top,
+                        width: rect.width,
+                        height: rect.height,
+                        depthIndex: parseInt(echoEl.dataset.index || 0, 10),
+                        isHovered: false
+                    });
                 } else {
                     echoEl.classList.remove('search-hit');
                     if (echoEl.style.getPropertyValue('--tz-override')) {
@@ -1106,6 +1159,11 @@ if (globalSearch) {
                 }
             }
         });
+
+        if (connectionManager) {
+            // Setting echo focus triggers the semantic 3D threading
+            connectionManager.setEchoFocus(matchedEchoes);
+        }
     });
 }
 
