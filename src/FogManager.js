@@ -50,7 +50,7 @@ export class FogManager {
     this.ctx.restore();
   }
 
-  clearFogAt(x, y, radius) {
+  clearFogAt(x, y, radius, isSpotlight = false) {
     if (!this.ctx) return;
     const rect = this.container.getBoundingClientRect();
     const relX = x - rect.left;
@@ -62,24 +62,38 @@ export class FogManager {
     // Main clear
     this.ctx.beginPath();
     this.ctx.arc(relX, relY, radius, 0, Math.PI * 2);
+
+    // Focus Spotlight effect: apply a strong, soft radial gradient mask to clear
+    if (isSpotlight) {
+        const grad = this.ctx.createRadialGradient(relX, relY, 0, relX, relY, radius);
+        grad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+        grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.8)');
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        this.ctx.fillStyle = grad;
+    } else {
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+    }
+
     this.ctx.fill();
 
     // Soft edge
-    this.ctx.beginPath();
-    this.ctx.arc(relX, relY, radius * 1.3, 0, Math.PI * 2);
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-    this.ctx.fill();
-
-    // Irregularities (droplets running)
-    // Random chance to clear a "drip" downwards
-    if (Math.random() < 0.3) {
+    if (!isSpotlight) {
         this.ctx.beginPath();
-        this.ctx.moveTo(relX, relY + radius);
-        this.ctx.lineTo(relX + (Math.random() - 0.5) * 10, relY + radius + 20 + Math.random() * 30);
-        this.ctx.lineWidth = 5;
-        this.ctx.lineCap = 'round';
-        this.ctx.strokeStyle = 'rgba(0, 0, 0, 1.0)';
-        this.ctx.stroke();
+        this.ctx.arc(relX, relY, radius * 1.3, 0, Math.PI * 2);
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        this.ctx.fill();
+
+        // Irregularities (droplets running)
+        // Random chance to clear a "drip" downwards
+        if (Math.random() < 0.3) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(relX, relY + radius);
+            this.ctx.lineTo(relX + (Math.random() - 0.5) * 10, relY + radius + 20 + Math.random() * 30);
+            this.ctx.lineWidth = 5;
+            this.ctx.lineCap = 'round';
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 1.0)';
+            this.ctx.stroke();
+        }
     }
 
     this.ctx.restore();

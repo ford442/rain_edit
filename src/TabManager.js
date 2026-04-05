@@ -956,10 +956,10 @@ Drag to change depth`;
                       el.style.setProperty('--rot-z', '0deg');
                   }
               }
-              // Dispatch event to clear fog
+              // Focus Spotlight: Dispatch event to heavily clear fog and rain when peeking
               const rect = el.getBoundingClientRect();
               const evt = new CustomEvent('echo-peek', {
-                detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+                detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, radius: Math.max(rect.width, rect.height) / 1.5, isFocusSpotlight: true }
               });
               document.dispatchEvent(evt);
           }

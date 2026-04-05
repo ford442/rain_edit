@@ -227,13 +227,57 @@ export class ConnectionManager {
                 }
             });
 
-            // Draw lines to matched Echo Documents
+            // Draw lines to matched Echo Documents (Semantic Depth Linking)
             if (this.echoTargets && this.echoTargets.length > 0) {
                 this.ctx.shadowColor = 'rgba(0, 229, 255, 0.8)'; // Cyan glow for echoes
                 this.echoTargets.forEach(rect => {
                     const tx = rect.left + rect.width / 2;
                     const ty = rect.top + rect.height / 2;
-                    drawFlowLine(tx, ty, true);
+
+                    // Modify appearance based on depth and hovered state
+                    // If not hovered (semantic link), use a thicker, brighter line
+                    // If hovered, use the standard cyan line
+                    const isSemantic = !rect.isHovered;
+
+                    const dist = Math.hypot(tx - x, ty - y);
+                    let opacity = Math.min(1.0, 1500 / (dist + 50));
+
+                    if (isSemantic) {
+                        // Depth-based opacity and thickness
+                        const depthBonus = Math.max(0, 1 - (rect.depthIndex * 0.1));
+                        opacity = Math.min(1.0, opacity + depthBonus * 0.3);
+                        this.ctx.strokeStyle = `rgba(0, 255, 128, ${opacity})`; // Unique green/cyan color for semantic links
+                        this.ctx.lineWidth = 2 + depthBonus;
+                        this.ctx.shadowColor = 'rgba(0, 255, 128, 0.9)';
+                    } else {
+                        this.ctx.strokeStyle = `rgba(0, 229, 255, ${opacity})`;
+                        this.ctx.lineWidth = 1.5;
+                        this.ctx.shadowColor = 'rgba(0, 229, 255, 0.8)';
+                    }
+
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, y);
+                    const cx = (x + tx) / 2;
+                    const cy = (y + ty) / 2 - 50;
+                    this.ctx.quadraticCurveTo(cx, cy, tx, ty);
+                    this.ctx.stroke();
+
+                    // Data Flow animation
+                    const flowTime = (time * (isSemantic ? 3 : 2)) % 1; // Faster data flow for semantic links
+                    const t = flowTime; // t from 0 to 1
+
+                    const px = (1 - t) * (1 - t) * x + 2 * (1 - t) * t * cx + t * t * tx;
+                    const py = (1 - t) * (1 - t) * y + 2 * (1 - t) * t * cy + t * t * ty;
+
+                    this.ctx.save();
+                    this.ctx.setLineDash([]);
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.3})`;
+                    this.ctx.shadowBlur = isSemantic ? 20 : 15;
+                    this.ctx.shadowColor = 'rgba(255, 255, 255, 1)';
+                    this.ctx.beginPath();
+                    this.ctx.arc(px, py, isSemantic ? 4 : 3, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
                 });
             }
 
