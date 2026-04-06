@@ -224,17 +224,17 @@ export class TabManager {
     if (!file) return;
     this.activeId = id;
 
-    // Trigger Depth-Swap animation
+    // Trigger Warp-In animation replacing depth-swap
     const targetEl = file.isImage ? this.imageViewerEl : this.editorEl;
     if (targetEl) {
-        targetEl.classList.remove('depth-swap-active');
+        targetEl.classList.remove('warp-in-active');
         // Force reflow
         void targetEl.offsetWidth;
-        targetEl.classList.add('depth-swap-active');
+        targetEl.classList.add('warp-in-active');
 
         // Clean up animation class
         setTimeout(() => {
-            targetEl.classList.remove('depth-swap-active');
+            targetEl.classList.remove('warp-in-active');
         }, 600);
     }
 
