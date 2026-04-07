@@ -140,4 +140,131 @@ export class StorageAPI {
       }).catch(console.error);
     }
   }
+
+  // ── VPS File Browser ──────────────────────────────────────────────────────
+
+  /**
+   * List the contents of a directory on the Contabo VPS.
+   * @param {string} path - Relative path under files_dir (e.g. 'audio/flac')
+   * @returns {Promise<Array<{name,path,type,size,modified,mime}>>}
+   */
+  async browseVPS(path = '') {
+    const url = `${this.baseUrl}/api/vps/browse?path=${encodeURIComponent(path)}`;
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) throw new Error(`Browse failed: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error('[StorageAPI] browseVPS error:', err);
+      return [];
+    }
+  }
+
+  /**
+   * Fetch the text content of a file on the VPS.
+   * @param {string} path - Relative file path (e.g. 'sequencer/songs/foo.json')
+   * @returns {Promise<string>} file text content
+   */
+  async getVPSFile(path) {
+    const url = `${this.baseUrl}/api/vps/file?path=${encodeURIComponent(path)}`;
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) throw new Error(`Get file failed: ${res.status}`);
+      return await res.text();
+    } catch (err) {
+      console.error('[StorageAPI] getVPSFile error:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Get the URL to stream/download a file from the VPS.
+   * @param {string} path - Relative file path
+   * @returns {string} full URL
+   */
+  getVPSFileURL(path) {
+    return `${this.baseUrl}/api/vps/file?path=${encodeURIComponent(path)}`;
+  }
+
+  /**
+   * Upload a File object to a directory on the VPS.
+   * @param {File} file - The File to upload
+   * @param {string} dirPath - Target directory relative path
+   * @param {Function} [onProgress] - Optional progress callback (0-100)
+   * @returns {Promise<{success,path,size}|null>}
+   */
+  async uploadVPSFile(file, dirPath = '', onProgress = null) {
+    return new Promise((resolve) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('path', dirPath);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${this.baseUrl}/api/vps/upload`);
+
+      if (onProgress) {
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+        };
+      }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try { resolve(JSON.parse(xhr.responseText)); }
+          catch { resolve({ success: true }); }
+        } else {
+          console.error('[StorageAPI] uploadVPSFile failed:', xhr.status, xhr.responseText);
+          resolve(null);
+        }
+      };
+
+      xhr.onerror = () => {
+        console.error('[StorageAPI] uploadVPSFile network error');
+        resolve(null);
+      };
+
+      xhr.send(formData);
+    });
+  }
+
+  /**
+   * Overwrite a text file on the VPS with new content (save edits).
+   * @param {string} path - Relative file path
+   * @param {string} content - New text content
+   * @returns {Promise<{success,path,size}|null>}
+   */
+  async saveVPSFile(path, content) {
+    const url = `${this.baseUrl}/api/vps/file`;
+    try {
+      const res = await fetch(url, {
+        method: 'PUT',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path, content }),
+      });
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error('[StorageAPI] saveVPSFile error:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Delete a file on the VPS.
+   * @param {string} path - Relative file path
+   * @returns {Promise<boolean>}
+   */
+  async deleteVPSFile(path) {
+    const url = `${this.baseUrl}/api/vps/file?path=${encodeURIComponent(path)}`;
+    try {
+      const res = await fetch(url, { method: 'DELETE', mode: 'cors' });
+      return res.ok;
+    } catch (err) {
+      console.error('[StorageAPI] deleteVPSFile error:', err);
+      return false;
+    }
+  }
 }
+
+export default StorageAPI;
