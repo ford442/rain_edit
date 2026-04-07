@@ -833,6 +833,11 @@ if (btnConstellation) {
     btnConstellation.addEventListener('click', () => { tabManager.toggleConstellationView(); });
 }
 
+const btnPrism = document.getElementById('btn-prism-view');
+if (btnPrism) {
+    btnPrism.addEventListener('click', () => { tabManager.togglePrismView(); });
+}
+
 const opacitySlider = document.getElementById('editor-opacity');
 opacitySlider.addEventListener('input', (e) => {
   updateFocusVisuals();
