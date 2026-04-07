@@ -53,6 +53,7 @@ const referenceLayer = document.getElementById('reference-layer');
 const referenceOverlay = document.getElementById('reference-overlay');
 const holoLayerEl = document.getElementById('holo-layer');
 const echoLayerEl = document.getElementById('echo-layer');
+const dustLayerEl = document.getElementById('dust-layer');
 const fogLayerEl = document.getElementById('fog-layer');
 const vignetteLayer = document.getElementById('vignette-layer'); // Added
 const neonScatterLayer = document.getElementById('neon-scatter-layer');
@@ -224,6 +225,13 @@ function resizeCanvases(){
     matrixLayer.style.height = rect.height + 'px';
     initMatrixRain();
   }
+
+  if (dustLayerEl) {
+    dustLayerEl.width = rect.width * dpr;
+    dustLayerEl.height = rect.height * dpr;
+    dustLayerEl.style.width = rect.width + 'px';
+    dustLayerEl.style.height = rect.height + 'px';
+  }
 }
 window.addEventListener('resize', resizeCanvases);
 resizeCanvases();
@@ -304,7 +312,72 @@ function awaitImage(src){
   return new Promise((resolve) => { img.onload = () => resolve(img); img.onerror = () => resolve(img); });
 }
 
+// --- Holographic Dust System ---
+let dustCtx = null;
+const dustParticles = [];
+function initDust() {
+    if (!dustLayerEl) return;
+    dustCtx = dustLayerEl.getContext('2d');
+    const count = 100;
+    for (let i = 0; i < count; i++) {
+        dustParticles.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            size: Math.random() * 2 + 0.5,
+            speedX: (Math.random() - 0.5) * 0.5,
+            speedY: (Math.random() - 0.5) * 0.5,
+            opacity: Math.random() * 0.5 + 0.2
+        });
+    }
+}
+
+function drawDust(time) {
+    if (!dustCtx || !dustLayerEl) return;
+
+    dustCtx.clearRect(0, 0, dustLayerEl.width, dustLayerEl.height);
+
+    // Parallax logic based on mouse CSS vars
+    const mxStr = document.body.style.getPropertyValue('--mouse-x');
+    const myStr = document.body.style.getPropertyValue('--mouse-y');
+    const mx = mxStr ? parseFloat(mxStr) : window.innerWidth / 2;
+    const my = myStr ? parseFloat(myStr) : window.innerHeight / 2;
+
+    const pX = (mx / window.innerWidth) - 0.5;
+    const pY = (my / window.innerHeight) - 0.5;
+
+    // Intensity modifier based on typing
+    const intensity = 1 + (typeof stormCharCount !== 'undefined' ? stormCharCount * 0.05 : 0);
+
+    const dpr = window.devicePixelRatio || 1;
+
+    dustCtx.fillStyle = '#00e5ff'; // Holographic blue
+
+    dustParticles.forEach((p, i) => {
+        // Slow drift
+        p.x += p.speedX * intensity;
+        p.y += p.speedY * intensity;
+
+        // Mouse parallax
+        const finalX = p.x - (pX * 50 * (i % 3 + 1));
+        const finalY = p.y - (pY * 50 * (i % 3 + 1));
+
+        // Wrap around
+        if (p.x > window.innerWidth) p.x = 0;
+        if (p.x < 0) p.x = window.innerWidth;
+        if (p.y > window.innerHeight) p.y = 0;
+        if (p.y < 0) p.y = window.innerHeight;
+
+        dustCtx.globalAlpha = p.opacity + (Math.sin(time * 0.002 + i) * 0.2); // Twinkle
+
+        dustCtx.beginPath();
+        dustCtx.arc(finalX * dpr, finalY * dpr, p.size * dpr, 0, Math.PI * 2);
+        dustCtx.fill();
+    });
+    dustCtx.globalAlpha = 1.0;
+}
+
 async function initLayers(){
+  initDust();
   // load texture and drop images; attempt to use copied public images first
   const bgImg = await awaitImage('./img/texture-rain-bg.png') || await awaitImage('/ra1n/img/weather/texture-rain-bg.png');
   const fgImg = await awaitImage('./img/texture-rain-fg.png') || await awaitImage('/ra1n/img/weather/texture-rain-fg.png');
@@ -372,6 +445,7 @@ async function initLayers(){
 
     if(fogManager) fogManager.render();
     drawMatrix();
+    drawDust(time);
     requestAnimationFrame(animate);
   }
 
@@ -514,6 +588,35 @@ document.addEventListener('mousemove', (e) => {
 document.addEventListener('mousedown', (e) => {
     if (raindrops) {
         raindrops.splash(e.clientX, e.clientY, 5);
+    }
+});
+
+// --- Kinetic Ripple Interaction ---
+document.addEventListener('dblclick', (e) => {
+    if (echoLayerEl) {
+        const echoes = echoLayerEl.querySelectorAll('.echo-document');
+        const cx = e.clientX;
+        const cy = e.clientY;
+
+        echoes.forEach(echo => {
+            const rect = echo.getBoundingClientRect();
+            const eCx = rect.left + rect.width / 2;
+            const eCy = rect.top + rect.height / 2;
+            const dist = Math.sqrt(Math.pow(cx - eCx, 2) + Math.pow(cy - eCy, 2));
+
+            // Wave propagates outwards
+            const delay = dist * 1.5;
+
+            setTimeout(() => {
+                echo.classList.remove('kinetic-ripple-hit');
+                void echo.offsetWidth; // Force reflow
+                echo.classList.add('kinetic-ripple-hit');
+
+                setTimeout(() => {
+                    echo.classList.remove('kinetic-ripple-hit');
+                }, 600); // Duration of the kinetic-ripple animation
+            }, delay);
+        });
     }
 });
 
