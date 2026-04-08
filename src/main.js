@@ -509,11 +509,28 @@ initLayers();
 // parallax from mouse
 let isFlashlightActive = false;
 
+let isAltDragActive = false;
+let altDragStartX = 0;
+let altDragStartY = 0;
+let sceneRotX = 0;
+let sceneRotY = 0;
+let currentSceneRotX = 0;
+let currentSceneRotY = 0;
+
 document.addEventListener('mousedown', (e) => {
     // Middle mouse button activates Flashlight mode
     if (e.button === 1) {
         isFlashlightActive = true;
         e.preventDefault(); // Prevent default middle-click scroll behavior
+    }
+
+    if (e.altKey && e.button === 0) { // Left click + Alt
+        isAltDragActive = true;
+        altDragStartX = e.clientX;
+        altDragStartY = e.clientY;
+        currentSceneRotX = sceneRotX;
+        currentSceneRotY = sceneRotY;
+        e.preventDefault(); // Prevent text selection while dragging
     }
 });
 
@@ -521,12 +538,29 @@ document.addEventListener('mouseup', (e) => {
     if (e.button === 1) {
         isFlashlightActive = false;
     }
+
+    if (e.button === 0) {
+        isAltDragActive = false;
+    }
 });
 
 document.addEventListener('mousemove', (e) => {
   const rect = editorEl.getBoundingClientRect();
   const x = ( (e.clientX - rect.left) / rect.width ) * 2 - 1;
   const y = ( (e.clientY - rect.top) / rect.height ) * 2 - 1;
+
+  // 3D Free-Cam Logic
+  if (isAltDragActive && echoLayerEl) {
+      const deltaX = e.clientX - altDragStartX;
+      const deltaY = e.clientY - altDragStartY;
+
+      // Sensitivity of rotation
+      sceneRotY = currentSceneRotY + (deltaX * 0.5);
+      sceneRotX = currentSceneRotX - (deltaY * 0.5);
+
+      echoLayerEl.style.transform = `rotateX(${sceneRotX}deg) rotateY(${sceneRotY}deg)`;
+      // Continue to next handlers but maybe skip some parallax to avoid conflict
+  }
 
   // Flashlight Effect: clear a large area of fog
   if (isFlashlightActive && fogManager) {
@@ -888,6 +922,16 @@ if (btnConstellation) {
 const btnPrism = document.getElementById('btn-prism-view');
 if (btnPrism) {
     btnPrism.addEventListener('click', () => { tabManager.togglePrismView(); });
+}
+
+const btnCoverflow = document.getElementById('btn-coverflow-view');
+if (btnCoverflow) {
+    btnCoverflow.addEventListener('click', () => { tabManager.toggleCoverflowView(); });
+}
+
+const btnWave = document.getElementById('btn-wave-view');
+if (btnWave) {
+    btnWave.addEventListener('click', () => { tabManager.toggleWaveView(); });
 }
 
 const opacitySlider = document.getElementById('editor-opacity');
