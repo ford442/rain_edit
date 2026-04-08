@@ -591,10 +591,10 @@ export class VPSFileBrowser {
       const result = await this.storageAPI.saveVPSFile(filePath, content);
       if (!result) throw new Error('No response');
 
-      // Update the tab's vpsPath and name
+      // Update the tab's vpsPath and name, then re-activate to refresh the tab bar
       activeFile.vpsPath = filePath;
       activeFile.name = filename;
-      this.tabManager._renderTabs?.();
+      this.tabManager.setActive(activeFile.id);
 
       this._setStatus(`Saved: ${filePath}`, 'ok');
       setTimeout(() => this.close(), 800);

@@ -197,7 +197,8 @@ async function _triggerVpsSave() {
         vpsBrowser.openSaveMode(activeFile.name || 'untitled.txt',
           activeFile.vpsPath.split('/').slice(0, -1).join('/'));
       }
-    } catch (_) {
+    } catch (err) {
+      console.error('[VPSFileBrowser] save error, opening save dialog:', err);
       vpsBrowser.openSaveMode(activeFile.name || 'untitled.txt');
     } finally {
       document.body.style.cursor = 'default';
