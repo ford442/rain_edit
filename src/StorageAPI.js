@@ -8,7 +8,7 @@
 const DEFAULT_BASE_URL =
   typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_STORAGE_BASE_URL
     ? import.meta.env.VITE_STORAGE_BASE_URL
-    : 'https://ford442-storage-manager.hf.space';
+    : 'https://storage.noahcohn.com';
 
 /**
  * Categories tracked in the remote storage.
@@ -229,15 +229,16 @@ export class StorageAPI {
 
   /**
    * Overwrite a text file on the VPS with new content (save edits).
+   * Hits `POST /api/vps/save`.
    * @param {string} path - Relative file path
    * @param {string} content - New text content
    * @returns {Promise<{success,path,size}|null>}
    */
   async saveVPSFile(path, content) {
-    const url = `${this.baseUrl}/api/vps/file`;
+    const url = `${this.baseUrl}/api/vps/save`;
     try {
       const res = await fetch(url, {
-        method: 'PUT',
+        method: 'POST',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path, content }),
@@ -246,6 +247,53 @@ export class StorageAPI {
       return await res.json();
     } catch (err) {
       console.error('[StorageAPI] saveVPSFile error:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Create a directory on the VPS.
+   * Hits `POST /api/vps/mkdir`.
+   * @param {string} path - Relative directory path to create
+   * @returns {Promise<{success,path}|null>}
+   */
+  async mkdirVPS(path) {
+    const url = `${this.baseUrl}/api/vps/mkdir`;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      });
+      if (!res.ok) throw new Error(`Mkdir failed: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error('[StorageAPI] mkdirVPS error:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Rename or move a file/directory on the VPS.
+   * Hits `POST /api/vps/rename`.
+   * @param {string} path - Current relative path
+   * @param {string} newPath - New relative path
+   * @returns {Promise<{success}|null>}
+   */
+  async renameVPSFile(path, newPath) {
+    const url = `${this.baseUrl}/api/vps/rename`;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path, new_path: newPath }),
+      });
+      if (!res.ok) throw new Error(`Rename failed: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error('[StorageAPI] renameVPSFile error:', err);
       return null;
     }
   }

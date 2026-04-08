@@ -121,22 +121,54 @@
       </filter>
     </svg>
 
-    <button id="btn-cabinet" title="Open 3D File Cabinet" style="
+    <div style="
       position: fixed;
       bottom: 24px;
       left: 24px;
       z-index: 40;
-      background: rgba(10, 15, 25, 0.8);
-      border: 1px solid rgba(0, 229, 255, 0.3);
-      color: #c0d0e0;
-      font-family: inherit;
-      font-size: 13px;
-      padding: 10px 20px;
-      border-radius: 16px;
-      cursor: pointer;
-      backdrop-filter: blur(6px);
-      transition: background 0.2s;
-    " onmouseover="this.style.background='rgba(0, 229, 255, 0.15)'" onmouseout="this.style.background='rgba(10, 15, 25, 0.8)'">🗄️ File Cabinet</button>
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    ">
+      <button id="btn-cabinet" title="Open 3D File Cabinet" style="
+        background: rgba(10, 15, 25, 0.8);
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        color: #c0d0e0;
+        font-family: inherit;
+        font-size: 13px;
+        padding: 10px 20px;
+        border-radius: 16px;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        transition: background 0.2s;
+      " onmouseover="this.style.background='rgba(0, 229, 255, 0.15)'" onmouseout="this.style.background='rgba(10, 15, 25, 0.8)'">🗄️ File Cabinet</button>
+
+      <button id="btn-vps-open" title="Open file from Contabo VPS (storage.noahcohn.com)" style="
+        background: rgba(10, 15, 25, 0.8);
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        color: #c0d0e0;
+        font-family: inherit;
+        font-size: 13px;
+        padding: 10px 20px;
+        border-radius: 16px;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        transition: background 0.2s;
+      " onmouseover="this.style.background='rgba(0, 229, 255, 0.15)'" onmouseout="this.style.background='rgba(10, 15, 25, 0.8)'">📡 VPS Files</button>
+
+      <button id="btn-vps-save" title="Save current file to Contabo VPS (Ctrl+Shift+S)" style="
+        background: rgba(10, 15, 25, 0.8);
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        color: #c0d0e0;
+        font-family: inherit;
+        font-size: 13px;
+        padding: 10px 20px;
+        border-radius: 16px;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        transition: background 0.2s;
+      " onmouseover="this.style.background='rgba(0, 229, 255, 0.15)'" onmouseout="this.style.background='rgba(10, 15, 25, 0.8)'">💾 Save to VPS</button>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>
