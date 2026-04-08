@@ -364,17 +364,17 @@ textarea:focus {
   overflow: hidden;
 
   /* Enhanced Modern Glassmorphism */
-  background: linear-gradient(145deg, rgba(16, 20, 30, 0.8), rgba(10, 15, 25, 0.7));
+  background: linear-gradient(145deg, rgba(20, 25, 40, 0.85), rgba(10, 15, 25, 0.8));
   backdrop-filter: blur(120px) saturate(400%);
   -webkit-backdrop-filter: blur(120px) saturate(400%);
 
-  border: 1px solid rgba(0, 229, 255, 0.15);
+  border: 1px solid rgba(0, 229, 255, 0.3);
   border-radius: 24px;
   box-shadow:
     0 80px 180px rgba(0, 0, 0, 0.95),
-    inset 0 1px 4px rgba(255, 255, 255, 0.2),
-    inset 0 0 80px rgba(255, 0, 128, 0.25),
-    0 0 50px rgba(0, 229, 255, 0.3);
+    inset 0 1px 4px rgba(255, 255, 255, 0.3),
+    inset 0 0 80px rgba(0, 229, 255, 0.15),
+    0 0 50px rgba(0, 229, 255, 0.5);
 
   z-index: 20;
   color: var(--text-primary);
@@ -1098,6 +1098,18 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   animation: distant-glitch 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
 }
 
+@keyframes glitch-distant-anim {
+  0% { --glitch-offset-x: 0px; --glitch-offset-y: 0px; filter: blur(4px) hue-rotate(var(--echo-tint, 0deg)); }
+  2% { --glitch-offset-x: -3px; --glitch-offset-y: 2px; filter: blur(2px) hue-rotate(calc(var(--echo-tint, 0deg) + 90deg)); }
+  4% { --glitch-offset-x: 3px; --glitch-offset-y: -1px; filter: blur(5px) hue-rotate(calc(var(--echo-tint, 0deg) - 90deg)); }
+  6% { --glitch-offset-x: 0px; --glitch-offset-y: 0px; filter: blur(4px) hue-rotate(var(--echo-tint, 0deg)); }
+  100% { --glitch-offset-x: 0px; --glitch-offset-y: 0px; filter: blur(4px) hue-rotate(var(--echo-tint, 0deg)); }
+}
+
+.echo-document.depth-aware-glitch {
+  animation: glitch-distant-anim var(--glitch-duration, 5s) infinite reverse;
+}
+
 /* Scanline Overlay */
 @keyframes scanline {
   0% { transform: translateY(0); }
@@ -1280,16 +1292,16 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   padding: 10px 32px;
 
   /* Sleeker Glassmorphism pill style */
-  background: linear-gradient(145deg, rgba(16, 20, 30, 0.95), rgba(5, 10, 15, 0.9));
+  background: linear-gradient(145deg, rgba(20, 25, 40, 0.95), rgba(10, 15, 25, 0.9));
   backdrop-filter: blur(100px) saturate(400%);
   -webkit-backdrop-filter: blur(100px) saturate(400%);
-  border: 1px solid rgba(0, 229, 255, 0.3);
+  border: 1px solid rgba(0, 229, 255, 0.5);
   border-radius: 32px;
   box-shadow:
     0 40px 80px rgba(0, 0, 0, 0.98),
-    inset 0 1px 3px rgba(255, 255, 255, 0.25),
-    inset 0 0 80px rgba(0, 229, 255, 0.15),
-    0 0 40px rgba(0, 229, 255, 0.25);
+    inset 0 1px 3px rgba(255, 255, 255, 0.4),
+    inset 0 0 80px rgba(0, 229, 255, 0.25),
+    0 0 50px rgba(0, 229, 255, 0.4);
   user-select: none;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1361,13 +1373,13 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   text-shadow: 0 0 10px rgba(0, 229, 255, 1);
 }
 .tab-item.active {
-  background: linear-gradient(180deg, rgba(255, 0, 128, 0.5), rgba(255, 0, 128, 0.2));
-  border-color: rgba(255, 0, 128, 1);
-  border-bottom: 2px solid rgba(255, 0, 128, 1);
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.6), rgba(0, 100, 255, 0.3));
+  border-color: rgba(0, 229, 255, 1);
+  border-bottom: 2px solid rgba(0, 229, 255, 1);
   color: #ffffff;
-  box-shadow: 0 15px 50px rgba(255, 0, 128, 0.9), inset 0 0 25px rgba(255, 0, 128, 0.8), 0 0 60px rgba(255, 0, 128, 1);
+  box-shadow: 0 15px 50px rgba(0, 229, 255, 0.9), inset 0 0 25px rgba(0, 229, 255, 0.8), 0 0 60px rgba(0, 229, 255, 1);
   transform: translateY(-3px) scale(1.06);
-  text-shadow: 0 0 15px #fff, 0 0 30px rgba(255, 0, 128, 1);
+  text-shadow: 0 0 15px #fff, 0 0 30px rgba(0, 229, 255, 1);
 }
 
 /* Depth badge — small indicator inside each tab */
@@ -1522,6 +1534,10 @@ body.x-ray-active #echo-layer {
     inset 0 0 35px rgba(255, 255, 255, 0.2),
     0 0 55px rgba(0, 229, 255, 0.4);
 
+  /* Glitch animation property for distant echo documents */
+  --glitch-offset-x: 0px;
+  --glitch-offset-y: 0px;
+
   transition: all 0.5s ease-out;
 
   /* Proximity Wake variables calculated by JS (0 to 1) */
@@ -1532,7 +1548,7 @@ body.x-ray-active #echo-layer {
   filter: blur(calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)))) hue-rotate(var(--echo-tint, 0deg));
 
   /* Transform including scroll parallax and wake pop */
-  transform: translate3d(var(--tx, 0px), calc(var(--ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0))), calc(var(--tz, 0px) + (var(--wake) * 60px))) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--ry, 0deg) + var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) scale(calc(1 + (var(--wake) * 0.08)));
+  transform: translate3d(calc(var(--tx, 0px) + var(--glitch-offset-x, 0px)), calc(var(--ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) + var(--glitch-offset-y, 0px)), calc(var(--tz, 0px) + (var(--wake) * 60px))) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--ry, 0deg) + var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) scale(calc(1 + (var(--wake) * 0.08)));
 
   /* Visual depth masking */
   mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
@@ -1639,18 +1655,18 @@ body.x-ray-active #echo-layer {
 
 .echo-header {
   font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 600;
-  color: #aaddff;
-  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
-  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #cceeff;
+  border-bottom: 1px solid hsla(var(--echo-tint, 0deg), 100%, 50%, 0.4);
+  padding: 8px 20px;
   margin-bottom: 16px;
-  letter-spacing: 0.5px;
-  text-shadow: 0 0 8px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.6);
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.8);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(0,0,0,0.4) !important;
+  background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 100%) !important;
 }
 
 .echo-header-title {
@@ -1670,13 +1686,14 @@ body.x-ray-active #echo-layer {
 }
 
 .echo-file-lang {
-  font-size: 10px;
-  background: rgba(255,255,255,0.1);
-  padding: 2px 6px;
+  font-size: 11px;
+  background: rgba(0,0,0,0.5);
+  padding: 2px 8px;
   border-radius: 4px;
   text-transform: uppercase;
-  color: hsla(var(--echo-tint, 0deg), 100%, 80%, 0.8);
-  border: 1px solid hsla(var(--echo-tint, 0deg), 100%, 50%, 0.3);
+  color: hsla(var(--echo-tint, 0deg), 100%, 90%, 0.9);
+  border: 1px solid hsla(var(--echo-tint, 0deg), 100%, 50%, 0.6);
+  box-shadow: 0 0 8px hsla(var(--echo-tint, 0deg), 100%, 50%, 0.2);
 }
 
 .echo-header-status {
@@ -2039,6 +2056,58 @@ body.semantic-xray-active #editor {
   filter: blur(4px) !important;
   transform: rotateY(-15deg) translateZ(-50px) !important;
   box-shadow: 20px 0 50px rgba(0,0,0,0.8);
+}
+
+/* Coverflow View */
+body.coverflow-active #editor, body.coverflow-active #image-viewer {
+  transform: scale(0.65) translateY(10%) translateZ(-50px);
+  filter: blur(2px);
+  opacity: 0.7;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.coverflow-active .echo-document {
+  opacity: 0.7;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateY(var(--rot-y, 0deg)) scale(var(--scale, 1));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: var(--z-index, 10);
+}
+
+body.coverflow-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 150px)) rotateY(0deg) scale(calc(var(--scale, 1) + 0.1)) !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.8);
+  z-index: 100 !important;
+}
+
+/* Wave View */
+body.wave-active #editor, body.wave-active #image-viewer {
+  transform: scale(0.6) translateY(20%) translateZ(-100px);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.wave-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1.5px);
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.wave-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 150px)) rotateZ(0deg) scale(1.1) !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.8);
+  z-index: 50 !important;
 }
 
 /* Cascade View */

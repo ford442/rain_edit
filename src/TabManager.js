@@ -41,6 +41,8 @@ export class TabManager {
     this.isVortexView = false;
     this.isConstellationView = false;
     this.isPrismView = false;
+    this.isCoverflowView = false;
+    this.isWaveView = false;
   }
 
   _deactivateAllViews() {
@@ -56,11 +58,37 @@ export class TabManager {
     this.isVortexView = false;
     this.isConstellationView = false;
     this.isPrismView = false;
-    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active', 'vortex-active', 'constellation-active', 'prism-active');
-    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view', 'btn-vortex-view', 'btn-constellation-view', 'btn-prism-view'].forEach(id => {
+    this.isCoverflowView = false;
+    this.isWaveView = false;
+    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active', 'vortex-active', 'constellation-active', 'prism-active', 'coverflow-active', 'wave-active');
+    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view', 'btn-vortex-view', 'btn-constellation-view', 'btn-prism-view', 'btn-coverflow-view', 'btn-wave-view'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
     });
+  }
+
+  toggleCoverflowView() {
+    const wasActive = this.isCoverflowView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCoverflowView = true;
+      document.body.classList.add('coverflow-active');
+      const btn = document.getElementById('btn-coverflow-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleWaveView() {
+    const wasActive = this.isWaveView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isWaveView = true;
+      document.body.classList.add('wave-active');
+      const btn = document.getElementById('btn-wave-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
   }
 
   togglePrismView() {
@@ -492,7 +520,7 @@ Drag to change depth`;
 
       // Semantic Gravity: Pull files with similar extensions or languages closer
       const fileExt = file.name.split('.').pop();
-      if ((fileExt === activeExt || file.language === activeLang) && !this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isIsometricView && !this.isStackView && !this.isTunnelView && !this.isGridView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isConstellationView && !this.isPrismView) {
+      if ((fileExt === activeExt || file.language === activeLang) && !this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isIsometricView && !this.isStackView && !this.isTunnelView && !this.isGridView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isConstellationView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView) {
           el.classList.add('semantic-gravity-pull');
       }
 
@@ -654,6 +682,11 @@ Drag to change depth`;
       const baseBlur = Math.min(15, 3 + (index * 3));
       el.style.setProperty('--base-opacity', baseOpacity);
       el.style.setProperty('--base-blur', `${baseBlur}px`);
+
+      // Add visual feedback elements for obscured distant documents
+      if (index >= 2) {
+          el.classList.add('depth-aware-glitch');
+      }
 
       // Add a CSS-animated scanning line effect to the document
       const scanLine = document.createElement('div');
@@ -876,6 +909,63 @@ Drag to change depth`;
         el.style.setProperty('--rot-z', `${rotZ}deg`);
         el.style.setProperty('--rot-x', '0deg');
         el.style.setProperty('--rot-y', '0deg');
+      } else if (this.isCoverflowView) {
+        // Coverflow View positions
+        const totalEchoes = inactiveFiles.length;
+        const middleIndex = Math.floor(totalEchoes / 2);
+        const diff = index - middleIndex;
+
+        const spacingX = 150;
+        const tx = diff * spacingX;
+
+        // Push back non-center items, scale them down, rotate them inwards
+        const absDiff = Math.abs(diff);
+        const tz = absDiff === 0 ? 0 : -200 - (absDiff * 50);
+        const rotY = diff === 0 ? 0 : (diff < 0 ? 45 : -45); // Left items face right, right items face left
+        const scale = 1 - (absDiff * 0.1);
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `0px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--scale', `${Math.max(0.3, scale)}`);
+        el.style.setProperty('--z-index', `${100 - absDiff}`);
+
+        // Reset others
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-z', '0deg');
+        el.style.setProperty('--scatter-x', '0px');
+        el.style.setProperty('--scatter-y', '0px');
+        el.style.setProperty('--scatter-z', '0px');
+        el.style.setProperty('--scatter-rot', '0deg');
+      } else if (this.isWaveView) {
+        // Wave View positions (Sine wave floating)
+        const totalEchoes = inactiveFiles.length;
+        const spreadW = window.innerWidth * 1.2;
+        const startX = -spreadW / 2;
+
+        const stepX = totalEchoes > 1 ? spreadW / (totalEchoes - 1) : 0;
+        const tx = startX + (index * stepX);
+
+        // Sine wave for Y
+        const frequency = 2; // Number of full waves
+        const amplitude = 300; // Height of wave
+        const phase = (index / Math.max(1, totalEchoes - 1)) * Math.PI * 2 * frequency;
+        const ty = Math.sin(phase) * amplitude;
+
+        const tz = -150; // Constant depth
+
+        // Derivative of sine is cosine, use for tangent rotation
+        const rotZ = Math.cos(phase) * 30; // Max tilt 30deg
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-z', `${rotZ}deg`);
+
+        // Reset others
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
       } else if (this.isPrismView) {
         // Prism View positions (Polyhedron shape)
         const totalEchoes = inactiveFiles.length;
@@ -1024,7 +1114,7 @@ Drag to change depth`;
           if (this.editorEl) {
               this.editorEl.classList.add('editor-peek-fade');
               // Bring forward while hovering the doc itself
-              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isPrismView) {
+              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView) {
                   el.style.setProperty('--tz', '100px');
               } else if (this.isOrbitView) {
                   // Push out slightly to emphasize selection in orbit view
@@ -1035,8 +1125,8 @@ Drag to change depth`;
                   // Bring forward slightly in scattered view
                   const originalZ = parseFloat(el.style.getPropertyValue('--scatter-z') || '0');
                   el.style.setProperty('--scatter-z', `${originalZ + 150}px`);
-              } else if (this.isPinboardView || this.isHelixView || this.isVortexView || this.isPrismView) {
-                  // Pop out for pinboard/helix/vortex/prism
+              } else if (this.isPinboardView || this.isHelixView || this.isVortexView || this.isPrismView || this.isWaveView) {
+                  // Pop out for pinboard/helix/vortex/prism/wave
                   const tz = parseFloat(el.style.getPropertyValue('--tz')) || 0;
                   el.style.setProperty('--tz', `${tz + 150}px`);
                   if (this.isPinboardView || this.isVortexView) {
@@ -1104,6 +1194,17 @@ Drag to change depth`;
                   const radius = 450;
                   const tz = radius * Math.cos(phi) - 200;
                   el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isCoverflowView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = inactiveFiles.length;
+                  const index = parseInt(el.dataset.index || 0);
+                  const middleIndex = Math.floor(totalEchoes / 2);
+                  const diff = index - middleIndex;
+                  const absDiff = Math.abs(diff);
+                  const tz = absDiff === 0 ? 0 : -200 - (absDiff * 50);
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isWaveView) {
+                  el.style.setProperty('--tz', `-150px`);
               } else if (!this.isCascadeView) {
                   const idx = parseInt(el.dataset.index || 0);
                   el.style.setProperty('--tz', `calc(-${idx * 50}px + var(--stack-z, 0px))`);
