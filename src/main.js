@@ -40,6 +40,7 @@ import { HoloManager } from './HoloManager.js';
 import { TabManager } from './TabManager.js';
 import { StorageAPI } from './StorageAPI.js';
 import { Cabinet3D } from './Cabinet3D.js';
+import { VPSFileBrowser } from './VPSFileBrowser.js';
 import backFrag from './shaders/water-back.frag?glslify';
 import frontFrag from './shaders/water.frag?glslify';
 import vertSrc from './shaders/simple.vert?glslify';
@@ -155,6 +156,57 @@ const cabinet3D  = new Cabinet3D(storageAPI, tabManager);
 const cabinetBtn = document.getElementById('btn-cabinet');
 if (cabinetBtn) {
   cabinetBtn.addEventListener('click', () => cabinet3D.toggle());
+}
+
+// Initialize VPS File Browser
+const vpsBrowser = new VPSFileBrowser(storageAPI, tabManager);
+
+const vpsOpenBtn = document.getElementById('btn-vps-open');
+if (vpsOpenBtn) {
+  vpsOpenBtn.addEventListener('click', () => vpsBrowser.open());
+}
+
+const vpsSaveBtn = document.getElementById('btn-vps-save');
+if (vpsSaveBtn) {
+  vpsSaveBtn.addEventListener('click', () => _triggerVpsSave());
+}
+
+/** Save the active tab to VPS. If already tagged with a vpsPath, saves directly; otherwise opens save-as panel. */
+async function _triggerVpsSave() {
+  const activeFile = tabManager.files.find(f => f.id === tabManager.activeId);
+  if (!activeFile) return;
+
+  if (activeFile.vpsPath) {
+    // Direct save — re-upload to the same VPS path
+    const content = activeFile.model
+      ? activeFile.model.getValue()
+      : (activeFile.content || '');
+
+    document.body.style.cursor = 'wait';
+    try {
+      const result = await storageAPI.saveVPSFile(activeFile.vpsPath, content);
+      if (result) {
+        // Brief visual confirmation on the save button
+        if (vpsSaveBtn) {
+          const orig = vpsSaveBtn.textContent;
+          vpsSaveBtn.textContent = '✅ Saved!';
+          setTimeout(() => { vpsSaveBtn.textContent = orig; }, 1500);
+        }
+      } else {
+        vpsBrowser.open();
+        vpsBrowser.openSaveMode(activeFile.name || 'untitled.txt',
+          activeFile.vpsPath.split('/').slice(0, -1).join('/'));
+      }
+    } catch (err) {
+      console.error('[VPSFileBrowser] save error, opening save dialog:', err);
+      vpsBrowser.openSaveMode(activeFile.name || 'untitled.txt');
+    } finally {
+      document.body.style.cursor = 'default';
+    }
+  } else {
+    // Unknown VPS path — open the save-as browser
+    vpsBrowser.openSaveMode(activeFile.name || 'untitled.txt');
+  }
 }
 
 // Listen for 3D Cabinet file cube clicks with depth focus logic
@@ -1977,6 +2029,14 @@ document.addEventListener('mousemove', () => {
 
 // Initial scan
 scanPortals();
+
+// Ctrl+Shift+S — Save current document to VPS
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
+    e.preventDefault();
+    _triggerVpsSave();
+  }
+});
 
 // Expose tabManager for testing
 window.tabManager = tabManager;
