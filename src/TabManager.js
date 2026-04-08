@@ -225,6 +225,7 @@ export class TabManager {
 
     this.files.push({ id, name, model, depth: 1, isImage, language, url: isImage ? content : null });
     this._renderTabs();
+    this._saveTabsToStorage();
     return id;
   }
 
@@ -366,8 +367,18 @@ Drag to change depth`;
       nameEl.className = 'tab-name';
       nameEl.textContent = file.name;
 
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'tab-close-btn';
+      closeBtn.textContent = '×';
+      closeBtn.title = 'Close tab';
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent tab activation on close click
+        this.removeFile(file.id);
+      });
+
       tab.appendChild(badge);
       tab.appendChild(nameEl);
+      tab.appendChild(closeBtn);
 
       tab.addEventListener('click', () => this.setActive(file.id));
 
@@ -1113,5 +1124,117 @@ Drag to change depth`;
 
       this.echoLayerEl.appendChild(el);
     });
+  }
+
+  /**
+   * Save the current tab list to localStorage for session restoration.
+   * Stores: [{fileId, name, language, vpsPath}, ...]
+   */
+  _saveTabsToStorage() {
+    try {
+      const tabData = this.files.map(file => ({
+        fileId: file.id,
+        name: file.name,
+        language: file.language,
+        vpsPath: file.vpsPath || null,
+        isImage: file.isImage,
+        url: file.url || null
+      }));
+      localStorage.setItem('rain_edit_open_tabs', JSON.stringify(tabData));
+    } catch (err) {
+      console.error('Failed to save tabs to localStorage:', err);
+    }
+  }
+
+  /**
+   * Load and restore tabs from localStorage.
+   * Fetches content for each saved tab and recreates it.
+   * @returns {Promise<void>}
+   */
+  async loadTabsFromStorage() {
+    try {
+      const stored = localStorage.getItem('rain_edit_open_tabs');
+      if (!stored) return;
+
+      const tabData = JSON.parse(stored);
+      if (!Array.isArray(tabData) || tabData.length === 0) return;
+
+      // Import StorageAPI to fetch file content
+      const { StorageAPI } = await import('./StorageAPI.js');
+      const storageAPI = new StorageAPI();
+
+      for (const tab of tabData) {
+        try {
+          let content = '';
+          let language = tab.language || 'plaintext';
+
+          // Fetch content based on file source
+          if (tab.isImage) {
+            // For images, url is already stored
+            content = tab.url;
+          } else if (tab.vpsPath) {
+            // Fetch from VPS
+            content = await storageAPI.getVPSFile(tab.vpsPath);
+          }
+          // If no vpsPath and not image, file is new/unsaved, just restore with empty content
+
+          // Add file to tabs
+          const fileId = this.addFile(tab.name, content, language);
+
+          // Update vpsPath if it was a VPS file
+          const file = this.files.find(f => f.id === fileId);
+          if (file && tab.vpsPath) {
+            file.vpsPath = tab.vpsPath;
+          }
+        } catch (err) {
+          console.error(`Failed to restore tab ${tab.name}:`, err);
+          // Continue with next tab if one fails
+        }
+      }
+
+      // Set first tab as active if any were restored
+      if (this.files.length > 0) {
+        this.setActive(this.files[0].id);
+      }
+    } catch (err) {
+      console.error('Failed to load tabs from localStorage:', err);
+    }
+  }
+
+  /**
+   * Remove a file/tab by id and save updated list.
+   * @param {number} id
+   */
+  removeFile(id) {
+    const index = this.files.findIndex(f => f.id === id);
+    if (index === -1) return;
+
+    // Dispose of Monaco model if it exists
+    const file = this.files[index];
+    if (file.model && file.model.dispose) {
+      file.model.dispose();
+    }
+
+    // Remove from array
+    this.files.splice(index, 1);
+
+    // If this was the active file, activate another one
+    if (this.activeId === id) {
+      if (this.files.length > 0) {
+        // Activate the file that was after this one, or the last one
+        const newActiveIndex = Math.min(index, this.files.length - 1);
+        this.setActive(this.files[newActiveIndex].id);
+      } else {
+        this.activeId = null;
+        this.editorEl.style.display = 'none';
+        if (this.imageViewerEl) {
+          this.imageViewerEl.style.display = 'none';
+        }
+      }
+    }
+
+    this._renderTabs();
+    this._renderEchoes();
+    this._saveTabsToStorage();
   }
 }

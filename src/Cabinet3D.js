@@ -273,6 +273,106 @@ export class Cabinet3D {
   }
 
   /**
+   * Add a visual badge indicator to mark remote VPS files.
+   * Creates a small canvas texture with a cloud icon.
+   * @param {THREE.Mesh} fileMesh
+   */
+  _addRemoteFileBadge(fileMesh) {
+    try {
+      // Create a small canvas for the badge
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+
+      // Draw badge background (semi-transparent white circle)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.beginPath();
+      ctx.arc(32, 32, 28, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw cloud icon (☁️ representation)
+      ctx.fillStyle = '#0066ff';
+      ctx.font = 'bold 40px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('☁', 32, 32);
+
+      // Create texture from canvas
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.magFilter = THREE.LinearFilter;
+      texture.minFilter = THREE.LinearFilter;
+
+      // Create a small sprite positioned at the top-right of the file cube
+      const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set(0.4, 0.4, 1);
+      sprite.position.set(FILE_CUBE_SIZE * 0.4, FILE_CUBE_SIZE * 0.4, FILE_CUBE_SIZE * 0.4);
+
+      fileMesh.add(sprite);
+    } catch (err) {
+      console.warn('Failed to add remote file badge:', err);
+    }
+  }
+
+  /**
+   * Fetch files from both local storage and remote VPS for a category.
+   * Merges local and remote files, marking remote files with isRemote flag.
+   * @param {string} catName
+   * @returns {Promise<Array>}
+   */
+  async _fetchCategoryFilesWithRemote(catName) {
+    try {
+      // Fetch local files from StorageAPI
+      let localFiles = [];
+      try {
+        const localData = await this.storageAPI.getCategoryFiles(catName);
+        localFiles = Array.isArray(localData) ? localData : (localData.items || localData.data || []);
+        // Mark local files
+        localFiles = localFiles.map(f => ({ ...f, isRemote: false }));
+      } catch (err) {
+        console.warn(`Could not fetch local files for ${catName}:`, err);
+      }
+
+      // Try to fetch remote files from VPS
+      let remoteFiles = [];
+      try {
+        // Try to browse a category-specific path first, then fall back to root
+        const paths = [`/${catName}`, '/'];
+        for (const path of paths) {
+          try {
+            const items = await this.storageAPI.browseVPS(path);
+            if (items && items.length > 0) {
+              // Filter for files only (not directories), limit to 32
+              remoteFiles = items
+                .filter(item => item.type === 'file')
+                .slice(0, 32)
+                .map(item => ({
+                  ...item,
+                  id: `vps_${item.path}`, // Use path as unique ID for VPS files
+                  name: item.name || item.path.split('/').pop(),
+                  isRemote: true,
+                  vpsPath: item.path
+                }));
+              break; // Successfully loaded, don't try other paths
+            }
+          } catch (err) {
+            // Continue to next path
+          }
+        }
+      } catch (err) {
+        console.warn(`Could not fetch remote files for ${catName}:`, err);
+      }
+
+      // Merge and return both lists
+      return [...localFiles, ...remoteFiles];
+    } catch (err) {
+      console.error(`Error fetching files for ${catName}:`, err);
+      return [];
+    }
+  }
+
+  /**
    * Populate file cubes around a category cube after the API responds.
    * For shaders with coordinates, positions are mapped from coordinate (0-1000) to 3D space.
    * @param {number} catIndex
@@ -326,9 +426,20 @@ export class Cabinet3D {
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(x, y, z);
-      mesh.userData = { type: 'file', catIndex, fileData, catName };
+      mesh.userData = {
+        type: 'file',
+        catIndex,
+        fileData,
+        catName,
+        isRemote: fileData.isRemote || false
+      };
       catMesh.add(mesh); // parented to the category cube
       this._fileMeshes.push(mesh);
+
+      // Add visual badge for remote files
+      if (fileData.isRemote) {
+        this._addRemoteFileBadge(mesh);
+      }
     }
   }
 
@@ -394,10 +505,8 @@ export class Cabinet3D {
 
     // Lazy-load files for this category
     if (!this._loadedCats.has(catIndex)) {
-      this.storageAPI
-        .getCategoryFiles(catName)
-        .then((files) => {
-          const list = Array.isArray(files) ? files : (files.items || files.data || []);
+      this._fetchCategoryFilesWithRemote(catName)
+        .then((list) => {
           this._buildFileCubes(catIndex, list);
           this._hint.textContent = `${catName}: ${list.length} file(s) · Click a file cube to open`;
         })

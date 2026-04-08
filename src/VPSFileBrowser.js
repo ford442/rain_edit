@@ -595,6 +595,7 @@ export class VPSFileBrowser {
       activeFile.vpsPath = filePath;
       activeFile.name = filename;
       this.tabManager.setActive(activeFile.id);
+      this.tabManager._saveTabsToStorage();
 
       this._setStatus(`Saved: ${filePath}`, 'ok');
       setTimeout(() => this.close(), 800);

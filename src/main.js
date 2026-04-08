@@ -142,10 +142,17 @@ const tabsContainerEl = document.getElementById('tabs-container');
 const imageViewerEl = document.getElementById('image-viewer');
 const tabManager = new TabManager(editor, monaco, editorEl, tabsContainerEl, imageViewerEl, echoLayerEl);
 
-// Add the initial demo file and make it active (depth 1 = middle, between rain layers)
-const INITIAL_CODE = ['// rain-2 demo','function hello(){','  console.log("hello world");','}','','// @portal'].join('\n');
-const initialFileId = tabManager.addFile('main.js', INITIAL_CODE, 'javascript');
-tabManager.setActive(initialFileId);
+// Restore previously open tabs from localStorage, or show initial demo file
+(async () => {
+  await tabManager.loadTabsFromStorage();
+
+  // If no tabs were restored, add the initial demo file
+  if (tabManager.files.length === 0) {
+    const INITIAL_CODE = ['// rain-2 demo','function hello(){','  console.log("hello world");','}','','// @portal'].join('\n');
+    const initialFileId = tabManager.addFile('main.js', INITIAL_CODE, 'javascript');
+    tabManager.setActive(initialFileId);
+  }
+})();
 
 // Initialize HoloManager
 const holoManager = new HoloManager(editor, holoLayerEl);
@@ -211,18 +218,41 @@ async function _triggerVpsSave() {
 
 // Listen for 3D Cabinet file cube clicks with depth focus logic
 window.addEventListener('fileCubeClicked', async (e) => {
-  const { id, type, name } = e.detail;
-  
+  const { id, type, name, fileData: eventFileData } = e.detail;
+
   console.log(`Fetching ${type}: ${name}...`);
   // Show loading cursor
   document.body.style.cursor = 'wait';
 
   try {
-    // 1. Fetch the code/json from the backend
-    const fileData = await storageAPI.getFileContent(id, type);
-    
+    // 1. Fetch the code/json from the backend (handle both local and remote files)
+    let fileData;
+    if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
+      // Remote VPS file - guess language from filename
+      const content = await storageAPI.getVPSFile(eventFileData.vpsPath);
+      const ext = name.split('.').pop().toLowerCase();
+      const languageMap = {
+        js: 'javascript', jsx: 'javascript', ts: 'typescript', tsx: 'typescript',
+        json: 'json', html: 'html', css: 'css', md: 'markdown', py: 'python',
+        glsl: 'glsl', wgsl: 'wgsl', frag: 'glsl', vert: 'glsl'
+      };
+      const language = languageMap[ext] || 'plaintext';
+      fileData = { content, language };
+    } else {
+      // Local file from StorageAPI
+      fileData = await storageAPI.getFileContent(id, type);
+    }
+
     // 2. Add it to the Tab Manager
     const newFileId = tabManager.addFile(name, fileData.content, fileData.language);
+
+    // 2b. If this is a remote file, tag it with vpsPath for saving
+    if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
+      const newFile = tabManager.files.find(f => f.id === newFileId);
+      if (newFile) {
+        newFile.vpsPath = eventFileData.vpsPath;
+      }
+    }
     
     // 3. DEPTH FOCUS LOGIC (The Immersive Step)
     // Push all current tabs backward into the rain (Depth 1)
