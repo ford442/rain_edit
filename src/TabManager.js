@@ -718,6 +718,46 @@ Drag to change depth`;
         document.dispatchEvent(evt);
       });
 
+      // Holographic Glitch on Hover
+      el.addEventListener('mouseenter', () => {
+          el.classList.add('glitch-active');
+          setTimeout(() => el.classList.remove('glitch-active'), 300); // Glitch duration
+      });
+
+      // Echo Pulse Focus (on double click)
+      el.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          // Apply pulse to clicked document immediately
+          el.classList.add('echo-pulse');
+          setTimeout(() => el.classList.remove('echo-pulse'), 1500);
+
+          // Get center coordinates of clicked document
+          const rect = el.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+
+          // Propagate pulse to other documents based on distance
+          const otherEchoes = Array.from(this.echoLayerEl.querySelectorAll('.echo-document')).filter(doc => doc !== el);
+
+          otherEchoes.forEach(doc => {
+              const docRect = doc.getBoundingClientRect();
+              const docCenterX = docRect.left + docRect.width / 2;
+              const docCenterY = docRect.top + docRect.height / 2;
+
+              const dx = docCenterX - centerX;
+              const dy = docCenterY - centerY;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+
+              // Delay based on distance (speed of ripple)
+              const delay = distance * 0.5; // adjust multiplier for speed
+
+              setTimeout(() => {
+                  doc.classList.add('echo-pulse');
+                  setTimeout(() => doc.classList.remove('echo-pulse'), 1500);
+              }, delay);
+          });
+      });
+
       // Calculate Exploded Orbit View variables
       const totalEchoes = inactiveFiles.length;
       if (totalEchoes > 0) {

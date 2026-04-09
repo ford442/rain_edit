@@ -1504,7 +1504,8 @@ body.x-ray-active #echo-layer {
   pointer-events: auto; /* Allow hovering to peek */
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 14px;
+  /* Depth-aware typography */
+  font-size: calc(14px + (var(--tz, 0) * 0.02px));
   line-height: 1.6;
   color: #cceeff;
   opacity: 0.1;
@@ -1515,7 +1516,8 @@ body.x-ray-active #echo-layer {
 
   /* Modern styling for obscured documents with noise texture */
   background-color: rgba(10, 15, 25, 0.6);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(35, 45, 65, 0.9), rgba(15, 20, 30, 0.5));
+  /* Added linear gradient for subtle background depth while retaining noise */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(15, 20, 30, 0.8), rgba(5, 10, 15, 0.4));
   background-blend-mode: overlay;
   backdrop-filter: blur(80px) saturate(400%);
   -webkit-backdrop-filter: blur(80px) saturate(400%);
@@ -1526,9 +1528,9 @@ body.x-ray-active #echo-layer {
   border-radius: 20px;
   padding: 32px;
 
-  /* Enhanced glowing edge and depth shadow */
+  /* Enhanced glowing edge and deepened shadow */
   box-shadow:
-    0 60px 140px rgba(0, 0, 0, 1),
+    0 80px 180px rgba(0, 0, 0, 0.95),
     inset 0 1px 4px rgba(255, 255, 255, 0.6),
     inset 0 0 120px rgba(0, 229, 255, 0.3),
     inset 0 0 35px rgba(255, 255, 255, 0.2),
@@ -2712,4 +2714,51 @@ body.siphon-mode-active .echo-document *::selection {
 @keyframes header-pop {
     0% { transform: translateZ(150px) scale(1.2); color: #fff; background: rgba(255, 0, 128, 0.5); border-color: #ff0080; text-shadow: 0 0 10px #fff; }
     100% { transform: translateZ(30px) scale(1); }
+}
+
+
+/* --- Innovated Echo Pulse Animation --- */
+@keyframes echo-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 hsla(var(--echo-tint, 180deg), 100%, 60%, 0.7);
+    border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 1);
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) scale(1.05);
+  }
+  70% {
+    box-shadow: 0 0 0 50px hsla(var(--echo-tint, 180deg), 100%, 60%, 0);
+    border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.2);
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) scale(1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsla(var(--echo-tint, 180deg), 100%, 60%, 0);
+    border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.5);
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) scale(1);
+  }
+}
+
+.echo-pulse {
+  animation: echo-pulse-ring 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards !important;
+  z-index: 60 !important;
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) !important;
+}
+
+/* --- Holographic Glitch on Hover --- */
+@keyframes hover-glitch {
+  0% { clip-path: inset(10% 0 80% 0); transform: translateX(-2px); }
+  20% { clip-path: inset(80% 0 5% 0); transform: translateX(2px); }
+  40% { clip-path: inset(30% 0 50% 0); transform: translateX(-2px); }
+  60% { clip-path: inset(60% 0 20% 0); transform: translateX(2px); }
+  80% { clip-path: inset(15% 0 70% 0); transform: translateX(-1px); }
+  100% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+}
+
+.echo-document.glitch-active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  animation: hover-glitch 0.3s steps(2) forwards;
+  z-index: 10;
 }
