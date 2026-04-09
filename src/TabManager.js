@@ -1,6 +1,9 @@
 import StorageAPI from './StorageAPI.js';
 const storageAPI = new StorageAPI();
 
+// Duration (ms) the note save toast stays visible
+const TOAST_DISPLAY_DURATION = 2500;
+
 // Z-index assigned to the editor element at each depth level
 const DEPTH_Z_INDEX = [0, 5, 15];
 
@@ -1303,6 +1306,6 @@ Drag to change depth`;
     toast.textContent = message;
     toast.style.opacity = '1';
     clearTimeout(this._toastTimer);
-    this._toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+    this._toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, TOAST_DISPLAY_DURATION);
   }
 }
