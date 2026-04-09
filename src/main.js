@@ -147,6 +147,12 @@ const INITIAL_CODE = ['// rain-2 demo','function hello(){','  console.log("hello
 const initialFileId = tabManager.addFile('main.js', INITIAL_CODE, 'javascript');
 tabManager.setActive(initialFileId);
 
+// Check for ?note= URL param — load named note on startup
+const _urlNote = new URLSearchParams(window.location.search).get('note');
+if (_urlNote) {
+  tabManager.openNoteAsTab(_urlNote);
+}
+
 // Initialize HoloManager
 const holoManager = new HoloManager(editor, holoLayerEl);
 
@@ -2079,6 +2085,17 @@ document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
     e.preventDefault();
     _triggerVpsSave();
+  }
+});
+
+// Ctrl+S — Save current note tab to backend (only when tab has a noteName)
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 's') {
+    const activeFile = tabManager.files.find(f => f.id === tabManager.activeId);
+    if (activeFile && activeFile.noteName) {
+      e.preventDefault();
+      tabManager.saveCurrentTabAsNote();
+    }
   }
 });
 

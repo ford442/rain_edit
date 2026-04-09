@@ -313,6 +313,80 @@ export class StorageAPI {
       return false;
     }
   }
+
+  // ── Named Notes API ───────────────────────────────────────────────────────────
+
+  /**
+   * List all named notes on the backend.
+   * @returns {Promise<Array<{name: string, updated_at: string, size: number}>>}
+   */
+  async listNotes() {
+    const url = `${this.baseUrl}/api/notes/list`;
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) throw new Error(`listNotes failed: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error('[StorageAPI] listNotes error:', err);
+      return [];
+    }
+  }
+
+  /**
+   * Load a named note's content from the backend.
+   * @param {string} noteName - The note name (no extension)
+   * @returns {Promise<{name: string, content: string, updated_at: string}|null>}
+   */
+  async loadNote(noteName) {
+    const url = `${this.baseUrl}/api/notes/read/${encodeURIComponent(noteName)}`;
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) throw new Error(`loadNote(${noteName}) failed: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error('[StorageAPI] loadNote error:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Save (create or overwrite) a named note on the backend.
+   * @param {string} noteName - The note name (no extension)
+   * @param {string} content - The text content to save
+   * @returns {Promise<{success: boolean, name: string, size: number, updated_at: string}|null>}
+   */
+  async saveNote(noteName, content) {
+    const url = `${this.baseUrl}/api/notes/write/${encodeURIComponent(noteName)}`;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+      if (!res.ok) throw new Error(`saveNote(${noteName}) failed: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.error('[StorageAPI] saveNote error:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Delete a named note from the backend.
+   * @param {string} noteName - The note name (no extension)
+   * @returns {Promise<boolean>}
+   */
+  async deleteNote(noteName) {
+    const url = `${this.baseUrl}/api/notes/delete/${encodeURIComponent(noteName)}`;
+    try {
+      const res = await fetch(url, { method: 'DELETE', mode: 'cors' });
+      return res.ok;
+    } catch (err) {
+      console.error('[StorageAPI] deleteNote error:', err);
+      return false;
+    }
+  }
 }
 
 export default StorageAPI;

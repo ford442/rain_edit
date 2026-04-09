@@ -1,3 +1,9 @@
+import StorageAPI from './StorageAPI.js';
+const storageAPI = new StorageAPI();
+
+// Duration (ms) the note save toast stays visible
+const TOAST_DISPLAY_DURATION = 2500;
+
 // Z-index assigned to the editor element at each depth level
 const DEPTH_Z_INDEX = [0, 5, 15];
 
@@ -1214,5 +1220,92 @@ Drag to change depth`;
 
       this.echoLayerEl.appendChild(el);
     });
+  }
+
+  /**
+   * Load a named note from the backend and open it as a new tab.
+   * If the note doesn't exist (null returned), creates a blank tab named `noteName`.
+   * @param {string} noteName - The note name (no extension)
+   * @returns {Promise<number>} the new file's id
+   */
+  async openNoteAsTab(noteName) {
+    document.body.style.cursor = 'wait';
+    try {
+      const note = await storageAPI.loadNote(noteName);
+      const content = note ? note.content : '';
+      const id = this.addFile(noteName, content, 'markdown');
+      const file = this.files.find(f => f.id === id);
+      if (file) file.noteName = noteName;
+      this.setActive(id);
+      return id;
+    } catch (err) {
+      console.error('[TabManager] openNoteAsTab error:', err);
+      const id = this.addFile(noteName, '', 'markdown');
+      const file = this.files.find(f => f.id === id);
+      if (file) file.noteName = noteName;
+      this.setActive(id);
+      return id;
+    } finally {
+      document.body.style.cursor = 'default';
+    }
+  }
+
+  /**
+   * Save the current tab's content to the backend as a named note.
+   * If the tab has no `noteName`, prompts the user for one.
+   * @returns {Promise<void>}
+   */
+  async saveCurrentTabAsNote() {
+    const activeFile = this.files.find(f => f.id === this.activeId);
+    if (!activeFile || activeFile.isImage) return;
+
+    let noteName = activeFile.noteName;
+    if (!noteName) {
+      noteName = window.prompt('Note name:', activeFile.name || '');
+      if (!noteName) return;
+      activeFile.noteName = noteName;
+    }
+
+    const content = activeFile.model ? activeFile.model.getValue() : '';
+    document.body.style.cursor = 'wait';
+    try {
+      const result = await storageAPI.saveNote(noteName, content);
+      if (result && result.success) {
+        this._showToast(`✅ Note "${noteName}" saved!`);
+      } else {
+        this._showToast(`❌ Failed to save note "${noteName}"`, true);
+      }
+    } catch (err) {
+      console.error('[TabManager] saveCurrentTabAsNote error:', err);
+      this._showToast(`❌ Error saving note: ${err.message}`, true);
+    } finally {
+      document.body.style.cursor = 'default';
+    }
+  }
+
+  /**
+   * Show a brief status toast notification.
+   * @param {string} message
+   * @param {boolean} [isError=false]
+   */
+  _showToast(message, isError = false) {
+    let toast = document.getElementById('note-save-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'note-save-toast';
+      toast.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:10px 16px;background:rgba(0,0,0,0.85);border-radius:4px;font-family:"JetBrains Mono",monospace;font-size:13px;z-index:9999;transition:opacity 0.3s;pointer-events:none;';
+      document.body.appendChild(toast);
+    }
+    if (isError) {
+      toast.style.color = '#ff4444';
+      toast.style.border = '1px solid #ff4444';
+    } else {
+      toast.style.color = '#00e5ff';
+      toast.style.border = '1px solid #00e5ff';
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, TOAST_DISPLAY_DURATION);
   }
 }
