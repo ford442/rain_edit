@@ -35,6 +35,7 @@ export class TabManager {
     this.files = [];
     this.activeId = null;
     this._nextId = 1;
+    this.isWaterfallView = false;
     this.isCascadeView = false;
     this.isOrbitView = false;
     this.isScatteredView = false;
@@ -52,6 +53,7 @@ export class TabManager {
   }
 
   _deactivateAllViews() {
+    this.isWaterfallView = false;
     this.isCascadeView = false;
     this.isOrbitView = false;
     this.isScatteredView = false;
@@ -66,8 +68,8 @@ export class TabManager {
     this.isPrismView = false;
     this.isCoverflowView = false;
     this.isWaveView = false;
-    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active', 'vortex-active', 'constellation-active', 'prism-active', 'coverflow-active', 'wave-active');
-    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view', 'btn-vortex-view', 'btn-constellation-view', 'btn-prism-view', 'btn-coverflow-view', 'btn-wave-view'].forEach(id => {
+    document.body.classList.remove('waterfall-active', 'cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active', 'vortex-active', 'constellation-active', 'prism-active', 'coverflow-active', 'wave-active');
+    ['btn-waterfall-view', 'btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view', 'btn-vortex-view', 'btn-constellation-view', 'btn-prism-view', 'btn-coverflow-view', 'btn-wave-view'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
     });
@@ -212,6 +214,18 @@ export class TabManager {
       this.isScatteredView = true;
       document.body.classList.add('scattered-active');
       const btn = document.getElementById('btn-scattered-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleWaterfallView() {
+    const wasActive = this.isWaterfallView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isWaterfallView = true;
+      document.body.classList.add('waterfall-active');
+      const btn = document.getElementById('btn-waterfall-view');
       if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
@@ -840,6 +854,17 @@ Drag to change depth`;
         el.style.setProperty('--tx', `0px`);
         el.style.setProperty('--ty', `0px`);
         el.style.setProperty('--tz', `0px`);
+      } else if (this.isWaterfallView) {
+        // Waterfall Layout: Cascade downwards and slightly backwards
+        const tx = (index % 2 === 0 ? 50 : -50); // slight alternating zigzag
+        const ty = index * 120 + 50; // cascade down heavily
+        const tz = -index * 60; // push backwards
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty('--rot-x', '15deg'); // slight tilt up to see the flow
+        el.style.setProperty('--rot-z', '0deg');
       } else if (this.isCascadeView) {
         // Cascade positions
         const vw = window.innerWidth;
