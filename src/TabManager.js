@@ -49,6 +49,7 @@ export class TabManager {
     this.isPrismView = false;
     this.isCoverflowView = false;
     this.isWaveView = false;
+    this.isSphereView = false;
   }
 
   _deactivateAllViews() {
@@ -66,8 +67,9 @@ export class TabManager {
     this.isPrismView = false;
     this.isCoverflowView = false;
     this.isWaveView = false;
-    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active', 'vortex-active', 'constellation-active', 'prism-active', 'coverflow-active', 'wave-active');
-    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view', 'btn-vortex-view', 'btn-constellation-view', 'btn-prism-view', 'btn-coverflow-view', 'btn-wave-view'].forEach(id => {
+    this.isSphereView = false;
+    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active', 'vortex-active', 'constellation-active', 'prism-active', 'coverflow-active', 'wave-active', 'sphere-active');
+    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view', 'btn-vortex-view', 'btn-constellation-view', 'btn-prism-view', 'btn-coverflow-view', 'btn-wave-view', 'btn-sphere-view'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
     });
@@ -80,6 +82,19 @@ export class TabManager {
       this.isCoverflowView = true;
       document.body.classList.add('coverflow-active');
       const btn = document.getElementById('btn-coverflow-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+
+  toggleSphereView() {
+    const wasActive = this.isSphereView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isSphereView = true;
+      document.body.classList.add('sphere-active');
+      const btn = document.getElementById('btn-sphere-view');
       if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
@@ -526,7 +541,7 @@ Drag to change depth`;
 
       // Semantic Gravity: Pull files with similar extensions or languages closer
       const fileExt = file.name.split('.').pop();
-      if ((fileExt === activeExt || file.language === activeLang) && !this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isIsometricView && !this.isStackView && !this.isTunnelView && !this.isGridView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isConstellationView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView) {
+      if ((fileExt === activeExt || file.language === activeLang) && !this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isIsometricView && !this.isStackView && !this.isTunnelView && !this.isGridView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isConstellationView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView) {
           el.classList.add('semantic-gravity-pull');
       }
 
@@ -955,6 +970,30 @@ Drag to change depth`;
         el.style.setProperty('--rot-z', `${rotZ}deg`);
         el.style.setProperty('--rot-x', '0deg');
         el.style.setProperty('--rot-y', '0deg');
+      } else if (this.isSphereView) {
+        // Fibonacci Sphere logic
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+
+        const radius = 600;
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200;
+
+        const rotX = (ty / radius) * -90;
+        const rotY = (tx / radius) * 90;
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', `${rotX}deg`);
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-z', '0deg');
+        el.style.setProperty('--scatter-x', '0px');
+        el.style.setProperty('--scatter-y', '0px');
+        el.style.setProperty('--scatter-z', '0px');
+        el.style.setProperty('--scatter-rot', '0deg');
       } else if (this.isCoverflowView) {
         // Coverflow View positions
         const totalEchoes = inactiveFiles.length;
@@ -1160,7 +1199,7 @@ Drag to change depth`;
           if (this.editorEl) {
               this.editorEl.classList.add('editor-peek-fade');
               // Bring forward while hovering the doc itself
-              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView) {
+              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView) {
                   el.style.setProperty('--tz', '100px');
               } else if (this.isOrbitView) {
                   // Push out slightly to emphasize selection in orbit view
@@ -1171,7 +1210,7 @@ Drag to change depth`;
                   // Bring forward slightly in scattered view
                   const originalZ = parseFloat(el.style.getPropertyValue('--scatter-z') || '0');
                   el.style.setProperty('--scatter-z', `${originalZ + 150}px`);
-              } else if (this.isPinboardView || this.isHelixView || this.isVortexView || this.isPrismView || this.isWaveView) {
+              } else if (this.isPinboardView || this.isHelixView || this.isVortexView || this.isPrismView || this.isWaveView || this.isSphereView) {
                   // Pop out for pinboard/helix/vortex/prism/wave
                   const tz = parseFloat(el.style.getPropertyValue('--tz')) || 0;
                   el.style.setProperty('--tz', `${tz + 150}px`);
@@ -1240,7 +1279,31 @@ Drag to change depth`;
                   const radius = 450;
                   const tz = radius * Math.cos(phi) - 200;
                   el.style.setProperty('--tz', `${tz}px`);
-              } else if (this.isCoverflowView) {
+              } else if (this.isSphereView) {
+        // Fibonacci Sphere logic
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+
+        const radius = 600;
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200;
+
+        const rotX = (ty / radius) * -90;
+        const rotY = (tx / radius) * 90;
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', `${rotX}deg`);
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-z', '0deg');
+        el.style.setProperty('--scatter-x', '0px');
+        el.style.setProperty('--scatter-y', '0px');
+        el.style.setProperty('--scatter-z', '0px');
+        el.style.setProperty('--scatter-rot', '0deg');
+      } else if (this.isCoverflowView) {
                   const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
                   const totalEchoes = inactiveFiles.length;
                   const index = parseInt(el.dataset.index || 0);
@@ -1248,6 +1311,15 @@ Drag to change depth`;
                   const diff = index - middleIndex;
                   const absDiff = Math.abs(diff);
                   const tz = absDiff === 0 ? 0 : -200 - (absDiff * 50);
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isSphereView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+                  const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+                  const radius = 600;
+                  const tz = radius * Math.cos(phi) - 200;
                   el.style.setProperty('--tz', `${tz}px`);
               } else if (this.isWaveView) {
                   el.style.setProperty('--tz', `-150px`);
@@ -1258,6 +1330,14 @@ Drag to change depth`;
           }
       });
 
+      // Calculate atmospheric depth based on tz
+      const tzVal = parseFloat(el.style.getPropertyValue('--tz')) || 0;
+      el.style.setProperty('--tz-val', tzVal);
+      if (tzVal < -100) {
+          el.classList.add('depth-desaturate');
+      } else {
+          el.classList.remove('depth-desaturate');
+      }
       this.echoLayerEl.appendChild(el);
     });
   }

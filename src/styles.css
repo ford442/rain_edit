@@ -1515,26 +1515,26 @@ body.x-ray-active #echo-layer {
   overflow: hidden;
 
   /* Modern styling for obscured documents with noise texture */
-  background-color: rgba(10, 15, 25, 0.6);
+  background-color: rgba(10, 15, 25, 0.4);
   /* Added linear gradient for subtle background depth while retaining noise */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(15, 20, 30, 0.8), rgba(5, 10, 15, 0.4));
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.25'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(20, 25, 40, 0.9), rgba(5, 10, 15, 0.6));
   background-blend-mode: overlay;
-  backdrop-filter: blur(80px) saturate(400%);
-  -webkit-backdrop-filter: blur(80px) saturate(400%);
+  backdrop-filter: blur(120px) saturate(300%);
+  -webkit-backdrop-filter: blur(120px) saturate(300%);
 
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  border-top: 1px solid rgba(0, 229, 255, 0.7);
-  border-left: 1px solid rgba(0, 229, 255, 0.6);
-  border-radius: 20px;
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-top: 2px solid rgba(0, 229, 255, 0.9);
+  border-left: 1px solid rgba(0, 229, 255, 0.7);
+  border-radius: 24px;
   padding: 32px;
 
   /* Enhanced glowing edge and deepened shadow */
   box-shadow:
-    0 80px 180px rgba(0, 0, 0, 0.95),
-    inset 0 1px 4px rgba(255, 255, 255, 0.6),
-    inset 0 0 120px rgba(0, 229, 255, 0.3),
-    inset 0 0 35px rgba(255, 255, 255, 0.2),
-    0 0 55px rgba(0, 229, 255, 0.4);
+    0 100px 200px rgba(0, 0, 0, 0.98),
+    inset 0 2px 5px rgba(255, 255, 255, 0.7),
+    inset 0 0 150px rgba(0, 229, 255, 0.25),
+    inset 0 0 45px rgba(255, 255, 255, 0.15),
+    0 0 75px rgba(0, 229, 255, 0.5);
 
   /* Glitch animation property for distant echo documents */
   --glitch-offset-x: 0px;
@@ -1547,7 +1547,7 @@ body.x-ray-active #echo-layer {
 
   /* Use wake to dynamically adjust blur, opacity, and scale */
   opacity: calc(var(--base-opacity, 0.1) + (var(--wake) * 0.5));
-  filter: blur(calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)))) hue-rotate(var(--echo-tint, 0deg));
+  filter: blur(calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)))) hue-rotate(var(--echo-tint, 0deg)) saturate(calc(100% + var(--tz-depth-saturate, 0%))) brightness(calc(100% + var(--tz-depth-brightness, 0%)));
 
   /* Transform including scroll parallax and wake pop */
   transform: translate3d(calc(var(--tx, 0px) + var(--glitch-offset-x, 0px)), calc(var(--ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) + var(--glitch-offset-y, 0px)), calc(var(--tz, 0px) + (var(--wake) * 60px))) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--ry, 0deg) + var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) scale(calc(1 + (var(--wake) * 0.08)));
@@ -1638,11 +1638,10 @@ body.x-ray-active #echo-layer {
   top: 0;
   left: 0;
   width: 100%;
-  height: 2px;
-  background: linear-gradient(to bottom, rgba(0, 229, 255, 0), rgba(0, 229, 255, 0.8) 50%, rgba(0, 229, 255, 0));
-  height: 4px;
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
-  animation: scan-line 4s linear infinite;
+  height: 3px;
+  background: linear-gradient(to bottom, rgba(0, 255, 255, 0) 0%, rgba(0, 255, 255, 1) 50%, rgba(255, 255, 255, 0.8) 50%, rgba(0, 255, 255, 1) 50%, rgba(0, 255, 255, 0) 100%);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 1), 0 0 5px rgba(255, 255, 255, 0.8);
+  animation: scan-line 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   animation-delay: calc(var(--index, 0) * 0.5s);
   z-index: 5;
   pointer-events: none;
@@ -2761,4 +2760,74 @@ body.siphon-mode-active .echo-document *::selection {
   pointer-events: none;
   animation: hover-glitch 0.3s steps(2) forwards;
   z-index: 10;
+}
+
+/* Atmospheric Depth Desaturation */
+.echo-document.depth-desaturate {
+    filter: blur(calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)))) hue-rotate(var(--echo-tint, 0deg)) saturate(calc(100% + (var(--tz-val, 0) * 0.1%))) brightness(calc(100% + (var(--tz-val, 0) * 0.05%)));
+}
+
+/* Sphere View */
+body.sphere-active #editor, body.sphere-active #image-viewer {
+  transform: scale(0.5) translateY(30%) translateZ(-200px);
+  filter: blur(6px);
+  opacity: 0.3;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.sphere-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: sphere-spin 60s linear infinite;
+}
+
+@keyframes sphere-spin {
+  from { transform: rotateY(0deg) rotateX(15deg); }
+  to { transform: rotateY(360deg) rotateX(15deg); }
+}
+
+body.sphere-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.2), inset 0 0 15px rgba(0, 229, 255, 0.2);
+}
+
+body.sphere-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg) scale(1.15) !important;
+  box-shadow: 0 0 60px rgba(0, 229, 255, 0.8), inset 0 0 30px rgba(0, 229, 255, 0.4);
+  border-color: rgba(0, 229, 255, 1);
+  z-index: 50 !important;
+}
+
+/* Magnetic Peel Animation */
+body.peel-active .echo-document {
+    transform: translate3d(var(--tx, 0px), calc(var(--ty, 0px) + var(--peel-ty, 0px)), var(--peel-tz, 0px)) rotateX(var(--peel-rot-x, 0deg)) rotateY(var(--ry, 0deg)) scale(calc(1 + (var(--wake) * 0.08))) !important;
+    transition: transform 0.1s linear, filter 0.3s ease, opacity 0.3s ease;
+    opacity: 0.8 !important;
+    filter: blur(2px) !important;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9), inset 0 1px 3px rgba(255, 255, 255, 0.5), 0 0 40px rgba(0, 229, 255, 0.4);
+    border-color: rgba(0, 229, 255, 0.7);
+    z-index: calc(50 - var(--index, 0));
+}
+
+body.peel-active .echo-document:hover {
+    transform: translate3d(var(--tx, 0px), calc(var(--ty, 0px) + var(--peel-ty, 0px)), calc(var(--peel-tz, 0px) + 150px)) rotateX(0deg) rotateY(0deg) scale(1.1) !important;
+    opacity: 1 !important;
+    filter: blur(0px) !important;
+    z-index: 100 !important;
+    box-shadow: 0 0 60px rgba(0, 229, 255, 0.8), inset 0 0 30px rgba(0, 229, 255, 0.4);
+}
+
+body.peel-active #editor {
+    opacity: 0.2 !important;
+    filter: blur(8px) !important;
+    transform: scale(0.9) translateZ(-100px) !important;
+    pointer-events: none;
+    transition: all 0.3s ease;
 }

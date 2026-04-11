@@ -551,6 +551,26 @@ document.addEventListener('mouseup', (e) => {
 });
 
 document.addEventListener('mousemove', (e) => {
+  if (typeof isPeelActive !== 'undefined' && isPeelActive && echoLayerEl && !tabManager.isCascadeView && !tabManager.isOrbitView && !tabManager.isScatteredView && !tabManager.isIsometricView && !tabManager.isStackView && !tabManager.isTunnelView && !tabManager.isGridView && !tabManager.isHelixView && !tabManager.isPinboardView && !tabManager.isVortexView && !tabManager.isConstellationView && !tabManager.isPrismView && !tabManager.isCoverflowView && !tabManager.isWaveView && !tabManager.isSphereView) {
+      // Calculate peel factor based on mouse Y
+      const pctY = e.clientY / window.innerHeight; // 0 to 1
+      const echoes = echoLayerEl.querySelectorAll('.echo-document');
+
+      echoes.forEach((echo, index) => {
+          if (echo.classList.contains('peek')) return;
+
+          // Fan them out vertically and push back slightly less
+          const targetY = (pctY - 0.5) * 800 * (index + 1); // Spread
+          const baseTz = -(index + 1) * 50;
+          const targetZ = baseTz + (pctY * 150); // Pull forward as you fan
+          const targetRotX = (pctY - 0.5) * 40; // Tilt
+
+          echo.style.setProperty('--peel-ty', `${targetY}px`);
+          echo.style.setProperty('--peel-tz', `${targetZ}px`);
+          echo.style.setProperty('--peel-rot-x', `${targetRotX}deg`);
+      });
+  }
+
   const rect = editorEl.getBoundingClientRect();
   const x = ( (e.clientX - rect.left) / rect.width ) * 2 - 1;
   const y = ( (e.clientY - rect.top) / rect.height ) * 2 - 1;
@@ -938,6 +958,11 @@ if (btnCoverflow) {
 const btnWave = document.getElementById('btn-wave-view');
 if (btnWave) {
     btnWave.addEventListener('click', () => { tabManager.toggleWaveView(); });
+}
+
+const btnSphere = document.getElementById('btn-sphere-view');
+if (btnSphere) {
+    btnSphere.addEventListener('click', () => { tabManager.toggleSphereView(); });
 }
 
 const opacitySlider = document.getElementById('editor-opacity');
@@ -2101,3 +2126,32 @@ document.addEventListener('keydown', (e) => {
 
 // Expose tabManager for testing
 window.tabManager = tabManager;
+
+// Magnetic Peel (Alt + Shift + Y Mouse Move)
+let isPeelActive = false;
+
+document.addEventListener('keydown', (e) => {
+    if (e.altKey && e.shiftKey) {
+        if (!isPeelActive) {
+             isPeelActive = true;
+             document.body.classList.add('peel-active');
+        }
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'Alt' || e.key === 'Shift') {
+        if (!e.altKey || !e.shiftKey) {
+            isPeelActive = false;
+            document.body.classList.remove('peel-active');
+
+            if (echoLayerEl && typeof tabManager !== 'undefined' && !tabManager.isCascadeView && !tabManager.isOrbitView && !tabManager.isScatteredView && !tabManager.isIsometricView && !tabManager.isStackView && !tabManager.isTunnelView && !tabManager.isGridView && !tabManager.isHelixView && !tabManager.isPinboardView && !tabManager.isVortexView && !tabManager.isConstellationView && !tabManager.isPrismView && !tabManager.isCoverflowView && !tabManager.isWaveView && !tabManager.isSphereView) {
+                 const echoes = echoLayerEl.querySelectorAll('.echo-document');
+                 echoes.forEach((echo) => {
+                     echo.style.removeProperty('transform');
+                     echo.style.setProperty('--tz-val', echo.style.getPropertyValue('--tz'));
+                 });
+            }
+        }
+    }
+});
