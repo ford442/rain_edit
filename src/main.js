@@ -890,6 +890,11 @@ document.getElementById('toggle-front-on-top').addEventListener('change', (e) =>
 document.getElementById('btn-depth-forward').addEventListener('click', () => { tabManager.adjustDepth(1); });
 document.getElementById('btn-depth-back').addEventListener('click', () => { tabManager.adjustDepth(-1); });
 
+const btnWaterfall = document.getElementById('btn-waterfall-view');
+if (btnWaterfall) {
+    btnWaterfall.addEventListener('click', () => { tabManager.toggleWaterfallView(); });
+}
+
 const btnCascade = document.getElementById('btn-cascade-view');
 if (btnCascade) {
     btnCascade.addEventListener('click', () => { tabManager.toggleCascadeView(); });
