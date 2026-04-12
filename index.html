@@ -36,22 +36,26 @@
         <div class="depth-controls">
           <button id="btn-depth-forward" title="Bring Forward — increase z-depth">⬆️ Bring Forward</button>
           <button id="btn-depth-back" title="Push Back — decrease z-depth">⬇️ Push Back</button>
-          <button id="btn-waterfall-view" title="Toggle Waterfall View">💧 Waterfall View</button>
-          <button id="btn-cascade-view" title="Toggle Cascade View">🌊 Cascade View</button>
-          <button id="btn-orbit-view" title="Toggle Orbit View">🪐 Orbit View</button>
-          <button id="btn-scattered-view" title="Toggle Scattered View">🌪️ Scattered View</button>
-          <button id="btn-isometric-view" title="Toggle Isometric Layer View">📐 Isometric</button>
-          <button id="btn-stack-view" title="Toggle Stack (Time Machine) View">⏳ Stack View</button>
-          <button id="btn-tunnel-view" title="Toggle Tunnel View">🚇 Tunnel View</button>
-          <button id="btn-grid-view" title="Toggle Grid View">🧊 Grid View</button>
-          <button id="btn-helix-view" title="Toggle Helix View">🧬 Helix View</button>
-          <button id="btn-pinboard-view" title="Toggle Pinboard View">📌 Pinboard</button>
-          <button id="btn-vortex-view" title="Toggle Vortex View">🌀 Vortex View</button>
-          <button id="btn-constellation-view" title="Toggle Constellation View">✨ Constellation View</button>
-          <button id="btn-prism-view" title="Toggle Prism View">💎 Prism View</button>
-          <button id="btn-coverflow-view" title="Toggle Coverflow View">🗂️ Coverflow</button>
-          <button id="btn-sphere-view" title="Toggle Sphere View">🌐 Sphere View</button>
-          <button id="btn-wave-view" title="Toggle Wave View">🌊 Wave View</button>
+          <select id="view-mode-select" title="Toggle View Mode">
+            <option value="">Default View</option>
+            <option value="waterfall">💧 Waterfall View</option>
+            <option value="cascade">🌊 Cascade View</option>
+            <option value="orbit">🪐 Orbit View</option>
+            <option value="scattered">🌪️ Scattered View</option>
+            <option value="isometric">📐 Isometric</option>
+            <option value="stack">⏳ Stack View</option>
+            <option value="tunnel">🚇 Tunnel View</option>
+            <option value="grid">🧊 Grid View</option>
+            <option value="helix">🧬 Helix View</option>
+            <option value="pinboard">📌 Pinboard</option>
+            <option value="vortex">🌀 Vortex View</option>
+            <option value="constellation">✨ Constellation View</option>
+            <option value="prism">💎 Prism View</option>
+            <option value="coverflow">🗂️ Coverflow</option>
+            <option value="sphere">🌐 Sphere View</option>
+            <option value="wave">🌊 Wave View</option>
+            <option value="black-hole">🕳️ Black Hole</option>
+          </select>
         </div>
       </div>
 
@@ -107,6 +111,9 @@
                </button>
                <button id="btn-z-scan" title="3D Z-Axis Scan" class="dock-btn-zscan">
                    🔍 Z-Scan
+               </button>
+               <button id="btn-black-hole-view" title="Toggle Black Hole View" class="dock-btn-sonar" style="margin-top: 5px;">
+                   🕳️ Black Hole
                </button>
            </div>
         </div>

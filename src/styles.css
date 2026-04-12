@@ -6,6 +6,9 @@
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --dynamic-hue: 180; /* Default Cyan hue */
+  /* Base Bioluminescent Green */
+  --bio-glow-color: rgba(57, 255, 20, 0.6);
+  --bio-glow-strong: rgba(57, 255, 20, 0.9);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1872,8 +1875,12 @@ body.x-ray-active #echo-layer {
   transform: translate3d(calc(var(--tx, 0px) * 0.5), calc(var(--ty, 0px) * 0.5), 250px) rotateX(var(--hover-rot-x, 0deg)) rotateY(var(--hover-rot-y, 0deg)) scale(1.15) !important;
   mask-image: none;
   -webkit-mask-image: none;
-  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.95), 0 0 40px rgba(0, 229, 255, 0.4), inset 0 0 40px rgba(0, 229, 255, 0.25);
-  border-color: rgba(0, 229, 255, 0.8);
+  /* Bioluminescent effect: Soft outer glow, intense inner border, slight inset glow */
+  box-shadow:
+    0 0 15px var(--bio-glow-color),
+    0 0 30px var(--bio-glow-color),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+  border-color: var(--bio-glow-strong);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -1888,12 +1895,11 @@ body.alt-focus-active .echo-document {
   z-index: 15;
 }
 
+body.alt-focus-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.alt-focus-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--explode-x, 0px), var(--explode-y, 0px), 250px) scale(1.1) !important;
-  box-shadow: 0 0 40px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 30;
 }
 
@@ -1913,12 +1919,11 @@ body.expose-active .echo-document {
   z-index: 20;
 }
 
+body.expose-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.expose-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--expose-tx, 0px), var(--expose-ty, 0px), 250px) scale(0.6) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 30 !important;
 }
 
@@ -2060,6 +2065,7 @@ body.semantic-xray-active #editor {
 }
 
 /* Coverflow View */
+body.coverflow-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.9); }
 body.coverflow-active #editor, body.coverflow-active #image-viewer {
   transform: scale(0.65) translateY(10%) translateZ(-50px);
   filter: blur(2px);
@@ -2080,12 +2086,11 @@ body.coverflow-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 150px)) rotateY(0deg) scale(calc(var(--scale, 1) + 0.1)) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 100 !important;
 }
 
 /* Wave View */
+body.wave-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.9); }
 body.wave-active #editor, body.wave-active #image-viewer {
   transform: scale(0.6) translateY(20%) translateZ(-100px);
   filter: blur(4px);
@@ -2106,12 +2111,11 @@ body.wave-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 150px)) rotateZ(0deg) scale(1.1) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 50 !important;
 }
 
 /* Waterfall View */
+body.waterfall-active { --bio-glow-color: rgba(0, 0, 0, 0.4); --bio-glow-strong: rgba(0, 0, 0, 0.8); }
 .waterfall-active #editor, .waterfall-active #image-viewer {
   transform: translateY(-20%) scale(0.9) rotateX(10deg);
   opacity: 0.9;
@@ -2127,10 +2131,10 @@ body.wave-active .echo-document:hover {
   filter: none !important;
   transform: translate3d(var(--tx), calc(var(--ty) - 20px), calc(var(--tz) + 100px)) rotateX(0deg) scale(1.05) !important;
   z-index: 50 !important;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
 }
 
 /* Cascade View */
+body.cascade-active { --bio-glow-color: rgba(0, 229, 255, 0.4); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 .cascade-active #editor, .cascade-active #image-viewer {
   transform: translateX(-25%) scale(0.85) rotateY(10deg);
   filter: blur(2px);
@@ -2150,11 +2154,11 @@ body.wave-active .echo-document:hover {
   filter: none;
   transform: translate3d(calc(var(--tx) - 20px), var(--ty), calc(var(--tz) + 50px)) rotateY(0deg) scale(1.05) !important;
   z-index: 50;
-  box-shadow: -20px 0 50px rgba(0,0,0,0.8);
-  border-left: 2px solid rgba(0,229,255,0.8);
+  border-left: 2px solid var(--bio-glow-strong);
 }
 
 /* Scattered View */
+body.scattered-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.scattered-active #editor, body.scattered-active #image-viewer {
   transform: scale(0.7) translateY(10%) translateZ(-50px);
   filter: blur(3px);
@@ -2176,12 +2180,11 @@ body.scattered-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--scatter-x, 0px), var(--scatter-y, 0px), calc(var(--scatter-z, 0px) + 100px)) rotateZ(var(--scatter-rot, 0deg)) rotateX(var(--hover-rot-x, 0deg)) rotateY(var(--hover-rot-y, 0deg)) scale(1.15) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 30 !important;
 }
 
 /* Constellation View */
+body.constellation-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.constellation-active #editor, body.constellation-active #image-viewer {
   transform: scale(0.6) translateY(20%) translateZ(-150px);
   filter: blur(5px);
@@ -2209,12 +2212,11 @@ body.constellation-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 150px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 50 !important;
 }
 
 /* Helix View */
+body.helix-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.helix-active #editor, body.helix-active #image-viewer {
   transform: scale(0.65) translateZ(-100px) translateY(10%);
   filter: blur(4px);
@@ -2242,12 +2244,11 @@ body.helix-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 150px)) rotateY(0deg) scale(1.15) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 30 !important;
 }
 
 /* Vortex View */
+body.vortex-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.vortex-active #editor, body.vortex-active #image-viewer {
   transform: scale(0.6) translateY(10%) translateZ(-50px);
   filter: blur(4px);
@@ -2279,12 +2280,11 @@ body.vortex-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) rotateZ(0deg) scale(1.1) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 30 !important;
 }
 
 /* Prism View */
+body.prism-active { --bio-glow-color: rgba(0, 229, 255, 0.8); --bio-glow-strong: rgba(0, 229, 255, 1); }
 body.prism-active #editor, body.prism-active #image-viewer {
   transform: scale(0.6) translateY(20%) translateZ(-150px);
   filter: blur(5px);
@@ -2318,12 +2318,11 @@ body.prism-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 150px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg) scale(1.1) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.8), inset 0 0 20px rgba(0, 229, 255, 0.4);
-  border-color: rgba(0, 229, 255, 1);
   z-index: 50 !important;
 }
 
 /* Pinboard View */
+body.pinboard-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.pinboard-active #editor, body.pinboard-active #image-viewer {
   transform: scale(0.7) translateY(10%) translateZ(-50px);
   filter: blur(3px);
@@ -2344,12 +2343,11 @@ body.pinboard-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 100px)) rotateZ(0deg) scale(1.1) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 30 !important;
 }
 
 /* Orbit View */
+body.orbit-active { --bio-glow-color: rgba(0, 229, 255, 0.4); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 .orbit-active #editor, .orbit-active #image-viewer {
   transform: scale(0.65) translateY(-20%);
   filter: blur(4px);
@@ -2378,8 +2376,6 @@ body.pinboard-active .echo-document:hover {
   opacity: 1;
   filter: none;
   z-index: 50;
-  box-shadow: 0 0 50px rgba(0,229,255,0.4);
-  border: 1px solid rgba(0,229,255,0.8);
   transform: rotateY(var(--orbit-rot-y, 0deg)) translateZ(var(--orbit-tz, 600px)) scale(1.1) !important;
 }
 
@@ -2408,6 +2404,7 @@ body.pinboard-active .echo-document:hover {
 }
 
 /* --- Tunnel View --- */
+body.tunnel-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.tunnel-active #editor, body.tunnel-active #image-viewer {
   transform: scale(0.6) translateY(20%) translateZ(-100px);
   filter: blur(5px);
@@ -2433,12 +2430,11 @@ body.tunnel-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) rotateZ(0deg) scale(1.1) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 30 !important;
 }
 
 /* --- Grid View --- */
+body.grid-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.grid-active #editor, body.grid-active #image-viewer {
   transform: scale(0.7) translateY(-20%) translateZ(-50px);
   filter: blur(4px);
@@ -2459,8 +2455,6 @@ body.grid-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 150px)) scale(1.15) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 30 !important;
 }
 
@@ -2525,6 +2519,7 @@ body.isometric-active #container > *::after {
 }
 
 /* --- Stack (Time Machine) View --- */
+body.stack-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.stack-active #editor, body.stack-active #image-viewer {
   transform: scale(0.8) translateY(-10%);
   filter: blur(2px);
@@ -2543,8 +2538,6 @@ body.stack-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 50px)) scale(1.05) !important;
-  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6), inset 0 0 20px rgba(0, 229, 255, 0.3);
-  border-color: rgba(0, 229, 255, 0.8);
   z-index: 30 !important;
 }
 
@@ -2560,12 +2553,11 @@ body.stack-active .echo-document:hover {
 }
 
 /* --- Magnetic Attraction for X-Ray Peek --- */
+body.x-ray-active { --bio-glow-color: rgba(0, 229, 255, 0.8); --bio-glow-strong: #00e5ff; }
 body.x-ray-active .echo-document:hover {
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), 250px) scale(1.1) !important;
   opacity: 1 !important;
   filter: blur(0px) !important;
-  box-shadow: 0 0 60px rgba(0, 229, 255, 0.8), inset 0 0 30px rgba(0, 229, 255, 0.4) !important;
-  border-color: #00e5ff !important;
   z-index: 100 !important;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -2787,6 +2779,7 @@ body.siphon-mode-active .echo-document *::selection {
 }
 
 /* Sphere View */
+body.sphere-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
 body.sphere-active #editor, body.sphere-active #image-viewer {
   transform: scale(0.5) translateY(30%) translateZ(-200px);
   filter: blur(6px);
@@ -2819,8 +2812,44 @@ body.sphere-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg) scale(1.15) !important;
-  box-shadow: 0 0 60px rgba(0, 229, 255, 0.8), inset 0 0 30px rgba(0, 229, 255, 0.4);
-  border-color: rgba(0, 229, 255, 1);
+  z-index: 50 !important;
+}
+
+/* Black Hole View */
+body.black-hole-active { --bio-glow-color: rgba(255, 0, 0, 0.6); --bio-glow-strong: rgba(255, 0, 0, 1); }
+body.black-hole-active #editor, body.black-hole-active #image-viewer {
+  transform: scale(0.3) translateZ(-500px);
+  filter: blur(10px) brightness(0.2);
+  opacity: 0.1;
+  transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.black-hole-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: black-hole-spin 10s linear infinite;
+}
+
+@keyframes black-hole-spin {
+  from { transform: rotateZ(0deg) scale(1); }
+  to { transform: rotateZ(360deg) scale(0.8); }
+}
+
+body.black-hole-active .echo-document {
+  opacity: calc(1 - (var(--index, 0) * 0.15)); /* Fade out deeper layers */
+  filter: blur(calc(2px + var(--index, 0) * 1px));
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg)) scale(calc(0.9 - (var(--index, 0) * 0.1)));
+  transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.5);
+  border-color: rgba(50, 50, 50, 0.5);
+}
+
+body.black-hole-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
   z-index: 50 !important;
 }
 
