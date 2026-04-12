@@ -51,6 +51,7 @@ export class TabManager {
     this.isCoverflowView = false;
     this.isWaveView = false;
     this.isSphereView = false;
+    this.isBlackHoleView = false;
   }
 
 _deactivateAllViews() {
@@ -70,6 +71,7 @@ _deactivateAllViews() {
     this.isCoverflowView = false;
     this.isWaveView = false;
     this.isSphereView = false;
+    this.isBlackHoleView = false;
 
     document.body.classList.remove(
       'waterfall-active', 
@@ -87,7 +89,8 @@ _deactivateAllViews() {
       'prism-active', 
       'coverflow-active', 
       'wave-active', 
-      'sphere-active'
+      'sphere-active',
+      'black-hole-active'
     );
 
     [
@@ -120,6 +123,18 @@ _deactivateAllViews() {
       this.isCoverflowView = true;
       document.body.classList.add('coverflow-active');
       const btn = document.getElementById('btn-coverflow-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleBlackHoleView() {
+    const wasActive = this.isBlackHoleView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isBlackHoleView = true;
+      document.body.classList.add('black-hole-active');
+      const btn = document.getElementById('btn-black-hole-view');
       if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
@@ -1165,6 +1180,17 @@ Drag to change depth`;
         el.style.setProperty('--tx', `0px`);
         el.style.setProperty('--ty', `0px`);
         el.style.setProperty('--tz', `0px`);
+      } else if (this.isBlackHoleView) {
+        // Black Hole View positions
+        const angle = index * Math.PI / 4;
+        const radius = Math.max(0, 200 - index * 20);
+
+        el.style.setProperty('--tx', `${Math.cos(angle) * radius}px`);
+        el.style.setProperty('--ty', `${Math.sin(angle) * radius}px`);
+        el.style.setProperty('--tz', `${-100 - index * 50}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty('--rot-z', `${index * 15}deg`);
       } else {
         // Original Parallax depth offsets
         const depthOffset = (index + 1) * 2;

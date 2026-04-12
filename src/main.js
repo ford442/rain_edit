@@ -890,84 +890,29 @@ document.getElementById('toggle-front-on-top').addEventListener('change', (e) =>
 document.getElementById('btn-depth-forward').addEventListener('click', () => { tabManager.adjustDepth(1); });
 document.getElementById('btn-depth-back').addEventListener('click', () => { tabManager.adjustDepth(-1); });
 
-const btnWaterfall = document.getElementById('btn-waterfall-view');
-if (btnWaterfall) {
-    btnWaterfall.addEventListener('click', () => { tabManager.toggleWaterfallView(); });
-}
-
-const btnCascade = document.getElementById('btn-cascade-view');
-if (btnCascade) {
-    btnCascade.addEventListener('click', () => { tabManager.toggleCascadeView(); });
-}
-
-const btnOrbit = document.getElementById('btn-orbit-view');
-if (btnOrbit) {
-    btnOrbit.addEventListener('click', () => { tabManager.toggleOrbitView(); });
-}
-
-const btnScattered = document.getElementById('btn-scattered-view');
-if (btnScattered) {
-    btnScattered.addEventListener('click', () => { tabManager.toggleScatteredView(); });
-}
-
-const btnIsometric = document.getElementById('btn-isometric-view');
-if (btnIsometric) {
-    btnIsometric.addEventListener('click', () => { tabManager.toggleIsometricView(); });
-}
-
-const btnStack = document.getElementById('btn-stack-view');
-if (btnStack) {
-    btnStack.addEventListener('click', () => { tabManager.toggleStackView(); });
-}
-
-const btnTunnel = document.getElementById('btn-tunnel-view');
-if (btnTunnel) {
-    btnTunnel.addEventListener('click', () => { tabManager.toggleTunnelView(); });
-}
-
-const btnGrid = document.getElementById('btn-grid-view');
-if (btnGrid) {
-    btnGrid.addEventListener('click', () => { tabManager.toggleGridView(); });
-}
-
-const btnHelix = document.getElementById('btn-helix-view');
-if (btnHelix) {
-    btnHelix.addEventListener('click', () => { tabManager.toggleHelixView(); });
-}
-
-const btnPinboard = document.getElementById('btn-pinboard-view');
-if (btnPinboard) {
-    btnPinboard.addEventListener('click', () => { tabManager.togglePinboardView(); });
-}
-
-const btnVortex = document.getElementById('btn-vortex-view');
-if (btnVortex) {
-    btnVortex.addEventListener('click', () => { tabManager.toggleVortexView(); });
-}
-
-const btnConstellation = document.getElementById('btn-constellation-view');
-if (btnConstellation) {
-    btnConstellation.addEventListener('click', () => { tabManager.toggleConstellationView(); });
-}
-
-const btnPrism = document.getElementById('btn-prism-view');
-if (btnPrism) {
-    btnPrism.addEventListener('click', () => { tabManager.togglePrismView(); });
-}
-
-const btnCoverflow = document.getElementById('btn-coverflow-view');
-if (btnCoverflow) {
-    btnCoverflow.addEventListener('click', () => { tabManager.toggleCoverflowView(); });
-}
-
-const btnWave = document.getElementById('btn-wave-view');
-if (btnWave) {
-    btnWave.addEventListener('click', () => { tabManager.toggleWaveView(); });
-}
-
-const btnSphere = document.getElementById('btn-sphere-view');
-if (btnSphere) {
-    btnSphere.addEventListener('click', () => { tabManager.toggleSphereView(); });
+const viewModeSelect = document.getElementById('view-mode-select');
+if (viewModeSelect) {
+    viewModeSelect.addEventListener('change', (e) => {
+        const view = e.target.value;
+        if (view === 'waterfall') tabManager.toggleWaterfallView();
+        else if (view === 'cascade') tabManager.toggleCascadeView();
+        else if (view === 'orbit') tabManager.toggleOrbitView();
+        else if (view === 'scattered') tabManager.toggleScatteredView();
+        else if (view === 'isometric') tabManager.toggleIsometricView();
+        else if (view === 'stack') tabManager.toggleStackView();
+        else if (view === 'tunnel') tabManager.toggleTunnelView();
+        else if (view === 'grid') tabManager.toggleGridView();
+        else if (view === 'helix') tabManager.toggleHelixView();
+        else if (view === 'pinboard') tabManager.togglePinboardView();
+        else if (view === 'vortex') tabManager.toggleVortexView();
+        else if (view === 'constellation') tabManager.toggleConstellationView();
+        else if (view === 'prism') tabManager.togglePrismView();
+        else if (view === 'coverflow') tabManager.toggleCoverflowView();
+        else if (view === 'sphere') tabManager.toggleSphereView();
+        else if (view === 'wave') tabManager.toggleWaveView();
+        else if (view === 'black-hole') tabManager.toggleBlackHoleView();
+        else tabManager._deactivateAllViews(); // Default view
+    });
 }
 
 const opacitySlider = document.getElementById('editor-opacity');
@@ -1839,6 +1784,11 @@ if (btnSonar) {
 const btnZScan = document.getElementById('btn-z-scan');
 if (btnZScan) {
     btnZScan.addEventListener('click', triggerZScan);
+}
+
+const btnBlackHole = document.getElementById('btn-black-hole-view');
+if (btnBlackHole) {
+    btnBlackHole.addEventListener('click', () => { tabManager.toggleBlackHoleView(); });
 }
 
 function triggerZScan() {
