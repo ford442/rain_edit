@@ -41,6 +41,7 @@ export class TabManager {
     this.isScatteredView = false;
     this.isIsometricView = false;
     this.isStackView = false;
+    this.isTimelineView = false;
     this.isTunnelView = false;
     this.isGridView = false;
     this.isHelixView = false;
@@ -61,6 +62,7 @@ _deactivateAllViews() {
     this.isScatteredView = false;
     this.isIsometricView = false;
     this.isStackView = false;
+    this.isTimelineView = false;
     this.isTunnelView = false;
     this.isGridView = false;
     this.isHelixView = false;
@@ -80,6 +82,7 @@ _deactivateAllViews() {
       'scattered-active', 
       'isometric-active', 
       'stack-active', 
+      'timeline-active',
       'tunnel-active', 
       'grid-active', 
       'helix-active', 
@@ -100,6 +103,7 @@ _deactivateAllViews() {
       'btn-scattered-view', 
       'btn-isometric-view', 
       'btn-stack-view', 
+      'btn-timeline-view',
       'btn-tunnel-view', 
       'btn-grid-view', 
       'btn-helix-view', 
@@ -232,6 +236,18 @@ _deactivateAllViews() {
       this.isStackView = true;
       document.body.classList.add('stack-active');
       const btn = document.getElementById('btn-stack-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleTimelineView() {
+    const wasActive = this.isTimelineView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTimelineView = true;
+      document.body.classList.add('timeline-active');
+      const btn = document.getElementById('btn-timeline-view');
       if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
@@ -443,17 +459,20 @@ _deactivateAllViews() {
     this.applyDepth(file.depth, oldDepth);
     this._renderTabs();
 
-    // Add snap animation if depth changed
+    // Add snap animation and shatter effect if depth changed
     if (oldDepth !== file.depth && this.echoLayerEl) {
         // Trigger snap animation on the background documents
         const targetEl = file.isImage ? this.imageViewerEl : this.editorEl;
         if (targetEl) {
             targetEl.classList.remove('echo-snap-active');
+            targetEl.classList.remove('shatter-active');
             void targetEl.offsetWidth; // Force reflow
             targetEl.classList.add('echo-snap-active');
+            targetEl.classList.add('shatter-active');
             setTimeout(() => {
                 targetEl.classList.remove('echo-snap-active');
-            }, 500);
+                targetEl.classList.remove('shatter-active');
+            }, 600);
         }
     }
   }
@@ -940,6 +959,21 @@ Drag to change depth`;
         el.style.setProperty('--tx', `${tx}px`);
         el.style.setProperty('--ty', `${ty}px`);
         el.style.setProperty('--tz', `${tz}px`);
+      } else if (this.isTimelineView) {
+        // Timeline View positions
+        const totalEchoes = inactiveFiles.length;
+        const width = window.innerWidth * 1.5;
+        // Position them in a line from left to right, going backwards in Z
+        const spacingX = totalEchoes > 1 ? width / (totalEchoes - 1) : 0;
+        const xPos = -width / 2 + (index * spacingX);
+        const zPos = -index * 150;
+
+        el.style.setProperty('--tx', `${xPos}px`);
+        el.style.setProperty('--ty', '0px');
+        el.style.setProperty('--tz', `${zPos}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty('--rot-z', '0deg');
       } else if (this.isStackView) {
         // Time Machine Stack View
         el.style.setProperty('--tx', `0px`);
