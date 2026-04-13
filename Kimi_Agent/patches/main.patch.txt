@@ -1,0 +1,39 @@
+MAIN.JS PATCH
+===============
+
+Add this code after the VPS save button setup (around line 170, after the vpsSaveBtn event listener):
+
+// ============================================
+// Depth control buttons - Bring Forward / Push Back
+// ============================================
+const btnDepthForward = document.getElementById('btn-depth-forward');
+const btnDepthBack = document.getElementById('btn-depth-back');
+
+if (btnDepthForward) {
+  btnDepthForward.addEventListener('click', () => {
+    const activeFile = tabManager.files.find(f => f.id === tabManager.activeId);
+    if (!activeFile) return;
+
+    // Cycle depth forward: 0 -> 1 -> 2 -> 0
+    activeFile.depth = (activeFile.depth + 1) % 3;
+    tabManager.applyDepth(activeFile.depth);
+    tabManager._renderTabs();
+
+    console.log(`[Depth] ${activeFile.name} moved to depth ${activeFile.depth} (${['Deep', 'Middle', 'Front'][activeFile.depth]})`);
+  });
+}
+
+if (btnDepthBack) {
+  btnDepthBack.addEventListener('click', () => {
+    const activeFile = tabManager.files.find(f => f.id === tabManager.activeId);
+    if (!activeFile) return;
+
+    // Cycle depth backward: 0 -> 2 -> 1 -> 0
+    activeFile.depth = activeFile.depth <= 0 ? 2 : activeFile.depth - 1;
+    tabManager.applyDepth(activeFile.depth);
+    tabManager._renderTabs();
+
+    console.log(`[Depth] ${activeFile.name} moved to depth ${activeFile.depth} (${['Deep', 'Middle', 'Front'][activeFile.depth]})`);
+  });
+}
+// ============================================

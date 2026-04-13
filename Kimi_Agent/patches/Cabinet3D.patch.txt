@@ -1,0 +1,16 @@
+CABINET3D.JS PATCH
+==================
+
+1. Find the CATEGORY_COLORS array (around line 20-27)
+2. Add yellow color for notes:
+
+const CATEGORY_COLORS = [
+  0x00aaff,  // songs   — blue
+  0x00ffaa,  // patterns — teal
+  0xff6600,  // banks    — orange
+  0xffaa00,  // samples  — amber
+  0xaa00ff,  // shaders  — purple
+  0x00ff66,  // music    — green
+  0xff0066,  // images   — pink/red
+  0xffff00   // notes    — yellow  <-- ADD THIS LINE
+];
