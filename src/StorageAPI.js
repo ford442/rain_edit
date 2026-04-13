@@ -13,7 +13,7 @@ const DEFAULT_BASE_URL =
 /**
  * Categories tracked in the remote storage.
  */
-export const STORAGE_CATEGORIES = ['songs', 'patterns', 'banks', 'samples', 'shaders', 'music', 'images'];
+export const STORAGE_CATEGORIES = ['songs', 'patterns', 'banks', 'samples', 'shaders', 'music', 'images', 'notes'];
 
 export class StorageAPI {
   /**
@@ -61,6 +61,11 @@ export class StorageAPI {
   async getCategoryFiles(type) {
     // Map 'shaders' category to 'shader' type for API
     const apiType = type === 'shaders' ? 'shader' : type;
+
+    if (apiType === 'notes') {
+      const items = await this.listNotes();
+      return items.map(item => ({ id: item.name, name: item.name, date: item.updated_at }));
+    }
     
     if (apiType === 'shader') {
       // Shader endpoint supports coordinate sorting
@@ -80,6 +85,9 @@ export class StorageAPI {
    * @returns {Promise<object>}
    */
   async fetchFileContent(id, type) {
+    if (type === 'notes') {
+      return this.loadNote(id);
+    }
     let url;
     // Handle both 'shader' and 'shaders' type names
     if (type === 'shaders' || type === 'shader') {
@@ -101,6 +109,15 @@ export class StorageAPI {
    */
   async getFileContent(id, type) {
     const apiType = type === 'shaders' ? 'shader' : type;
+
+    if (apiType === 'notes') {
+      const data = await this.loadNote(id);
+      if (!data) throw new Error(`StorageAPI getFileContent(${id}, ${type}) failed: note not found`);
+      return {
+        content: data.content,
+        language: 'markdown'
+      };
+    }
     
     if (apiType === 'shader') {
       // Shader endpoint returns { id, code, name }

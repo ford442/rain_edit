@@ -229,6 +229,16 @@ window.addEventListener('fileCubeClicked', async (e) => {
     
     // 2. Add it to the Tab Manager
     const newFileId = tabManager.addFile(name, fileData.content, fileData.language);
+
+    // Tag the new file with its cabinet origin so save logic can route correctly
+    const newFile = tabManager.files.find(f => f.id === newFileId);
+    if (newFile) {
+      newFile.cabinetType = type;
+      newFile.cabinetId = id;
+      if (type === 'notes') {
+        newFile.noteName = id;
+      }
+    }
     
     // 3. DEPTH FOCUS LOGIC (The Immersive Step)
     // Push all current tabs backward into the rain (Depth 1)
@@ -239,7 +249,6 @@ window.addEventListener('fileCubeClicked', async (e) => {
     });
 
     // Pull the newly opened file completely to the front (Depth 2)
-    const newFile = tabManager.files.find(f => f.id === newFileId);
     if (newFile) {
       newFile.depth = 2; // Unobscured by rain
     }
@@ -886,9 +895,37 @@ document.getElementById('toggle-front-on-top').addEventListener('change', (e) =>
   frontCanvas.style.zIndex = e.target.checked ? 10 : 0;
 });
 
-// Depth control buttons — push the active document backward or pull it forward
-document.getElementById('btn-depth-forward').addEventListener('click', () => { tabManager.adjustDepth(1); });
-document.getElementById('btn-depth-back').addEventListener('click', () => { tabManager.adjustDepth(-1); });
+// Depth control buttons - Bring Forward / Push Back
+const btnDepthForward = document.getElementById('btn-depth-forward');
+const btnDepthBack = document.getElementById('btn-depth-back');
+
+if (btnDepthForward) {
+  btnDepthForward.addEventListener('click', () => {
+    const activeFile = tabManager.files.find(f => f.id === tabManager.activeId);
+    if (!activeFile) return;
+
+    // Cycle depth forward: 0 -> 1 -> 2 -> 0
+    activeFile.depth = (activeFile.depth + 1) % 3;
+    tabManager.applyDepth(activeFile.depth);
+    tabManager._renderTabs();
+
+    console.log(`[Depth] ${activeFile.name} moved to depth ${activeFile.depth} (${['Deep', 'Middle', 'Front'][activeFile.depth]})`);
+  });
+}
+
+if (btnDepthBack) {
+  btnDepthBack.addEventListener('click', () => {
+    const activeFile = tabManager.files.find(f => f.id === tabManager.activeId);
+    if (!activeFile) return;
+
+    // Cycle depth backward: 0 -> 2 -> 1 -> 0
+    activeFile.depth = activeFile.depth <= 0 ? 2 : activeFile.depth - 1;
+    tabManager.applyDepth(activeFile.depth);
+    tabManager._renderTabs();
+
+    console.log(`[Depth] ${activeFile.name} moved to depth ${activeFile.depth} (${['Deep', 'Middle', 'Front'][activeFile.depth]})`);
+  });
+}
 
 const viewModeSelect = document.getElementById('view-mode-select');
 if (viewModeSelect) {
@@ -2068,13 +2105,26 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Ctrl+S — Save current note tab to backend (only when tab has a noteName)
+// Ctrl+S — Save current tab to backend
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 's') {
     const activeFile = tabManager.files.find(f => f.id === tabManager.activeId);
-    if (activeFile && activeFile.noteName) {
+    if (!activeFile || activeFile.isImage) return;
+
+    if (activeFile.cabinetType === 'notes' || activeFile.noteName) {
       e.preventDefault();
-      tabManager.saveCurrentTabAsNote();
+      const noteName = activeFile.noteName || activeFile.cabinetId || activeFile.name;
+      const content = activeFile.model ? activeFile.model.getValue() : '';
+      storageAPI.saveNote(noteName, content).then((result) => {
+        if (result && result.success) {
+          tabManager._showToast(`✅ Note "${noteName}" saved!`);
+        } else {
+          tabManager._showToast(`❌ Failed to save note "${noteName}"`, true);
+        }
+      }).catch((err) => {
+        console.error('Save note error:', err);
+        tabManager._showToast(`❌ Error saving note: ${err.message}`, true);
+      });
     }
   }
 });

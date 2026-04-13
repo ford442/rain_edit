@@ -25,6 +25,7 @@ const CATEGORY_COLORS = [
   0xaa00ff, // shaders  — purple
   0x00ff66, // music    — green
   0xff0066, // images   — pink/red
+  0xffff00, // notes    — yellow
 ];
 
 const CAT_CUBE_SIZE  = 1.4;   // side-length of each category cube
@@ -444,6 +445,7 @@ export class Cabinet3D {
   _detectLanguage(catName, data) {
     if (catName === 'shaders') return 'glsl';
     if (catName === 'images') return 'image';
+    if (catName === 'notes') return 'markdown';
     if (data.language) return data.language;
     const name = (data.filename || data.name || '').toLowerCase();
     if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.gif') || name.endsWith('.webp')) return 'image';
