@@ -937,6 +937,7 @@ if (viewModeSelect) {
         else if (view === 'scattered') tabManager.toggleScatteredView();
         else if (view === 'isometric') tabManager.toggleIsometricView();
         else if (view === 'stack') tabManager.toggleStackView();
+        else if (view === 'timeline') tabManager.toggleTimelineView();
         else if (view === 'tunnel') tabManager.toggleTunnelView();
         else if (view === 'grid') tabManager.toggleGridView();
         else if (view === 'helix') tabManager.toggleHelixView();
@@ -1286,9 +1287,43 @@ editor.onDidChangeCursorPosition((e) => {
           if (connectionManager) {
               connectionManager.setEchoFocus(matchedEchoes);
           }
+
+          // Trigger semantic sparks for hovered items
+          matchedEchoes.forEach(match => {
+              if (match.isHovered && Math.random() > 0.7) {
+                  spawnSemanticSpark(match.left + match.width / 2, match.top + match.height / 2);
+              }
+          });
       }
   }
 });
+
+function spawnSemanticSpark(startX, startY) {
+    if (!echoLayerEl) return;
+    const spark = document.createElement('div');
+    spark.className = 'semantic-spark';
+    spark.style.left = `${startX}px`;
+    spark.style.top = `${startY}px`;
+
+    // Editor is roughly in the center
+    const editorRect = editorEl.getBoundingClientRect();
+    const endX = editorRect.left + editorRect.width / 2 + (Math.random() - 0.5) * 100;
+    const endY = editorRect.top + editorRect.height / 2 + (Math.random() - 0.5) * 100;
+
+    const dx = endX - startX;
+    const dy = endY - startY;
+
+    spark.style.setProperty('--tx', `${dx}px`);
+    spark.style.setProperty('--ty', `${dy}px`);
+
+    echoLayerEl.appendChild(spark);
+
+    setTimeout(() => {
+        if (spark.parentNode) {
+            spark.parentNode.removeChild(spark);
+        }
+    }, 1000);
+}
 
 // --- Fog / Condensation Logic ---
 // Handled by FogManager (canvas overlay)

@@ -281,6 +281,32 @@ export class ConnectionManager {
                 });
             }
 
+            // Draw "timeline rail" if timeline view is active
+            if (document.body.classList.contains('timeline-active')) {
+                const echoes = document.querySelectorAll('.echo-document');
+                if (echoes.length > 1) {
+                    this.ctx.strokeStyle = `rgba(255, 0, 128, 0.5)`;
+                    this.ctx.lineWidth = 3;
+                    this.ctx.shadowColor = 'rgba(255, 0, 128, 0.8)';
+                    this.ctx.shadowBlur = 15;
+                    this.ctx.beginPath();
+
+                    let first = true;
+                    echoes.forEach(echo => {
+                        const rect = echo.getBoundingClientRect();
+                        const tx = rect.left + rect.width / 2;
+                        const ty = rect.top + rect.height / 2;
+                        if (first) {
+                            this.ctx.moveTo(tx, ty);
+                            first = false;
+                        } else {
+                            this.ctx.lineTo(tx, ty);
+                        }
+                    });
+                    this.ctx.stroke();
+                }
+            }
+
             // Draw Semantic 3D Threading between the echo targets themselves
             if (this.echoTargets && this.echoTargets.length > 1) {
                 // We only thread echoes that are semantic (not just hovered)
