@@ -1292,19 +1292,19 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 10px 32px;
+  padding: 12px 36px;
 
   /* Sleeker Glassmorphism pill style */
   background: linear-gradient(145deg, rgba(20, 25, 40, 0.95), rgba(10, 15, 25, 0.9));
-  backdrop-filter: blur(100px) saturate(400%);
-  -webkit-backdrop-filter: blur(100px) saturate(400%);
+  backdrop-filter: blur(120px) saturate(400%);
+  -webkit-backdrop-filter: blur(120px) saturate(400%);
   border: 1px solid rgba(0, 229, 255, 0.5);
   border-radius: 32px;
   box-shadow:
     0 40px 80px rgba(0, 0, 0, 0.98),
     inset 0 1px 3px rgba(255, 255, 255, 0.4),
     inset 0 0 80px rgba(0, 229, 255, 0.25),
-    0 0 50px rgba(0, 229, 255, 0.4);
+    0 0 60px rgba(0, 229, 255, 0.5);
   user-select: none;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1356,8 +1356,8 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   font-family: var(--font-mono);
   color: rgba(230, 240, 255, 0.85);
   background: linear-gradient(135deg, rgba(25, 30, 45, 0.7), rgba(10, 15, 25, 0.5));
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  backdrop-filter: blur(48px) saturate(200%);
+  -webkit-backdrop-filter: blur(48px) saturate(200%);
   border: 1px solid rgba(0, 229, 255, 0.4);
   border-bottom: 2px solid rgba(0, 229, 255, 0.3);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), inset 0 1px 3px rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 229, 255, 0.2);
@@ -2978,4 +2978,44 @@ body.peel-active #editor {
     transform: scale(0.9) translateZ(-100px) !important;
     pointer-events: none;
     transition: all 0.3s ease;
+}
+
+/* Echo Wave Distortion */
+@keyframes echo-wave {
+  0% { transform: scale(1) translateZ(var(--tz, 0px)); filter: blur(var(--base-blur, 4px)) brightness(1); }
+  50% { transform: scale(1.05) translateZ(calc(var(--tz, 0px) + 20px)) skewX(2deg) skewY(-2deg); filter: blur(calc(var(--base-blur, 4px) - 2px)) brightness(1.5) hue-rotate(15deg); box-shadow: 0 0 30px rgba(0, 229, 255, 0.6), inset 0 0 15px rgba(0, 229, 255, 0.3); border-color: rgba(0, 229, 255, 0.8); }
+  100% { transform: scale(1) translateZ(var(--tz, 0px)); filter: blur(var(--base-blur, 4px)) brightness(1); box-shadow: none; border-color: rgba(0, 229, 255, 0.2); }
+}
+
+.echo-wave-distortion {
+  animation: echo-wave 0.5s ease-out forwards !important;
+  z-index: 55 !important;
+}
+
+/* Neon Tracing Border */
+@keyframes neon-spin {
+  0% { --neon-angle: 0deg; }
+  100% { --neon-angle: 360deg; }
+}
+
+@property --neon-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.echo-document.neon-tracing::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 26px;
+  padding: 2px;
+  background: conic-gradient(from var(--neon-angle), transparent 0%, transparent 60%, rgba(0, 229, 255, 1) 80%, rgba(255, 0, 128, 1) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: neon-spin 3s linear infinite;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0.8;
 }
