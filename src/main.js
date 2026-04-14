@@ -668,7 +668,6 @@ document.addEventListener('mousemove', (e) => {
         }
       });
     }
-
     // Proximity Wake Logic
     echoes.forEach(echo => {
       // Skip if peeking or magnifier is active, let CSS handle it completely
@@ -701,9 +700,23 @@ document.addEventListener('mousemove', (e) => {
         echo.style.setProperty('--foil-x', `${pctX}%`);
         echo.style.setProperty('--foil-y', `${pctY}%`);
       }
-    });
 
-  }
+      // Echo Wave Distortion
+      if (dist < 150 && !echo.classList.contains('echo-wave-distortion')) {
+          echo.classList.add('echo-wave-distortion');
+          setTimeout(() => {
+              echo.classList.remove('echo-wave-distortion');
+          }, 500);
+      }
+
+      // Neon Tracing logic
+      if (wakeFactor > 0.5) {
+         echo.classList.add('neon-tracing');
+      } else {
+         echo.classList.remove('neon-tracing');
+      }
+    });
+}
 });
 
 document.addEventListener('mousedown', (e) => {
