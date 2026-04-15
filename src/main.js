@@ -559,7 +559,62 @@ document.addEventListener('mouseup', (e) => {
     }
 });
 
+let isWormholeActive = false;
+
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.altKey) {
+        isWormholeActive = true;
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'Control' || e.key === 'Alt') {
+        if (!e.ctrlKey || !e.altKey) {
+            isWormholeActive = false;
+            if (echoLayerEl) {
+                const echoes = echoLayerEl.querySelectorAll('.echo-document');
+                echoes.forEach((echo) => {
+                    echo.style.removeProperty('--wormhole-tx');
+                    echo.style.removeProperty('--wormhole-ty');
+                    echo.style.removeProperty('--wormhole-tz');
+                    echo.style.removeProperty('--wormhole-scale');
+                });
+            }
+        }
+    }
+});
+
 document.addEventListener('mousemove', (e) => {
+  // Gravitational Wormhole (Ctrl + Alt)
+  if (isWormholeActive && echoLayerEl) {
+      const echoes = echoLayerEl.querySelectorAll('.echo-document');
+      echoes.forEach(echo => {
+          const rect = echo.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+
+          const dx = e.clientX - cx;
+          const dy = e.clientY - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          const maxDist = 300;
+          if (dist < maxDist) {
+              const pull = 1 - (dist / maxDist); // 0 to 1
+              const pullFactor = Math.pow(pull, 2); // stronger near center
+
+              echo.style.setProperty('--wormhole-tx', `${dx * pullFactor * 0.8}px`);
+              echo.style.setProperty('--wormhole-ty', `${dy * pullFactor * 0.8}px`);
+              echo.style.setProperty('--wormhole-tz', `${pullFactor * 150}px`); // pull forward
+              echo.style.setProperty('--wormhole-scale', `${1 + pullFactor * 0.2}`);
+          } else {
+              echo.style.setProperty('--wormhole-tx', '0px');
+              echo.style.setProperty('--wormhole-ty', '0px');
+              echo.style.setProperty('--wormhole-tz', '0px');
+              echo.style.setProperty('--wormhole-scale', '1');
+          }
+      });
+  }
+
   if (typeof isPeelActive !== 'undefined' && isPeelActive && echoLayerEl && !tabManager.isCascadeView && !tabManager.isOrbitView && !tabManager.isScatteredView && !tabManager.isIsometricView && !tabManager.isStackView && !tabManager.isTunnelView && !tabManager.isGridView && !tabManager.isHelixView && !tabManager.isPinboardView && !tabManager.isVortexView && !tabManager.isConstellationView && !tabManager.isPrismView && !tabManager.isCoverflowView && !tabManager.isWaveView && !tabManager.isSphereView) {
       // Calculate peel factor based on mouse Y
       const pctY = e.clientY / window.innerHeight; // 0 to 1
@@ -962,7 +1017,20 @@ if (viewModeSelect) {
         else if (view === 'sphere') tabManager.toggleSphereView();
         else if (view === 'wave') tabManager.toggleWaveView();
         else if (view === 'black-hole') tabManager.toggleBlackHoleView();
+        else if (view === 'rolodex') tabManager.toggleRolodexView();
         else tabManager._deactivateAllViews(); // Default view
+    });
+}
+
+// Theater Mode Logic
+const theaterToggle = document.getElementById('theater-mode');
+if (theaterToggle) {
+    theaterToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            document.body.classList.add('theater-active');
+        } else {
+            document.body.classList.remove('theater-active');
+        }
     });
 }
 
@@ -2180,10 +2248,20 @@ document.addEventListener('keydown', (e) => {
 // Expose tabManager for testing
 window.tabManager = tabManager;
 
-// Magnetic Peel (Alt + Shift + Y Mouse Move)
+// Hyper-Jump & Magnetic Peel
 let isPeelActive = false;
 
 document.addEventListener('keydown', (e) => {
+    // Hyper-Jump
+    if (e.altKey && e.shiftKey && e.key === 'J') {
+         if (!document.body.classList.contains('hyper-jump-active')) {
+             document.body.classList.add('hyper-jump-active');
+             setTimeout(() => document.body.classList.remove('hyper-jump-active'), 1000);
+         }
+         e.preventDefault();
+         return;
+    }
+
     if (e.altKey && e.shiftKey) {
         if (!isPeelActive) {
              isPeelActive = true;

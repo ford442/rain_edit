@@ -53,6 +53,7 @@ export class TabManager {
     this.isWaveView = false;
     this.isSphereView = false;
     this.isBlackHoleView = false;
+    this.isRolodexView = false;
   }
 
 _deactivateAllViews() {
@@ -74,6 +75,7 @@ _deactivateAllViews() {
     this.isWaveView = false;
     this.isSphereView = false;
     this.isBlackHoleView = false;
+    this.isRolodexView = false;
 
     document.body.classList.remove(
       'waterfall-active', 
@@ -93,7 +95,8 @@ _deactivateAllViews() {
       'coverflow-active', 
       'wave-active', 
       'sphere-active',
-      'black-hole-active'
+      'black-hole-active',
+      'rolodex-active'
     );
 
     [
@@ -113,7 +116,8 @@ _deactivateAllViews() {
       'btn-prism-view', 
       'btn-coverflow-view', 
       'btn-wave-view', 
-      'btn-sphere-view'
+      'btn-sphere-view',
+      'btn-rolodex-view'
     ].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
@@ -139,6 +143,18 @@ _deactivateAllViews() {
       this.isBlackHoleView = true;
       document.body.classList.add('black-hole-active');
       const btn = document.getElementById('btn-black-hole-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleRolodexView() {
+    const wasActive = this.isRolodexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isRolodexView = true;
+      document.body.classList.add('rolodex-active');
+      const btn = document.getElementById('btn-rolodex-view');
       if (btn) btn.classList.add('active');
     }
     this._renderEchoes();
@@ -625,7 +641,7 @@ Drag to change depth`;
 
       // Semantic Gravity: Pull files with similar extensions or languages closer
       const fileExt = file.name.split('.').pop();
-      if ((fileExt === activeExt || file.language === activeLang) && !this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isIsometricView && !this.isStackView && !this.isTunnelView && !this.isGridView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isConstellationView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView) {
+      if ((fileExt === activeExt || file.language === activeLang) && !this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isIsometricView && !this.isStackView && !this.isTunnelView && !this.isGridView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isConstellationView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView && !this.isRolodexView) {
           el.classList.add('semantic-gravity-pull');
       }
 
@@ -806,6 +822,10 @@ Drag to change depth`;
       const lightLeak = document.createElement('div');
       lightLeak.className = 'light-leak';
       el.appendChild(lightLeak);
+
+      const holoRing = document.createElement('div');
+      holoRing.className = 'echo-document-holo-ring';
+      el.appendChild(holoRing);
 
       // Ghost Scroll feature: allow scrolling without bringing document to front
       pre.addEventListener('wheel', (e) => {
@@ -1225,6 +1245,30 @@ Drag to change depth`;
         el.style.setProperty('--rot-x', '0deg');
         el.style.setProperty('--rot-y', '0deg');
         el.style.setProperty('--rot-z', `${index * 15}deg`);
+      } else if (this.isRolodexView) {
+        // Rolodex View: revolving file cabinet cylinder
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const angle = (index / totalEchoes) * Math.PI * 2;
+        const radius = 600;
+
+        const tx = 0;
+        const ty = Math.sin(angle) * radius;
+        const tz = Math.cos(angle) * radius - 200; // offset back
+
+        // Orient planes facing outward
+        const rotX = -(angle * 180 / Math.PI);
+        const rotY = 0;
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', `${rotX}deg`);
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-z', '0deg');
+        el.style.setProperty('--scatter-x', '0px');
+        el.style.setProperty('--scatter-y', '0px');
+        el.style.setProperty('--scatter-z', '0px');
+        el.style.setProperty('--scatter-rot', '0deg');
       } else {
         // Original Parallax depth offsets
         const depthOffset = (index + 1) * 2;
@@ -1320,7 +1364,7 @@ Drag to change depth`;
           if (this.editorEl) {
               this.editorEl.classList.add('editor-peek-fade');
               // Bring forward while hovering the doc itself
-              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView) {
+              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView && !this.isRolodexView) {
                   el.style.setProperty('--tz', '100px');
               } else if (this.isOrbitView) {
                   // Push out slightly to emphasize selection in orbit view
@@ -1331,8 +1375,8 @@ Drag to change depth`;
                   // Bring forward slightly in scattered view
                   const originalZ = parseFloat(el.style.getPropertyValue('--scatter-z') || '0');
                   el.style.setProperty('--scatter-z', `${originalZ + 150}px`);
-              } else if (this.isPinboardView || this.isHelixView || this.isVortexView || this.isPrismView || this.isWaveView || this.isSphereView) {
-                  // Pop out for pinboard/helix/vortex/prism/wave
+              } else if (this.isPinboardView || this.isHelixView || this.isVortexView || this.isPrismView || this.isWaveView || this.isSphereView || this.isRolodexView) {
+                  // Pop out for pinboard/helix/vortex/prism/wave/rolodex
                   const tz = parseFloat(el.style.getPropertyValue('--tz')) || 0;
                   el.style.setProperty('--tz', `${tz + 150}px`);
                   if (this.isPinboardView || this.isVortexView) {
@@ -1441,6 +1485,14 @@ Drag to change depth`;
                   const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
                   const radius = 600;
                   const tz = radius * Math.cos(phi) - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isRolodexView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const angle = (index / totalEchoes) * Math.PI * 2;
+                  const radius = 600;
+                  const tz = Math.cos(angle) * radius - 200;
                   el.style.setProperty('--tz', `${tz}px`);
               } else if (this.isWaveView) {
                   el.style.setProperty('--tz', `-150px`);

@@ -1555,6 +1555,23 @@ body.x-ray-active #echo-layer {
   100% { transform: rotate(360deg) scale(1.02); }
 }
 
+/* Holo Ring Style for Rolodex */
+.echo-document-holo-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 30px;
+  border: 2px dashed rgba(0, 229, 255, 0.5);
+  pointer-events: none;
+  animation: holo-ring-spin 10s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 20;
+}
+
+body.rolodex-active .echo-document:hover .echo-document-holo-ring {
+  opacity: 1;
+}
+
 /* Semantic Sparks */
 .semantic-spark {
     position: absolute;
@@ -1596,7 +1613,11 @@ body.x-ray-active #echo-layer {
   filter: blur(calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)))) hue-rotate(var(--echo-tint, 0deg)) saturate(calc(100% + var(--tz-depth-saturate, 0%))) brightness(calc(100% + var(--tz-depth-brightness, 0%)));
 
   /* Transform including scroll parallax and wake pop */
-  transform: translate3d(calc(var(--tx, 0px) + var(--glitch-offset-x, 0px)), calc(var(--ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) + var(--glitch-offset-y, 0px)), calc(var(--tz, 0px) + (var(--wake) * 60px))) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--ry, 0deg) + var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) scale(calc(1 + (var(--wake) * 0.08)));
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px)),
+    calc(var(--ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) + var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px)),
+    calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px))
+  ) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--ry, 0deg) + var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) scale(calc((1 + (var(--wake) * 0.08)) * var(--wormhole-scale, 1)));
 
   /* Visual depth masking */
   mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
@@ -2667,7 +2688,11 @@ body.x-ray-active .echo-document:hover {
     --tz: calc(-10px + var(--stack-z, 0px)) !important;
     --base-opacity: 0.4 !important;
     --base-blur: 2px !important;
-    transform: translate3d(calc(var(--tx, 0px) * 0.9), calc(var(--ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0))), calc(var(--tz, 0px) + (var(--wake) * 60px))) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--ry, 0deg) + var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) scale(calc(1.05 + (var(--wake) * 0.08)));
+    transform: translate3d(
+      calc(var(--tx, 0px) * 0.9 + var(--wormhole-tx, 0px)),
+      calc(var(--ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) + var(--wormhole-ty, 0px)),
+      calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px))
+    ) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--ry, 0deg) + var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) scale(calc((1.05 + (var(--wake) * 0.08)) * var(--wormhole-scale, 1)));
     box-shadow:
       0 40px 100px rgba(0, 0, 0, 0.9),
       inset 0 1px 3px rgba(255, 255, 255, 0.3),
@@ -2915,6 +2940,42 @@ body.sphere-active .echo-document:hover {
   z-index: 50 !important;
 }
 
+/* Rolodex View */
+body.rolodex-active { --bio-glow-color: rgba(0, 229, 255, 0.6); --bio-glow-strong: rgba(0, 229, 255, 0.8); }
+body.rolodex-active #editor, body.rolodex-active #image-viewer {
+  transform: scale(0.65) translateY(10%) translateZ(-50px);
+  filter: blur(2px);
+  opacity: 0.7;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.rolodex-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: rolodex-spin 60s linear infinite;
+}
+
+@keyframes rolodex-spin {
+  from { transform: rotateY(0deg) rotateX(-15deg); }
+  to { transform: rotateY(360deg) rotateX(-15deg); }
+}
+
+body.rolodex-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.15), inset 0 0 10px rgba(0, 229, 255, 0.1);
+}
+
+body.rolodex-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg) scale(1.15) !important;
+  z-index: 100 !important;
+}
+
 /* Black Hole View */
 body.black-hole-active { --bio-glow-color: rgba(255, 0, 0, 0.6); --bio-glow-strong: rgba(255, 0, 0, 1); }
 body.black-hole-active #editor, body.black-hole-active #image-viewer {
@@ -2953,9 +3014,60 @@ body.black-hole-active .echo-document:hover {
   z-index: 50 !important;
 }
 
+/* Theater Mode */
+body.theater-active #editor {
+  z-index: 1000 !important;
+  transform: scale(1.05) translateZ(50px) !important;
+  box-shadow: 0 50px 150px rgba(0,0,0,0.9), 0 0 50px rgba(0, 229, 255, 0.3) !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.theater-active #echo-layer,
+body.theater-active #reference-layer,
+body.theater-active #tabs-container,
+body.theater-active #dock {
+  opacity: 0.05 !important;
+  filter: blur(10px) grayscale(100%) !important;
+  pointer-events: none !important;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.theater-active #container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 900;
+  pointer-events: none;
+  animation: fade-in 0.5s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Hyper-Jump Effect */
+.hyper-jump-active {
+  animation: hyper-jump 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards !important;
+}
+
+@keyframes hyper-jump {
+  0% { transform: scale(1) translateZ(0); filter: blur(0px) brightness(1) contrast(1); }
+  20% { transform: scale(0.9) translateZ(-500px); filter: blur(5px) brightness(0.5) contrast(1.5) hue-rotate(90deg); }
+  80% { transform: scale(3) translateZ(1000px); filter: blur(20px) brightness(3) contrast(2) hue-rotate(-90deg); opacity: 0; }
+  100% { transform: scale(1) translateZ(0); filter: blur(0px) brightness(1) contrast(1); opacity: 1; }
+}
+
 /* Magnetic Peel Animation */
 body.peel-active .echo-document {
-    transform: translate3d(var(--tx, 0px), calc(var(--ty, 0px) + var(--peel-ty, 0px)), var(--peel-tz, 0px)) rotateX(var(--peel-rot-x, 0deg)) rotateY(var(--ry, 0deg)) scale(calc(1 + (var(--wake) * 0.08))) !important;
+    transform: translate3d(
+      calc(var(--tx, 0px) + var(--wormhole-tx, 0px)),
+      calc(var(--ty, 0px) + var(--peel-ty, 0px) + var(--wormhole-ty, 0px)),
+      calc(var(--peel-tz, 0px) + var(--wormhole-tz, 0px))
+    ) rotateX(var(--peel-rot-x, 0deg)) rotateY(var(--ry, 0deg)) scale(calc((1 + (var(--wake) * 0.08)) * var(--wormhole-scale, 1))) !important;
     transition: transform 0.1s linear, filter 0.3s ease, opacity 0.3s ease;
     opacity: 0.8 !important;
     filter: blur(2px) !important;
