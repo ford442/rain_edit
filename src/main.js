@@ -1018,6 +1018,7 @@ if (viewModeSelect) {
         else if (view === 'wave') tabManager.toggleWaveView();
         else if (view === 'black-hole') tabManager.toggleBlackHoleView();
         else if (view === 'rolodex') tabManager.toggleRolodexView();
+        else if (view === 'cylinder') tabManager.toggleCylinderView();
         else tabManager._deactivateAllViews(); // Default view
     });
 }

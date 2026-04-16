@@ -54,6 +54,7 @@ export class TabManager {
     this.isSphereView = false;
     this.isBlackHoleView = false;
     this.isRolodexView = false;
+    this.isCylinderView = false;
   }
 
 _deactivateAllViews() {
@@ -76,6 +77,7 @@ _deactivateAllViews() {
     this.isSphereView = false;
     this.isBlackHoleView = false;
     this.isRolodexView = false;
+    this.isCylinderView = false;
 
     document.body.classList.remove(
       'waterfall-active', 
@@ -96,7 +98,8 @@ _deactivateAllViews() {
       'wave-active', 
       'sphere-active',
       'black-hole-active',
-      'rolodex-active'
+      'rolodex-active',
+      'cylinder-active'
     );
 
     [
@@ -160,6 +163,17 @@ _deactivateAllViews() {
     this._renderEchoes();
   }
 
+  toggleCylinderView() {
+    const wasActive = this.isCylinderView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCylinderView = true;
+      document.body.classList.add('cylinder-active');
+      const btn = document.getElementById('btn-cylinder-view');
+      if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
 
   toggleSphereView() {
     const wasActive = this.isSphereView;
@@ -641,7 +655,7 @@ Drag to change depth`;
 
       // Semantic Gravity: Pull files with similar extensions or languages closer
       const fileExt = file.name.split('.').pop();
-      if ((fileExt === activeExt || file.language === activeLang) && !this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isIsometricView && !this.isStackView && !this.isTunnelView && !this.isGridView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isConstellationView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView && !this.isRolodexView) {
+      if ((fileExt === activeExt || file.language === activeLang) && !this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isIsometricView && !this.isStackView && !this.isTunnelView && !this.isGridView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isConstellationView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView && !this.isRolodexView && !this.isCylinderView) {
           el.classList.add('semantic-gravity-pull');
       }
 
@@ -1124,6 +1138,29 @@ Drag to change depth`;
         el.style.setProperty('--scatter-y', '0px');
         el.style.setProperty('--scatter-z', '0px');
         el.style.setProperty('--scatter-rot', '0deg');
+      } else if (this.isCylinderView) {
+        // Cylinder View: vertical carousel
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const angle = (index / totalEchoes) * Math.PI * 2;
+        const radius = 600;
+
+        const tx = Math.sin(angle) * radius;
+        const ty = 0;
+        const tz = Math.cos(angle) * radius - 200; // offset back
+
+        // Orient planes facing outward (along Y axis)
+        const rotY = (angle * 180 / Math.PI);
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-z', '0deg');
+        el.style.setProperty('--scatter-x', '0px');
+        el.style.setProperty('--scatter-y', '0px');
+        el.style.setProperty('--scatter-z', '0px');
+        el.style.setProperty('--scatter-rot', '0deg');
       } else if (this.isCoverflowView) {
         // Coverflow View positions
         const totalEchoes = inactiveFiles.length;
@@ -1364,7 +1401,7 @@ Drag to change depth`;
           if (this.editorEl) {
               this.editorEl.classList.add('editor-peek-fade');
               // Bring forward while hovering the doc itself
-              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView && !this.isRolodexView) {
+              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isPrismView && !this.isCoverflowView && !this.isWaveView && !this.isSphereView && !this.isRolodexView && !this.isCylinderView) {
                   el.style.setProperty('--tz', '100px');
               } else if (this.isOrbitView) {
                   // Push out slightly to emphasize selection in orbit view
@@ -1375,8 +1412,8 @@ Drag to change depth`;
                   // Bring forward slightly in scattered view
                   const originalZ = parseFloat(el.style.getPropertyValue('--scatter-z') || '0');
                   el.style.setProperty('--scatter-z', `${originalZ + 150}px`);
-              } else if (this.isPinboardView || this.isHelixView || this.isVortexView || this.isPrismView || this.isWaveView || this.isSphereView || this.isRolodexView) {
-                  // Pop out for pinboard/helix/vortex/prism/wave/rolodex
+              } else if (this.isPinboardView || this.isHelixView || this.isVortexView || this.isPrismView || this.isWaveView || this.isSphereView || this.isRolodexView || this.isCylinderView) {
+                  // Pop out for pinboard/helix/vortex/prism/wave/rolodex/cylinder
                   const tz = parseFloat(el.style.getPropertyValue('--tz')) || 0;
                   el.style.setProperty('--tz', `${tz + 150}px`);
                   if (this.isPinboardView || this.isVortexView) {
@@ -1487,6 +1524,14 @@ Drag to change depth`;
                   const tz = radius * Math.cos(phi) - 200;
                   el.style.setProperty('--tz', `${tz}px`);
               } else if (this.isRolodexView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const angle = (index / totalEchoes) * Math.PI * 2;
+                  const radius = 600;
+                  const tz = Math.cos(angle) * radius - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isCylinderView) {
                   const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
                   const totalEchoes = Math.max(1, inactiveFiles.length);
                   const index = parseInt(el.dataset.index || 0);

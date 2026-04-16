@@ -1355,11 +1355,11 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   font-weight: 700;
   font-family: var(--font-mono);
   color: rgba(230, 240, 255, 0.85);
-  background: linear-gradient(135deg, rgba(25, 30, 45, 0.7), rgba(10, 15, 25, 0.5));
+  background: linear-gradient(135deg, rgba(30, 35, 50, 0.85), rgba(15, 20, 30, 0.8));
   backdrop-filter: blur(48px) saturate(200%);
   -webkit-backdrop-filter: blur(48px) saturate(200%);
-  border: 1px solid rgba(0, 229, 255, 0.4);
-  border-bottom: 2px solid rgba(0, 229, 255, 0.3);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-bottom: 2px solid rgba(0, 229, 255, 0.5);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), inset 0 1px 3px rgba(255, 255, 255, 0.3), 0 0 20px rgba(0, 229, 255, 0.2);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
@@ -1367,7 +1367,7 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   letter-spacing: 1px;
 }
 .tab-item:hover {
-  background: linear-gradient(135deg, rgba(40, 50, 70, 0.95), rgba(20, 25, 40, 0.8));
+  background: linear-gradient(135deg, rgba(50, 60, 80, 0.95), rgba(25, 30, 45, 0.8));
   border-color: rgba(0, 229, 255, 1);
   border-bottom: 2px solid rgba(0, 229, 255, 1);
   color: #fff;
@@ -1376,7 +1376,7 @@ body.theme-blueprint #rain-back, body.theme-blueprint #rain-front {
   text-shadow: 0 0 10px rgba(0, 229, 255, 1);
 }
 .tab-item.active {
-  background: linear-gradient(180deg, rgba(0, 229, 255, 0.6), rgba(0, 100, 255, 0.3));
+  background: linear-gradient(180deg, rgba(0, 229, 255, 0.8), rgba(0, 100, 255, 0.5));
   border-color: rgba(0, 229, 255, 1);
   border-bottom: 2px solid rgba(0, 229, 255, 1);
   color: #ffffff;
@@ -1532,6 +1532,23 @@ body.x-ray-active #echo-layer {
   padding: 32px;
 }
 
+.echo-document::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 0, 128, 0.05), rgba(0, 229, 255, 0.05));
+  opacity: 0.5;
+  z-index: 1;
+  animation: echo-gradient-shift 12s ease-in-out infinite alternate;
+}
+
+@keyframes echo-gradient-shift {
+  0% { background: linear-gradient(135deg, rgba(255, 0, 128, 0.05), rgba(0, 229, 255, 0.05)); opacity: 0.5; }
+  50% { background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(255, 255, 0, 0.05)); opacity: 0.8; }
+  100% { background: linear-gradient(135deg, rgba(255, 255, 0, 0.05), rgba(255, 0, 128, 0.05)); opacity: 0.5; }
+}
+
 /* Advanced Holographic Interface Elements - Glowing Rings */
 .echo-document::before {
   content: '';
@@ -1543,6 +1560,7 @@ body.x-ray-active #echo-layer {
   animation: holo-ring-spin 20s linear infinite;
   opacity: 0;
   transition: opacity 0.3s ease;
+  z-index: 2;
 }
 
 .echo-document:hover::before {
@@ -2973,6 +2991,42 @@ body.rolodex-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg) scale(1.15) !important;
+  z-index: 100 !important;
+}
+
+/* Cylinder View */
+body.cylinder-active { --bio-glow-color: rgba(200, 50, 255, 0.6); --bio-glow-strong: rgba(200, 50, 255, 0.8); }
+body.cylinder-active #editor, body.cylinder-active #image-viewer {
+  transform: scale(0.65) translateY(10%) translateZ(-50px);
+  filter: blur(2px);
+  opacity: 0.7;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.cylinder-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: cylinder-spin 40s linear infinite;
+}
+
+@keyframes cylinder-spin {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(360deg); }
+}
+
+body.cylinder-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 0 30px rgba(200, 50, 255, 0.15), inset 0 0 10px rgba(200, 50, 255, 0.1);
+}
+
+body.cylinder-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) rotateX(0deg) rotateY(var(--rot-y, 0deg)) rotateZ(0deg) scale(1.15) !important;
   z-index: 100 !important;
 }
 
