@@ -585,6 +585,44 @@ document.addEventListener('keyup', (e) => {
 });
 
 document.addEventListener('mousemove', (e) => {
+  // 3D Parallax on Active Editor
+  const activeEditorEl = document.getElementById('editor');
+
+  // Exclude parallax effect when any active view modes that use transforms are enabled.
+  const activeViewsClasses = Array.from(document.body.classList).filter(c => c.endsWith('-active'));
+
+  if (activeEditorEl && activeViewsClasses.length === 0) {
+      const xOffset = (e.clientX / window.innerWidth - 0.5) * 20; // max +/- 10px shift
+      const yOffset = (e.clientY / window.innerHeight - 0.5) * 20;
+      const rotateX = (e.clientY / window.innerHeight - 0.5) * -5; // max +/- 2.5 deg tilt
+      const rotateY = (e.clientX / window.innerWidth - 0.5) * 5;
+
+      // We use CSS variables to play nicely with default position/transforms.
+      activeEditorEl.style.setProperty('--px', `${xOffset}px`);
+      activeEditorEl.style.setProperty('--py', `${yOffset}px`);
+      activeEditorEl.style.setProperty('--rx', `${rotateX}deg`);
+      activeEditorEl.style.setProperty('--ry', `${rotateY}deg`);
+
+      // Parallax the dock slightly as well
+      const dockEl = document.getElementById('dock');
+      if (dockEl) {
+          dockEl.style.setProperty('--rx', `${rotateX * 0.5}deg`);
+          dockEl.style.setProperty('--ry', `${rotateY * 0.5}deg`);
+      }
+  } else if (activeEditorEl) {
+      // Reset variables if a view mode is active
+      activeEditorEl.style.removeProperty('--px');
+      activeEditorEl.style.removeProperty('--py');
+      activeEditorEl.style.removeProperty('--rx');
+      activeEditorEl.style.removeProperty('--ry');
+
+      const dockEl = document.getElementById('dock');
+      if (dockEl) {
+          dockEl.style.removeProperty('--rx');
+          dockEl.style.removeProperty('--ry');
+      }
+  }
+
   // Gravitational Wormhole (Ctrl + Alt)
   if (isWormholeActive && echoLayerEl) {
       const echoes = echoLayerEl.querySelectorAll('.echo-document');
@@ -1019,6 +1057,7 @@ if (viewModeSelect) {
         else if (view === 'black-hole') tabManager.toggleBlackHoleView();
         else if (view === 'rolodex') tabManager.toggleRolodexView();
         else if (view === 'cylinder') tabManager.toggleCylinderView();
+        else if (view === 'galaxy') tabManager.toggleGalaxyView();
         else tabManager._deactivateAllViews(); // Default view
     });
 }

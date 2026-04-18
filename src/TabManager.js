@@ -55,6 +55,7 @@ export class TabManager {
     this.isBlackHoleView = false;
     this.isRolodexView = false;
     this.isCylinderView = false;
+    this.isGalaxyView = false;
   }
 
 _deactivateAllViews() {
@@ -78,6 +79,7 @@ _deactivateAllViews() {
     this.isBlackHoleView = false;
     this.isRolodexView = false;
     this.isCylinderView = false;
+    this.isGalaxyView = false;
 
     document.body.classList.remove(
       'waterfall-active', 
@@ -99,7 +101,8 @@ _deactivateAllViews() {
       'sphere-active',
       'black-hole-active',
       'rolodex-active',
-      'cylinder-active'
+      'cylinder-active',
+      'galaxy-active'
     );
 
     [
@@ -135,6 +138,16 @@ _deactivateAllViews() {
       document.body.classList.add('coverflow-active');
       const btn = document.getElementById('btn-coverflow-view');
       if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleGalaxyView() {
+    const wasActive = this.isGalaxyView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isGalaxyView = true;
+      document.body.classList.add('galaxy-active');
     }
     this._renderEchoes();
   }
@@ -1161,6 +1174,46 @@ Drag to change depth`;
         el.style.setProperty('--scatter-y', '0px');
         el.style.setProperty('--scatter-z', '0px');
         el.style.setProperty('--scatter-rot', '0deg');
+      } else if (this.isGalaxyView) {
+        // Galaxy Spiral View: Logarithmic spiral arrangement on X-Z plane
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const spiralRotations = 3; // How many times the arms wrap
+        const maxRadius = 1500;
+
+        // Progress along the spiral (0 at center, 1 at edge)
+        const t = index / totalEchoes;
+
+        // Logarithmic scaling for tighter clustering at the core
+        const r = maxRadius * Math.pow(t, 0.7);
+        const theta = t * Math.PI * 2 * spiralRotations;
+
+        // Two spiral arms offset by PI
+        const armOffset = (index % 2 === 0) ? 0 : Math.PI;
+
+        const tx = r * Math.cos(theta + armOffset);
+        // Add slight vertical variation
+        const ty = (Math.random() - 0.5) * 200 * t;
+        const tz = r * Math.sin(theta + armOffset) - 600; // Shift galaxy backwards
+
+        // Tilt elements slightly inwards towards the core, rotate to face camera somewhat
+        const rotX = 15 * Math.cos(theta);
+        const rotY = 25 * Math.sin(theta);
+        const rotZ = 0;
+
+        // Core elements are smaller and brighter
+        const scale = 0.5 + (0.5 * (1 - t));
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', `${rotX}deg`);
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-z', `${rotZ}deg`);
+        el.style.setProperty('--scatter-x', '0px');
+        el.style.setProperty('--scatter-y', '0px');
+        el.style.setProperty('--scatter-z', '0px');
+        el.style.setProperty('--scatter-rot', '0deg');
+        el.style.setProperty('--scale', scale.toFixed(2));
       } else if (this.isCoverflowView) {
         // Coverflow View positions
         const totalEchoes = inactiveFiles.length;
@@ -1538,6 +1591,18 @@ Drag to change depth`;
                   const angle = (index / totalEchoes) * Math.PI * 2;
                   const radius = 600;
                   const tz = Math.cos(angle) * radius - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isGalaxyView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const maxRadius = 1500;
+                  const spiralRotations = 3;
+                  const t = index / totalEchoes;
+                  const r = maxRadius * Math.pow(t, 0.7);
+                  const theta = t * Math.PI * 2 * spiralRotations;
+                  const armOffset = (index % 2 === 0) ? 0 : Math.PI;
+                  const tz = r * Math.sin(theta + armOffset) - 600;
                   el.style.setProperty('--tz', `${tz}px`);
               } else if (this.isWaveView) {
                   el.style.setProperty('--tz', `-150px`);
