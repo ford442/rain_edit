@@ -754,8 +754,14 @@ document.addEventListener('mousemove', (e) => {
         const centerY = echoRect.top + echoRect.height / 2;
         const dist = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
 
-        if (dist < 200) {
+        if (dist < 300) {
           echo.classList.add('magnifier-active');
+          // Update internal mouse coordinates relative to the echo document for the radial mask
+          const rect = echo.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          echo.style.setProperty('--mouse-x', `${x}px`);
+          echo.style.setProperty('--mouse-y', `${y}px`);
         } else {
           echo.classList.remove('magnifier-active');
         }

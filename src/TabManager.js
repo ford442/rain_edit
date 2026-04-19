@@ -695,8 +695,12 @@ Drag to change depth`;
 
       const peekBtn = document.createElement('button');
       peekBtn.className = 'echo-peek-btn';
-      peekBtn.title = 'Peek Document';
-      peekBtn.textContent = '👁️';
+      peekBtn.title = 'Expanded Peek';
+      peekBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+        </svg>
+      `;
 
       echoHeader.appendChild(headerTitle);
       echoHeader.appendChild(headerStatus);
@@ -707,16 +711,37 @@ Drag to change depth`;
           const isPeeking = el.classList.contains('is-peeking');
           if (isPeeking) {
               el.classList.remove('is-peeking');
+              peekBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                </svg>
+              `;
               if (this.editorEl) this.editorEl.classList.remove('editor-peek-fade');
           } else {
-              // Optionally un-peek others if only one peek at a time is desired:
-              // this.echoLayerEl.querySelectorAll('.is-peeking').forEach(doc => doc.classList.remove('is-peeking'));
+              // Un-peek others
+              this.echoLayerEl.querySelectorAll('.is-peeking').forEach(doc => {
+                  doc.classList.remove('is-peeking');
+                  const otherBtn = doc.querySelector('.echo-peek-btn');
+                  if (otherBtn) {
+                      otherBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                        </svg>
+                      `;
+                  }
+              });
+
               el.classList.add('is-peeking');
+              peekBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
+                </svg>
+              `;
               if (this.editorEl) this.editorEl.classList.add('editor-peek-fade');
 
               const rect = el.getBoundingClientRect();
               const evt = new CustomEvent('echo-peek', {
-                detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+                  detail: { x: window.innerWidth / 2, y: window.innerHeight / 2 } // clear center screen
               });
               document.dispatchEvent(evt);
           }
