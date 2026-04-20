@@ -584,7 +584,63 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
+
+// Clear gravitational cache on resize
+window.addEventListener('resize', () => {
+  const dockEl = document.getElementById('dock');
+  const tabsEl = document.getElementById('tabs-container');
+  if (dockEl) dockEl._origRect = null;
+  if (tabsEl) tabsEl._origRect = null;
+});
+
 document.addEventListener('mousemove', (e) => {
+
+  // Gravitational Cursor Tracking for UI Elements (Dock & Tabs)
+  const mx = e.clientX;
+  const my = e.clientY;
+
+  // Track cursor position globally for CSS effects
+  document.body.style.setProperty('--mouse-x', `${mx}px`);
+  document.body.style.setProperty('--mouse-y', `${my}px`);
+
+  // Define UI elements that exert "gravity"
+  const dockEl = document.getElementById('dock');
+  const tabsEl = document.getElementById('tabs-container');
+
+  const applyGravity = (element, maxDist, strength) => {
+    if (!element) return;
+
+    // Cache original rect to avoid layout thrashing and feedback loops
+    if (!element._origRect) {
+        // Temporarily remove transform to get true original position
+        const currentTransform = element.style.transform;
+        element.style.transform = 'none';
+        element._origRect = element.getBoundingClientRect();
+        element.style.transform = currentTransform;
+    }
+
+    const cx = element._origRect.left + element._origRect.width / 2;
+    const cy = element._origRect.top + element._origRect.height / 2;
+    const dx = mx - cx;
+    const dy = my - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < maxDist) {
+      // Linear pull based on proximity
+      const pullX = (dx / dist) * (maxDist - dist) * strength;
+      const pullY = (dy / dist) * (maxDist - dist) * strength;
+      element.style.transform = `translate(${pullX}px, ${pullY}px)`;
+      // Optionally add a dynamic glow when pulled
+      element.style.boxShadow = `0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 ${maxDist - dist}px rgba(0, 229, 255, 0.3)`;
+    } else {
+      element.style.transform = `translate(0px, 0px)`;
+      element.style.boxShadow = ''; // Reset to class defaults
+    }
+  };
+
+  applyGravity(dockEl, 300, 0.05); // 300px radius, weak pull
+  applyGravity(tabsEl, 200, 0.03); // 200px radius, weaker pull
+
   // 3D Parallax on Active Editor
   const activeEditorEl = document.getElementById('editor');
 
@@ -2330,5 +2386,29 @@ document.addEventListener('keyup', (e) => {
                  });
             }
         }
+    }
+});
+
+
+// Z-Axis Slicer Logic
+document.addEventListener('DOMContentLoaded', () => {
+    const slicerRange = document.getElementById('z-slicer-range');
+    if (slicerRange) {
+        slicerRange.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value); // 0 to 100
+            const maxDepth = 10; // max logical depth we expect
+            const targetDepth = Math.round((val / 100) * maxDepth);
+
+            // Highlight documents matching the target depth
+            const docs = document.querySelectorAll('.echo-document');
+            docs.forEach(doc => {
+                const index = parseInt(doc.dataset.index || 0);
+                if (index === targetDepth) {
+                    doc.classList.add('slicer-highlight');
+                } else {
+                    doc.classList.remove('slicer-highlight');
+                }
+            });
+        });
     }
 });
