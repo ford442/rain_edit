@@ -861,12 +861,6 @@ Drag to change depth`;
           el.classList.add('depth-aware-glitch');
       }
 
-      // Add a CSS-animated scanning line effect to the document
-      const scanLine = document.createElement('div');
-      scanLine.className = 'scan-line';
-      scanLine.style.setProperty('--index', index);
-      el.appendChild(scanLine);
-
       const hexOverlay = document.createElement('div');
       hexOverlay.className = 'hex-overlay';
       el.appendChild(hexOverlay);
@@ -878,6 +872,10 @@ Drag to change depth`;
       const holoRing = document.createElement('div');
       holoRing.className = 'echo-document-holo-ring';
       el.appendChild(holoRing);
+
+      const magneticEdge = document.createElement('div');
+      magneticEdge.className = 'magnetic-edge';
+      el.appendChild(magneticEdge);
 
       // Ghost Scroll feature: allow scrolling without bringing document to front
       pre.addEventListener('wheel', (e) => {
