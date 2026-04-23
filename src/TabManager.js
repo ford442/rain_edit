@@ -1644,6 +1644,46 @@ Drag to change depth`;
       } else {
           el.classList.remove('depth-desaturate');
       }
+
+      // Depth Parting (The Moses Effect)
+      el.addEventListener('mouseenter', () => {
+          const hoveredRect = el.getBoundingClientRect();
+          const hcx = hoveredRect.left + hoveredRect.width / 2;
+          const hcy = hoveredRect.top + hoveredRect.height / 2;
+
+          this.echoLayerEl.querySelectorAll('.echo-document').forEach(sibling => {
+              if (sibling === el) return;
+
+              const siblingRect = sibling.getBoundingClientRect();
+              const scx = siblingRect.left + siblingRect.width / 2;
+              const scy = siblingRect.top + siblingRect.height / 2;
+
+              const dx = scx - hcx;
+              const dy = scy - hcy;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+
+              // Only push siblings within a certain radius
+              if (dist < 600 && dist > 0) {
+                  const pushFactor = (600 - dist) / 600; // 0 to 1
+                  const pushDist = pushFactor * 150; // max push 150px
+
+                  const nx = dx / dist;
+                  const ny = dy / dist;
+
+                  sibling.style.setProperty('--part-tx', `${nx * pushDist}px`);
+                  sibling.style.setProperty('--part-ty', `${ny * pushDist}px`);
+              }
+          });
+      });
+
+      el.addEventListener('mouseleave', () => {
+          this.echoLayerEl.querySelectorAll('.echo-document').forEach(sibling => {
+              if (sibling === el) return;
+              sibling.style.setProperty('--part-tx', '0px');
+              sibling.style.setProperty('--part-ty', '0px');
+          });
+      });
+
       this.echoLayerEl.appendChild(el);
     });
   }
