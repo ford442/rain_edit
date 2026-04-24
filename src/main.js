@@ -1142,9 +1142,30 @@ opacitySlider.addEventListener('input', (e) => {
 });
 
 // Link editor scrolling to echo layer for 3D parallax effect
+let lastScrollTop = 0;
+let lastScrollTime = performance.now();
 editor.onDidScrollChange((e) => {
     if (echoLayerEl) {
         echoLayerEl.style.setProperty('--editor-scroll-y', `${e.scrollTop}px`);
+
+        // Scroll-Linked Kinetic Chromatic Aberration
+        const now = performance.now();
+        const dt = now - lastScrollTime;
+        if (dt > 0) {
+            const dy = e.scrollTop - lastScrollTop;
+            const velocity = Math.abs(dy / dt);
+            // Clamp velocity
+            const clampedVel = Math.min(velocity * 10, 50); // Scale for visual effect
+            document.body.style.setProperty('--scroll-vel', clampedVel);
+
+            // Auto-decay the velocity effect
+            clearTimeout(window._scrollDecayTimer);
+            window._scrollDecayTimer = setTimeout(() => {
+                document.body.style.setProperty('--scroll-vel', 0);
+            }, 100);
+        }
+        lastScrollTop = e.scrollTop;
+        lastScrollTime = now;
     }
 });
 // Initial set handled by updateFocusVisuals call later or manually
@@ -1357,6 +1378,13 @@ editor.onDidChangeCursorPosition((e) => {
   if (scrolledVisiblePosition) {
       const x = scrolledVisiblePosition.left;
       const y = scrolledVisiblePosition.top;
+
+      // Calculate cursor vertical percentage for Semantic Sync Plane
+      const editorHeight = editorEl.clientHeight;
+      if (editorHeight > 0) {
+          const cursorYPercent = (y / editorHeight) * 100;
+          document.body.style.setProperty('--cursor-y-percent', `${cursorYPercent}%`);
+      }
 
       // Focus Peeking: Highlight note behind cursor
       if (referenceManager) {
