@@ -849,6 +849,10 @@ Drag to change depth`;
       scanLineDiv.style.setProperty('--index', index);
       el.appendChild(scanLineDiv);
 
+      const semanticLaser = document.createElement('div');
+      semanticLaser.className = 'semantic-sync-laser';
+      el.appendChild(semanticLaser);
+
       // Dynamic Opacity and Blur based on depth index via CSS variables
       // (This avoids inline style specificity issues that break hover states)
       const baseOpacity = Math.max(0.15, 0.7 - (index * 0.2));

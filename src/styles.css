@@ -1527,28 +1527,75 @@ body.x-ray-active #echo-layer {
   color: #d8f5ff; /* Slightly brighter text color */
   opacity: 0.15; /* Slightly higher base opacity */
   filter: blur(4px) hue-rotate(var(--echo-tint, 0deg));
-  text-shadow: 0 0 10px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.4);
-  will-change: transform, opacity, filter;
+
+  /* Scroll-Linked Kinetic Chromatic Aberration */
+  text-shadow:
+      calc(var(--scroll-vel, 0) * -0.5px) 0 calc(var(--scroll-vel, 0) * 0.2px) rgba(255, 0, 0, 0.8),
+      calc(var(--scroll-vel, 0) * 0.5px) 0 calc(var(--scroll-vel, 0) * 0.2px) rgba(0, 255, 255, 0.8),
+      0 0 10px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.4);
+
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + (var(--scroll-vel, 0) * 0.5px)),
+      calc(var(--tz, 0px) + (var(--scroll-vel, 0) * 1px))
+  ) skewY(calc(var(--scroll-vel, 0) * 0.05deg));
+
+  will-change: transform, opacity, filter, text-shadow;
+  transition: transform 0.1s ease-out, text-shadow 0.1s ease-out;
   overflow: hidden;
 
-  /* Look & Feel Upgrades: Holographic Glass */
-  background: radial-gradient(circle at 50% 50%, rgba(10, 15, 30, 0.4) 0%, rgba(5, 8, 20, 0.8) 100%);
-  backdrop-filter: blur(12px) brightness(1.2);
-  -webkit-backdrop-filter: blur(12px) brightness(1.2);
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  border-image: linear-gradient(135deg, rgba(0,229,255,0.8) 0%, rgba(0,0,0,0) 50%, rgba(255,0,128,0.8) 100%) 1;
-  /* Added linear gradient for subtle background depth while retaining noise */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.25'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(20, 30, 45, 0.8), rgba(5, 10, 20, 0.8));
+  /* Look & Feel Upgrades: Holographic Glass & Aurora Border */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.25'/%3E%3C/svg%3E"), linear-gradient(135deg, rgba(15, 20, 35, 0.7), rgba(5, 8, 15, 0.9));
   background-blend-mode: overlay;
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%) brightness(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(180%) brightness(1.1);
 
-  border: 1px solid rgba(0, 229, 255, 0.15);
-  border-top: 1px solid rgba(0, 229, 255, 0.6);
-  border-left: 1px solid rgba(0, 229, 255, 0.5);
-  border-radius: 16px; /* slightly smaller radius for more crisp card look */
-  padding: 24px; /* Reduced padding for more content space */
+  border: 1px solid rgba(0, 229, 255, 0.1);
+  border-radius: 20px;
+  padding: 24px;
   box-sizing: border-box;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 20px rgba(0, 229, 255, 0.05);
+}
+
+.echo-document::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(45deg, rgba(0,229,255,0.8), rgba(255,0,128,0.8), rgba(0,255,150,0.8), rgba(0,229,255,0.8));
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+  animation: aurora-border-spin 8s linear infinite;
+  opacity: 0.6;
+}
+
+.echo-document .semantic-sync-laser {
+  content: '';
+  position: absolute;
+  top: var(--cursor-y-percent, 50%);
+  left: -10%;
+  width: 120%;
+  height: 2px;
+  background: rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 1), 0 0 30px rgba(0, 229, 255, 0.8);
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.3;
+  mix-blend-mode: screen;
+  transition: top 0.1s linear, opacity 0.3s ease;
+  transform: translateZ(50px);
+}
+
+@keyframes aurora-border-spin {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .echo-document::after {
@@ -1560,6 +1607,7 @@ body.x-ray-active #echo-layer {
   opacity: 0.5;
   z-index: 1;
   animation: echo-gradient-shift 12s ease-in-out infinite alternate;
+  border-radius: 20px;
 }
 
 @keyframes echo-gradient-shift {
@@ -1762,6 +1810,7 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
   pointer-events: none;
 }
 
+
 @keyframes scan-line {
   0% { top: -10%; opacity: 0; }
   10% { opacity: 1; }
@@ -1958,6 +2007,8 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
   scrollbar-width: none; /* Firefox */
   flex: 1;
   margin: 20px 0;
+  transform-style: preserve-3d;
+  perspective: 1000px;
 
   /* Data-Stream Flow Mask */
   mask-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, black 10%, black 90%, rgba(0,0,0,0.3) 100%);
@@ -1970,6 +2021,18 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
 .echo-document pre code {
     background: transparent;
     text-shadow: 0 0 5px currentColor;
+    transform-style: preserve-3d;
+}
+
+/* Holographic Z-Depth Code Extrusion */
+.echo-document pre code .mtk5,
+.echo-document pre code .mtk6,
+.echo-document pre code .mtk8 {
+    display: inline-block;
+    transform: translateZ(30px);
+    text-shadow: 0 10px 20px rgba(0, 229, 255, 0.6), 0 0 10px rgba(0, 229, 255, 0.4);
+    font-weight: bold;
+    transition: transform 0.3s ease;
 }
 
 .echo-document pre::-webkit-scrollbar {
