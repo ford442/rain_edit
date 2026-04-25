@@ -80,6 +80,7 @@ _deactivateAllViews() {
     this.isRolodexView = false;
     this.isCylinderView = false;
     this.isGalaxyView = false;
+    this.isOrigamiView = false;
 
     document.body.classList.remove(
       'waterfall-active', 
@@ -102,8 +103,11 @@ _deactivateAllViews() {
       'black-hole-active',
       'rolodex-active',
       'cylinder-active',
-      'galaxy-active'
+      'galaxy-active',
+      'origami-active'
     );
+
+    this.isOrigamiView = false;
 
     [
       'btn-waterfall-view', 
@@ -138,6 +142,16 @@ _deactivateAllViews() {
       document.body.classList.add('coverflow-active');
       const btn = document.getElementById('btn-coverflow-view');
       if (btn) btn.classList.add('active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleOrigamiView() {
+    const wasActive = this.isOrigamiView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isOrigamiView = true;
+      document.body.classList.add('origami-active');
     }
     this._renderEchoes();
   }
@@ -1201,6 +1215,30 @@ Drag to change depth`;
         el.style.setProperty('--scatter-y', '0px');
         el.style.setProperty('--scatter-z', '0px');
         el.style.setProperty('--scatter-rot', '0deg');
+      } else if (this.isOrigamiView) {
+        // Origami spatial view calculation
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const foldAngle = 35; // degrees for each fold
+        const spacing = 180;
+
+        // Alternating folds
+        const direction = index % 2 === 0 ? 1 : -1;
+        const tx = (index - totalEchoes / 2) * spacing;
+        const ty = (index % 3) * 60 - 60; // stagger y
+        const tz = Math.abs(index - totalEchoes / 2) * -150 - 200; // V-shape depth
+        const rotY = direction * foldAngle;
+        const rotZ = direction * 5;
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-z', `${rotZ}deg`);
+        el.style.setProperty('--scatter-x', '0px');
+        el.style.setProperty('--scatter-y', '0px');
+        el.style.setProperty('--scatter-z', '0px');
+        el.style.setProperty('--scatter-rot', '0deg');
       } else if (this.isGalaxyView) {
         // Galaxy Spiral View: Logarithmic spiral arrangement on X-Z plane
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -1618,6 +1656,12 @@ Drag to change depth`;
                   const angle = (index / totalEchoes) * Math.PI * 2;
                   const radius = 600;
                   const tz = Math.cos(angle) * radius - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isOrigamiView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const tz = Math.abs(index - totalEchoes / 2) * -150 - 200;
                   el.style.setProperty('--tz', `${tz}px`);
               } else if (this.isGalaxyView) {
                   const inactiveFiles = this.files.filter(f => f.id !== this.activeId);

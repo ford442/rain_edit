@@ -1120,6 +1120,7 @@ if (viewModeSelect) {
         else if (view === 'rolodex') tabManager.toggleRolodexView();
         else if (view === 'cylinder') tabManager.toggleCylinderView();
         else if (view === 'galaxy') tabManager.toggleGalaxyView();
+        else if (view === 'origami') tabManager.toggleOrigamiView();
         else tabManager._deactivateAllViews(); // Default view
     });
 }
