@@ -802,23 +802,28 @@ document.addEventListener('mousemove', (e) => {
       echo.style.setProperty('--rot-y', `${rotY}deg`);
     });
 
-    // Magnifying Glass Logic
+    // Magnifying Glass / Focus Lens Logic
     if (isMagnifierMode) {
       echoes.forEach(echo => {
         const echoRect = echo.getBoundingClientRect();
+        // Fallback for centering if properties aren't set
         const centerX = echoRect.left + echoRect.width / 2;
         const centerY = echoRect.top + echoRect.height / 2;
         const dist = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
 
         if (dist < 300) {
-          echo.classList.add('magnifier-active');
-          // Update internal mouse coordinates relative to the echo document for the radial mask
-          const rect = echo.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
+          // Add the improved 'loupe-active' feature instead of the old 'magnifier-active'
+          echo.classList.add('loupe-active');
+          echo.classList.remove('magnifier-active');
+
+          // Because 'loupe-active' centers the element perfectly on the screen (-50%, -50% transform on left: 50%, top: 50%),
+          // we must calculate mouse coordinates relative to the center of the viewport for the mask-image
+          const x = e.clientX - window.innerWidth / 2 + (echo.offsetWidth / 2);
+          const y = e.clientY - window.innerHeight / 2 + (echo.offsetHeight / 2);
           echo.style.setProperty('--mouse-x', `${x}px`);
           echo.style.setProperty('--mouse-y', `${y}px`);
         } else {
+          echo.classList.remove('loupe-active');
           echo.classList.remove('magnifier-active');
         }
       });
@@ -1735,6 +1740,7 @@ document.addEventListener('keyup', (e) => {
     if (echoLayerEl) {
       echoLayerEl.querySelectorAll('.echo-document').forEach(echo => {
         echo.classList.remove('magnifier-active');
+        echo.classList.remove('loupe-active');
       });
     }
   }
