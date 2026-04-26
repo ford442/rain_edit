@@ -674,11 +674,16 @@ Drag to change depth`;
       el.dataset.id = file.id;
       el.dataset.index = index; // Store for CSS vars restore later
 
-      let tint = '0deg'; // default cyan
-      if (file.name.endsWith('.js')) tint = '60deg'; // yellow
-      else if (file.name.endsWith('.css')) tint = '200deg'; // blue
-      else if (file.name.endsWith('.html') || file.name.endsWith('.md')) tint = '320deg'; // pink/orange
-      el.style.setProperty('--echo-tint', tint);
+      // Chromatic Depth Layering
+      // Shift hue gradually based on depth index. We base it off a base color.
+      let baseTint = 180; // cyan base
+      if (file.name.endsWith('.js')) baseTint = 60; // yellow
+      else if (file.name.endsWith('.css')) baseTint = 200; // blue
+      else if (file.name.endsWith('.html') || file.name.endsWith('.md')) baseTint = 320; // pink
+
+      // Shift hue by 15 degrees per depth level
+      const currentTint = (baseTint + (index * 15)) % 360;
+      el.style.setProperty('--echo-tint', `${currentTint}deg`);
 
       // Semantic Gravity: Pull files with similar extensions or languages closer
       const fileExt = file.name.split('.').pop();
@@ -894,6 +899,10 @@ Drag to change depth`;
       const magneticEdge = document.createElement('div');
       magneticEdge.className = 'magnetic-edge';
       el.appendChild(magneticEdge);
+
+      const edgeBleedLayer = document.createElement('div');
+      edgeBleedLayer.className = 'edge-bleed-layer';
+      el.appendChild(edgeBleedLayer);
 
       // Ghost Scroll feature: allow scrolling without bringing document to front
       pre.addEventListener('wheel', (e) => {
