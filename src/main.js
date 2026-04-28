@@ -603,6 +603,12 @@ document.addEventListener('mousemove', (e) => {
   document.body.style.setProperty('--mouse-x', `${mx}px`);
   document.body.style.setProperty('--mouse-y', `${my}px`);
 
+  // Normalized mouse coordinates from -1 to 1 for advanced 3D tilting
+  const nx = (mx / window.innerWidth) * 2 - 1;
+  const ny = (my / window.innerHeight) * 2 - 1;
+  document.body.style.setProperty('--mouse-nx', nx);
+  document.body.style.setProperty('--mouse-ny', ny);
+
   // Define UI elements that exert "gravity"
   const dockEl = document.getElementById('dock');
   const tabsEl = document.getElementById('tabs-container');
@@ -1126,6 +1132,7 @@ if (viewModeSelect) {
         else if (view === 'cylinder') tabManager.toggleCylinderView();
         else if (view === 'galaxy') tabManager.toggleGalaxyView();
         else if (view === 'origami') tabManager.toggleOrigamiView();
+        else if (view === 'data-hive') tabManager.toggleDataHiveView();
         else tabManager._deactivateAllViews(); // Default view
     });
 }

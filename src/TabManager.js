@@ -81,6 +81,7 @@ _deactivateAllViews() {
     this.isCylinderView = false;
     this.isGalaxyView = false;
     this.isOrigamiView = false;
+    this.isDataHiveView = false;
 
     document.body.classList.remove(
       'waterfall-active', 
@@ -104,10 +105,12 @@ _deactivateAllViews() {
       'rolodex-active',
       'cylinder-active',
       'galaxy-active',
-      'origami-active'
+      'origami-active',
+      'data-hive-active'
     );
 
     this.isOrigamiView = false;
+    this.isDataHiveView = false;
 
     [
       'btn-waterfall-view', 
@@ -127,7 +130,8 @@ _deactivateAllViews() {
       'btn-coverflow-view', 
       'btn-wave-view', 
       'btn-sphere-view',
-      'btn-rolodex-view'
+      'btn-rolodex-view',
+      'btn-data-hive-view'
     ].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
@@ -152,6 +156,16 @@ _deactivateAllViews() {
     if (!wasActive) {
       this.isOrigamiView = true;
       document.body.classList.add('origami-active');
+    }
+    this._renderEchoes();
+  }
+
+  toggleDataHiveView() {
+    const wasActive = this.isDataHiveView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDataHiveView = true;
+      document.body.classList.add('data-hive-active');
     }
     this._renderEchoes();
   }
@@ -1248,6 +1262,28 @@ Drag to change depth`;
         el.style.setProperty('--scatter-y', '0px');
         el.style.setProperty('--scatter-z', '0px');
         el.style.setProperty('--scatter-rot', '0deg');
+      } else if (this.isDataHiveView) {
+        // Data Hive View: Hexagonal grid arrangement
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const hexWidth = 240;
+        const hexHeight = 200;
+
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        // Stagger rows for hexagonal tiling
+        const xOffset = (row % 2 === 1) ? hexWidth / 2 : 0;
+        const tx = (col - cols / 2) * hexWidth + xOffset;
+        const ty = (row - cols / 2) * hexHeight;
+        const tz = -400 - (row * 50); // Slight slant backward
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty('--rot-z', '0deg');
       } else if (this.isGalaxyView) {
         // Galaxy Spiral View: Logarithmic spiral arrangement on X-Z plane
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -1683,6 +1719,14 @@ Drag to change depth`;
                   const theta = t * Math.PI * 2 * spiralRotations;
                   const armOffset = (index % 2 === 0) ? 0 : Math.PI;
                   const tz = r * Math.sin(theta + armOffset) - 600;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isDataHiveView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const cols = Math.ceil(Math.sqrt(totalEchoes));
+                  const index = parseInt(el.dataset.index || 0);
+                  const row = Math.floor(index / cols);
+                  const tz = -400 - (row * 50);
                   el.style.setProperty('--tz', `${tz}px`);
               } else if (this.isWaveView) {
                   el.style.setProperty('--tz', `-150px`);
