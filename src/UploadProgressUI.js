@@ -17,7 +17,7 @@ export class UploadProgressUI {
   }
 
   _build() {
-    const el = document.createElement('div');
+    const el = document.createElement("div");
     el.style.cssText = `
       position: fixed;
       bottom: 32px;
@@ -38,20 +38,22 @@ export class UploadProgressUI {
       transition: opacity 0.3s;
     `;
 
-    const header = document.createElement('div');
-    header.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:10px;';
+    const header = document.createElement("div");
+    header.style.cssText =
+      "display:flex;align-items:center;gap:8px;margin-bottom:10px;";
 
-    const icon = document.createElement('span');
-    icon.textContent = '⬆';
-    icon.style.cssText = 'font-size:16px;color:#64c8ff;';
+    const icon = document.createElement("span");
+    icon.textContent = "⬆";
+    icon.style.cssText = "font-size:16px;color:#64c8ff;";
 
-    this._label = document.createElement('span');
-    this._label.style.cssText = 'flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+    this._label = document.createElement("span");
+    this._label.style.cssText =
+      "flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;";
 
     header.appendChild(icon);
     header.appendChild(this._label);
 
-    const track = document.createElement('div');
+    const track = document.createElement("div");
     track.style.cssText = `
       height: 4px;
       background: rgba(255,255,255,0.1);
@@ -60,7 +62,7 @@ export class UploadProgressUI {
       margin-bottom: 8px;
     `;
 
-    this._bar = document.createElement('div');
+    this._bar = document.createElement("div");
     this._bar.style.cssText = `
       height: 100%;
       width: 0%;
@@ -70,8 +72,8 @@ export class UploadProgressUI {
     `;
     track.appendChild(this._bar);
 
-    this._status = document.createElement('div');
-    this._status.style.cssText = 'font-size:11px;color:rgba(255,255,255,0.5);';
+    this._status = document.createElement("div");
+    this._status.style.cssText = "font-size:11px;color:rgba(255,255,255,0.5);";
 
     el.appendChild(header);
     el.appendChild(track);
@@ -84,11 +86,11 @@ export class UploadProgressUI {
   show(filename) {
     if (!this._el) this._build();
     this._label.textContent = filename;
-    this._bar.style.width = '0%';
-    this._bar.style.background = 'linear-gradient(90deg, #64c8ff, #a0f0c0)';
-    this._status.textContent = 'Uploading…';
-    this._el.style.opacity = '1';
-    this._el.style.pointerEvents = 'none';
+    this._bar.style.width = "0%";
+    this._bar.style.background = "linear-gradient(90deg, #64c8ff, #a0f0c0)";
+    this._status.textContent = "Uploading…";
+    this._el.style.opacity = "1";
+    this._el.style.pointerEvents = "none";
   }
 
   setProgress(percent) {
@@ -99,23 +101,23 @@ export class UploadProgressUI {
 
   setDone() {
     if (!this._el) return;
-    this._bar.style.width = '100%';
-    this._bar.style.background = 'linear-gradient(90deg, #40e080, #80ffc0)';
-    this._status.textContent = 'Upload complete';
+    this._bar.style.width = "100%";
+    this._bar.style.background = "linear-gradient(90deg, #40e080, #80ffc0)";
+    this._status.textContent = "Upload complete";
     setTimeout(() => this.hide(), 2000);
   }
 
-  setError(message = 'Upload failed') {
+  setError(message = "Upload failed") {
     if (!this._el) return;
-    this._bar.style.background = 'linear-gradient(90deg, #ff4060, #ff8080)';
+    this._bar.style.background = "linear-gradient(90deg, #ff4060, #ff8080)";
     this._status.textContent = message;
-    this._el.style.pointerEvents = 'auto';
+    this._el.style.pointerEvents = "auto";
     setTimeout(() => this.hide(), 4000);
   }
 
   hide() {
     if (!this._el) return;
-    this._el.style.opacity = '0';
+    this._el.style.opacity = "0";
     setTimeout(() => {
       if (this._el) {
         this._el.remove();
