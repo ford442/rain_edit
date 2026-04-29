@@ -10,36 +10,74 @@
 
 // Map common MIME types / file extensions to display icons
 function fileIcon(name, type) {
-  if (type === 'directory') return '📁';
-  const ext = name.split('.').pop().toLowerCase();
+  if (type === "directory") return "📁";
+  const ext = name.split(".").pop().toLowerCase();
   const icons = {
-    js: '📜', ts: '📜', json: '📋', md: '📝', txt: '📄',
-    html: '🌐', css: '🎨', py: '🐍', sh: '⚙️',
-    png: '🖼️', jpg: '🖼️', jpeg: '🖼️', gif: '🖼️', webp: '🖼️', svg: '🖼️',
-    mp3: '🎵', wav: '🎵', flac: '🎵', ogg: '🎵',
-    mp4: '🎬', webm: '🎬',
-    glsl: '✨', wgsl: '✨', frag: '✨', vert: '✨',
-    zip: '🗜️', gz: '🗜️',
+    js: "📜",
+    ts: "📜",
+    json: "📋",
+    md: "📝",
+    txt: "📄",
+    html: "🌐",
+    css: "🎨",
+    py: "🐍",
+    sh: "⚙️",
+    png: "🖼️",
+    jpg: "🖼️",
+    jpeg: "🖼️",
+    gif: "🖼️",
+    webp: "🖼️",
+    svg: "🖼️",
+    mp3: "🎵",
+    wav: "🎵",
+    flac: "🎵",
+    ogg: "🎵",
+    mp4: "🎬",
+    webm: "🎬",
+    glsl: "✨",
+    wgsl: "✨",
+    frag: "✨",
+    vert: "✨",
+    zip: "🗜️",
+    gz: "🗜️",
   };
-  return icons[ext] || '📄';
+  return icons[ext] || "📄";
 }
 
 // Guess a Monaco language from a file name
 function guessLanguage(name) {
-  const ext = name.split('.').pop().toLowerCase();
+  const ext = name.split(".").pop().toLowerCase();
   const map = {
-    js: 'javascript', jsx: 'javascript',
-    ts: 'typescript', tsx: 'typescript',
-    json: 'json', html: 'html', css: 'css', scss: 'css',
-    md: 'markdown', markdown: 'markdown',
-    py: 'python', sh: 'shell', bash: 'shell',
-    glsl: 'glsl', wgsl: 'wgsl', frag: 'glsl', vert: 'glsl',
-    xml: 'xml', yaml: 'yaml', yml: 'yaml',
-    c: 'c', cpp: 'cpp', h: 'cpp',
-    rs: 'rust', go: 'go', java: 'java',
-    sql: 'sql', txt: 'plaintext',
+    js: "javascript",
+    jsx: "javascript",
+    ts: "typescript",
+    tsx: "typescript",
+    json: "json",
+    html: "html",
+    css: "css",
+    scss: "css",
+    md: "markdown",
+    markdown: "markdown",
+    py: "python",
+    sh: "shell",
+    bash: "shell",
+    glsl: "glsl",
+    wgsl: "wgsl",
+    frag: "glsl",
+    vert: "glsl",
+    xml: "xml",
+    yaml: "yaml",
+    yml: "yaml",
+    c: "c",
+    cpp: "cpp",
+    h: "cpp",
+    rs: "rust",
+    go: "go",
+    java: "java",
+    sql: "sql",
+    txt: "plaintext",
   };
-  return map[ext] || 'plaintext';
+  return map[ext] || "plaintext";
 }
 
 // Inline CSS for the panel (injected once)
@@ -249,8 +287,8 @@ export class VPSFileBrowser {
     this.storageAPI = storageAPI;
     this.tabManager = tabManager;
 
-    this._currentPath = '';
-    this._mode = 'open'; // 'open' | 'save'
+    this._currentPath = "";
+    this._mode = "open"; // 'open' | 'save'
     this._visible = false;
 
     this._injectStyles();
@@ -260,87 +298,87 @@ export class VPSFileBrowser {
   // ─── DOM ─────────────────────────────────────────────────────────────────
 
   _injectStyles() {
-    if (document.getElementById('vps-browser-style')) return;
-    const style = document.createElement('style');
-    style.id = 'vps-browser-style';
+    if (document.getElementById("vps-browser-style")) return;
+    const style = document.createElement("style");
+    style.id = "vps-browser-style";
     style.textContent = PANEL_STYLE;
     document.head.appendChild(style);
   }
 
   _buildDOM() {
     // Backdrop
-    this._backdrop = document.createElement('div');
-    this._backdrop.id = 'vps-panel-backdrop';
-    this._backdrop.addEventListener('click', () => this.close());
+    this._backdrop = document.createElement("div");
+    this._backdrop.id = "vps-panel-backdrop";
+    this._backdrop.addEventListener("click", () => this.close());
     document.body.appendChild(this._backdrop);
 
     // Panel
-    this._panel = document.createElement('div');
-    this._panel.id = 'vps-browser-panel';
-    this._panel.setAttribute('role', 'dialog');
-    this._panel.setAttribute('aria-modal', 'true');
-    this._panel.setAttribute('aria-label', 'VPS File Browser');
+    this._panel = document.createElement("div");
+    this._panel.id = "vps-browser-panel";
+    this._panel.setAttribute("role", "dialog");
+    this._panel.setAttribute("aria-modal", "true");
+    this._panel.setAttribute("aria-label", "VPS File Browser");
 
     // Header
-    const header = document.createElement('div');
-    header.className = 'vps-header';
+    const header = document.createElement("div");
+    header.className = "vps-header";
 
-    const title = document.createElement('span');
-    title.className = 'vps-title';
-    title.textContent = '📡 VPS Files — storage.noahcohn.com';
+    const title = document.createElement("span");
+    title.className = "vps-title";
+    title.textContent = "📡 VPS Files — storage.noahcohn.com";
     header.appendChild(title);
 
-    this._modeBadge = document.createElement('span');
-    this._modeBadge.className = 'vps-mode-badge';
-    this._modeBadge.textContent = 'OPEN';
+    this._modeBadge = document.createElement("span");
+    this._modeBadge.className = "vps-mode-badge";
+    this._modeBadge.textContent = "OPEN";
     header.appendChild(this._modeBadge);
 
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'vps-close';
-    closeBtn.textContent = '✕';
-    closeBtn.title = 'Close (Esc)';
-    closeBtn.addEventListener('click', () => this.close());
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "vps-close";
+    closeBtn.textContent = "✕";
+    closeBtn.title = "Close (Esc)";
+    closeBtn.addEventListener("click", () => this.close());
     header.appendChild(closeBtn);
     this._panel.appendChild(header);
 
     // Breadcrumb
-    this._breadcrumb = document.createElement('div');
-    this._breadcrumb.className = 'vps-breadcrumb';
+    this._breadcrumb = document.createElement("div");
+    this._breadcrumb.className = "vps-breadcrumb";
     this._panel.appendChild(this._breadcrumb);
 
     // Toolbar (shown in save mode or always for mkdir)
-    this._toolbar = document.createElement('div');
-    this._toolbar.className = 'vps-toolbar';
+    this._toolbar = document.createElement("div");
+    this._toolbar.className = "vps-toolbar";
 
-    this._saveNameInput = document.createElement('input');
-    this._saveNameInput.className = 'vps-save-name';
-    this._saveNameInput.placeholder = 'filename.txt';
-    this._saveNameInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') this._confirmSave();
+    this._saveNameInput = document.createElement("input");
+    this._saveNameInput.className = "vps-save-name";
+    this._saveNameInput.placeholder = "filename.txt";
+    this._saveNameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") this._confirmSave();
     });
     this._toolbar.appendChild(this._saveNameInput);
 
-    const saveHereBtn = document.createElement('button');
-    saveHereBtn.className = 'vps-btn-primary';
-    saveHereBtn.textContent = '💾 Save Here';
-    saveHereBtn.addEventListener('click', () => this._confirmSave());
+    const saveHereBtn = document.createElement("button");
+    saveHereBtn.className = "vps-btn-primary";
+    saveHereBtn.textContent = "💾 Save Here";
+    saveHereBtn.addEventListener("click", () => this._confirmSave());
     this._toolbar.appendChild(saveHereBtn);
 
-    const mkdirBtn = document.createElement('button');
-    mkdirBtn.textContent = '📂 New Folder';
-    mkdirBtn.addEventListener('click', () => this._promptMkdir());
+    const mkdirBtn = document.createElement("button");
+    mkdirBtn.textContent = "📂 New Folder";
+    mkdirBtn.addEventListener("click", () => this._promptMkdir());
     this._toolbar.appendChild(mkdirBtn);
 
     this._panel.appendChild(this._toolbar);
 
     // File list
-    this._fileList = document.createElement('div');
-    this._fileList.className = 'vps-file-list';
+    this._fileList = document.createElement("div");
+    this._fileList.className = "vps-file-list";
     this._panel.appendChild(this._fileList);
 
     // Status bar
-    this._statusBar = document.createElement('div');
-    this._statusBar.className = 'vps-status-bar';
+    this._statusBar = document.createElement("div");
+    this._statusBar.className = "vps-status-bar";
     this._panel.appendChild(this._statusBar);
 
     document.body.appendChild(this._panel);
@@ -348,18 +386,21 @@ export class VPSFileBrowser {
     // Keyboard listener
     this._onKeyDown = (e) => {
       if (!this._visible) return;
-      if (e.key === 'Escape') { e.stopPropagation(); this.close(); }
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        this.close();
+      }
     };
-    document.addEventListener('keydown', this._onKeyDown, true);
+    document.addEventListener("keydown", this._onKeyDown, true);
   }
 
   // ─── Public API ──────────────────────────────────────────────────────────
 
   /** Open the browser in file-open mode. */
-  open(path = '') {
-    this._mode = 'open';
-    this._modeBadge.textContent = 'OPEN';
-    this._toolbar.style.display = 'none';
+  open(path = "") {
+    this._mode = "open";
+    this._modeBadge.textContent = "OPEN";
+    this._toolbar.style.display = "none";
     this._show(path);
   }
 
@@ -368,10 +409,10 @@ export class VPSFileBrowser {
    * @param {string} [suggestedName] - Default filename to suggest.
    * @param {string} [suggestedPath] - Pre-navigate to this directory.
    */
-  openSaveMode(suggestedName = '', suggestedPath = '') {
-    this._mode = 'save';
-    this._modeBadge.textContent = 'SAVE AS';
-    this._toolbar.style.display = 'flex';
+  openSaveMode(suggestedName = "", suggestedPath = "") {
+    this._mode = "save";
+    this._modeBadge.textContent = "SAVE AS";
+    this._toolbar.style.display = "flex";
     this._saveNameInput.value = suggestedName;
     this._show(suggestedPath);
     // Focus input after animation
@@ -380,8 +421,8 @@ export class VPSFileBrowser {
 
   close() {
     this._visible = false;
-    this._panel.classList.remove('vps-panel-visible');
-    this._backdrop.classList.remove('vps-panel-visible');
+    this._panel.classList.remove("vps-panel-visible");
+    this._backdrop.classList.remove("vps-panel-visible");
   }
 
   toggle() {
@@ -391,10 +432,10 @@ export class VPSFileBrowser {
 
   // ─── Private helpers ─────────────────────────────────────────────────────
 
-  _show(path = '') {
+  _show(path = "") {
     this._visible = true;
-    this._panel.classList.add('vps-panel-visible');
-    this._backdrop.classList.add('vps-panel-visible');
+    this._panel.classList.add("vps-panel-visible");
+    this._backdrop.classList.add("vps-panel-visible");
     this._navigate(path);
   }
 
@@ -402,92 +443,96 @@ export class VPSFileBrowser {
     this._currentPath = path;
     this._renderBreadcrumb(path);
     this._setLoading(true);
-    this._setStatus('');
+    this._setStatus("");
 
     try {
       const items = await this.storageAPI.browseVPS(path);
       this._renderItems(items || []);
     } catch (err) {
-      console.error('[VPSFileBrowser] browse error:', err);
+      console.error("[VPSFileBrowser] browse error:", err);
       this._renderItems([]);
-      this._setStatus('Could not load directory listing — check CORS / backend.', 'err');
+      this._setStatus(
+        "Could not load directory listing — check CORS / backend.",
+        "err",
+      );
     } finally {
       this._setLoading(false);
     }
   }
 
   _renderBreadcrumb(path) {
-    this._breadcrumb.innerHTML = '';
+    this._breadcrumb.innerHTML = "";
 
     const addCrumb = (label, navPath, isCurrent = false) => {
-      const span = document.createElement('span');
-      span.className = 'crumb' + (isCurrent ? ' crumb-current' : '');
+      const span = document.createElement("span");
+      span.className = "crumb" + (isCurrent ? " crumb-current" : "");
       span.textContent = label;
-      if (!isCurrent) span.addEventListener('click', () => this._navigate(navPath));
+      if (!isCurrent)
+        span.addEventListener("click", () => this._navigate(navPath));
       this._breadcrumb.appendChild(span);
     };
 
     // Root crumb
-    addCrumb('🏠 root', '', !path);
+    addCrumb("🏠 root", "", !path);
 
     if (path) {
-      const parts = path.split('/').filter(Boolean);
+      const parts = path.split("/").filter(Boolean);
       parts.forEach((part, i) => {
-        const sep = document.createElement('span');
-        sep.className = 'crumb-sep';
-        sep.textContent = ' / ';
+        const sep = document.createElement("span");
+        sep.className = "crumb-sep";
+        sep.textContent = " / ";
         this._breadcrumb.appendChild(sep);
 
-        const navPath = parts.slice(0, i + 1).join('/');
+        const navPath = parts.slice(0, i + 1).join("/");
         addCrumb(part, navPath, i === parts.length - 1);
       });
     }
   }
 
   _renderItems(items) {
-    this._fileList.innerHTML = '';
+    this._fileList.innerHTML = "";
 
     if (items.length === 0) {
-      const empty = document.createElement('div');
-      empty.className = 'vps-empty';
-      empty.textContent = 'Empty directory';
+      const empty = document.createElement("div");
+      empty.className = "vps-empty";
+      empty.textContent = "Empty directory";
       this._fileList.appendChild(empty);
       return;
     }
 
     // Sort: directories first, then files alphabetically
     const sorted = [...items].sort((a, b) => {
-      if (a.type === 'directory' && b.type !== 'directory') return -1;
-      if (a.type !== 'directory' && b.type === 'directory') return 1;
-      return (a.name || '').localeCompare(b.name || '');
+      if (a.type === "directory" && b.type !== "directory") return -1;
+      if (a.type !== "directory" && b.type === "directory") return 1;
+      return (a.name || "").localeCompare(b.name || "");
     });
 
     // Back navigation entry if not at root
     if (this._currentPath) {
-      const up = document.createElement('div');
-      up.className = 'vps-item vps-item-dir';
+      const up = document.createElement("div");
+      up.className = "vps-item vps-item-dir";
       up.innerHTML = `<span class="vps-icon">⬆️</span><span class="vps-name">..</span>`;
-      up.title = 'Go up one level';
-      up.addEventListener('click', () => {
-        const parent = this._currentPath.includes('/')
-          ? this._currentPath.split('/').slice(0, -1).join('/')
-          : '';
+      up.title = "Go up one level";
+      up.addEventListener("click", () => {
+        const parent = this._currentPath.includes("/")
+          ? this._currentPath.split("/").slice(0, -1).join("/")
+          : "";
         this._navigate(parent);
       });
       this._fileList.appendChild(up);
     }
 
-    sorted.forEach(item => {
-      const row = document.createElement('div');
-      const isDir = item.type === 'directory';
-      row.className = 'vps-item ' + (isDir ? 'vps-item-dir' : 'vps-item-file');
+    sorted.forEach((item) => {
+      const row = document.createElement("div");
+      const isDir = item.type === "directory";
+      row.className = "vps-item " + (isDir ? "vps-item-dir" : "vps-item-file");
 
-      const icon = document.createElement('span');
-      icon.className = 'vps-icon';
+      const icon = document.createElement("span");
+      icon.className = "vps-icon";
       icon.textContent = fileIcon(item.name, item.type);
 
-      const name = document.createElement('span');
-      name.className = 'vps-name';
+      const name = document.createElement("span");
+      name.className = "vps-name";
       name.textContent = item.name;
       name.title = item.path || item.name;
 
@@ -495,26 +540,26 @@ export class VPSFileBrowser {
       row.appendChild(name);
 
       if (!isDir && item.size != null) {
-        const size = document.createElement('span');
-        size.className = 'vps-size';
+        const size = document.createElement("span");
+        size.className = "vps-size";
         size.textContent = _formatSize(item.size);
         row.appendChild(size);
       }
 
       if (isDir) {
-        row.addEventListener('click', () => {
+        row.addEventListener("click", () => {
           const next = this._currentPath
             ? `${this._currentPath}/${item.name}`
             : item.name;
           this._navigate(next);
 
           // In save mode, update filename input with directory context
-          if (this._mode === 'save') {
+          if (this._mode === "save") {
             this._saveNameInput.focus();
           }
         });
       } else {
-        row.addEventListener('click', () => this._handleFileClick(item));
+        row.addEventListener("click", () => this._handleFileClick(item));
       }
 
       this._fileList.appendChild(row);
@@ -522,7 +567,7 @@ export class VPSFileBrowser {
   }
 
   async _handleFileClick(item) {
-    if (this._mode === 'save') {
+    if (this._mode === "save") {
       // Clicking an existing file in save mode pre-fills its name
       this._saveNameInput.value = item.name;
       this._saveNameInput.focus();
@@ -530,32 +575,32 @@ export class VPSFileBrowser {
     }
 
     // Open mode: load the file into editor
-    const filePath = item.path || (this._currentPath
-      ? `${this._currentPath}/${item.name}`
-      : item.name);
+    const filePath =
+      item.path ||
+      (this._currentPath ? `${this._currentPath}/${item.name}` : item.name);
 
     this._setStatus(`Loading ${item.name}…`);
-    document.body.style.cursor = 'wait';
+    document.body.style.cursor = "wait";
 
     try {
       const content = await this.storageAPI.getVPSFile(filePath);
-      if (content == null) throw new Error('Empty response');
+      if (content == null) throw new Error("Empty response");
 
       const language = guessLanguage(item.name);
       const fileId = this.tabManager.addFile(item.name, content, language);
       this.tabManager.setActive(fileId);
 
       // Tag the tab with its VPS path so "Save" can round-trip
-      const tab = this.tabManager.files.find(f => f.id === fileId);
+      const tab = this.tabManager.files.find((f) => f.id === fileId);
       if (tab) tab.vpsPath = filePath;
 
-      this._setStatus(`Opened: ${item.name}`, 'ok');
+      this._setStatus(`Opened: ${item.name}`, "ok");
       setTimeout(() => this.close(), 600);
     } catch (err) {
-      console.error('[VPSFileBrowser] open file error:', err);
-      this._setStatus(`Failed to open ${item.name}`, 'err');
+      console.error("[VPSFileBrowser] open file error:", err);
+      this._setStatus(`Failed to open ${item.name}`, "err");
     } finally {
-      document.body.style.cursor = 'default';
+      document.body.style.cursor = "default";
     }
   }
 
@@ -563,7 +608,7 @@ export class VPSFileBrowser {
     const filename = this._saveNameInput.value.trim();
     if (!filename) {
       this._saveNameInput.focus();
-      this._setStatus('Please enter a filename.', 'err');
+      this._setStatus("Please enter a filename.", "err");
       return;
     }
 
@@ -573,41 +618,41 @@ export class VPSFileBrowser {
 
     // Get content from the active tab
     const activeFile = this.tabManager.files.find(
-      f => f.id === this.tabManager.activeId
+      (f) => f.id === this.tabManager.activeId,
     );
     if (!activeFile) {
-      this._setStatus('No active file to save.', 'err');
+      this._setStatus("No active file to save.", "err");
       return;
     }
 
     const content = activeFile.model
       ? activeFile.model.getValue()
-      : (activeFile.content || '');
+      : activeFile.content || "";
 
     this._setStatus(`Saving to ${filePath}…`);
-    document.body.style.cursor = 'wait';
+    document.body.style.cursor = "wait";
 
     try {
       const result = await this.storageAPI.saveVPSFile(filePath, content);
-      if (!result) throw new Error('No response');
+      if (!result) throw new Error("No response");
 
       // Update the tab's vpsPath and name, then re-activate to refresh the tab bar
       activeFile.vpsPath = filePath;
       activeFile.name = filename;
       this.tabManager.setActive(activeFile.id);
 
-      this._setStatus(`Saved: ${filePath}`, 'ok');
+      this._setStatus(`Saved: ${filePath}`, "ok");
       setTimeout(() => this.close(), 800);
     } catch (err) {
-      console.error('[VPSFileBrowser] save error:', err);
-      this._setStatus(`Save failed — check backend/CORS.`, 'err');
+      console.error("[VPSFileBrowser] save error:", err);
+      this._setStatus(`Save failed — check backend/CORS.`, "err");
     } finally {
-      document.body.style.cursor = 'default';
+      document.body.style.cursor = "default";
     }
   }
 
   async _promptMkdir() {
-    const name = window.prompt('New folder name:');
+    const name = window.prompt("New folder name:");
     if (!name || !name.trim()) return;
     const dirPath = this._currentPath
       ? `${this._currentPath}/${name.trim()}`
@@ -618,7 +663,7 @@ export class VPSFileBrowser {
     if (result) {
       this._navigate(this._currentPath);
     } else {
-      this._setStatus('Failed to create folder.', 'err');
+      this._setStatus("Failed to create folder.", "err");
     }
   }
 
@@ -628,14 +673,15 @@ export class VPSFileBrowser {
     }
   }
 
-  _setStatus(msg, type = '') {
+  _setStatus(msg, type = "") {
     this._statusBar.textContent = msg;
-    this._statusBar.className = 'vps-status-bar' + (type ? ` vps-status-${type}` : '');
+    this._statusBar.className =
+      "vps-status-bar" + (type ? ` vps-status-${type}` : "");
   }
 }
 
 function _formatSize(bytes) {
-  if (bytes == null) return '';
+  if (bytes == null) return "";
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;

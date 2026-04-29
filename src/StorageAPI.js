@@ -6,21 +6,32 @@
  */
 
 const DEFAULT_BASE_URL =
-  typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_STORAGE_BASE_URL
+  typeof import.meta !== "undefined" &&
+  import.meta.env &&
+  import.meta.env.VITE_STORAGE_BASE_URL
     ? import.meta.env.VITE_STORAGE_BASE_URL
-    : 'https://storage.noahcohn.com';
+    : "https://storage.noahcohn.com";
 
 /**
  * Categories tracked in the remote storage.
  */
-export const STORAGE_CATEGORIES = ['songs', 'patterns', 'banks', 'samples', 'shaders', 'music', 'images', 'notes'];
+export const STORAGE_CATEGORIES = [
+  "songs",
+  "patterns",
+  "banks",
+  "samples",
+  "shaders",
+  "music",
+  "images",
+  "notes",
+];
 
 export class StorageAPI {
   /**
    * @param {string} [baseUrl] - Optional override for the backend base URL.
    */
   constructor(baseUrl = DEFAULT_BASE_URL) {
-    this.baseUrl = baseUrl.replace(/\/$/, '');
+    this.baseUrl = baseUrl.replace(/\/$/, "");
   }
 
   /**
@@ -48,7 +59,10 @@ export class StorageAPI {
   async fetchCategory(type) {
     const url = `${this.baseUrl}/api/songs?type=${encodeURIComponent(type)}`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`StorageAPI fetchCategory(${type}) failed: ${res.status}`);
+    if (!res.ok)
+      throw new Error(
+        `StorageAPI fetchCategory(${type}) failed: ${res.status}`,
+      );
     return res.json();
   }
 
@@ -60,19 +74,25 @@ export class StorageAPI {
    */
   async getCategoryFiles(type) {
     // Map 'shaders' category to 'shader' type for API
-    const apiType = type === 'shaders' ? 'shader' : type;
+    const apiType = type === "shaders" ? "shader" : type;
 
-    if (apiType === 'notes') {
+    if (apiType === "notes") {
       const items = await this.listNotes();
-      return items.map(item => ({ id: item.name, name: item.name, date: item.updated_at }));
+      return items.map((item) => ({
+        id: item.name,
+        name: item.name,
+        date: item.updated_at,
+      }));
     }
-    
-    if (apiType === 'shader') {
+
+    if (apiType === "shader") {
       // Shader endpoint supports coordinate sorting
-      return this._fetch('/api/shaders?sort_by=coordinate');
+      return this._fetch("/api/shaders?sort_by=coordinate");
     } else {
       // Standard JSON endpoints
-      return this._fetch(`/api/songs?type=${encodeURIComponent(apiType)}&sort_by=date`);
+      return this._fetch(
+        `/api/songs?type=${encodeURIComponent(apiType)}&sort_by=date`,
+      );
     }
   }
 
@@ -85,18 +105,21 @@ export class StorageAPI {
    * @returns {Promise<object>}
    */
   async fetchFileContent(id, type) {
-    if (type === 'notes') {
+    if (type === "notes") {
       return this.loadNote(id);
     }
     let url;
     // Handle both 'shader' and 'shaders' type names
-    if (type === 'shaders' || type === 'shader') {
+    if (type === "shaders" || type === "shader") {
       url = `${this.baseUrl}/api/shaders/${encodeURIComponent(id)}/code`;
     } else {
       url = `${this.baseUrl}/api/songs/${encodeURIComponent(id)}`;
     }
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`StorageAPI fetchFileContent(${id}, ${type}) failed: ${res.status}`);
+    if (!res.ok)
+      throw new Error(
+        `StorageAPI fetchFileContent(${id}, ${type}) failed: ${res.status}`,
+      );
     return res.json();
   }
 
@@ -108,36 +131,45 @@ export class StorageAPI {
    * @returns {Promise<{content: string, language: string}>}
    */
   async getFileContent(id, type) {
-    const apiType = type === 'shaders' ? 'shader' : type;
+    const apiType = type === "shaders" ? "shader" : type;
 
-    if (apiType === 'notes') {
+    if (apiType === "notes") {
       const data = await this.loadNote(id);
-      if (!data) throw new Error(`StorageAPI getFileContent(${id}, ${type}) failed: note not found`);
+      if (!data)
+        throw new Error(
+          `StorageAPI getFileContent(${id}, ${type}) failed: note not found`,
+        );
       return {
         content: data.content,
-        language: 'markdown'
+        language: "markdown",
       };
     }
-    
-    if (apiType === 'shader') {
+
+    if (apiType === "shader") {
       // Shader endpoint returns { id, code, name }
-      const data = await this._fetch(`/api/shaders/${encodeURIComponent(id)}/code`);
+      const data = await this._fetch(
+        `/api/shaders/${encodeURIComponent(id)}/code`,
+      );
       return {
         content: data.code,
-        language: 'wgsl' // Monaco language format for WebGPU shaders
+        language: "wgsl", // Monaco language format for WebGPU shaders
       };
-    } else if (apiType === 'brainfuck') {
-      const data = await this._fetch(`/api/songs/${encodeURIComponent(id)}?type=${encodeURIComponent(apiType)}`);
+    } else if (apiType === "brainfuck") {
+      const data = await this._fetch(
+        `/api/songs/${encodeURIComponent(id)}?type=${encodeURIComponent(apiType)}`,
+      );
       return {
         content: data.code || JSON.stringify(data, null, 2),
-        language: 'brainfuck'
+        language: "brainfuck",
       };
     } else {
       // Standard JSON endpoints
-      const data = await this._fetch(`/api/songs/${encodeURIComponent(id)}?type=${encodeURIComponent(apiType)}`);
+      const data = await this._fetch(
+        `/api/songs/${encodeURIComponent(id)}?type=${encodeURIComponent(apiType)}`,
+      );
       return {
         content: JSON.stringify(data, null, 2),
-        language: 'json'
+        language: "json",
       };
     }
   }
@@ -148,12 +180,12 @@ export class StorageAPI {
    * @param {string} type - Category type.
    */
   async recordPlay(id, type) {
-    const apiType = type === 'shaders' ? 'shader' : type;
-    
-    if (apiType === 'shader') {
+    const apiType = type === "shaders" ? "shader" : type;
+
+    if (apiType === "shader") {
       // Fire and forget - don't await, don't throw
-      fetch(`${this.baseUrl}/api/shaders/${encodeURIComponent(id)}/play`, { 
-        method: 'POST' 
+      fetch(`${this.baseUrl}/api/shaders/${encodeURIComponent(id)}/play`, {
+        method: "POST",
       }).catch(console.error);
     }
   }
@@ -165,14 +197,14 @@ export class StorageAPI {
    * @param {string} path - Relative path under files_dir (e.g. 'audio/flac')
    * @returns {Promise<Array<{name,path,type,size,modified,mime}>>}
    */
-  async browseVPS(path = '') {
+  async browseVPS(path = "") {
     const url = `${this.baseUrl}/api/vps/browse?path=${encodeURIComponent(path)}`;
     try {
-      const res = await fetch(url, { mode: 'cors' });
+      const res = await fetch(url, { mode: "cors" });
       if (!res.ok) throw new Error(`Browse failed: ${res.status}`);
       return await res.json();
     } catch (err) {
-      console.error('[StorageAPI] browseVPS error:', err);
+      console.error("[StorageAPI] browseVPS error:", err);
       return [];
     }
   }
@@ -185,11 +217,11 @@ export class StorageAPI {
   async getVPSFile(path) {
     const url = `${this.baseUrl}/api/vps/file?path=${encodeURIComponent(path)}`;
     try {
-      const res = await fetch(url, { mode: 'cors' });
+      const res = await fetch(url, { mode: "cors" });
       if (!res.ok) throw new Error(`Get file failed: ${res.status}`);
       return await res.text();
     } catch (err) {
-      console.error('[StorageAPI] getVPSFile error:', err);
+      console.error("[StorageAPI] getVPSFile error:", err);
       return null;
     }
   }
@@ -210,33 +242,41 @@ export class StorageAPI {
    * @param {Function} [onProgress] - Optional progress callback (0-100)
    * @returns {Promise<{success,path,size}|null>}
    */
-  async uploadVPSFile(file, dirPath = '', onProgress = null) {
+  async uploadVPSFile(file, dirPath = "", onProgress = null) {
     return new Promise((resolve) => {
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('path', dirPath);
+      formData.append("file", file);
+      formData.append("path", dirPath);
 
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${this.baseUrl}/api/vps/upload`);
+      xhr.open("POST", `${this.baseUrl}/api/vps/upload`);
 
       if (onProgress) {
         xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+          if (e.lengthComputable)
+            onProgress(Math.round((e.loaded / e.total) * 100));
         };
       }
 
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          try { resolve(JSON.parse(xhr.responseText)); }
-          catch { resolve({ success: true }); }
+          try {
+            resolve(JSON.parse(xhr.responseText));
+          } catch {
+            resolve({ success: true });
+          }
         } else {
-          console.error('[StorageAPI] uploadVPSFile failed:', xhr.status, xhr.responseText);
+          console.error(
+            "[StorageAPI] uploadVPSFile failed:",
+            xhr.status,
+            xhr.responseText,
+          );
           resolve(null);
         }
       };
 
       xhr.onerror = () => {
-        console.error('[StorageAPI] uploadVPSFile network error');
+        console.error("[StorageAPI] uploadVPSFile network error");
         resolve(null);
       };
 
@@ -255,15 +295,15 @@ export class StorageAPI {
     const url = `${this.baseUrl}/api/vps/save`;
     try {
       const res = await fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path, content }),
       });
       if (!res.ok) throw new Error(`Save failed: ${res.status}`);
       return await res.json();
     } catch (err) {
-      console.error('[StorageAPI] saveVPSFile error:', err);
+      console.error("[StorageAPI] saveVPSFile error:", err);
       return null;
     }
   }
@@ -278,15 +318,15 @@ export class StorageAPI {
     const url = `${this.baseUrl}/api/vps/mkdir`;
     try {
       const res = await fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path }),
       });
       if (!res.ok) throw new Error(`Mkdir failed: ${res.status}`);
       return await res.json();
     } catch (err) {
-      console.error('[StorageAPI] mkdirVPS error:', err);
+      console.error("[StorageAPI] mkdirVPS error:", err);
       return null;
     }
   }
@@ -302,15 +342,15 @@ export class StorageAPI {
     const url = `${this.baseUrl}/api/vps/rename`;
     try {
       const res = await fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ path, new_path: newPath }),
       });
       if (!res.ok) throw new Error(`Rename failed: ${res.status}`);
       return await res.json();
     } catch (err) {
-      console.error('[StorageAPI] renameVPSFile error:', err);
+      console.error("[StorageAPI] renameVPSFile error:", err);
       return null;
     }
   }
@@ -323,10 +363,10 @@ export class StorageAPI {
   async deleteVPSFile(path) {
     const url = `${this.baseUrl}/api/vps/file?path=${encodeURIComponent(path)}`;
     try {
-      const res = await fetch(url, { method: 'DELETE', mode: 'cors' });
+      const res = await fetch(url, { method: "DELETE", mode: "cors" });
       return res.ok;
     } catch (err) {
-      console.error('[StorageAPI] deleteVPSFile error:', err);
+      console.error("[StorageAPI] deleteVPSFile error:", err);
       return false;
     }
   }
@@ -340,11 +380,11 @@ export class StorageAPI {
   async listNotes() {
     const url = `${this.baseUrl}/api/notes/list`;
     try {
-      const res = await fetch(url, { mode: 'cors' });
+      const res = await fetch(url, { mode: "cors" });
       if (!res.ok) throw new Error(`listNotes failed: ${res.status}`);
       return await res.json();
     } catch (err) {
-      console.error('[StorageAPI] listNotes error:', err);
+      console.error("[StorageAPI] listNotes error:", err);
       return [];
     }
   }
@@ -357,11 +397,12 @@ export class StorageAPI {
   async loadNote(noteName) {
     const url = `${this.baseUrl}/api/notes/read/${encodeURIComponent(noteName)}`;
     try {
-      const res = await fetch(url, { mode: 'cors' });
-      if (!res.ok) throw new Error(`loadNote(${noteName}) failed: ${res.status}`);
+      const res = await fetch(url, { mode: "cors" });
+      if (!res.ok)
+        throw new Error(`loadNote(${noteName}) failed: ${res.status}`);
       return await res.json();
     } catch (err) {
-      console.error('[StorageAPI] loadNote error:', err);
+      console.error("[StorageAPI] loadNote error:", err);
       return null;
     }
   }
@@ -376,15 +417,16 @@ export class StorageAPI {
     const url = `${this.baseUrl}/api/notes/write/${encodeURIComponent(noteName)}`;
     try {
       const res = await fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
       });
-      if (!res.ok) throw new Error(`saveNote(${noteName}) failed: ${res.status}`);
+      if (!res.ok)
+        throw new Error(`saveNote(${noteName}) failed: ${res.status}`);
       return await res.json();
     } catch (err) {
-      console.error('[StorageAPI] saveNote error:', err);
+      console.error("[StorageAPI] saveNote error:", err);
       return null;
     }
   }
@@ -397,10 +439,10 @@ export class StorageAPI {
   async deleteNote(noteName) {
     const url = `${this.baseUrl}/api/notes/delete/${encodeURIComponent(noteName)}`;
     try {
-      const res = await fetch(url, { method: 'DELETE', mode: 'cors' });
+      const res = await fetch(url, { method: "DELETE", mode: "cors" });
       return res.ok;
     } catch (err) {
-      console.error('[StorageAPI] deleteNote error:', err);
+      console.error("[StorageAPI] deleteNote error:", err);
       return false;
     }
   }

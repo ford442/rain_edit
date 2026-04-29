@@ -4,10 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>rain-2 — Monaco + dual rain layers</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/src/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
     <div id="app">
@@ -34,8 +37,15 @@
       <div id="tabs-container">
         <div class="tabs-list"></div>
         <div class="depth-controls">
-          <button id="btn-depth-forward" title="Bring Forward — increase z-depth">⬆️ Bring Forward</button>
-          <button id="btn-depth-back" title="Push Back — decrease z-depth">⬇️ Push Back</button>
+          <button
+            id="btn-depth-forward"
+            title="Bring Forward — increase z-depth"
+          >
+            ⬆️ Bring Forward
+          </button>
+          <button id="btn-depth-back" title="Push Back — decrease z-depth">
+            ⬇️ Push Back
+          </button>
           <select id="view-mode-select" title="Toggle View Mode">
             <option value="">Default View</option>
             <option value="waterfall">💧 Waterfall View</option>
@@ -61,68 +71,163 @@
             <option value="galaxy">🌌 Galaxy View</option>
             <option value="data-hive">🐝 Data Hive</option>
             <option value="origami">🦢 Origami View</option>
+            <option value="matrix-rain">🔣 Matrix Rain View</option>
           </select>
         </div>
       </div>
 
-    <div id="dock">
+      <div id="dock">
         <div class="dock-title">RAIN CONTROL</div>
 
-        <div class="dock-group" style="align-items: center; margin-bottom: 5px;">
-             <canvas id="radar-canvas" width="160" height="90" style="background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); width: 100%; display: block;"></canvas>
+        <div class="dock-group" style="align-items: center; margin-bottom: 5px">
+          <canvas
+            id="radar-canvas"
+            width="160"
+            height="90"
+            style="
+              background: rgba(0, 0, 0, 0.3);
+              border-radius: 8px;
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              width: 100%;
+              display: block;
+            "
+          ></canvas>
         </div>
 
         <div class="dock-group">
           <label><span class="icon">⛈️</span> Storm Intensity</label>
-          <input id="storm-intensity" type="range" min="0" max="100" value="30">
+          <input
+            id="storm-intensity"
+            type="range"
+            min="0"
+            max="100"
+            value="30"
+          />
         </div>
 
         <div class="dock-group">
           <label><span class="icon">👁️</span> Editor Opacity</label>
-          <input id="editor-opacity" type="range" min="0" max="1" step="0.05" value="1">
+          <input
+            id="editor-opacity"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value="1"
+          />
         </div>
 
         <div class="dock-group">
-            <label><span class="icon">📝</span> Reference Text</label>
-            <textarea id="reference-input" rows="3" placeholder="Paste reference here..."></textarea>
+          <label><span class="icon">📝</span> Reference Text</label>
+          <textarea
+            id="reference-input"
+            rows="3"
+            placeholder="Paste reference here..."
+          ></textarea>
         </div>
 
         <div class="dock-group">
-            <label><span class="icon">🔍</span> Deep Search</label>
-            <input id="global-search" type="text" placeholder="Search background tabs..." style="background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; color: #c0c0d0; padding: 6px; font-family: inherit; font-size: 11px; width: 100%; box-sizing: border-box; outline: none;">
+          <label><span class="icon">🔍</span> Deep Search</label>
+          <input
+            id="global-search"
+            type="text"
+            placeholder="Search background tabs..."
+            style="
+              background: rgba(0, 0, 0, 0.3);
+              border: 1px solid rgba(255, 255, 255, 0.05);
+              border-radius: 8px;
+              color: #c0c0d0;
+              padding: 6px;
+              font-family: inherit;
+              font-size: 11px;
+              width: 100%;
+              box-sizing: border-box;
+              outline: none;
+            "
+          />
         </div>
 
         <div class="dock-group">
           <label><span class="icon">🎨</span> Theme</label>
-          <select id="theme-select" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #c0c0d0; padding: 4px; font-family: inherit; font-size: 11px; width: 100%; margin-top: 5px; cursor: pointer;">
-             <option value="cyberpunk">Cyberpunk</option>
-             <option value="journal">Journal</option>
-             <option value="blueprint">Blueprint</option>
+          <select
+            id="theme-select"
+            style="
+              background: rgba(0, 0, 0, 0.3);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              border-radius: 4px;
+              color: #c0c0d0;
+              padding: 4px;
+              font-family: inherit;
+              font-size: 11px;
+              width: 100%;
+              margin-top: 5px;
+              cursor: pointer;
+            "
+          >
+            <option value="cyberpunk">Cyberpunk</option>
+            <option value="journal">Journal</option>
+            <option value="blueprint">Blueprint</option>
           </select>
         </div>
 
         <div class="dock-toggles">
-           <label title="Back Rain"><input id="toggle-back" type="checkbox" checked> Back Rain</label>
-           <label title="Front Rain"><input id="toggle-front" type="checkbox" checked> Front Rain</label>
-           <label title="Front Rain on Top"><input id="toggle-front-on-top" type="checkbox" checked> Rain Layering</label>
-           <label title="Focus Mode"><input id="focus-mode" type="checkbox"> Focus Mode</label>
-           <label title="Blueprint Mode"><input id="blueprint-mode" type="checkbox"> Blueprint Mode</label>
-           <label title="Lantern Mode"><input id="lantern-mode" type="checkbox" checked> Lantern Mode</label>
-           <label title="Ghost Mode"><input id="ghost-mode" type="checkbox"> Ghost Mode</label>
-           <label title="Wiper Mode"><input id="wiper-mode" type="checkbox"> Wiper Mode</label>
-           <label title="Expose Mode"><input id="expose-mode" type="checkbox"> Expose Mode</label>
-           <label title="Theater Mode"><input id="theater-mode" type="checkbox"> Theater Mode</label>
-           <div>
-               <button id="btn-sonar-ping" title="Sonar Ping (Ctrl+Space)" class="dock-btn-sonar">
-                   📡 Sonar Ping
-               </button>
-               <button id="btn-z-scan" title="3D Z-Axis Scan" class="dock-btn-zscan">
-                   🔍 Z-Scan
-               </button>
-               <button id="btn-black-hole-view" title="Toggle Black Hole View" class="dock-btn-sonar" style="margin-top: 5px;">
-                   🕳️ Black Hole
-               </button>
-           </div>
+          <label title="Back Rain"
+            ><input id="toggle-back" type="checkbox" checked /> Back Rain</label
+          >
+          <label title="Front Rain"
+            ><input id="toggle-front" type="checkbox" checked /> Front
+            Rain</label
+          >
+          <label title="Front Rain on Top"
+            ><input id="toggle-front-on-top" type="checkbox" checked /> Rain
+            Layering</label
+          >
+          <label title="Focus Mode"
+            ><input id="focus-mode" type="checkbox" /> Focus Mode</label
+          >
+          <label title="Blueprint Mode"
+            ><input id="blueprint-mode" type="checkbox" /> Blueprint Mode</label
+          >
+          <label title="Lantern Mode"
+            ><input id="lantern-mode" type="checkbox" checked /> Lantern
+            Mode</label
+          >
+          <label title="Ghost Mode"
+            ><input id="ghost-mode" type="checkbox" /> Ghost Mode</label
+          >
+          <label title="Wiper Mode"
+            ><input id="wiper-mode" type="checkbox" /> Wiper Mode</label
+          >
+          <label title="Expose Mode"
+            ><input id="expose-mode" type="checkbox" /> Expose Mode</label
+          >
+          <label title="Theater Mode"
+            ><input id="theater-mode" type="checkbox" /> Theater Mode</label
+          >
+          <div>
+            <button
+              id="btn-sonar-ping"
+              title="Sonar Ping (Ctrl+Space)"
+              class="dock-btn-sonar"
+            >
+              📡 Sonar Ping
+            </button>
+            <button
+              id="btn-z-scan"
+              title="3D Z-Axis Scan"
+              class="dock-btn-zscan"
+            >
+              🔍 Z-Scan
+            </button>
+            <button
+              id="btn-black-hole-view"
+              title="Toggle Black Hole View"
+              class="dock-btn-sonar"
+              style="margin-top: 5px"
+            >
+              🕳️ Black Hole
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -132,66 +237,102 @@
 
     <!-- 3D File Cabinet toggle button -->
     <!-- Heat Distortion SVG -->
-    <svg style="position: absolute; width: 0; height: 0;">
+    <svg style="position: absolute; width: 0; height: 0">
       <filter id="heat-haze">
-        <feTurbulence type="fractalNoise" baseFrequency="0.015 0.05" numOctaves="2" result="noise" />
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G" />
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.015 0.05"
+          numOctaves="2"
+          result="noise"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="noise"
+          scale="10"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
       </filter>
     </svg>
 
-    <div style="
-      position: fixed;
-      bottom: 24px;
-      left: 24px;
-      z-index: 40;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    ">
-      <button id="btn-cabinet" title="Open 3D File Cabinet" style="
-        background: rgba(10, 15, 25, 0.8);
-        border: 1px solid rgba(0, 229, 255, 0.3);
-        color: #c0d0e0;
-        font-family: inherit;
-        font-size: 13px;
-        padding: 10px 20px;
-        border-radius: 16px;
-        cursor: pointer;
-        backdrop-filter: blur(6px);
-        transition: background 0.2s;
-      " onmouseover="this.style.background='rgba(0, 229, 255, 0.15)'" onmouseout="this.style.background='rgba(10, 15, 25, 0.8)'">🗄️ File Cabinet</button>
+    <div
+      style="
+        position: fixed;
+        bottom: 24px;
+        left: 24px;
+        z-index: 40;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      "
+    >
+      <button
+        id="btn-cabinet"
+        title="Open 3D File Cabinet"
+        style="
+          background: rgba(10, 15, 25, 0.8);
+          border: 1px solid rgba(0, 229, 255, 0.3);
+          color: #c0d0e0;
+          font-family: inherit;
+          font-size: 13px;
+          padding: 10px 20px;
+          border-radius: 16px;
+          cursor: pointer;
+          backdrop-filter: blur(6px);
+          transition: background 0.2s;
+        "
+        onmouseover="this.style.background = 'rgba(0, 229, 255, 0.15)'"
+        onmouseout="this.style.background = 'rgba(10, 15, 25, 0.8)'"
+      >
+        🗄️ File Cabinet
+      </button>
 
-      <button id="btn-vps-open" title="Open file from Contabo VPS (storage.noahcohn.com)" style="
-        background: rgba(10, 15, 25, 0.8);
-        border: 1px solid rgba(0, 229, 255, 0.3);
-        color: #c0d0e0;
-        font-family: inherit;
-        font-size: 13px;
-        padding: 10px 20px;
-        border-radius: 16px;
-        cursor: pointer;
-        backdrop-filter: blur(6px);
-        transition: background 0.2s;
-      " onmouseover="this.style.background='rgba(0, 229, 255, 0.15)'" onmouseout="this.style.background='rgba(10, 15, 25, 0.8)'">📡 VPS Files</button>
+      <button
+        id="btn-vps-open"
+        title="Open file from Contabo VPS (storage.noahcohn.com)"
+        style="
+          background: rgba(10, 15, 25, 0.8);
+          border: 1px solid rgba(0, 229, 255, 0.3);
+          color: #c0d0e0;
+          font-family: inherit;
+          font-size: 13px;
+          padding: 10px 20px;
+          border-radius: 16px;
+          cursor: pointer;
+          backdrop-filter: blur(6px);
+          transition: background 0.2s;
+        "
+        onmouseover="this.style.background = 'rgba(0, 229, 255, 0.15)'"
+        onmouseout="this.style.background = 'rgba(10, 15, 25, 0.8)'"
+      >
+        📡 VPS Files
+      </button>
 
-      <button id="btn-vps-save" title="Save current file to Contabo VPS (Ctrl+Shift+S)" style="
-        background: rgba(10, 15, 25, 0.8);
-        border: 1px solid rgba(0, 229, 255, 0.3);
-        color: #c0d0e0;
-        font-family: inherit;
-        font-size: 13px;
-        padding: 10px 20px;
-        border-radius: 16px;
-        cursor: pointer;
-        backdrop-filter: blur(6px);
-        transition: background 0.2s;
-      " onmouseover="this.style.background='rgba(0, 229, 255, 0.15)'" onmouseout="this.style.background='rgba(10, 15, 25, 0.8)'">💾 Save to VPS</button>
+      <button
+        id="btn-vps-save"
+        title="Save current file to Contabo VPS (Ctrl+Shift+S)"
+        style="
+          background: rgba(10, 15, 25, 0.8);
+          border: 1px solid rgba(0, 229, 255, 0.3);
+          color: #c0d0e0;
+          font-family: inherit;
+          font-size: 13px;
+          padding: 10px 20px;
+          border-radius: 16px;
+          cursor: pointer;
+          backdrop-filter: blur(6px);
+          transition: background 0.2s;
+        "
+        onmouseover="this.style.background = 'rgba(0, 229, 255, 0.15)'"
+        onmouseout="this.style.background = 'rgba(10, 15, 25, 0.8)'"
+      >
+        💾 Save to VPS
+      </button>
     </div>
-
 
     <div id="z-slicer-ui">
       <div class="slicer-label">Z-DEPTH SLICER</div>
-      <input type="range" id="z-slicer-range" min="0" max="100" value="0">
+      <input type="range" id="z-slicer-range" min="0" max="100" value="0" />
     </div>
 
     <script type="module" src="/src/main.js"></script>
