@@ -90,60 +90,62 @@ export class TabManager {
     this.isCylinderView = false;
     this.isGalaxyView = false;
     this.isOrigamiView = false;
-    this.isMatrixRainView = false;
+    this.isDataHiveView = false;
 
     document.body.classList.remove(
-      "waterfall-active",
-      "cascade-active",
-      "orbit-active",
-      "scattered-active",
-      "isometric-active",
-      "stack-active",
-      "timeline-active",
-      "tunnel-active",
-      "grid-active",
-      "helix-active",
-      "pinboard-active",
-      "vortex-active",
-      "constellation-active",
-      "prism-active",
-      "coverflow-active",
-      "wave-active",
-      "sphere-active",
-      "black-hole-active",
-      "rolodex-active",
-      "cylinder-active",
-      "galaxy-active",
-      "origami-active",
-      "matrix-rain-active",
+      'waterfall-active', 
+      'cascade-active', 
+      'orbit-active', 
+      'scattered-active', 
+      'isometric-active', 
+      'stack-active', 
+      'timeline-active',
+      'tunnel-active', 
+      'grid-active', 
+      'helix-active', 
+      'pinboard-active', 
+      'vortex-active', 
+      'constellation-active', 
+      'prism-active', 
+      'coverflow-active', 
+      'wave-active', 
+      'sphere-active',
+      'black-hole-active',
+      'rolodex-active',
+      'cylinder-active',
+      'galaxy-active',
+      'origami-active',
+      'data-hive-active',
+      "matrix-rain-active"
     );
 
     this.isOrigamiView = false;
-    this.isMatrixRainView = false;
+    this.isDataHiveView = false;
 
     [
-      "btn-waterfall-view",
-      "btn-cascade-view",
-      "btn-orbit-view",
-      "btn-scattered-view",
-      "btn-isometric-view",
-      "btn-stack-view",
-      "btn-timeline-view",
-      "btn-tunnel-view",
-      "btn-grid-view",
-      "btn-helix-view",
-      "btn-pinboard-view",
-      "btn-vortex-view",
-      "btn-constellation-view",
-      "btn-prism-view",
-      "btn-coverflow-view",
-      "btn-wave-view",
-      "btn-sphere-view",
-      "btn-rolodex-view",
-      "btn-matrix-rain-view",
-    ].forEach((id) => {
-      const btn = document.getElementById(id);
-      if (btn) btn.classList.remove("active");
+      'btn-waterfall-view', 
+      'btn-cascade-view', 
+      'btn-orbit-view', 
+      'btn-scattered-view', 
+      'btn-isometric-view', 
+      'btn-stack-view', 
+      'btn-timeline-view',
+      'btn-tunnel-view', 
+      'btn-grid-view', 
+      'btn-helix-view', 
+      'btn-pinboard-view', 
+      'btn-vortex-view', 
+      'btn-constellation-view', 
+      'btn-prism-view', 
+      'btn-coverflow-view', 
+      'btn-wave-view', 
+      'btn-sphere-view',
+      'btn-rolodex-view',
+      'btn-data-hive-view',
+      "btn-matrix-rain-view"
+    ].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.classList.remove('active');
     });
   }
 
@@ -177,6 +179,16 @@ export class TabManager {
     if (!wasActive) {
       this.isOrigamiView = true;
       document.body.classList.add("origami-active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleDataHiveView() {
+    const wasActive = this.isDataHiveView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDataHiveView = true;
+      document.body.classList.add('data-hive-active');
     }
     this._renderEchoes();
   }
@@ -1327,16 +1339,38 @@ Drag to change depth`;
         const rotY = direction * foldAngle;
         const rotZ = direction * 5;
 
-        el.style.setProperty("--tx", `${tx}px`);
-        el.style.setProperty("--ty", `${ty}px`);
-        el.style.setProperty("--tz", `${tz}px`);
-        el.style.setProperty("--rot-x", "0deg");
-        el.style.setProperty("--rot-y", `${rotY}deg`);
-        el.style.setProperty("--rot-z", `${rotZ}deg`);
-        el.style.setProperty("--scatter-x", "0px");
-        el.style.setProperty("--scatter-y", "0px");
-        el.style.setProperty("--scatter-z", "0px");
-        el.style.setProperty("--scatter-rot", "0deg");
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-z', `${rotZ}deg`);
+        el.style.setProperty('--scatter-x', '0px');
+        el.style.setProperty('--scatter-y', '0px');
+        el.style.setProperty('--scatter-z', '0px');
+        el.style.setProperty('--scatter-rot', '0deg');
+      } else if (this.isDataHiveView) {
+        // Data Hive View: Hexagonal grid arrangement
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const hexWidth = 240;
+        const hexHeight = 200;
+
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        // Stagger rows for hexagonal tiling
+        const xOffset = (row % 2 === 1) ? hexWidth / 2 : 0;
+        const tx = (col - cols / 2) * hexWidth + xOffset;
+        const ty = (row - cols / 2) * hexHeight;
+        const tz = -400 - (row * 50); // Slight slant backward
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty('--rot-z', '0deg');
       } else if (this.isGalaxyView) {
         // Galaxy Spiral View: Logarithmic spiral arrangement on X-Z plane
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -1681,160 +1715,148 @@ Drag to change depth`;
         }
       });
 
-      el.addEventListener("mouseleave", () => {
-        // Reset 3D tilt
-        el.style.setProperty("--hover-rot-x", `0deg`);
-        el.style.setProperty("--hover-rot-y", `0deg`);
+      el.addEventListener('mouseleave', () => {
+          // Reset 3D tilt
+          el.style.setProperty('--hover-rot-x', `0deg`);
+          el.style.setProperty('--hover-rot-y', `0deg`);
 
-        if (this.editorEl) {
-          this.editorEl.classList.remove("editor-peek-fade");
-          // Restore Z
-          if (this.isOrbitView) {
-            const tEchoes = inactiveFiles.length;
-            const oRad = Math.max(500, tEchoes * 120);
-            el.style.setProperty("--orbit-tz", `${oRad}px`);
-          } else if (this.isScatteredView) {
-            // Restore scatter Z
-            const index = parseInt(el.dataset.index || 0);
-            const sz = -100 - index * 80;
-            el.style.setProperty("--scatter-z", `${sz}px`);
-          } else if (this.isVortexView) {
-            const inactiveFiles = this.files.filter(
-              (f) => f.id !== this.activeId,
-            );
-            const totalEchoes = inactiveFiles.length;
-            const index = parseInt(el.dataset.index || 0);
-            const indexRatio = index / Math.max(1, totalEchoes - 1);
-            const radius = 200 + index * 40;
-            const angle = indexRatio * Math.PI * 2 * 4;
-            const tz = -index * 120 - 100;
-            const rotZ = (angle * 180) / Math.PI + 90;
-            el.style.setProperty("--tz", `${tz}px`);
-            el.style.setProperty("--rot-z", `${rotZ}deg`);
-          } else if (this.isPinboardView) {
-            const index = parseInt(el.dataset.index || 0);
-            const tz = -150 + Math.sin(index * 789) * 50;
-            const rotZ = Math.sin(index * 111) * 15;
-            el.style.setProperty("--tz", `${tz}px`);
-            el.style.setProperty("--rot-z", `${rotZ}deg`);
-          } else if (this.isHelixView) {
-            const inactiveFiles = this.files.filter(
-              (f) => f.id !== this.activeId,
-            );
-            const totalEchoes = inactiveFiles.length;
-            const index = parseInt(el.dataset.index || 0);
-            const indexRatio = index / Math.max(1, totalEchoes - 1);
-            const radius = 300;
-            const cycles = 2;
-            const angle = indexRatio * Math.PI * 2 * cycles;
-            const tz = Math.sin(angle) * radius - 200;
-            el.style.setProperty("--tz", `${tz}px`);
-          } else if (this.isPrismView) {
-            const inactiveFiles = this.files.filter(
-              (f) => f.id !== this.activeId,
-            );
-            const totalEchoes = inactiveFiles.length;
-            const index = parseInt(el.dataset.index || 0);
-            const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
-            const radius = 450;
-            const tz = radius * Math.cos(phi) - 200;
-            el.style.setProperty("--tz", `${tz}px`);
-          } else if (this.isSphereView) {
-            // Fibonacci Sphere logic
-            const totalEchoes = Math.max(1, inactiveFiles.length);
-            const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
-            const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+          if (this.editorEl) {
+              this.editorEl.classList.remove('editor-peek-fade');
+              // Restore Z
+              if (this.isOrbitView) {
+                  const tEchoes = inactiveFiles.length;
+                  const oRad = Math.max(500, tEchoes * 120);
+                  el.style.setProperty('--orbit-tz', `${oRad}px`);
+              } else if (this.isScatteredView) {
+                  // Restore scatter Z
+                  const index = parseInt(el.dataset.index || 0);
+                  const sz = -100 - (index * 80);
+                  el.style.setProperty('--scatter-z', `${sz}px`);
+              } else if (this.isVortexView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = inactiveFiles.length;
+                  const index = parseInt(el.dataset.index || 0);
+                  const indexRatio = index / Math.max(1, totalEchoes - 1);
+                  const radius = 200 + (index * 40);
+                  const angle = indexRatio * Math.PI * 2 * 4;
+                  const tz = -index * 120 - 100;
+                  const rotZ = (angle * 180 / Math.PI) + 90;
+                  el.style.setProperty('--tz', `${tz}px`);
+                  el.style.setProperty('--rot-z', `${rotZ}deg`);
+              } else if (this.isPinboardView) {
+                  const index = parseInt(el.dataset.index || 0);
+                  const tz = -150 + (Math.sin(index * 789) * 50);
+                  const rotZ = Math.sin(index * 111) * 15;
+                  el.style.setProperty('--tz', `${tz}px`);
+                  el.style.setProperty('--rot-z', `${rotZ}deg`);
+              } else if (this.isHelixView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = inactiveFiles.length;
+                  const index = parseInt(el.dataset.index || 0);
+                  const indexRatio = index / Math.max(1, totalEchoes - 1);
+                  const radius = 300;
+                  const cycles = 2;
+                  const angle = indexRatio * Math.PI * 2 * cycles;
+                  const tz = Math.sin(angle) * radius - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isPrismView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = inactiveFiles.length;
+                  const index = parseInt(el.dataset.index || 0);
+                  const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+                  const radius = 450;
+                  const tz = radius * Math.cos(phi) - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isSphereView) {
+        // Fibonacci Sphere logic
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
 
-            const radius = 600;
-            const tx = radius * Math.sin(phi) * Math.cos(theta);
-            const ty = radius * Math.sin(phi) * Math.sin(theta);
-            const tz = radius * Math.cos(phi) - 200;
+        const radius = 600;
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200;
 
-            const rotX = (ty / radius) * -90;
-            const rotY = (tx / radius) * 90;
+        const rotX = (ty / radius) * -90;
+        const rotY = (tx / radius) * 90;
 
-            el.style.setProperty("--tx", `${tx}px`);
-            el.style.setProperty("--ty", `${ty}px`);
-            el.style.setProperty("--tz", `${tz}px`);
-            el.style.setProperty("--rot-x", `${rotX}deg`);
-            el.style.setProperty("--rot-y", `${rotY}deg`);
-            el.style.setProperty("--rot-z", "0deg");
-            el.style.setProperty("--scatter-x", "0px");
-            el.style.setProperty("--scatter-y", "0px");
-            el.style.setProperty("--scatter-z", "0px");
-            el.style.setProperty("--scatter-rot", "0deg");
-          } else if (this.isCoverflowView) {
-            const inactiveFiles = this.files.filter(
-              (f) => f.id !== this.activeId,
-            );
-            const totalEchoes = inactiveFiles.length;
-            const index = parseInt(el.dataset.index || 0);
-            const middleIndex = Math.floor(totalEchoes / 2);
-            const diff = index - middleIndex;
-            const absDiff = Math.abs(diff);
-            const tz = absDiff === 0 ? 0 : -200 - absDiff * 50;
-            el.style.setProperty("--tz", `${tz}px`);
-          } else if (this.isSphereView) {
-            const inactiveFiles = this.files.filter(
-              (f) => f.id !== this.activeId,
-            );
-            const totalEchoes = Math.max(1, inactiveFiles.length);
-            const index = parseInt(el.dataset.index || 0);
-            const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
-            const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
-            const radius = 600;
-            const tz = radius * Math.cos(phi) - 200;
-            el.style.setProperty("--tz", `${tz}px`);
-          } else if (this.isRolodexView) {
-            const inactiveFiles = this.files.filter(
-              (f) => f.id !== this.activeId,
-            );
-            const totalEchoes = Math.max(1, inactiveFiles.length);
-            const index = parseInt(el.dataset.index || 0);
-            const angle = (index / totalEchoes) * Math.PI * 2;
-            const radius = 600;
-            const tz = Math.cos(angle) * radius - 200;
-            el.style.setProperty("--tz", `${tz}px`);
-          } else if (this.isCylinderView) {
-            const inactiveFiles = this.files.filter(
-              (f) => f.id !== this.activeId,
-            );
-            const totalEchoes = Math.max(1, inactiveFiles.length);
-            const index = parseInt(el.dataset.index || 0);
-            const angle = (index / totalEchoes) * Math.PI * 2;
-            const radius = 600;
-            const tz = Math.cos(angle) * radius - 200;
-            el.style.setProperty("--tz", `${tz}px`);
-          } else if (this.isOrigamiView) {
-            const inactiveFiles = this.files.filter(
-              (f) => f.id !== this.activeId,
-            );
-            const totalEchoes = Math.max(1, inactiveFiles.length);
-            const index = parseInt(el.dataset.index || 0);
-            const tz = Math.abs(index - totalEchoes / 2) * -150 - 200;
-            el.style.setProperty("--tz", `${tz}px`);
-          } else if (this.isGalaxyView) {
-            const inactiveFiles = this.files.filter(
-              (f) => f.id !== this.activeId,
-            );
-            const totalEchoes = Math.max(1, inactiveFiles.length);
-            const index = parseInt(el.dataset.index || 0);
-            const maxRadius = 1500;
-            const spiralRotations = 3;
-            const t = index / totalEchoes;
-            const r = maxRadius * Math.pow(t, 0.7);
-            const theta = t * Math.PI * 2 * spiralRotations;
-            const armOffset = index % 2 === 0 ? 0 : Math.PI;
-            const tz = r * Math.sin(theta + armOffset) - 600;
-            el.style.setProperty("--tz", `${tz}px`);
-          } else if (this.isWaveView) {
-            el.style.setProperty("--tz", `-150px`);
-          } else if (!this.isCascadeView) {
-            const idx = parseInt(el.dataset.index || 0);
-            el.style.setProperty(
-              "--tz",
-              `calc(-${idx * 50}px + var(--stack-z, 0px))`,
-            );
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', `${rotX}deg`);
+        el.style.setProperty('--rot-y', `${rotY}deg`);
+        el.style.setProperty('--rot-z', '0deg');
+        el.style.setProperty('--scatter-x', '0px');
+        el.style.setProperty('--scatter-y', '0px');
+        el.style.setProperty('--scatter-z', '0px');
+        el.style.setProperty('--scatter-rot', '0deg');
+      } else if (this.isCoverflowView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = inactiveFiles.length;
+                  const index = parseInt(el.dataset.index || 0);
+                  const middleIndex = Math.floor(totalEchoes / 2);
+                  const diff = index - middleIndex;
+                  const absDiff = Math.abs(diff);
+                  const tz = absDiff === 0 ? 0 : -200 - (absDiff * 50);
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isSphereView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+                  const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+                  const radius = 600;
+                  const tz = radius * Math.cos(phi) - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isRolodexView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const angle = (index / totalEchoes) * Math.PI * 2;
+                  const radius = 600;
+                  const tz = Math.cos(angle) * radius - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isCylinderView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const angle = (index / totalEchoes) * Math.PI * 2;
+                  const radius = 600;
+                  const tz = Math.cos(angle) * radius - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isOrigamiView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const tz = Math.abs(index - totalEchoes / 2) * -150 - 200;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isGalaxyView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const index = parseInt(el.dataset.index || 0);
+                  const maxRadius = 1500;
+                  const spiralRotations = 3;
+                  const t = index / totalEchoes;
+                  const r = maxRadius * Math.pow(t, 0.7);
+                  const theta = t * Math.PI * 2 * spiralRotations;
+                  const armOffset = (index % 2 === 0) ? 0 : Math.PI;
+                  const tz = r * Math.sin(theta + armOffset) - 600;
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isDataHiveView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const cols = Math.ceil(Math.sqrt(totalEchoes));
+                  const index = parseInt(el.dataset.index || 0);
+                  const row = Math.floor(index / cols);
+                  const tz = -400 - (row * 50);
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isWaveView) {
+                  el.style.setProperty('--tz', `-150px`);
+              } else if (!this.isCascadeView) {
+                  const idx = parseInt(el.dataset.index || 0);
+                  el.style.setProperty('--tz', `calc(-${idx * 50}px + var(--stack-z, 0px))`);
+              }
           }
         }
       });
