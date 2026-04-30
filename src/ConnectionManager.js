@@ -373,6 +373,64 @@ export class ConnectionManager {
         }
       }
 
+      // Echo-Layer Constellation Connections
+      if (document.body.classList.contains("constellation-active")) {
+        const echoes = Array.from(document.querySelectorAll(".echo-document"));
+        if (echoes.length > 1) {
+          const echoData = echoes.map((el) => {
+            const rect = el.getBoundingClientRect();
+            return {
+              x: rect.left + rect.width / 2,
+              y: rect.top + rect.height / 2,
+              element: el,
+            };
+          });
+
+          this.ctx.lineWidth = 1;
+          this.ctx.lineCap = "round";
+          this.ctx.setLineDash([2, 10]);
+          this.ctx.lineDashOffset = -time * 3;
+
+          for (let i = 0; i < echoData.length; i++) {
+            for (let j = i + 1; j < echoData.length; j++) {
+              const a = echoData[i];
+              const b = echoData[j];
+              const dist = Math.hypot(a.x - b.x, a.y - b.y);
+
+              // Only connect nearby echoes to keep it constellation-like
+              if (dist < 400) {
+                const opacity = Math.min(0.35, 1 - dist / 400) * (0.6 + Math.sin(time * 2 + i + j) * 0.4);
+
+                this.ctx.strokeStyle = `rgba(0, 229, 255, ${opacity})`;
+                this.ctx.shadowColor = `rgba(0, 229, 255, ${opacity * 0.5})`;
+                this.ctx.shadowBlur = 8;
+                this.ctx.beginPath();
+                this.ctx.moveTo(a.x, a.y);
+                this.ctx.lineTo(b.x, b.y);
+                this.ctx.stroke();
+
+                // Occasional data packet
+                const packetCycle = (time * 1.2 + i * 0.5 + j * 0.3) % 3;
+                if (packetCycle < 1) {
+                  const t = packetCycle;
+                  const px = a.x + (b.x - a.x) * t;
+                  const py = a.y + (b.y - a.y) * t;
+                  this.ctx.save();
+                  this.ctx.setLineDash([]);
+                  this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.3})`;
+                  this.ctx.shadowBlur = 10;
+                  this.ctx.shadowColor = "rgba(255, 255, 255, 0.8)";
+                  this.ctx.beginPath();
+                  this.ctx.arc(px, py, 2, 0, Math.PI * 2);
+                  this.ctx.fill();
+                  this.ctx.restore();
+                }
+              }
+            }
+          }
+        }
+      }
+
       // Reset
       this.ctx.setLineDash([]);
       this.ctx.shadowBlur = 0;
@@ -387,10 +445,6 @@ export class ConnectionManager {
     const h = this.radarCanvas.height;
     this.radarCtx.clearRect(0, 0, w, h);
 
-    if (!this.referenceManager) return;
-    const cards = this.referenceManager.getCards();
-    if (!cards || cards.length === 0) return;
-
     // Draw grid lines
     this.radarCtx.strokeStyle = "rgba(255, 255, 255, 0.1)";
     this.radarCtx.lineWidth = 1;
@@ -401,24 +455,69 @@ export class ConnectionManager {
     this.radarCtx.lineTo(w, h / 2);
     this.radarCtx.stroke();
 
-    cards.forEach((card) => {
-      const rect = card.getBoundingClientRect();
-      // Map screen coords to radar coords
-      const rx = (rect.left / window.innerWidth) * w;
-      const ry = (rect.top / window.innerHeight) * h;
-      const rw = Math.max(2, (rect.width / window.innerWidth) * w);
-      const rh = Math.max(2, (rect.height / window.innerHeight) * h);
+    // Draw concentric depth rings (holographic feel)
+    this.radarCtx.strokeStyle = "rgba(0, 229, 255, 0.06)";
+    this.radarCtx.lineWidth = 1;
+    for (let r = 1; r <= 3; r++) {
+      this.radarCtx.beginPath();
+      this.radarCtx.arc(w / 2, h / 2, (w / 2) * (r / 3), 0, Math.PI * 2);
+      this.radarCtx.stroke();
+    }
 
-      let color = "rgba(255, 255, 255, 0.3)";
-      if (card.classList.contains("matched-card")) {
-        color = "#00e5ff";
-      } else if (card.classList.contains("spotlight")) {
-        color = "#ff0055";
-      }
+    // Draw Reference Cards
+    const cards = this.referenceManager ? this.referenceManager.getCards() : [];
+    if (cards && cards.length > 0) {
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const rx = (rect.left / window.innerWidth) * w;
+        const ry = (rect.top / window.innerHeight) * h;
+        const rw = Math.max(2, (rect.width / window.innerWidth) * w);
+        const rh = Math.max(2, (rect.height / window.innerHeight) * h);
 
-      this.radarCtx.fillStyle = color;
-      this.radarCtx.fillRect(rx, ry, rw, rh);
-    });
+        let color = "rgba(255, 255, 255, 0.3)";
+        if (card.classList.contains("matched-card")) {
+          color = "#00e5ff";
+        } else if (card.classList.contains("spotlight")) {
+          color = "#ff0055";
+        }
+
+        this.radarCtx.fillStyle = color;
+        this.radarCtx.fillRect(rx, ry, rw, rh);
+      });
+    }
+
+    // Draw Echo Documents as depth-linked blips
+    const echoes = document.querySelectorAll(".echo-document");
+    if (echoes.length > 0) {
+      echoes.forEach((echo) => {
+        const rect = echo.getBoundingClientRect();
+        const rx = ((rect.left + rect.width / 2) / window.innerWidth) * w;
+        const ry = ((rect.top + rect.height / 2) / window.innerHeight) * h;
+
+        // Depth from tz CSS variable
+        const tzVal = parseFloat(echo.style.getPropertyValue("--tz")) || 0;
+        const depthNorm = Math.max(0, Math.min(1, (-tzVal) / 1000)); // 0 = front, 1 = deep back
+
+        // Deep = dimmer, smaller, cooler (bluer)
+        // Shallow = brighter, larger, warmer (cyan/white)
+        const size = Math.max(1.5, 4 - depthNorm * 2.5);
+        const brightness = 1 - depthNorm * 0.6;
+        const r = Math.floor(100 + 155 * brightness);
+        const g = Math.floor(180 + 75 * brightness);
+        const b = Math.floor(255);
+        const color = `rgba(${r}, ${g}, ${b}, ${0.3 + brightness * 0.5})`;
+        const glow = `rgba(${r}, ${g}, ${b}, ${0.15 + brightness * 0.25})`;
+
+        // Glow halo
+        this.radarCtx.shadowBlur = 6 + depthNorm * 4;
+        this.radarCtx.shadowColor = glow;
+        this.radarCtx.fillStyle = color;
+        this.radarCtx.beginPath();
+        this.radarCtx.arc(rx, ry, size, 0, Math.PI * 2);
+        this.radarCtx.fill();
+        this.radarCtx.shadowBlur = 0;
+      });
+    }
 
     // Draw Viewport "Scan" line
     const scanY = ((time * 0.2) % 1) * h;
