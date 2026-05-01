@@ -1858,9 +1858,7 @@ Drag to change depth`;
                   el.style.setProperty('--tz', `calc(-${idx * 50}px + var(--stack-z, 0px))`);
               }
           }
-        }
       });
-
       // Calculate atmospheric depth based on tz
       const tzVal = parseFloat(el.style.getPropertyValue("--tz")) || 0;
       el.style.setProperty("--tz-val", tzVal);

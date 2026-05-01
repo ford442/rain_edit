@@ -290,6 +290,66 @@ export class ConnectionManager {
         });
       }
 
+      // Draw Echo-Layer Constellation Connections (Ambient geometric mesh)
+      const allEchoes = document.querySelectorAll(".echo-document");
+      if (allEchoes.length > 1 && document.body.classList.contains("constellation-active")) {
+        const echoData = Array.from(allEchoes).map((echo) => {
+          const rect = echo.getBoundingClientRect();
+          const titleEl = echo.querySelector(".echo-title");
+          const extMatch = titleEl ? titleEl.textContent.match(/\.[0-9a-z]+$/i) : null;
+          const ext = extMatch ? extMatch[0].toLowerCase() : null;
+          return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+            ext: ext
+          };
+        });
+
+        this.ctx.save();
+        this.ctx.lineWidth = 0.8;
+        this.ctx.shadowBlur = 8;
+        this.ctx.shadowColor = "rgba(100, 200, 255, 0.4)";
+
+        for (let i = 0; i < echoData.length; i++) {
+          for (let j = i + 1; j < echoData.length; j++) {
+            const a = echoData[i];
+            const b = echoData[j];
+
+            // Only connect if they have the same extension and it exists
+            if (!a.ext || !b.ext || a.ext !== b.ext) continue;
+
+            const dist = Math.hypot(a.x - b.x, a.y - b.y);
+
+            if (dist < 500) { // Connection threshold
+              const pulse = (Math.sin(time + i * 0.5 + j * 0.5) + 1) / 2; // 0 to 1
+              const opacity = (1 - dist / 500) * 0.25 * pulse; // Fade out by distance
+
+              if (opacity > 0.01) {
+                this.ctx.strokeStyle = `rgba(200, 230, 255, ${opacity})`;
+                this.ctx.beginPath();
+                this.ctx.moveTo(a.x, a.y);
+                this.ctx.lineTo(b.x, b.y);
+                this.ctx.stroke();
+
+                // Occasional faint data pulse along the constellation line
+                const flowTime = (time * 0.5 + i * 0.1 + j * 0.1) % 1;
+                if (flowTime < 0.1) {
+                  const t = flowTime * 10; // map 0-0.1 to 0-1
+                  const px = a.x + (b.x - a.x) * t;
+                  const py = a.y + (b.y - a.y) * t;
+
+                  this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity + 0.2})`;
+                  this.ctx.beginPath();
+                  this.ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+                  this.ctx.fill();
+                }
+              }
+            }
+          }
+        }
+        this.ctx.restore();
+      }
+
       // Draw "timeline rail" if timeline view is active
       if (document.body.classList.contains("timeline-active")) {
         const echoes = document.querySelectorAll(".echo-document");
@@ -387,10 +447,6 @@ export class ConnectionManager {
     const h = this.radarCanvas.height;
     this.radarCtx.clearRect(0, 0, w, h);
 
-    if (!this.referenceManager) return;
-    const cards = this.referenceManager.getCards();
-    if (!cards || cards.length === 0) return;
-
     // Draw grid lines
     this.radarCtx.strokeStyle = "rgba(255, 255, 255, 0.1)";
     this.radarCtx.lineWidth = 1;
@@ -401,23 +457,84 @@ export class ConnectionManager {
     this.radarCtx.lineTo(w, h / 2);
     this.radarCtx.stroke();
 
-    cards.forEach((card) => {
-      const rect = card.getBoundingClientRect();
-      // Map screen coords to radar coords
+    if (this.referenceManager) {
+      const cards = this.referenceManager.getCards();
+      if (cards && cards.length > 0) {
+        cards.forEach((card) => {
+          const rect = card.getBoundingClientRect();
+          // Map screen coords to radar coords
+          const rx = (rect.left / window.innerWidth) * w;
+          const ry = (rect.top / window.innerHeight) * h;
+          const rw = Math.max(2, (rect.width / window.innerWidth) * w);
+          const rh = Math.max(2, (rect.height / window.innerHeight) * h);
+
+          let color = "rgba(255, 255, 255, 0.3)";
+          if (card.classList.contains("matched-card")) {
+            color = "#00e5ff";
+          } else if (card.classList.contains("spotlight")) {
+            color = "#ff0055";
+          }
+
+          this.radarCtx.fillStyle = color;
+          this.radarCtx.fillRect(rx, ry, rw, rh);
+        });
+      }
+    }
+
+    // Draw Echo Documents
+    const echoes = document.querySelectorAll(".echo-document");
+    echoes.forEach((echo) => {
+      const rect = echo.getBoundingClientRect();
       const rx = (rect.left / window.innerWidth) * w;
       const ry = (rect.top / window.innerHeight) * h;
-      const rw = Math.max(2, (rect.width / window.innerWidth) * w);
-      const rh = Math.max(2, (rect.height / window.innerHeight) * h);
 
-      let color = "rgba(255, 255, 255, 0.3)";
-      if (card.classList.contains("matched-card")) {
-        color = "#00e5ff";
-      } else if (card.classList.contains("spotlight")) {
-        color = "#ff0055";
+      let color = "rgba(200, 200, 200, 0.6)"; // Default
+      const titleEl = echo.querySelector(".echo-title");
+      if (titleEl) {
+        const text = titleEl.textContent.toLowerCase();
+        if (text.endsWith(".js")) color = "rgba(255, 215, 0, 0.8)"; // Yellow
+        else if (text.endsWith(".css")) color = "rgba(0, 191, 255, 0.8)"; // Blue
+        else if (text.endsWith(".html")) color = "rgba(255, 87, 34, 0.8)"; // Orange
+        else if (text.endsWith(".md")) color = "rgba(255, 255, 255, 0.8)"; // White
       }
 
+      // Parse depth from --tz (usually negative or 0)
+      const tzStr = echo.style.getPropertyValue("--tz") || "0px";
+      const tz = parseFloat(tzStr) || 0;
+
+      // Map tz (e.g., -500 to 0) to a depth factor (0.1 to 1.0)
+      // Closer (tz near 0) -> factor near 1.0
+      // Further (tz heavily negative) -> factor near 0.1
+      const maxDepth = 1000;
+      const depthFactor = Math.max(0.1, 1 - (Math.abs(tz) / maxDepth));
+
+      const radius = 2 + (depthFactor * 3); // Closer docs have larger radius (up to 5)
+      const alpha = 0.2 + (depthFactor * 0.8);
+
+      this.radarCtx.save();
+      this.radarCtx.globalAlpha = alpha;
       this.radarCtx.fillStyle = color;
-      this.radarCtx.fillRect(rx, ry, rw, rh);
+
+      // Draw concentric rings based on depth
+      if (depthFactor > 0.6) {
+        this.radarCtx.strokeStyle = color;
+        this.radarCtx.lineWidth = 0.5;
+        this.radarCtx.beginPath();
+        this.radarCtx.arc(rx, ry, radius + 3, 0, Math.PI * 2);
+        this.radarCtx.stroke();
+
+        if (depthFactor > 0.8) {
+           this.radarCtx.beginPath();
+           this.radarCtx.arc(rx, ry, radius + 6, 0, Math.PI * 2);
+           this.radarCtx.stroke();
+        }
+      }
+
+      this.radarCtx.beginPath();
+      // Draw as a circle blip
+      this.radarCtx.arc(rx, ry, radius, 0, Math.PI * 2);
+      this.radarCtx.fill();
+      this.radarCtx.restore();
     });
 
     // Draw Viewport "Scan" line
