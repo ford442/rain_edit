@@ -1,3 +1,10 @@
+export class ConnectionManager {
+  constructor(radarCanvas, radarCtx, referenceManager = null) {
+    this.radarCanvas = radarCanvas;
+    this.radarCtx = radarCtx;
+    this.referenceManager = referenceManager;
+  }
+
   drawRadar(time) {
     if (!this.radarCtx || !this.radarCanvas) return;
 
@@ -55,4 +62,13 @@
         const r = Math.floor(100 + 155 * brightness);
         const g = Math.floor(180 + 75 * brightness);
         const b = Math.floor(255);
-        const color = `rgba(${r}, ${g}, ${b}, ${0.3 + brightness * 0`*
+        const color = `rgba(${r}, ${g}, ${b}, ${0.3 + brightness * 0.7})`;
+
+        this.radarCtx.fillStyle = color;
+        this.radarCtx.beginPath();
+        this.radarCtx.arc(rx, ry, size, 0, Math.PI * 2);
+        this.radarCtx.fill();
+      });
+    }
+  }
+}
