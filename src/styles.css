@@ -2352,6 +2352,12 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
     saturate(calc(100% + var(--tz-depth-saturate, 0%)))
     brightness(calc(100% + var(--tz-depth-brightness, 0%)));
 
+  /* Deep Layer Breathing */
+  animation: deep-pulse calc(10s + (var(--index, 0) * 2s)) infinite alternate ease-in-out;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(0, 0, 0, 0.1) 100%);
+  overflow: hidden; /* To contain glare */
+
   /* Transform including scroll parallax and wake pop */
   transform: translate3d(
       calc(
@@ -5126,11 +5132,13 @@ body.peel-active #editor {
   pointer-events: none;
   z-index: 10;
 
-  /* Use mask-composite to apply border glow */
+  /* Prismatic Dispersion Border */
   background: radial-gradient(
-    400px circle at var(--mouse-local-x, -100%) var(--mouse-local-y, -100%),
-    rgba(0, 229, 255, 0.4),
-    transparent 40%
+    600px circle at var(--mouse-local-x, -100%) var(--mouse-local-y, -100%),
+    rgba(0, 229, 255, 0.8) 0%,
+    rgba(255, 0, 128, 0.6) 20%,
+    rgba(0, 255, 200, 0.2) 40%,
+    transparent 60%
   );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
@@ -5270,6 +5278,22 @@ body.peel-active #editor {
 .echo-document.is-peeking::before {
   opacity: 0.1; /* Fade out scanlines when brought to focus */
 }
+
+/* Elevated Peeking State */
+.echo-document.is-peeking {
+  box-shadow:
+    0 100px 300px rgba(0, 0, 0, 0.95),
+    0 0 100px rgba(0, 229, 255, 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(0, 229, 255, 0.6) !important;
+  background: rgba(10, 15, 25, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 16px !important;
+  opacity: 1 !important;
+  z-index: 9999 !important;
+}
+
 
 /* Origami View */
 body.origami-active .echo-document {
@@ -5411,4 +5435,30 @@ body.data-hive-active .echo-document:hover {
   filter: drop-shadow(0 0 30px rgba(255, 165, 0, 1));
   z-index: 9999 !important;
   transform: translate3d(var(--tx), var(--ty), calc(var(--tz) + 100px)) scale(1.1) !important;
+}
+
+@keyframes deep-pulse {
+  0% { transform: translate3d(calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px)), calc(var(--ty, 0px) + var(--part-ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) + var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px)), calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px))) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) rotateZ(var(--rot-z, 0deg)); filter: blur(calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)))) hue-rotate(var(--echo-tint, 0deg)) saturate(calc(100% + var(--tz-depth-saturate, 0%))) brightness(calc(100% + var(--tz-depth-brightness, 0%))); }
+  100% { transform: translate3d(calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px)), calc(var(--ty, 0px) + var(--part-ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) + var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px)), calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px) + 5px)) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) rotateZ(var(--rot-z, 0deg)); filter: blur(calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)) + 1px)) hue-rotate(var(--echo-tint, 0deg)) saturate(calc(100% + var(--tz-depth-saturate, 0%))) brightness(calc(100% + var(--tz-depth-brightness, 0%) + 10%)); }
+}
+
+/* Dynamic Holographic Glare */
+.echo-document::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    800px circle at var(--mouse-local-x, -100%) var(--mouse-local-y, -100%),
+    rgba(255, 255, 255, 0.08),
+    transparent 40%
+  );
+  z-index: 15;
+  border-radius: inherit;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.echo-document:hover::after {
+  opacity: 1;
 }

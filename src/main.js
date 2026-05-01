@@ -663,7 +663,7 @@ document.addEventListener("mousemove", (e) => {
   const mx = e.clientX;
   const my = e.clientY;
 
-  // Track cursor position globally for CSS effects
+// Track cursor position globally for CSS effects
   document.body.style.setProperty("--mouse-x", `${mx}px`);
   document.body.style.setProperty("--mouse-y", `${my}px`);
 
@@ -672,6 +672,30 @@ document.addEventListener("mousemove", (e) => {
   const ny = (my / window.innerHeight) * 2 - 1;
   document.body.style.setProperty('--mouse-nx', nx);
   document.body.style.setProperty('--mouse-ny', ny);
+
+  // --- NEW: Calculate local coordinates for echo-documents (for magnetic-edge and holographic glares) ---
+  if (echoLayerEl) {
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach(echo => {
+      const rect = echo.getBoundingClientRect();
+      // Only calculate if document is reasonably visible or nearby to save performance
+      const localX = mx - rect.left;
+      const localY = my - rect.top;
+
+      echo.style.setProperty('--mouse-local-x', `${localX}px`);
+      echo.style.setProperty('--mouse-local-y', `${localY}px`);
+
+      // Calculate normalized local coords for 3D tilt
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const hoverRotY = ((localX - centerX) / centerX) * 5; // max 5deg tilt
+      const hoverRotX = -((localY - centerY) / centerY) * 5;
+
+      echo.style.setProperty('--hover-rot-x', `${hoverRotX}deg`);
+      echo.style.setProperty('--hover-rot-y', `${hoverRotY}deg`);
+    });
+  }
+  // --- END NEW ---
 
   // Define UI elements that exert "gravity"
   const dockEl = document.getElementById("dock");
