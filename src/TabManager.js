@@ -1859,7 +1859,6 @@ Drag to change depth`;
               }
           }
       });
-
       // Calculate atmospheric depth based on tz
       const tzVal = parseFloat(el.style.getPropertyValue("--tz")) || 0;
       el.style.setProperty("--tz-val", tzVal);
