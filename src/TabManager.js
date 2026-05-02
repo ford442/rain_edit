@@ -58,6 +58,7 @@ export class TabManager {
     this.isConstellationView = false;
     this.isPrismView = false;
     this.isCoverflowView = false;
+    this.isCrystalView = false;
     this.isWaveView = false;
     this.isSphereView = false;
     this.isBlackHoleView = false;
@@ -68,6 +69,7 @@ export class TabManager {
   }
 
   _deactivateAllViews() {
+    this.isCrystalView = false;
     this.isWaterfallView = false;
     this.isCascadeView = false;
     this.isOrbitView = false;
@@ -156,6 +158,18 @@ export class TabManager {
       this.isCoverflowView = true;
       document.body.classList.add("coverflow-active");
       const btn = document.getElementById("btn-coverflow-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleCrystalView() {
+    const wasActive = this.isCrystalView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCrystalView = true;
+      document.body.classList.add("crystal-active");
+      const btn = document.getElementById("btn-crystal-view");
       if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
@@ -998,6 +1012,10 @@ Drag to change depth`;
       edgeBleedLayer.className = "edge-bleed-layer";
       el.appendChild(edgeBleedLayer);
 
+      const spotlight = document.createElement("div");
+      spotlight.className = "volumetric-spotlight";
+      el.appendChild(spotlight);
+
       // Ghost Scroll feature: allow scrolling without bringing document to front
       pre.addEventListener("wheel", (e) => {
         e.stopPropagation(); // prevent main editor from scrolling
@@ -1364,6 +1382,26 @@ Drag to change depth`;
         const tx = (col - cols / 2) * hexWidth + xOffset;
         const ty = (row - cols / 2) * hexHeight;
         const tz = -400 - (row * 50); // Slight slant backward
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', '0deg');
+        el.style.setProperty('--rot-y', '0deg');
+      } else if (this.isCrystalView) {
+        // Crystal Lattice View: 3D Grid Arrangement
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const size = Math.ceil(Math.cbrt(totalEchoes)); // Cube root for 3D grid
+        const spacing = 350; // Spacing between nodes
+
+        const zLayer = Math.floor(index / (size * size));
+        const rem = index % (size * size);
+        const yLayer = Math.floor(rem / size);
+        const xLayer = rem % size;
+
+        const tx = (xLayer - size / 2) * spacing;
+        const ty = (yLayer - size / 2) * spacing;
+        const tz = -600 - (zLayer * spacing);
 
         el.style.setProperty('--tx', `${tx}px`);
         el.style.setProperty('--ty', `${ty}px`);
@@ -1850,6 +1888,15 @@ Drag to change depth`;
                   const index = parseInt(el.dataset.index || 0);
                   const row = Math.floor(index / cols);
                   const tz = -400 - (row * 50);
+                  el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isCrystalView) {
+                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+                  const totalEchoes = Math.max(1, inactiveFiles.length);
+                  const size = Math.ceil(Math.cbrt(totalEchoes));
+                  const index = parseInt(el.dataset.index || 0);
+                  const spacing = 350;
+                  const zLayer = Math.floor(index / (size * size));
+                  const tz = -600 - (zLayer * spacing);
                   el.style.setProperty('--tz', `${tz}px`);
               } else if (this.isWaveView) {
                   el.style.setProperty('--tz', `-150px`);

@@ -673,6 +673,36 @@ document.addEventListener("mousemove", (e) => {
   document.body.style.setProperty('--mouse-nx', nx);
   document.body.style.setProperty('--mouse-ny', ny);
 
+  // 3D Magnifying Glass Effect (Shift Key)
+  if (e.shiftKey && tabManager && tabManager.files) {
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach((echo) => {
+      const rect = echo.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dist = Math.sqrt(Math.pow(mx - cx, 2) + Math.pow(my - cy, 2));
+
+      if (dist < 300) {
+        // Apply magnetic pull and lens effect
+        const pullFactor = 1 - dist / 300;
+        echo.style.setProperty("--lens-pull", pullFactor);
+        echo.classList.add("shift-lens-hit");
+      } else {
+        echo.style.setProperty("--lens-pull", 0);
+        echo.classList.remove("shift-lens-hit");
+      }
+    });
+    window.__lensActive = true;
+  } else if (echoLayerEl && window.__lensActive) {
+    // Clear lens effect if shift is released or mouse moves away
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach((echo) => {
+      echo.style.setProperty("--lens-pull", 0);
+      echo.classList.remove("shift-lens-hit");
+    });
+    window.__lensActive = false;
+  }
+
   // --- NEW: Calculate local coordinates for echo-documents (for magnetic-edge and holographic glares) ---
   if (echoLayerEl) {
     const echoes = echoLayerEl.querySelectorAll(".echo-document");
@@ -1282,6 +1312,7 @@ if (viewModeSelect) {
     else if (view === "origami") tabManager.toggleOrigamiView();
     else if (view === "matrix-rain") tabManager.toggleMatrixRainView();
             else if (view === 'data-hive') tabManager.toggleDataHiveView();
+    else if (view === "crystal") tabManager.toggleCrystalView();
 
     else tabManager._deactivateAllViews(); // Default view
   });
@@ -2641,6 +2672,17 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  if (e.key === "Shift") {
+    if (echoLayerEl && window.__lensActive) {
+      const echoes = echoLayerEl.querySelectorAll(".echo-document");
+      echoes.forEach((echo) => {
+        echo.style.setProperty("--lens-pull", 0);
+        echo.classList.remove("shift-lens-hit");
+      });
+      window.__lensActive = false;
+    }
+  }
+
   if (e.key === "Alt" || e.key === "Shift") {
     if (!e.altKey || !e.shiftKey) {
       isPeelActive = false;

@@ -5462,3 +5462,69 @@ body.data-hive-active .echo-document:hover {
 .echo-document:hover::after {
   opacity: 1;
 }
+
+/* Glassmorphism UI */
+#dock,
+#tabs-container {
+  background: rgba(10, 15, 25, 0.4) !important;
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.echo-header {
+  background: linear-gradient(180deg, rgba(20, 25, 35, 0.8), rgba(10, 15, 25, 0.4)) !important;
+  backdrop-filter: blur(4px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px 8px 0 0;
+}
+
+/* Crystal Lattice View Specifics */
+body.crystal-active .echo-document {
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  backdrop-filter: blur(10px) brightness(1.2);
+}
+
+body.crystal-active .echo-document::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(45deg, rgba(0,255,255,0.3), transparent, rgba(255,0,255,0.3));
+  z-index: -1;
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* 3D Magnifying Glass Effect */
+.echo-document.shift-lens-hit {
+  transform: translate3d(var(--tx), var(--ty), calc(var(--tz) + (var(--lens-pull, 0) * 400px)))
+             rotateX(calc(var(--rot-x) + var(--hover-rot-x, 0deg)))
+             rotateY(calc(var(--rot-y) + var(--hover-rot-y, 0deg))) !important;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.2s;
+  filter: brightness(calc(1 + var(--lens-pull, 0) * 0.5)) saturate(calc(1 + var(--lens-pull, 0)));
+  z-index: calc(100 + (var(--lens-pull, 0) * 100));
+}
+
+/* Volumetric Spotlight */
+.volumetric-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mouse-local-x, 50%) var(--mouse-local-y, 50%),
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.02) 40%,
+    transparent 80%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+  mix-blend-mode: overlay;
+}
+
+.echo-document:hover .volumetric-spotlight {
+  opacity: 1;
+}
