@@ -66,6 +66,7 @@ export class TabManager {
     this.isCylinderView = false;
     this.isGalaxyView = false;
     this.isMatrixRainView = false;
+    this.isFractalView = false;
   }
 
   _deactivateAllViews() {
@@ -93,6 +94,7 @@ export class TabManager {
     this.isGalaxyView = false;
     this.isOrigamiView = false;
     this.isDataHiveView = false;
+    this.isFractalView = false;
 
     document.body.classList.remove(
       'waterfall-active', 
@@ -118,7 +120,8 @@ export class TabManager {
       'galaxy-active',
       'origami-active',
       'data-hive-active',
-      "matrix-rain-active"
+      "matrix-rain-active",
+      "fractal-active"
     );
 
     this.isOrigamiView = false;
@@ -144,7 +147,8 @@ export class TabManager {
       'btn-sphere-view',
       'btn-rolodex-view',
       'btn-data-hive-view',
-      "btn-matrix-rain-view"
+      "btn-matrix-rain-view",
+      "btn-fractal-view"
     ].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
@@ -158,6 +162,18 @@ export class TabManager {
       this.isCoverflowView = true;
       document.body.classList.add("coverflow-active");
       const btn = document.getElementById("btn-coverflow-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleFractalView() {
+    const wasActive = this.isFractalView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isFractalView = true;
+      document.body.classList.add("fractal-active");
+      const btn = document.getElementById("btn-fractal-view");
       if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
@@ -782,7 +798,8 @@ Drag to change depth`;
         !this.isSphereView &&
         !this.isRolodexView &&
         !this.isCylinderView &&
-        !this.isMatrixRainView
+        !this.isMatrixRainView &&
+        !this.isFractalView
       ) {
         el.classList.add("semantic-gravity-pull");
       }
@@ -1246,6 +1263,61 @@ Drag to change depth`;
         el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", `${rotZ}deg`);
+      } else if (this.isMatrixRainView) {
+        // Arrange items randomly on X and Z, falling down from Y
+        const maxCols = 10;
+        const col = index % maxCols;
+        const colWidth = window.innerWidth / maxCols;
+
+        // Spread out evenly but with some jitter
+        const tX = -window.innerWidth / 2 + (col * colWidth) + (Math.random() * 50);
+
+        // Random Y start position for staggered falling effect
+        // We set startY uniformly within a viewport height so that
+        // they loop inside the animation keyframes (-100vh to 100vh) consistently
+        const startY = -window.innerHeight / 2 - (Math.random() * window.innerHeight);
+
+        // Z-depth spread
+        const tZ = -300 - (Math.random() * 600);
+
+        const rX = 0;
+        const rY = 0;
+        const rZ = 0;
+
+        el.style.setProperty("--tx", `${tX}px`);
+        el.style.setProperty("--ty", `${startY}px`);
+        el.style.setProperty("--tz", `${tZ}px`);
+        el.style.setProperty("--rot-x", `${rX}deg`);
+        el.style.setProperty("--rot-y", `${rY}deg`);
+        el.style.setProperty("--rot-z", `${rZ}deg`);
+
+        // Use animation delay to randomize falling
+        el.style.setProperty("--matrix-delay", `${Math.random() * 5}s`);
+      } else if (this.isFractalView) {
+        // Fractal Tree positioning
+        const depth = Math.floor(Math.log2(index + 1)); // 0, 1, 2, 3...
+        const indexInLevel = index - (Math.pow(2, depth) - 1); // 0, 0,1, 0,1,2,3...
+        const itemsInLevel = Math.pow(2, depth);
+
+        // Spread evenly horizontally based on depth
+        const xSpread = window.innerWidth * 0.8;
+        const startX = -xSpread / 2;
+        const stepX = itemsInLevel > 1 ? xSpread / (itemsInLevel - 1) : 0;
+
+        const tX = startX + (indexInLevel * stepX);
+        const tY = depth * 300 - 400; // Go down as depth increases
+        const tZ = -depth * 200; // Go back as depth increases
+
+        const rX = 0;
+        const rY = 0;
+        const rZ = 0;
+
+        el.style.setProperty("--tx", `${tX}px`);
+        el.style.setProperty("--ty", `${tY}px`);
+        el.style.setProperty("--tz", `${tZ}px`);
+        el.style.setProperty("--rot-x", `${rX}deg`);
+        el.style.setProperty("--rot-y", `${rY}deg`);
+        el.style.setProperty("--rot-z", `${rZ}deg`);
       } else if (this.isVortexView) {
         // Vortex View positions
         const totalEchoes = inactiveFiles.length;
@@ -1730,9 +1802,10 @@ Drag to change depth`;
             this.isSphereView ||
             this.isRolodexView ||
             this.isCylinderView ||
-            this.isMatrixRainView
+            this.isMatrixRainView ||
+            this.isFractalView
           ) {
-            // Pop out for pinboard/helix/vortex/prism/wave/rolodex/cylinder
+            // Pop out for pinboard/helix/vortex/prism/wave/rolodex/cylinder/fractal
             const tz = parseFloat(el.style.getPropertyValue("--tz")) || 0;
             el.style.setProperty("--tz", `${tz + 150}px`);
             if (this.isPinboardView || this.isVortexView) {
