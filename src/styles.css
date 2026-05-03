@@ -5528,3 +5528,93 @@ body.crystal-active .echo-document::before {
 .echo-document:hover .volumetric-spotlight {
   opacity: 1;
 }
+
+/* Matrix Rain View */
+body.matrix-rain-active .echo-document {
+  opacity: 0.8;
+  border: 1px solid rgba(0, 255, 0, 0.4);
+  background: rgba(0, 15, 0, 0.9);
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 10px rgba(0, 255, 0, 0.2);
+  color: #0f0;
+  text-shadow: 0 0 5px #0f0;
+  font-family: "JetBrains Mono", monospace;
+  animation: matrix-fall 10s linear infinite;
+  animation-delay: var(--matrix-delay, 0s);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px)),
+      var(--tz, 0px)
+    );
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+body.matrix-rain-active .echo-document pre,
+body.matrix-rain-active .echo-document code {
+  color: #0f0 !important;
+  text-shadow: 0 0 5px #0f0 !important;
+}
+
+body.matrix-rain-active .echo-document [class^="mtk"] {
+  color: #0f0 !important;
+  text-shadow: 0 0 5px #0f0 !important;
+}
+
+body.matrix-rain-active .echo-document:hover {
+  opacity: 1;
+  z-index: 100 !important;
+  box-shadow: 0 0 40px rgba(0, 255, 0, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.4);
+  border: 1px solid rgba(0, 255, 0, 0.8);
+  filter: brightness(1.5);
+  animation-play-state: paused;
+}
+
+@keyframes matrix-fall {
+  0% {
+    transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px)),
+      var(--tz, 0px)
+    );
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + 200vh),
+      var(--tz, 0px)
+    );
+    opacity: 0;
+  }
+}
+
+/* Fractal Tree View */
+body.fractal-active .echo-document {
+  transition: transform 0.8s cubic-bezier(0.1, 0.7, 0.1, 1), opacity 0.5s ease, filter 0.5s ease;
+  transform-style: preserve-3d;
+  opacity: 0.85;
+  filter: hue-rotate(90deg) brightness(1.2);
+  border: 1px solid rgba(100, 255, 100, 0.4);
+  box-shadow: 0 0 30px rgba(100, 255, 100, 0.2), inset 0 0 15px rgba(100, 255, 100, 0.1);
+  border-radius: 12px;
+}
+
+body.fractal-active .echo-document:hover {
+  opacity: 1;
+  filter: hue-rotate(90deg) brightness(1.5) drop-shadow(0 0 20px rgba(100, 255, 100, 0.8));
+  z-index: 100 !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    ) scale(1.1) !important;
+}
+
+body.fractal-active #echo-layer {
+  perspective: 2500px;
+}

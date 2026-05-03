@@ -1313,6 +1313,7 @@ if (viewModeSelect) {
     else if (view === "matrix-rain") tabManager.toggleMatrixRainView();
             else if (view === 'data-hive') tabManager.toggleDataHiveView();
     else if (view === "crystal") tabManager.toggleCrystalView();
+    else if (view === "fractal") tabManager.toggleFractalView();
 
     else tabManager._deactivateAllViews(); // Default view
   });
