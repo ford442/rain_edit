@@ -841,6 +841,7 @@ document.addEventListener("mousemove", (e) => {
     echoLayerEl &&
     !tabManager.isCascadeView &&
     !tabManager.isOrbitView &&
+    !tabManager.isSolarSystemView &&
     !tabManager.isScatteredView &&
     !tabManager.isIsometricView &&
     !tabManager.isStackView &&
@@ -921,6 +922,14 @@ document.addEventListener("mousemove", (e) => {
       // Rotate entire echo layer based on horizontal mouse position
       const orbitRot = -x * 360;
       echoLayerEl.style.setProperty("--orbit-global-rot", `${orbitRot}deg`);
+    }
+
+    if (tabManager.isSolarSystemView) {
+      // Tilt entire solar system based on mouse position
+      const solarRotX = y * 30 + 60; // Base tilt 60deg + 30deg from mouse
+      const solarRotY = x * 20;
+      echoLayerEl.style.setProperty("--solar-global-rot-x", `${solarRotX}deg`);
+      echoLayerEl.style.setProperty("--solar-global-rot-y", `${solarRotY}deg`);
     }
 
     if (tabManager.isHelixView) {
@@ -1314,6 +1323,7 @@ if (viewModeSelect) {
             else if (view === 'data-hive') tabManager.toggleDataHiveView();
     else if (view === "crystal") tabManager.toggleCrystalView();
     else if (view === "fractal") tabManager.toggleFractalView();
+    else if (view === "solar-system") tabManager.toggleSolarSystemView();
 
     else tabManager._deactivateAllViews(); // Default view
   });
@@ -2694,6 +2704,7 @@ document.addEventListener("keyup", (e) => {
         typeof tabManager !== "undefined" &&
         !tabManager.isCascadeView &&
         !tabManager.isOrbitView &&
+    !tabManager.isSolarSystemView &&
         !tabManager.isScatteredView &&
         !tabManager.isIsometricView &&
         !tabManager.isStackView &&

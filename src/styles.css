@@ -5618,3 +5618,50 @@ body.fractal-active .echo-document:hover {
 body.fractal-active #echo-layer {
   perspective: 2500px;
 }
+
+/* --- Solar System View --- */
+body.solar-system-active #echo-layer {
+  transform: rotateX(var(--solar-global-rot-x, 60deg)) rotateY(var(--solar-global-rot-y, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+body.solar-system-active .echo-document {
+  /* Positioning set by TabManager via --orbit-radius, --orbit-start-angle */
+  transform: translateZ(var(--tz, -200px)) rotateZ(var(--orbit-start-angle, 0rad)) translateX(var(--orbit-radius, 300px)) rotateZ(calc(-1 * var(--orbit-start-angle, 0rad))) rotateX(-90deg);
+  animation: solar-orbit calc(30s * var(--orbit-index, 1)) linear infinite;
+  transform-origin: 50% 50%;
+  /* Optional visual styling for documents in orbit */
+  border: 1px solid rgba(255, 200, 0, 0.2);
+  box-shadow: 0 0 30px rgba(255, 200, 0, 0.1);
+}
+
+@keyframes solar-orbit {
+  from {
+    transform: translateZ(var(--tz, -200px)) rotateZ(var(--orbit-start-angle, 0rad)) translateX(var(--orbit-radius, 300px)) rotateZ(calc(-1 * var(--orbit-start-angle, 0rad))) rotateX(-90deg);
+  }
+  to {
+    /* We add 360deg to the start angle to make a full orbit */
+    transform: translateZ(var(--tz, -200px)) rotateZ(calc(var(--orbit-start-angle, 0rad) + 360deg)) translateX(var(--orbit-radius, 300px)) rotateZ(calc(-1 * (var(--orbit-start-angle, 0rad) + 360deg))) rotateX(-90deg);
+  }
+}
+
+body.solar-system-active #editor {
+  box-shadow: 0 0 150px rgba(255, 200, 0, 0.4), inset 0 0 50px rgba(255, 200, 0, 0.2) !important;
+  border: 1px solid rgba(255, 200, 0, 0.5) !important;
+  transform: scale(0.9) translateZ(50px) !important;
+  transition: all 0.5s ease-out;
+}
+
+body.solar-system-active #echo-layer::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200vw;
+  height: 200vw;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, transparent 20%, rgba(255, 200, 0, 0.05) 50%, transparent 80%);
+  border-radius: 50%;
+  pointer-events: none;
+}

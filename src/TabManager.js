@@ -67,6 +67,7 @@ export class TabManager {
     this.isGalaxyView = false;
     this.isMatrixRainView = false;
     this.isFractalView = false;
+    this.isSolarSystemView = false;
   }
 
   _deactivateAllViews() {
@@ -95,6 +96,7 @@ export class TabManager {
     this.isOrigamiView = false;
     this.isDataHiveView = false;
     this.isFractalView = false;
+    this.isSolarSystemView = false;
 
     document.body.classList.remove(
       'waterfall-active', 
@@ -121,7 +123,8 @@ export class TabManager {
       'origami-active',
       'data-hive-active',
       "matrix-rain-active",
-      "fractal-active"
+      "fractal-active",
+      "solar-system-active"
     );
 
     this.isOrigamiView = false;
@@ -148,7 +151,8 @@ export class TabManager {
       'btn-rolodex-view',
       'btn-data-hive-view',
       "btn-matrix-rain-view",
-      "btn-fractal-view"
+      "btn-fractal-view",
+      "btn-solar-system-view"
     ].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.classList.remove('active');
@@ -162,6 +166,18 @@ export class TabManager {
       this.isCoverflowView = true;
       document.body.classList.add("coverflow-active");
       const btn = document.getElementById("btn-coverflow-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleSolarSystemView() {
+    const wasActive = this.isSolarSystemView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isSolarSystemView = true;
+      document.body.classList.add("solar-system-active");
+      const btn = document.getElementById("btn-solar-system-view");
       if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
@@ -1415,6 +1431,36 @@ Drag to change depth`;
         el.style.setProperty("--scatter-y", "0px");
         el.style.setProperty("--scatter-z", "0px");
         el.style.setProperty("--scatter-rot", "0deg");
+      } else if (this.isSolarSystemView) {
+        // Concentric orbits around the center.
+        // Index determines the orbit radius and speed.
+        const orbitSpacing = 200; // Distance between orbits
+        const radius = 300 + (index * orbitSpacing);
+
+        // Stagger the starting angles
+        const startAngle = (index * Math.PI * 0.7) % (Math.PI * 2);
+
+        // Pass the radius to CSS for animation
+        el.style.setProperty("--orbit-radius", `${radius}px`);
+        el.style.setProperty("--orbit-start-angle", `${startAngle}rad`);
+
+        // We'll let CSS keyframes handle the x/y translation for the orbit,
+        // but we'll set base transforms here to position the orbital plane.
+        // By default we use a tilted plane
+        el.style.setProperty("--tx", "0px");
+        el.style.setProperty("--ty", "0px");
+        el.style.setProperty("--tz", "-200px"); // Push back slightly
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+
+        // Pass index to CSS to vary the orbit duration
+        el.style.setProperty("--orbit-index", index + 1);
+
       } else if (this.isOrigamiView) {
         // Origami spatial view calculation
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -1936,6 +1982,10 @@ Drag to change depth`;
                   const radius = 600;
                   const tz = Math.cos(angle) * radius - 200;
                   el.style.setProperty('--tz', `${tz}px`);
+              } else if (this.isSolarSystemView) {
+                  // In hover out, we just need to make sure we don't clobber the animation properties
+                  // We'll set a base tz. The orbit animation handles the rest.
+                  el.style.setProperty('--tz', `-200px`);
               } else if (this.isOrigamiView) {
                   const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
                   const totalEchoes = Math.max(1, inactiveFiles.length);
