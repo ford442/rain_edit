@@ -41,6 +41,7 @@ import { TabManager } from "./TabManager.js";
 import { StorageAPI } from "./StorageAPI.js";
 import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
+import DataSiphon from "./DataSiphon.js";
 import backFrag from "./shaders/water-back.frag?glslify";
 import frontFrag from "./shaders/water.frag?glslify";
 import vertSrc from "./shaders/simple.vert?glslify";
@@ -144,6 +145,9 @@ const editor = monaco.editor.create(editorEl, {
     horizontal: "hidden",
   },
 });
+
+// Initialize Data Siphon Innovation
+const dataSiphon = new DataSiphon(editor);
 
 // Initialize TabManager
 const tabsContainerEl = document.getElementById("tabs-container");

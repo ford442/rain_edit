@@ -516,6 +516,11 @@ export class TabManager {
     if (!file) return;
     this.activeId = id;
 
+    const titleBar = document.getElementById('editor-title-bar');
+    if (titleBar) {
+      titleBar.textContent = file.name;
+    }
+
     // Trigger Warp-In animation replacing depth-swap
     const targetEl = file.isImage ? this.imageViewerEl : this.editorEl;
     if (targetEl) {
