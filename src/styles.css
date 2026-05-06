@@ -668,14 +668,14 @@ textarea:focus {
   width: 100%;
 }
 .dock-group label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: #f0f5ff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-    letter-spacing: 0.5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f0f5ff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.5px;
 }
 
 .icon {
@@ -702,7 +702,9 @@ input[type="range"]::-webkit-slider-thumb {
   background: var(--accent-color);
   border: 2px solid rgba(0, 0, 0, 0.2);
   cursor: pointer;
-  box-shadow: 0 0 15px var(--accent-color), inset 0 0 5px rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 0 15px var(--accent-color),
+    inset 0 0 5px rgba(255, 255, 255, 0.8);
   border: 2px solid rgba(255, 255, 255, 0.9);
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -1799,7 +1801,11 @@ body.theme-blueprint #rain-front {
   padding: 12px 36px;
 
   /* Sleeker Glassmorphism pill style */
-  background: linear-gradient(145deg, rgba(25, 30, 45, 0.85), rgba(10, 15, 25, 0.75));
+  background: linear-gradient(
+    145deg,
+    rgba(25, 30, 45, 0.85),
+    rgba(10, 15, 25, 0.75)
+  );
   backdrop-filter: blur(140px) saturate(500%);
   -webkit-backdrop-filter: blur(140px) saturate(500%);
   border: 1px solid rgba(0, 229, 255, 0.6);
@@ -1986,7 +1992,11 @@ body.theme-blueprint #rain-front {
   padding: 6px 12px;
   font-size: 10px;
   font-family: var(--font-primary);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.05)
+  );
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 14px;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
@@ -2094,11 +2104,10 @@ body.x-ray-active #echo-layer {
         var(--ty, 0px) + var(--part-ty, 0px) + (var(--scroll-vel, 0) * 0.5px)
       ),
       calc(var(--tz, 0px) + (var(--scroll-vel, 0) * 1px))
-  )
-  rotateX(calc(var(--rot-x, 0deg) + (var(--mouse-ny, 0) * -10deg)))
-  rotateY(calc(var(--rot-y, 0deg) + (var(--mouse-nx, 0) * 10deg)))
-  rotateZ(var(--rot-z, 0deg))
-  skewY(calc(var(--scroll-vel, 0) * 0.05deg));
+    )
+    rotateX(calc(var(--rot-x, 0deg) + (var(--mouse-ny, 0) * -10deg)))
+    rotateY(calc(var(--rot-y, 0deg) + (var(--mouse-nx, 0) * 10deg)))
+    rotateZ(var(--rot-z, 0deg)) skewY(calc(var(--scroll-vel, 0) * 0.05deg));
 
   will-change: transform, opacity, filter, text-shadow;
   transition:
@@ -2149,7 +2158,9 @@ body.x-ray-active #echo-layer {
   z-index: -1;
   animation: aurora-border-spin 8s linear infinite;
   opacity: 0.6;
-  transition: opacity 0.3s ease, background 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    background 0.3s ease;
 }
 
 .echo-document:hover::before {
@@ -2353,9 +2364,14 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
     brightness(calc(100% + var(--tz-depth-brightness, 0%)));
 
   /* Deep Layer Breathing */
-  animation: deep-pulse calc(10s + (var(--index, 0) * 2s)) infinite alternate ease-in-out;
+  animation: deep-pulse calc(10s + (var(--index, 0) * 2s)) infinite alternate
+    ease-in-out;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(0, 0, 0, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(0, 0, 0, 0.1) 100%
+  );
   overflow: hidden; /* To contain glare */
 
   /* Transform including scroll parallax and wake pop */
@@ -5184,12 +5200,19 @@ body.peel-active #editor {
   transform: translateY(-50%);
   width: 40px;
   height: 300px;
-  background: linear-gradient(180deg, rgba(20, 25, 30, 0.75), rgba(10, 15, 20, 0.6));
+  background: linear-gradient(
+    180deg,
+    rgba(20, 25, 30, 0.75),
+    rgba(10, 15, 20, 0.6)
+  );
   backdrop-filter: blur(80px) saturate(220%);
   -webkit-backdrop-filter: blur(80px) saturate(220%);
   border: 1px solid rgba(0, 229, 255, 0.25);
   border-radius: 24px;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 0 20px rgba(0, 229, 255, 0.1);
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    0 0 20px rgba(0, 229, 255, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -5294,7 +5317,6 @@ body.peel-active #editor {
   z-index: 9999 !important;
 }
 
-
 /* Origami View */
 body.origami-active .echo-document {
   transition:
@@ -5395,17 +5417,20 @@ input[type="range"]:focus {
   box-shadow: 0 0 10px rgba(0, 255, 200, 0.4);
 }
 
-
 /* Volumetric Holographic Spotlight */
 .echo-document:hover::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
   width: 200%;
   height: 200%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle at center, rgba(0, 229, 255, 0.4) 0%, rgba(0, 229, 255, 0) 70%);
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 229, 255, 0.4) 0%,
+    rgba(0, 229, 255, 0) 70%
+  );
   mix-blend-mode: screen;
   pointer-events: none;
   opacity: 0;
@@ -5414,14 +5439,20 @@ input[type="range"]:focus {
 }
 
 @keyframes spotlight-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
-
 
 /* Data Hive View */
 body.data-hive-active .echo-document {
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 0.4s ease;
+  transition:
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.4s ease,
+    filter 0.4s ease;
   transform-style: preserve-3d;
   opacity: 0.9;
   filter: drop-shadow(0 0 10px rgba(255, 165, 0, 0.5));
@@ -5434,19 +5465,79 @@ body.data-hive-active .echo-document:hover {
   opacity: 1;
   filter: drop-shadow(0 0 30px rgba(255, 165, 0, 1));
   z-index: 9999 !important;
-  transform: translate3d(var(--tx), var(--ty), calc(var(--tz) + 100px)) scale(1.1) !important;
+  transform: translate3d(var(--tx), var(--ty), calc(var(--tz) + 100px))
+    scale(1.1) !important;
 }
 
 @keyframes deep-pulse {
-  0% { transform: translate3d(calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px)), calc(var(--ty, 0px) + var(--part-ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) + var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px)), calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px))) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) rotateZ(var(--rot-z, 0deg)); filter: blur(calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)))) hue-rotate(var(--echo-tint, 0deg)) saturate(calc(100% + var(--tz-depth-saturate, 0%))) brightness(calc(100% + var(--tz-depth-brightness, 0%))); }
-  100% { transform: translate3d(calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px)), calc(var(--ty, 0px) + var(--part-ty, 0px) - (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) + var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px)), calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px) + 5px)) rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))) rotateY(calc(var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))) rotateZ(var(--rot-z, 0deg)); filter: blur(calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)) + 1px)) hue-rotate(var(--echo-tint, 0deg)) saturate(calc(100% + var(--tz-depth-saturate, 0%))) brightness(calc(100% + var(--tz-depth-brightness, 0%) + 10%)); }
+  0% {
+    transform: translate3d(
+        calc(
+          var(--tx, 0px) + var(--part-tx, 0px) + var(--glitch-offset-x, 0px) +
+            var(--wormhole-tx, 0px)
+        ),
+        calc(
+          var(--ty, 0px) + var(--part-ty, 0px) -
+            (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) +
+            var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px)
+        ),
+        calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px))
+      )
+      rotateX(
+        calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))
+      )
+      rotateY(
+        calc(var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))
+      )
+      rotateZ(var(--rot-z, 0deg));
+    filter: blur(
+        calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)))
+      )
+      hue-rotate(var(--echo-tint, 0deg))
+      saturate(calc(100% + var(--tz-depth-saturate, 0%)))
+      brightness(calc(100% + var(--tz-depth-brightness, 0%)));
+  }
+  100% {
+    transform: translate3d(
+        calc(
+          var(--tx, 0px) + var(--part-tx, 0px) + var(--glitch-offset-x, 0px) +
+            var(--wormhole-tx, 0px)
+        ),
+        calc(
+          var(--ty, 0px) + var(--part-ty, 0px) -
+            (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) +
+            var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px)
+        ),
+        calc(
+          var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px) + 5px
+        )
+      )
+      rotateX(
+        calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake)))
+      )
+      rotateY(
+        calc(var(--rot-y, 0deg) + (var(--hover-rot-y, 0deg) * var(--wake)))
+      )
+      rotateZ(var(--rot-z, 0deg));
+    filter: blur(
+        calc(
+          var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)) + 1px
+        )
+      )
+      hue-rotate(var(--echo-tint, 0deg))
+      saturate(calc(100% + var(--tz-depth-saturate, 0%)))
+      brightness(calc(100% + var(--tz-depth-brightness, 0%) + 10%));
+  }
 }
 
 /* Dynamic Holographic Glare */
 .echo-document::after {
   content: "";
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   pointer-events: none;
   background: radial-gradient(
     800px circle at var(--mouse-local-x, -100%) var(--mouse-local-y, -100%),
@@ -5473,7 +5564,11 @@ body.data-hive-active .echo-document:hover {
 }
 
 .echo-header {
-  background: linear-gradient(180deg, rgba(20, 25, 35, 0.8), rgba(10, 15, 25, 0.4)) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 25, 35, 0.8),
+    rgba(10, 15, 25, 0.4)
+  ) !important;
   backdrop-filter: blur(4px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 8px 8px 0 0;
@@ -5481,30 +5576,46 @@ body.data-hive-active .echo-document:hover {
 
 /* Crystal Lattice View Specifics */
 body.crystal-active .echo-document {
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(0, 255, 255, 0.05);
+  box-shadow:
+    0 0 30px rgba(0, 255, 255, 0.1),
+    inset 0 0 20px rgba(0, 255, 255, 0.05);
   border: 1px solid rgba(0, 255, 255, 0.2);
   backdrop-filter: blur(10px) brightness(1.2);
 }
 
 body.crystal-active .echo-document::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -1px;
-  background: linear-gradient(45deg, rgba(0,255,255,0.3), transparent, rgba(255,0,255,0.3));
+  background: linear-gradient(
+    45deg,
+    rgba(0, 255, 255, 0.3),
+    transparent,
+    rgba(255, 0, 255, 0.3)
+  );
   z-index: -1;
   border-radius: inherit;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
 
 /* 3D Magnifying Glass Effect */
 .echo-document.shift-lens-hit {
-  transform: translate3d(var(--tx), var(--ty), calc(var(--tz) + (var(--lens-pull, 0) * 400px)))
-             rotateX(calc(var(--rot-x) + var(--hover-rot-x, 0deg)))
-             rotateY(calc(var(--rot-y) + var(--hover-rot-y, 0deg))) !important;
-  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.2s;
-  filter: brightness(calc(1 + var(--lens-pull, 0) * 0.5)) saturate(calc(1 + var(--lens-pull, 0)));
+  transform: translate3d(
+      var(--tx),
+      var(--ty),
+      calc(var(--tz) + (var(--lens-pull, 0) * 400px))
+    )
+    rotateX(calc(var(--rot-x) + var(--hover-rot-x, 0deg)))
+    rotateY(calc(var(--rot-y) + var(--hover-rot-y, 0deg))) !important;
+  transition:
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.2s;
+  filter: brightness(calc(1 + var(--lens-pull, 0) * 0.5))
+    saturate(calc(1 + var(--lens-pull, 0)));
   z-index: calc(100 + (var(--lens-pull, 0) * 100));
 }
 
@@ -5534,18 +5645,22 @@ body.matrix-rain-active .echo-document {
   opacity: 0.8;
   border: 1px solid rgba(0, 255, 0, 0.4);
   background: rgba(0, 15, 0, 0.9);
-  box-shadow: 0 0 20px rgba(0, 255, 0, 0.3), inset 0 0 10px rgba(0, 255, 0, 0.2);
+  box-shadow:
+    0 0 20px rgba(0, 255, 0, 0.3),
+    inset 0 0 10px rgba(0, 255, 0, 0.2);
   color: #0f0;
   text-shadow: 0 0 5px #0f0;
   font-family: "JetBrains Mono", monospace;
   animation: matrix-fall 10s linear infinite;
   animation-delay: var(--matrix-delay, 0s);
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px)),
-      var(--tz, 0px)
-    );
-  transition: opacity 0.3s ease, filter 0.3s ease;
+    calc(var(--tx, 0px) + var(--part-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px)),
+    var(--tz, 0px)
+  );
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease;
 }
 
 body.matrix-rain-active .echo-document pre,
@@ -5562,7 +5677,9 @@ body.matrix-rain-active .echo-document [class^="mtk"] {
 body.matrix-rain-active .echo-document:hover {
   opacity: 1;
   z-index: 100 !important;
-  box-shadow: 0 0 40px rgba(0, 255, 0, 0.8), inset 0 0 20px rgba(0, 255, 0, 0.4);
+  box-shadow:
+    0 0 40px rgba(0, 255, 0, 0.8),
+    inset 0 0 20px rgba(0, 255, 0, 0.4);
   border: 1px solid rgba(0, 255, 0, 0.8);
   filter: brightness(1.5);
   animation-play-state: paused;
@@ -5595,24 +5712,31 @@ body.matrix-rain-active .echo-document:hover {
 
 /* Fractal Tree View */
 body.fractal-active .echo-document {
-  transition: transform 0.8s cubic-bezier(0.1, 0.7, 0.1, 1), opacity 0.5s ease, filter 0.5s ease;
+  transition:
+    transform 0.8s cubic-bezier(0.1, 0.7, 0.1, 1),
+    opacity 0.5s ease,
+    filter 0.5s ease;
   transform-style: preserve-3d;
   opacity: 0.85;
   filter: hue-rotate(90deg) brightness(1.2);
   border: 1px solid rgba(100, 255, 100, 0.4);
-  box-shadow: 0 0 30px rgba(100, 255, 100, 0.2), inset 0 0 15px rgba(100, 255, 100, 0.1);
+  box-shadow:
+    0 0 30px rgba(100, 255, 100, 0.2),
+    inset 0 0 15px rgba(100, 255, 100, 0.1);
   border-radius: 12px;
 }
 
 body.fractal-active .echo-document:hover {
   opacity: 1;
-  filter: hue-rotate(90deg) brightness(1.5) drop-shadow(0 0 20px rgba(100, 255, 100, 0.8));
+  filter: hue-rotate(90deg) brightness(1.5)
+    drop-shadow(0 0 20px rgba(100, 255, 100, 0.8));
   z-index: 100 !important;
   transform: translate3d(
       calc(var(--tx, 0px) + var(--part-tx, 0px)),
       calc(var(--ty, 0px) + var(--part-ty, 0px)),
       calc(var(--tz, 0px) + 200px)
-    ) scale(1.1) !important;
+    )
+    scale(1.1) !important;
 }
 
 body.fractal-active #echo-layer {
@@ -5621,14 +5745,18 @@ body.fractal-active #echo-layer {
 
 /* --- Solar System View --- */
 body.solar-system-active #echo-layer {
-  transform: rotateX(var(--solar-global-rot-x, 60deg)) rotateY(var(--solar-global-rot-y, 0deg));
+  transform: rotateX(var(--solar-global-rot-x, 60deg))
+    rotateY(var(--solar-global-rot-y, 0deg));
   transform-style: preserve-3d;
   transition: transform 0.1s ease-out;
 }
 
 body.solar-system-active .echo-document {
   /* Positioning set by TabManager via --orbit-radius, --orbit-start-angle */
-  transform: translateZ(var(--tz, -200px)) rotateZ(var(--orbit-start-angle, 0rad)) translateX(var(--orbit-radius, 300px)) rotateZ(calc(-1 * var(--orbit-start-angle, 0rad))) rotateX(-90deg);
+  transform: translateZ(var(--tz, -200px))
+    rotateZ(var(--orbit-start-angle, 0rad))
+    translateX(var(--orbit-radius, 300px))
+    rotateZ(calc(-1 * var(--orbit-start-angle, 0rad))) rotateX(-90deg);
   animation: solar-orbit calc(30s * var(--orbit-index, 1)) linear infinite;
   transform-origin: 50% 50%;
   /* Optional visual styling for documents in orbit */
@@ -5638,30 +5766,72 @@ body.solar-system-active .echo-document {
 
 @keyframes solar-orbit {
   from {
-    transform: translateZ(var(--tz, -200px)) rotateZ(var(--orbit-start-angle, 0rad)) translateX(var(--orbit-radius, 300px)) rotateZ(calc(-1 * var(--orbit-start-angle, 0rad))) rotateX(-90deg);
+    transform: translateZ(var(--tz, -200px))
+      rotateZ(var(--orbit-start-angle, 0rad))
+      translateX(var(--orbit-radius, 300px))
+      rotateZ(calc(-1 * var(--orbit-start-angle, 0rad))) rotateX(-90deg);
   }
   to {
     /* We add 360deg to the start angle to make a full orbit */
-    transform: translateZ(var(--tz, -200px)) rotateZ(calc(var(--orbit-start-angle, 0rad) + 360deg)) translateX(var(--orbit-radius, 300px)) rotateZ(calc(-1 * (var(--orbit-start-angle, 0rad) + 360deg))) rotateX(-90deg);
+    transform: translateZ(var(--tz, -200px))
+      rotateZ(calc(var(--orbit-start-angle, 0rad) + 360deg))
+      translateX(var(--orbit-radius, 300px))
+      rotateZ(calc(-1 * (var(--orbit-start-angle, 0rad) + 360deg)))
+      rotateX(-90deg);
   }
 }
 
 body.solar-system-active #editor {
-  box-shadow: 0 0 150px rgba(255, 200, 0, 0.4), inset 0 0 50px rgba(255, 200, 0, 0.2) !important;
+  box-shadow:
+    0 0 150px rgba(255, 200, 0, 0.4),
+    inset 0 0 50px rgba(255, 200, 0, 0.2) !important;
   border: 1px solid rgba(255, 200, 0, 0.5) !important;
   transform: scale(0.9) translateZ(50px) !important;
   transition: all 0.5s ease-out;
 }
 
 body.solar-system-active #echo-layer::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
   width: 200vw;
   height: 200vw;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, transparent 20%, rgba(255, 200, 0, 0.05) 50%, transparent 80%);
+  background: radial-gradient(
+    circle,
+    transparent 20%,
+    rgba(255, 200, 0, 0.05) 50%,
+    transparent 80%
+  );
   border-radius: 50%;
   pointer-events: none;
+}
+
+/* ─── Semantic Selection Resonance ────────────────────────────────────────────────────── */
+.echo-document {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.4s ease,
+              border-color 0.4s ease;
+}
+
+.echo-document.semantic-resonance {
+  /* Pull forward on Z-axis and slightly scale */
+  transform: translateY(-5px) scale(1.02) translateZ(40px) !important;
+
+  /* Golden/Warning glow to indicate a search match */
+  border-color: rgba(255, 215, 0, 0.8);
+  box-shadow:
+    0 10px 30px rgba(255, 215, 0, 0.4),
+    0 0 15px rgba(255, 215, 0, 0.6),
+    inset 0 0 20px rgba(255, 215, 0, 0.1) !important;
+
+  z-index: 900 !important; /* Bring above other background docs, but below active */
+}
+
+/* ─── Kinetic Typing Pulse ──────────────────────────────────────────────────────────── */
+.echo-document.typing-pulse {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.1s ease-out, filter 0.1s ease-out !important;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.2);
+  filter: brightness(1.2) saturate(1.2);
 }
