@@ -5665,3 +5665,69 @@ body.solar-system-active #echo-layer::before {
   border-radius: 50%;
   pointer-events: none;
 }
+
+/* --- Glassmorphic UI Enhancements --- */
+#tabs-container, #dock {
+  /* Stronger blur and translucent background */
+  background: rgba(15, 15, 25, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  /* Neon border styling */
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.1),
+              inset 0 0 20px rgba(0, 229, 255, 0.05);
+  border-radius: 8px;
+}
+
+/* Optional: A sleek title bar for the active editor */
+.editor-title-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 25px;
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.15) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+  color: #00e5ff;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  padding-left: 15px;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 10; /* above editor content but below modals */
+}
+
+/* --- Echo Hover Lift (Innovation) --- */
+.echo-document {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+  transform-style: preserve-3d; /* Ensure 3D rendering context */
+}
+
+.echo-document:hover {
+  /* Lift forward and scale up slightly */
+  transform: translateY(-5px) scale(1.05) translateZ(30px) !important;
+
+  /* Apply our dynamic Bioluminescent glow from earlier */
+  box-shadow:
+    0 10px 30px var(--bio-glow-color, rgba(0, 229, 255, 0.6)),
+    0 0 15px var(--bio-glow-strong, rgba(0, 229, 255, 0.9)),
+    inset 0 0 10px rgba(255, 255, 255, 0.2);
+
+  z-index: 1000 !important; /* Force to top of its local stacking context */
+  cursor: pointer;
+}
+
+/* --- Data Siphon Particle Base --- */
+.data-particle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: #00e5ff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00e5ff, 0 0 12px #fff;
+  pointer-events: none;
+  z-index: 9999;
+}
