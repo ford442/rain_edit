@@ -2660,6 +2660,8 @@ document.addEventListener("keydown", (e) => {
 
 // Expose tabManager for testing
 window.tabManager = tabManager;
+  initSemanticResonance(editor, tabManager);
+  initKineticTypingPulse(editor);
 
 // Hyper-Jump & Magnetic Peel
 let isPeelActive = false;
@@ -2759,3 +2761,72 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+// ─── Semantic Selection Resonance ──────────────────────────────────────────────────────
+function initSemanticResonance(editor, tabManager) {
+  let resonanceTimeout;
+
+  editor.onDidChangeCursorSelection((e) => {
+    // 1. Clear previous timeout to debounce rapid selection changes
+    clearTimeout(resonanceTimeout);
+
+    resonanceTimeout = setTimeout(() => {
+      // 2. Get the currently selected text
+      const selection = e.selection;
+      const model = editor.getModel();
+      const selectedText = model.getValueInRange(selection).trim();
+
+      // 3. Reset all documents if selection is too short
+      if (selectedText.length < 3) {
+        clearAllResonances();
+        return;
+      }
+
+      // 4. Check background files for the text
+      tabManager.files.forEach(file => {
+        // Skip the currently active file
+        if (file.id === tabManager.activeId) return;
+
+        // Find the DOM element for this file's echo document
+        const echoNode = document.querySelector(`.echo-document[data-id="${file.id}"]`);
+        if (!echoNode) return;
+
+        // Check if the background model contains the selected text
+        const fileContent = file.model.getValue();
+        if (fileContent.includes(selectedText)) {
+          echoNode.classList.add('semantic-resonance');
+        } else {
+          echoNode.classList.remove('semantic-resonance');
+        }
+      });
+    }, 150); // 150ms debounce
+  });
+
+  function clearAllResonances() {
+    document.querySelectorAll('.semantic-resonance').forEach(node => {
+      node.classList.remove('semantic-resonance');
+    });
+  }
+}
+
+// ─── Kinetic Typing Pulse ────────────────────────────────────────────────────────────
+function initKineticTypingPulse(editor) {
+  let pulseTimeout;
+
+  editor.onDidChangeModelContent(() => {
+    const echoLayerEl = document.getElementById("echo-layer");
+    if (!echoLayerEl) return;
+
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach(echo => {
+      echo.classList.add("typing-pulse");
+    });
+
+    clearTimeout(pulseTimeout);
+    pulseTimeout = setTimeout(() => {
+      echoes.forEach(echo => {
+        echo.classList.remove("typing-pulse");
+      });
+    }, 150);
+  });
+}
