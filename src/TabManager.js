@@ -68,6 +68,7 @@ export class TabManager {
     this.isMatrixRainView = false;
     this.isFractalView = false;
     this.isSolarSystemView = false;
+    this.isNeonSynthView = false;
   }
 
   _deactivateAllViews() {
@@ -97,6 +98,7 @@ export class TabManager {
     this.isDataHiveView = false;
     this.isFractalView = false;
     this.isSolarSystemView = false;
+    this.isNeonSynthView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -125,6 +127,7 @@ export class TabManager {
       "matrix-rain-active",
       "fractal-active",
       "solar-system-active",
+      "neon-synth-active",
     );
 
     this.isOrigamiView = false;
@@ -153,10 +156,23 @@ export class TabManager {
       "btn-matrix-rain-view",
       "btn-fractal-view",
       "btn-solar-system-view",
+      "btn-neon-synth-view",
     ].forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) btn.classList.remove("active");
     });
+  }
+
+  toggleNeonSynthView() {
+    const wasActive = this.isNeonSynthView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isNeonSynthView = true;
+      document.body.classList.add("neon-synth-active");
+      const btn = document.getElementById("btn-neon-synth-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
   }
 
   toggleCoverflowView() {
@@ -820,7 +836,8 @@ Drag to change depth`;
         !this.isRolodexView &&
         !this.isCylinderView &&
         !this.isMatrixRainView &&
-        !this.isFractalView
+        !this.isFractalView &&
+        !this.isNeonSynthView
       ) {
         el.classList.add("semantic-gravity-pull");
       }
@@ -1532,6 +1549,26 @@ Drag to change depth`;
         el.style.setProperty("--rot-x", "0deg");
         el.style.setProperty("--rot-y", "0deg");
         el.style.setProperty("--rot-z", "0deg");
+      } else if (this.isNeonSynthView) {
+        // Neon Synth View: Retro-futuristic grid highway stretching backwards
+        const laneWidth = 400;
+        const zSpacing = 300;
+        // Alternate between left and right lanes
+        const isLeftLane = index % 2 === 0;
+        const tx = isLeftLane ? -laneWidth / 2 : laneWidth / 2;
+        // Position at the bottom to form the 'highway' feel
+        const ty = 300;
+        const tz = -index * zSpacing;
+
+        // Tilt backwards to lay flat like a road
+        const rotX = 70;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
       } else if (this.isGalaxyView) {
         // Galaxy Spiral View: Logarithmic spiral arrangement on X-Z plane
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -1830,7 +1867,8 @@ Drag to change depth`;
             !this.isSphereView &&
             !this.isRolodexView &&
             !this.isCylinderView &&
-            !this.isMatrixRainView
+            !this.isMatrixRainView &&
+            !this.isNeonSynthView
           ) {
             el.style.setProperty("--tz", "100px");
           } else if (this.isOrbitView) {
@@ -1854,9 +1892,10 @@ Drag to change depth`;
             this.isRolodexView ||
             this.isCylinderView ||
             this.isMatrixRainView ||
-            this.isFractalView
+            this.isFractalView ||
+            this.isNeonSynthView
           ) {
-            // Pop out for pinboard/helix/vortex/prism/wave/rolodex/cylinder/fractal
+            // Pop out for pinboard/helix/vortex/prism/wave/rolodex/cylinder/fractal/neon-synth
             const tz = parseFloat(el.style.getPropertyValue("--tz")) || 0;
             el.style.setProperty("--tz", `${tz + 150}px`);
             if (this.isPinboardView || this.isVortexView) {
@@ -2047,6 +2086,11 @@ Drag to change depth`;
             const spacing = 350;
             const zLayer = Math.floor(index / (size * size));
             const tz = -600 - zLayer * spacing;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isNeonSynthView) {
+            const index = parseInt(el.dataset.index || 0);
+            const zSpacing = 300;
+            const tz = -index * zSpacing;
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isWaveView) {
             el.style.setProperty("--tz", `-150px`);
