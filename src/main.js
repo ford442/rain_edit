@@ -1035,6 +1035,21 @@ document.addEventListener("mousemove", (e) => {
         }, 500);
       }
 
+      // Fluid Repulsion
+      if (dist < maxDist) {
+        const repelFactor = Math.pow(1 - dist / maxDist, 2);
+        const dx = cx - e.clientX;
+        const dy = cy - e.clientY;
+        const normalizedDx = dx / (dist || 1);
+        const normalizedDy = dy / (dist || 1);
+        const maxRepel = 80; // pixels to repel
+        echo.style.setProperty("--repel-tx", `${normalizedDx * maxRepel * repelFactor}px`);
+        echo.style.setProperty("--repel-ty", `${normalizedDy * maxRepel * repelFactor}px`);
+      } else {
+        echo.style.setProperty("--repel-tx", `0px`);
+        echo.style.setProperty("--repel-ty", `0px`);
+      }
+
       // Neon Tracing logic
       if (wakeFactor > 0.5) {
         echo.classList.add("neon-tracing");
@@ -1328,6 +1343,7 @@ if (viewModeSelect) {
     else if (view === "crystal") tabManager.toggleCrystalView();
     else if (view === "fractal") tabManager.toggleFractalView();
     else if (view === "solar-system") tabManager.toggleSolarSystemView();
+    else if (view === "neon-synth") tabManager.toggleNeonSynthView();
 
     else tabManager._deactivateAllViews(); // Default view
   });
