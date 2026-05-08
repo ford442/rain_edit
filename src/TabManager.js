@@ -199,6 +199,20 @@ export class TabManager {
     this._renderEchoes();
   }
 
+  toggleCarouselView() {
+    this._deactivateAllViews();
+    this.isCarouselView = true;
+    document.body.classList.add("carousel-active");
+    this._renderEchoes();
+  }
+
+  toggleInfinityMirrorView() {
+    this._deactivateAllViews();
+    this.isInfinityMirrorView = true;
+    document.body.classList.add("infinity-mirror-active");
+    this._renderEchoes();
+  }
+
   toggleFractalView() {
     const wasActive = this.isFractalView;
     this._deactivateAllViews();
@@ -1431,6 +1445,23 @@ Drag to change depth`;
         el.style.setProperty("--scatter-y", "0px");
         el.style.setProperty("--scatter-z", "0px");
         el.style.setProperty("--scatter-rot", "0deg");
+      } else if (this.isCarouselView) {
+        const total = Math.max(1, inactiveFiles.length);
+        const radius = Math.max(800, total * 150); // Dynamic radius
+
+        // We'll calculate a base angle per item
+        const angleStep = 360 / total;
+        const currentAngle = index * angleStep;
+
+        // We can pass these to CSS
+        el.style.setProperty('--carousel-angle', `${currentAngle}deg`);
+        el.style.setProperty('--carousel-radius', `${radius}px`);
+
+        el.style.transform = `
+          translate3d(-50%, -50%, 0)
+          rotateY(var(--carousel-angle))
+          translateZ(var(--carousel-radius))
+        `;
       } else if (this.isCylinderView) {
         // Cylinder View: vertical carousel
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -1797,11 +1828,14 @@ Drag to change depth`;
       // preventing the active document from switching when the user is trying to double click.
       el.addEventListener("click", (e) => {
         if (e.detail === 1) {
-          // single click only
+          // Add Kaleidoscope Effect
+          el.classList.add("kaleidoscope-fx");
+
           clickTimeout = setTimeout(() => {
             this.setActive(file.id);
+            el.classList.remove("kaleidoscope-fx"); // clean up
             clickTimeout = null;
-          }, 250); // wait 250ms to see if it's a double click
+          }, 600); // Wait for the animation (600ms) to complete before switching
         }
       });
 

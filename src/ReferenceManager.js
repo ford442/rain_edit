@@ -473,7 +473,7 @@ export class ReferenceManager {
       this.layer.appendChild(card);
     });
 
-    if (this.connectionManager) {
+    if (this.connectionManager && typeof this.connectionManager.updateKeywords === 'function') {
       this.connectionManager.updateKeywords();
     }
   }

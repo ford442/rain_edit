@@ -555,9 +555,11 @@ async function initLayers() {
     if (fgLayer) fgLayer.bindTexture("u_waterMap", raindrops.canvas);
 
     const time = performance.now() / 1000;
-    if (connectionManager) {
+    if (connectionManager && typeof connectionManager.draw === 'function') {
       connectionManager.draw(time);
-      connectionManager.drawRadar(time);
+      if (typeof connectionManager.drawRadar === 'function') {
+        connectionManager.drawRadar(time);
+      }
     }
 
     if (referenceManager) {
@@ -1327,6 +1329,8 @@ if (viewModeSelect) {
     else if (view === "grid") tabManager.toggleGridView();
     else if (view === "helix") tabManager.toggleHelixView();
     else if (view === "pinboard") tabManager.togglePinboardView();
+    else if (view === "carousel") tabManager.toggleCarouselView();
+    else if (view === "infinity-mirror") tabManager.toggleInfinityMirrorView();
     else if (view === "vortex") tabManager.toggleVortexView();
     else if (view === "constellation") tabManager.toggleConstellationView();
     else if (view === "prism") tabManager.togglePrismView();
