@@ -69,6 +69,7 @@ export class TabManager {
     this.isFractalView = false;
     this.isSolarSystemView = false;
     this.isNeonSynthView = false;
+    this.isTesseractView = false;
   }
 
   _deactivateAllViews() {
@@ -99,6 +100,7 @@ export class TabManager {
     this.isFractalView = false;
     this.isSolarSystemView = false;
     this.isNeonSynthView = false;
+    this.isTesseractView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -128,6 +130,7 @@ export class TabManager {
       "fractal-active",
       "solar-system-active",
       "neon-synth-active",
+      "tesseract-active",
     );
 
     this.isOrigamiView = false;
@@ -157,6 +160,7 @@ export class TabManager {
       "btn-fractal-view",
       "btn-solar-system-view",
       "btn-neon-synth-view",
+      "btn-tesseract-view",
     ].forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) btn.classList.remove("active");
@@ -170,6 +174,18 @@ export class TabManager {
       this.isNeonSynthView = true;
       document.body.classList.add("neon-synth-active");
       const btn = document.getElementById("btn-neon-synth-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleTesseractView() {
+    const wasActive = this.isTesseractView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTesseractView = true;
+      document.body.classList.add("tesseract-active");
+      const btn = document.getElementById("btn-tesseract-view");
       if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
@@ -1514,6 +1530,25 @@ Drag to change depth`;
 
         // Pass index to CSS to vary the orbit duration
         el.style.setProperty("--orbit-index", index + 1);
+      } else if (this.isTesseractView) {
+        const face = index % 6;
+        const isOuter = Math.floor(index / 6) % 2 === 0;
+        const r = isOuter ? 400 : 200;
+        let tx = 0, ty = 0, tz = 0, rx = 0, ry = 0;
+        if (face===0) { tz = r; }
+        else if (face===1) { tz = -r; ry = 180; }
+        else if (face===2) { tx = r; ry = 90; }
+        else if (face===3) { tx = -r; ry = -90; }
+        else if (face===4) { ty = r; rx = -90; }
+        else if (face===5) { ty = -r; rx = 90; }
+
+        el.style.setProperty('--tx', `${tx}px`);
+        el.style.setProperty('--ty', `${ty}px`);
+        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty('--rot-x', `${rx}deg`);
+        el.style.setProperty('--rot-y', `${ry}deg`);
+        el.style.setProperty('--rot-z', '0deg');
+
       } else if (this.isOrigamiView) {
         // Origami spatial view calculation
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -1805,6 +1840,23 @@ Drag to change depth`;
       }
 
       let clickTimeout = null;
+
+      // Add context menu (right click) for Holographic Side-by-Side Projection
+      el.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isProjected = el.classList.contains('holo-projected');
+
+        // Remove from all other echoes
+        this.echoLayerEl.querySelectorAll('.echo-document').forEach(doc => {
+          doc.classList.remove('holo-projected');
+        });
+
+        if (!isProjected) {
+          el.classList.add('holo-projected');
+        }
+      });
 
       // Add double click listener to break through the active document
       el.addEventListener("dblclick", (e) => {
@@ -2125,6 +2177,15 @@ Drag to change depth`;
             const index = parseInt(el.dataset.index || 0);
             const zSpacing = 300;
             const tz = -index * zSpacing;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isTesseractView) {
+            const face = parseInt(el.dataset.index || 0) % 6;
+            const isOuter = Math.floor(parseInt(el.dataset.index || 0) / 6) % 2 === 0;
+            const r = isOuter ? 400 : 200;
+            let tz = 0;
+            if (face === 0) { tz = r; }
+            else if (face === 1) { tz = -r; }
+            else { tz = 0; }
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isWaveView) {
             el.style.setProperty("--tz", `-150px`);
