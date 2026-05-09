@@ -73,11 +73,8 @@ body,
   z-index: 5; /* default: depth 1 — middle between rain layers; JS will update dynamically */
 
   /* Cyber Grid Background */
-  background-image: radial-gradient(
-    rgba(255, 255, 255, 0.03) 1px,
-    transparent 1px
-  );
-  background-size: 20px 20px;
+  background-image: radial-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px), linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px, 40px 40px, 40px 40px;
 
   /* X-Ray Mode variables */
   --mouse-x: 50%;
@@ -85,6 +82,12 @@ body,
   --sonar-x: 50%;
   --sonar-y: 50%;
   --sonar-radius: 0px;
+}
+
+::selection {
+  background: rgba(0, 229, 255, 0.4);
+  color: #fff;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
 }
 
 #editor.x-ray-active {
@@ -3023,6 +3026,21 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* Holographic Side-by-Side Projection State */
+.echo-document.holo-projected {
+  z-index: 1000 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: translate3d(25vw, 0, 100px) scale(1.2) !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.8);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body:has(.holo-projected) #editor {
+  transform: translateX(-20vw) scale(0.9);
+  transition: transform 0.5s ease;
+}
+
 /* X-Ray Peek State */
 .echo-document.peek,
 .echo-document:hover {
@@ -3265,6 +3283,14 @@ body.expose-active .echo-document:hover {
 
 .echo-snap-active {
   animation: echo-snap 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+/* Gravity Well Interaction */
+.gravity-well-active .echo-document {
+  transform: translate3d(calc(var(--mouse-x) - 50vw), calc(var(--mouse-y) - 50vh), -500px) scale(0.1) !important;
+  filter: brightness(3) saturate(200%) blur(10px) !important;
+  box-shadow: 0 0 100px rgba(0, 255, 255, 1) !important;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
 
 /* Document Shatter Effect */
@@ -4755,6 +4781,30 @@ body.cylinder-active #echo-layer {
   }
 }
 
+/* Tesseract View */
+body.tesseract-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+  animation: tesseract-spin 20s linear infinite;
+}
+
+@keyframes tesseract-spin {
+  from {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  to {
+    transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+  }
+}
+
+body.tesseract-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1px);
+  transition: all 1s;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+  border: 1px solid rgba(0, 229, 255, 0.8);
+}
+
 /* Neon Synth View */
 body.neon-synth-active {
   --bio-glow-color: rgba(255, 0, 255, 0.6);
@@ -5952,6 +6002,27 @@ body.solar-system-active #echo-layer::before {
               0 0 15px rgba(0, 229, 255, 0.2),
               inset 0 0 20px rgba(0, 229, 255, 0.1);
   border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-sheen {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+  transform: skewX(-20deg);
+  animation: sheen 5s infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes sheen {
+  0% { left: -100%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
 }
 
 /* Optional: A sleek title bar for the active editor */

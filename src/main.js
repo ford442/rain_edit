@@ -604,6 +604,16 @@ let currentSceneRotX = 0;
 let currentSceneRotY = 0;
 
 document.addEventListener("mousedown", (e) => {
+  // Clear any active holo projection if clicking outside
+  if (!e.target.closest('.echo-document')) {
+    const echoLayerEl = document.getElementById("echo-layer");
+    if (echoLayerEl) {
+      echoLayerEl.querySelectorAll('.holo-projected').forEach(doc => {
+        doc.classList.remove('holo-projected');
+      });
+    }
+  }
+
   // Middle mouse button activates Flashlight mode
   if (e.button === 1) {
     isFlashlightActive = true;
@@ -636,6 +646,10 @@ let isWormholeActive = false;
 document.addEventListener("keydown", (e) => {
   if (e.ctrlKey && e.altKey) {
     isWormholeActive = true;
+  }
+
+  if (e.altKey && e.code === "KeyZ") {
+    document.body.classList.toggle("gravity-well-active");
   }
 });
 
