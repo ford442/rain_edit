@@ -1082,30 +1082,24 @@ document.addEventListener("mousedown", (e) => {
   }
 });
 
-// --- Kinetic Ripple Interaction ---
+// --- Z-Axis Depth Wave Interaction ---
 document.addEventListener("dblclick", (e) => {
   if (echoLayerEl) {
     const echoes = echoLayerEl.querySelectorAll(".echo-document");
-    const cx = e.clientX;
-    const cy = e.clientY;
 
     echoes.forEach((echo) => {
-      const rect = echo.getBoundingClientRect();
-      const eCx = rect.left + rect.width / 2;
-      const eCy = rect.top + rect.height / 2;
-      const dist = Math.sqrt(Math.pow(cx - eCx, 2) + Math.pow(cy - eCy, 2));
-
-      // Wave propagates outwards
-      const delay = dist * 1.5;
+      // Wave propagates backwards through depth layers consecutively
+      const index = parseInt(echo.dataset.index || 0, 10);
+      const delay = index * 150; // 150ms delay per depth layer
 
       setTimeout(() => {
-        echo.classList.remove("kinetic-ripple-hit");
+        echo.classList.remove("z-depth-wave-hit");
         void echo.offsetWidth; // Force reflow
-        echo.classList.add("kinetic-ripple-hit");
+        echo.classList.add("z-depth-wave-hit");
 
         setTimeout(() => {
-          echo.classList.remove("kinetic-ripple-hit");
-        }, 600); // Duration of the kinetic-ripple animation
+          echo.classList.remove("z-depth-wave-hit");
+        }, 600); // Duration of the z-depth-wave animation
       }, delay);
     });
   }
@@ -1362,6 +1356,8 @@ if (viewModeSelect) {
     else if (view === "fractal") tabManager.toggleFractalView();
     else if (view === "solar-system") tabManager.toggleSolarSystemView();
     else if (view === "neon-synth") tabManager.toggleNeonSynthView();
+    else if (view === "blueprint-3d") tabManager.toggleBlueprint3dView();
+    else if (view === "cyber-cortex") tabManager.toggleCyberCortexView();
 
     else tabManager._deactivateAllViews(); // Default view
   });

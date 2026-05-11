@@ -4544,6 +4544,43 @@ body.siphon-mode-active .echo-document *::selection {
   }
 }
 
+/* --- Z-Axis Depth Wave --- */
+@keyframes z-depth-wave {
+  0% {
+    transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    ) scale(1);
+    filter: blur(var(--base-blur, 4px)) brightness(1);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+  }
+  30% {
+    transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    ) scale(1.15);
+    filter: blur(0px) brightness(2.5) hue-rotate(45deg);
+    box-shadow: 0 0 80px rgba(0, 229, 255, 1), inset 0 0 40px rgba(255, 0, 128, 0.8);
+    border-color: rgba(255, 255, 255, 1);
+  }
+  100% {
+    transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    ) scale(1);
+    filter: blur(var(--base-blur, 4px)) brightness(1);
+    box-shadow: none;
+  }
+}
+
+.z-depth-wave-hit {
+  animation: z-depth-wave 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+  z-index: 200 !important;
+}
+
 /* --- Innovated Echo Pulse Animation --- */
 @keyframes echo-pulse-ring {
   0% {
@@ -5342,12 +5379,12 @@ body.peel-active #editor {
   );
   backdrop-filter: blur(80px) saturate(220%);
   -webkit-backdrop-filter: blur(80px) saturate(220%);
-  border: 1px solid rgba(0, 229, 255, 0.25);
+  border: 2px solid #00e5ff;
   border-radius: 24px;
   box-shadow:
     0 15px 40px rgba(0, 0, 0, 0.8),
     inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    0 0 20px rgba(0, 229, 255, 0.1);
+    0 0 25px rgba(0, 229, 255, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -5708,9 +5745,10 @@ body.data-hive-active .echo-document:hover {
 #dock,
 #tabs-container {
   background: rgba(10, 15, 25, 0.4) !important;
-  backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(30px) saturate(250%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(250%) !important;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.1) !important;
 }
 
 .echo-header {
@@ -6124,4 +6162,114 @@ body.solar-system-active #echo-layer::before {
 .carousel-active .echo-document:hover {
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 255, 255, 0.5);
   border-color: rgba(0, 255, 255, 0.6);
+}
+
+/* Blueprint 3D View */
+body.blueprint-3d-active {
+  --bio-glow-color: rgba(0, 150, 255, 0.6);
+  --bio-glow-strong: rgba(0, 150, 255, 0.9);
+}
+
+body.blueprint-3d-active #editor {
+  transform: scale(0.6) translateY(20%) translateZ(-100px);
+  filter: blur(2px);
+  opacity: 0.8;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.blueprint-3d-active #echo-layer {
+  perspective: 2000px;
+  transform: rotateX(20deg) rotateY(-15deg);
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.blueprint-3d-active .echo-document {
+  background: rgba(0, 150, 255, 0.1);
+  border: 2px dashed rgba(0, 150, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 150, 255, 0.5);
+  color: #aaddff;
+  opacity: 0.8;
+  filter: blur(1px);
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    var(--tz, 0px)
+  ) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.blueprint-3d-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    calc(var(--tz, 0px) + 200px)
+  ) scale(1.1) !important;
+  z-index: 50 !important;
+}
+
+/* Cyber Cortex View */
+body.cyber-cortex-active {
+  --bio-glow-color: rgba(255, 0, 255, 0.6);
+  --bio-glow-strong: rgba(255, 0, 255, 0.9);
+}
+
+body.cyber-cortex-active #editor {
+  transform: scale(0.5) translateY(10%) translateZ(-200px);
+  filter: blur(4px);
+  opacity: 0.6;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.cyber-cortex-active #echo-layer {
+  perspective: 2500px;
+  animation: cyber-cortex-spin 60s linear infinite;
+}
+
+@keyframes cyber-cortex-spin {
+  from { transform: rotateY(0deg) rotateX(10deg); }
+  to { transform: rotateY(360deg) rotateX(10deg); }
+}
+
+body.cyber-cortex-active .echo-document {
+  border-radius: 50%;
+  width: 400px;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle, rgba(20, 0, 30, 0.9) 0%, rgba(10, 0, 20, 0.8) 100%);
+  border: 2px solid rgba(255, 0, 255, 0.6);
+  box-shadow: 0 0 30px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.3);
+  opacity: 0.85;
+  filter: blur(1px);
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    var(--tz, 0px)
+  ) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.cyber-cortex-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  border-radius: 12px; /* Morph back to a readable rectangle */
+  width: 600px;
+  height: 800px;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    calc(var(--tz, 0px) + 300px)
+  ) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
+  z-index: 100 !important;
+}
+
+body.cyber-cortex-active .echo-document pre {
+  max-height: 100%;
+  width: 100%;
 }
