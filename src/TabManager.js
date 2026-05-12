@@ -70,6 +70,8 @@ export class TabManager {
     this.isSolarSystemView = false;
     this.isNeonSynthView = false;
     this.isTesseractView = false;
+    this.isBlueprint3dView = false;
+    this.isCyberCortexView = false;
   }
 
   _deactivateAllViews() {
@@ -101,6 +103,8 @@ export class TabManager {
     this.isSolarSystemView = false;
     this.isNeonSynthView = false;
     this.isTesseractView = false;
+    this.isBlueprint3dView = false;
+    this.isCyberCortexView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -131,6 +135,8 @@ export class TabManager {
       "solar-system-active",
       "neon-synth-active",
       "tesseract-active",
+      "blueprint-3d-active",
+      "cyber-cortex-active"
     );
 
     this.isOrigamiView = false;
@@ -161,6 +167,8 @@ export class TabManager {
       "btn-solar-system-view",
       "btn-neon-synth-view",
       "btn-tesseract-view",
+      "btn-blueprint-3d-view",
+      "btn-cyber-cortex-view"
     ].forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) btn.classList.remove("active");
@@ -174,6 +182,30 @@ export class TabManager {
       this.isNeonSynthView = true;
       document.body.classList.add("neon-synth-active");
       const btn = document.getElementById("btn-neon-synth-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleBlueprint3dView() {
+    const wasActive = this.isBlueprint3dView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isBlueprint3dView = true;
+      document.body.classList.add("blueprint-3d-active");
+      const btn = document.getElementById("btn-blueprint-3d-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleCyberCortexView() {
+    const wasActive = this.isCyberCortexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCyberCortexView = true;
+      document.body.classList.add("cyber-cortex-active");
+      const btn = document.getElementById("btn-cyber-cortex-view");
       if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
@@ -867,7 +899,9 @@ Drag to change depth`;
         !this.isCylinderView &&
         !this.isMatrixRainView &&
         !this.isFractalView &&
-        !this.isNeonSynthView
+        !this.isNeonSynthView &&
+        !this.isBlueprint3dView &&
+        !this.isCyberCortexView
       ) {
         el.classList.add("semantic-gravity-pull");
       }
@@ -1549,6 +1583,48 @@ Drag to change depth`;
         el.style.setProperty('--rot-y', `${ry}deg`);
         el.style.setProperty('--rot-z', '0deg');
 
+      } else if (this.isBlueprint3dView) {
+        // Semi-circle arrangement like an architect's desk
+        const totalEchoes = inactiveFiles.length;
+        const r = 400;
+        const angle = (index / Math.max(1, totalEchoes - 1)) * Math.PI;
+
+        const tx = Math.cos(angle) * r;
+        const ty = 50; // slightly down
+        const tz = -Math.sin(angle) * r - 100;
+
+        const rotY = (angle * 180 / Math.PI) - 90; // Face user
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+
+      } else if (this.isCyberCortexView) {
+        // Brain-like cluster / spherical node map
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+
+        const radius = 500;
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200;
+
+        // Add some organic jitter
+        const rotX = Math.sin(index * 13) * 30;
+        const rotY = Math.cos(index * 17) * 30;
+        const rotZ = Math.sin(index * 19) * 30;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+
       } else if (this.isOrigamiView) {
         // Origami spatial view calculation
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -1954,7 +2030,9 @@ Drag to change depth`;
             !this.isRolodexView &&
             !this.isCylinderView &&
             !this.isMatrixRainView &&
-            !this.isNeonSynthView
+            !this.isNeonSynthView &&
+            !this.isBlueprint3dView &&
+            !this.isCyberCortexView
           ) {
             el.style.setProperty("--tz", "100px");
           } else if (this.isOrbitView) {
@@ -1979,7 +2057,9 @@ Drag to change depth`;
             this.isCylinderView ||
             this.isMatrixRainView ||
             this.isFractalView ||
-            this.isNeonSynthView
+            this.isNeonSynthView ||
+            this.isBlueprint3dView ||
+            this.isCyberCortexView
           ) {
             // Pop out for pinboard/helix/vortex/prism/wave/rolodex/cylinder/fractal/neon-synth
             const tz = parseFloat(el.style.getPropertyValue("--tz")) || 0;
@@ -2186,6 +2266,20 @@ Drag to change depth`;
             if (face === 0) { tz = r; }
             else if (face === 1) { tz = -r; }
             else { tz = 0; }
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isBlueprint3dView) {
+            const totalEchoes = Math.max(1, document.querySelectorAll(".echo-document").length - 1);
+            const index = parseInt(el.dataset.index || 0);
+            const r = 400;
+            const angle = (index / Math.max(1, totalEchoes - 1)) * Math.PI; // Semi-circle
+            const tz = -Math.sin(angle) * r - 100;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isCyberCortexView) {
+            const totalEchoes = Math.max(1, document.querySelectorAll(".echo-document").length - 1);
+            const index = parseInt(el.dataset.index || 0);
+            const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+            const radius = 500;
+            const tz = radius * Math.cos(phi) - 200;
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isWaveView) {
             el.style.setProperty("--tz", `-150px`);
