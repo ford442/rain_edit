@@ -1344,6 +1344,7 @@ if (viewModeSelect) {
     else if (view === "helix") tabManager.toggleHelixView();
     else if (view === "pinboard") tabManager.togglePinboardView();
     else if (view === "carousel") tabManager.toggleCarouselView();
+    // UI binding for Infinity Mirror view mode (added in previous iteration)
     else if (view === "infinity-mirror") tabManager.toggleInfinityMirrorView();
     else if (view === "vortex") tabManager.toggleVortexView();
     else if (view === "constellation") tabManager.toggleConstellationView();
