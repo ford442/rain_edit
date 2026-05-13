@@ -693,6 +693,39 @@ document.addEventListener("mousemove", (e) => {
   document.body.style.setProperty('--mouse-nx', nx);
   document.body.style.setProperty('--mouse-ny', ny);
 
+  // Update targets for Depth Spotlight and Hologram Preview
+  if (document.body.classList.contains("depth-spotlight-active") || document.body.classList.contains("hologram-preview-active")) {
+    const echoes = Array.from(document.querySelectorAll(".echo-document"));
+    let closestEcho = null;
+    let minDistance = Infinity;
+
+    echoes.forEach((echo) => {
+      const rect = echo.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dist = Math.hypot(cx - mx, cy - my);
+
+      // Clean up previous classes
+      echo.classList.remove("spotlight-target");
+      echo.classList.remove("hologram-target");
+
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestEcho = echo;
+      }
+    });
+
+    if (closestEcho) {
+      if (document.body.classList.contains("depth-spotlight-active")) {
+        closestEcho.classList.add("spotlight-target");
+      }
+      if (document.body.classList.contains("hologram-preview-active")) {
+        closestEcho.classList.add("hologram-target");
+      }
+    }
+  }
+
+
   // 3D Magnifying Glass Effect (Shift Key)
   if (e.shiftKey && tabManager && tabManager.files) {
     const echoes = echoLayerEl.querySelectorAll(".echo-document");
@@ -1359,6 +1392,7 @@ if (viewModeSelect) {
     else if (view === "neon-synth") tabManager.toggleNeonSynthView();
     else if (view === "blueprint-3d") tabManager.toggleBlueprint3dView();
     else if (view === "cyber-cortex") tabManager.toggleCyberCortexView();
+    else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
 
     else tabManager._deactivateAllViews(); // Default view
   });
@@ -2861,3 +2895,15 @@ function initKineticTypingPulse(editor) {
     }, 150);
   });
 }
+
+// --- Depth Spotlight (Alt+Shift+S) & Hologram Preview (Alt+Shift+H) ---
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.shiftKey && e.code === "KeyS") {
+    e.preventDefault();
+    document.body.classList.toggle("depth-spotlight-active");
+  }
+  if (e.altKey && e.shiftKey && e.code === "KeyH") {
+    e.preventDefault();
+    document.body.classList.toggle("hologram-preview-active");
+  }
+});
