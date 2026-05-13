@@ -72,6 +72,7 @@ export class TabManager {
     this.isTesseractView = false;
     this.isBlueprint3dView = false;
     this.isCyberCortexView = false;
+    this.isQuantumSuperpositionView = false;
   }
 
   _deactivateAllViews() {
@@ -105,6 +106,7 @@ export class TabManager {
     this.isTesseractView = false;
     this.isBlueprint3dView = false;
     this.isCyberCortexView = false;
+    this.isQuantumSuperpositionView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -210,6 +212,16 @@ export class TabManager {
     }
     this._renderEchoes();
   }
+
+  toggleQuantumSuperpositionView() {
+    this._deactivateAllViews();
+    if (!document.body.classList.contains("quantum-superposition-active")) {
+      this.isQuantumSuperpositionView = true;
+      document.body.classList.add("quantum-superposition-active");
+    }
+    this._renderEchoes();
+  }
+
 
   toggleTesseractView() {
     const wasActive = this.isTesseractView;
@@ -1602,7 +1614,26 @@ Drag to change depth`;
         el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", "0deg");
 
-      } else if (this.isCyberCortexView) {
+
+    } else if (this.isQuantumSuperpositionView) {
+      // Quantum Superposition: Scatter in 3D cloud
+      const maxDist = 800;
+      const tX = (Math.random() - 0.5) * maxDist * 2;
+      const tY = (Math.random() - 0.5) * maxDist * 2;
+      const tZ = -(Math.random() * 2000 + 200); // Back into screen
+
+      const rX = (Math.random() - 0.5) * 60; // -30 to 30 deg
+      const rY = (Math.random() - 0.5) * 60;
+      const rZ = (Math.random() - 0.5) * 60;
+
+      el.style.setProperty("--tx", `${tX}px`);
+      el.style.setProperty("--ty", `${tY}px`);
+      el.style.setProperty("--tz", `${tZ}px`);
+      el.style.setProperty("--rot-x", `${rX}deg`);
+      el.style.setProperty("--rot-y", `${rY}deg`);
+      el.style.setProperty("--rot-z", `${rZ}deg`);
+
+    } else if (this.isCyberCortexView) {
         // Brain-like cluster / spherical node map
         const totalEchoes = Math.max(1, inactiveFiles.length);
         const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);

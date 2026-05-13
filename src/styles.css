@@ -6273,3 +6273,135 @@ body.cyber-cortex-active .echo-document pre {
   max-height: 100%;
   width: 100%;
 }
+
+/* =========================================================
+   QUANTUM SUPERPOSITION VIEW
+   ========================================================= */
+body.quantum-superposition-active {
+  --bio-glow-color: rgba(100, 200, 255, 0.6);
+  --bio-glow-strong: rgba(100, 200, 255, 0.9);
+}
+
+body.quantum-superposition-active #editor {
+  transform: scale(0.6) translateY(15%) translateZ(-300px);
+  filter: blur(5px);
+  opacity: 0.5;
+  transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.quantum-superposition-active #echo-layer {
+  perspective: 2500px;
+  transform: rotateX(15deg) rotateY(-10deg);
+  transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.quantum-superposition-active .echo-document {
+  background: rgba(10, 20, 30, 0.6);
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(100, 200, 255, 0.4);
+  box-shadow: 0 0 20px rgba(100, 200, 255, 0.2);
+  opacity: 0.7;
+  filter: blur(2px);
+  /* The layout will be driven by random inline --tx, --ty, --tz, --rot-x, --rot-y, --rot-z variables */
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    var(--tz, 0px)
+  ) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.quantum-superposition-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  border-color: rgba(100, 200, 255, 1);
+  box-shadow: 0 0 40px rgba(100, 200, 255, 0.6);
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    calc(var(--tz, 0px) + 200px)
+  ) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 9999 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.quantum-superposition-active .echo-document {
+    transition: opacity 0.3s ease;
+    transform: none !important;
+  }
+}
+
+/* =========================================================
+   DEPTH SPOTLIGHT (Ctrl + Shift + S)
+   ========================================================= */
+body.depth-spotlight-active #echo-layer .echo-document {
+  transition: filter 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.depth-spotlight-active #echo-layer .echo-document.spotlight-target {
+  opacity: 1 !important;
+  filter: blur(0px) saturate(200%) brightness(1.2) !important;
+  box-shadow: 0 0 50px rgba(0, 255, 255, 0.8), inset 0 0 20px rgba(0, 255, 255, 0.4) !important;
+  border: 1px solid rgba(0, 255, 255, 1) !important;
+  /* Lift it slightly forward based on its base transform */
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    calc(var(--tz, 0px) + 100px)
+  ) scale(1.05) !important;
+  z-index: 1000 !important;
+}
+
+body.depth-spotlight-active #echo-layer .echo-document:not(.spotlight-target) {
+  opacity: 0.1 !important;
+  filter: blur(10px) grayscale(80%) !important;
+}
+
+body.depth-spotlight-active #editor {
+  opacity: 0.2;
+  filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+/* =========================================================
+   HOLOGRAM PREVIEW (Alt + Shift + H)
+   ========================================================= */
+body.hologram-preview-active #echo-layer .echo-document {
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.hologram-preview-active #echo-layer .echo-document.hologram-target {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    400px
+  ) scale(1.5) !important;
+  z-index: 9999 !important;
+  /* Holographic visual effects */
+  background: rgba(0, 50, 100, 0.8) !important;
+  backdrop-filter: blur(10px) sepia(50%) hue-rotate(180deg) !important;
+  border: 2px solid rgba(0, 255, 255, 0.8) !important;
+  box-shadow: 0 20px 60px rgba(0, 255, 255, 0.5), inset 0 0 30px rgba(0, 255, 255, 0.3) !important;
+}
+body.hologram-preview-active #echo-layer .echo-document.hologram-target::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 255, 0.1) 2px,
+    rgba(0, 255, 255, 0.1) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+body.hologram-preview-active #echo-layer .echo-document:not(.hologram-target) {
+  opacity: 0.15 !important;
+  filter: blur(5px) !important;
+}
