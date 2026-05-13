@@ -6405,3 +6405,251 @@ body.hologram-preview-active #echo-layer .echo-document:not(.hologram-target) {
   opacity: 0.15 !important;
   filter: blur(5px) !important;
 }
+
+/* =========================================================
+   OUTLINE VIEW  (Ctrl+Shift+O / #view-mode-select → outline)
+   ========================================================= */
+
+/* Enhanced tab active appearance in outline mode */
+body.outline-active .tab-item.active {
+  background: rgba(0, 229, 255, 0.15);
+  border-bottom: 2px solid #00e5ff;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+}
+
+body.outline-active .tab-depth-badge.depth-2 {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.9);
+}
+
+/* Echo documents get stronger outlines in outline view */
+body.outline-active .echo-document {
+  border: 1px solid hsla(var(--echo-tint, 180deg), 100%, 60%, 0.55);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.25),
+    inset 0 0 24px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.1);
+  opacity: calc(var(--base-opacity, 0.4) + 0.15);
+  filter: blur(calc(var(--base-blur, 4px) * 0.6)) hue-rotate(var(--echo-tint, 0deg));
+}
+
+body.outline-active .echo-document:hover {
+  border-color: hsla(var(--echo-tint, 180deg), 100%, 70%, 0.85) !important;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 2px hsla(var(--echo-tint, 180deg), 100%, 70%, 0.5),
+    0 0 30px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.2),
+    inset 0 0 30px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.15) !important;
+}
+
+/* Animated neon border in outline mode */
+body.outline-active .echo-document::before {
+  animation: aurora-border-spin 4s linear infinite;
+  opacity: 0.8;
+}
+
+/* Rain-drip animation on echo headers in outline mode */
+@keyframes rain-drip {
+  0%   { background-position: 0% 0%;   opacity: 0; }
+  30%  { opacity: 0.6; }
+  100% { background-position: 0% 200%; opacity: 0; }
+}
+
+body.outline-active .echo-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 6px,
+    hsla(var(--echo-tint, 180deg), 100%, 70%, 0.08) 6px,
+    hsla(var(--echo-tint, 180deg), 100%, 70%, 0.08) 7px
+  );
+  background-size: 100% 14px;
+  animation: rain-drip 2.5s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Focus Outline button */
+.echo-focus-outline-btn {
+  background: transparent;
+  border: 1px solid hsla(var(--echo-tint, 180deg), 100%, 60%, 0.4);
+  border-radius: 6px;
+  color: hsla(var(--echo-tint, 180deg), 100%, 70%, 0.8);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 3px 7px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.echo-focus-outline-btn:hover {
+  background: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.15);
+  border-color: hsla(var(--echo-tint, 180deg), 100%, 70%, 0.8);
+  box-shadow: 0 0 10px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.3);
+}
+
+/* Echo that has outline focus highlight */
+.echo-document.outline-focus-active {
+  outline: 2px solid hsla(var(--echo-tint, 180deg), 100%, 70%, 0.9) !important;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 40px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.35),
+    inset 0 0 20px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.1) !important;
+}
+
+/* Symbol Outline panel */
+.echo-symbol-outline {
+  margin: 8px 0 6px;
+  border: 1px solid hsla(var(--echo-tint, 180deg), 80%, 55%, 0.3);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  max-height: 300px;
+  opacity: 1;
+}
+
+.echo-symbol-outline[data-collapsed="true"] {
+  max-height: 32px;
+}
+
+.echo-symbol-outline[data-collapsed="true"] .echo-outline-list {
+  display: none;
+}
+
+.echo-outline-toggle {
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    hsla(var(--echo-tint, 180deg), 60%, 25%, 0.5) 0%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  border: none;
+  border-bottom: 1px solid hsla(var(--echo-tint, 180deg), 80%, 55%, 0.3);
+  color: hsla(var(--echo-tint, 180deg), 100%, 75%, 0.9);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 6px 12px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s ease;
+}
+
+.echo-outline-toggle:hover {
+  background: linear-gradient(
+    90deg,
+    hsla(var(--echo-tint, 180deg), 60%, 35%, 0.6) 0%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+
+.echo-symbol-outline[data-collapsed="true"] .echo-outline-toggle {
+  border-bottom: none;
+}
+
+.outline-icon {
+  color: hsla(var(--echo-tint, 180deg), 100%, 70%, 0.8);
+  font-size: 13px;
+}
+
+.outline-count {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-left: auto;
+}
+
+.echo-outline-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.echo-outline-list::-webkit-scrollbar {
+  width: 3px;
+}
+
+.echo-outline-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.echo-outline-list::-webkit-scrollbar-thumb {
+  background: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.3);
+  border-radius: 2px;
+}
+
+.echo-outline-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(200, 230, 255, 0.75);
+  cursor: default;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.echo-outline-item:hover {
+  background: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.08);
+  color: rgba(220, 245, 255, 0.95);
+}
+
+.outline-kind-icon {
+  color: hsla(var(--echo-tint, 180deg), 100%, 70%, 0.7);
+  font-size: 12px;
+  flex-shrink: 0;
+  width: 14px;
+  text-align: center;
+}
+
+.outline-sym-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.outline-line {
+  color: rgba(150, 180, 200, 0.4);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+/* Kind-specific icon colours */
+.echo-outline-item.outline-kind-class    .outline-kind-icon { color: #ff79c6; }
+.echo-outline-item.outline-kind-function .outline-kind-icon { color: #50fa7b; }
+.echo-outline-item.outline-kind-arrow    .outline-kind-icon { color: #8be9fd; }
+.echo-outline-item.outline-kind-method  .outline-kind-icon { color: #ffb86c; }
+.echo-outline-item.outline-kind-def     .outline-kind-icon { color: #bd93f9; }
+.echo-outline-item.outline-kind-const   .outline-kind-icon { color: #f1fa8c; }
+
+/* data-depth attribute visual distinction in outline mode */
+body.outline-active .echo-document[data-depth="0"] {
+  border-color: hsla(220deg, 80%, 60%, 0.4);
+}
+
+body.outline-active .echo-document[data-depth="1"] {
+  border-color: hsla(180deg, 90%, 60%, 0.5);
+}
+
+body.outline-active .echo-document[data-depth="2"] {
+  border-color: hsla(160deg, 100%, 65%, 0.65);
+}
+

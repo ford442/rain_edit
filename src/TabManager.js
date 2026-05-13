@@ -17,6 +17,48 @@ const DEPTH_TITLES = [
   "Front — above all rain (z-index: 15)",
 ];
 
+/**
+ * Extract top-level symbols (functions, classes, variables, methods) from source code.
+ * Uses simple regex patterns — works best with JS/TS/Python.
+ * @param {string} source
+ * @returns {{ name: string, kind: string, line: number }[]}
+ */
+function _extractSymbols(source) {
+  const symbols = [];
+  const patterns = [
+    { kind: "class",    re: /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/m },
+    { kind: "function", re: /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/m },
+    { kind: "arrow",    re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/m },
+    { kind: "method",   re: /^\s{2,}(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/m },
+    { kind: "def",      re: /^def\s+(\w+)\s*\(/m },
+    { kind: "const",    re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=/m },
+  ];
+  const lines = source.split("\n");
+  lines.forEach((line, idx) => {
+    for (const { kind, re } of patterns) {
+      const m = line.match(re);
+      if (m) {
+        // Avoid duplicate names at same line
+        if (!symbols.some(s => s.name === m[1] && s.line === idx + 1)) {
+          symbols.push({ name: m[1], kind, line: idx + 1 });
+        }
+        break;
+      }
+    }
+  });
+  return symbols;
+}
+
+/**
+ * Return a small icon character for a symbol kind.
+ * @param {string} kind
+ * @returns {string}
+ */
+function _symbolKindIcon(kind) {
+  const map = { class: "◉", function: "ƒ", arrow: "→", method: "⬡", def: "δ", const: "κ" };
+  return map[kind] ?? "·";
+}
+
 export class TabManager {
   /**
    * @param {import('monaco-editor').editor.IStandaloneCodeEditor} editor
@@ -73,6 +115,7 @@ export class TabManager {
     this.isBlueprint3dView = false;
     this.isCyberCortexView = false;
     this.isQuantumSuperpositionView = false;
+    this.isOutlineView = false;
   }
 
   _deactivateAllViews() {
@@ -107,6 +150,7 @@ export class TabManager {
     this.isBlueprint3dView = false;
     this.isCyberCortexView = false;
     this.isQuantumSuperpositionView = false;
+    this.isOutlineView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -138,7 +182,8 @@ export class TabManager {
       "neon-synth-active",
       "tesseract-active",
       "blueprint-3d-active",
-      "cyber-cortex-active"
+      "cyber-cortex-active",
+      "outline-active"
     );
 
     this.isOrigamiView = false;
@@ -218,6 +263,16 @@ export class TabManager {
     if (!document.body.classList.contains("quantum-superposition-active")) {
       this.isQuantumSuperpositionView = true;
       document.body.classList.add("quantum-superposition-active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleOutlineView() {
+    const wasActive = this.isOutlineView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isOutlineView = true;
+      document.body.classList.add("outline-active");
     }
     this._renderEchoes();
   }
@@ -881,6 +936,7 @@ Drag to change depth`;
       el.className = "echo-document";
       el.dataset.id = file.id;
       el.dataset.index = index; // Store for CSS vars restore later
+      el.dataset.depth = file.depth ?? 0; // data-depth for CSS targeting
 
       // Chromatic Depth Layering
       // Shift hue gradually based on depth index. We base it off a base color.
@@ -966,6 +1022,44 @@ Drag to change depth`;
       echoHeader.appendChild(headerStatus);
       echoHeader.appendChild(peekBtn);
 
+      // Focus Outline button — highlights matching content in active editor
+      const focusOutlineBtn = document.createElement("button");
+      focusOutlineBtn.className = "echo-focus-outline-btn";
+      focusOutlineBtn.title = "Focus Outline — highlight this file's symbols in the active editor";
+      focusOutlineBtn.textContent = "⌖";
+      focusOutlineBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        // Toggle outline-highlight class on this echo
+        const isHighlighting = el.classList.contains("outline-focus-active");
+        this.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          doc.classList.remove("outline-focus-active");
+        });
+        if (!isHighlighting) {
+          el.classList.add("outline-focus-active");
+          // Apply semantic resonance — find matching symbols in active editor
+          if (this.editor && !file.isImage) {
+            const symbols = _extractSymbols(file.model ? file.model.getValue() : "");
+            if (symbols.length > 0) {
+              const activeContent = this.editor.getValue ? this.editor.getValue() : "";
+              const firstSymbol = symbols[0].name;
+              const matchIdx = activeContent.indexOf(firstSymbol);
+              if (matchIdx !== -1 && this.editor.revealLineInCenter) {
+                const model = this.editor.getModel();
+                if (model) {
+                  const pos = model.getPositionAt(matchIdx);
+                  this.editor.revealLineInCenter(pos.lineNumber);
+                  this.editor.setSelection({
+                    startLineNumber: pos.lineNumber, startColumn: pos.column,
+                    endLineNumber: pos.lineNumber, endColumn: pos.column + firstSymbol.length
+                  });
+                }
+              }
+            }
+          }
+        }
+      });
+      echoHeader.appendChild(focusOutlineBtn);
+
       peekBtn.addEventListener("click", (e) => {
         e.stopPropagation(); // prevent click from making it active
         const isPeeking = el.classList.contains("is-peeking");
@@ -1008,6 +1102,40 @@ Drag to change depth`;
       });
 
       el.appendChild(echoHeader);
+
+      // Symbol Outline section — collapsible panel showing top-level symbols
+      if (!file.isImage && file.model) {
+        const symbols = _extractSymbols(file.model.getValue());
+        if (symbols.length > 0) {
+          const outlineSection = document.createElement("div");
+          outlineSection.className = "echo-symbol-outline";
+          outlineSection.dataset.collapsed = "false";
+
+          const outlineToggle = document.createElement("button");
+          outlineToggle.className = "echo-outline-toggle";
+          outlineToggle.title = "Toggle symbol outline";
+          outlineToggle.innerHTML = `<span class="outline-icon">⬡</span> Symbols <span class="outline-count">(${symbols.length})</span>`;
+          outlineToggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isCollapsed = outlineSection.dataset.collapsed === "true";
+            outlineSection.dataset.collapsed = isCollapsed ? "false" : "true";
+          });
+
+          const outlineList = document.createElement("ul");
+          outlineList.className = "echo-outline-list";
+          symbols.slice(0, 12).forEach((sym) => {
+            const item = document.createElement("li");
+            item.className = `echo-outline-item outline-kind-${sym.kind}`;
+            item.title = `${sym.kind}: ${sym.name} (line ${sym.line})`;
+            item.innerHTML = `<span class="outline-kind-icon">${_symbolKindIcon(sym.kind)}</span><span class="outline-sym-name">${sym.name}</span><span class="outline-line">:${sym.line}</span>`;
+            outlineList.appendChild(item);
+          });
+
+          outlineSection.appendChild(outlineToggle);
+          outlineSection.appendChild(outlineList);
+          el.appendChild(outlineSection);
+        }
+      }
 
       const bodyWrapper = document.createElement("div");
       bodyWrapper.className = "echo-body-wrapper";
