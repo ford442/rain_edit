@@ -161,18 +161,25 @@ const tabManager = new TabManager(
   echoLayerEl,
 );
 
-// Add the initial demo file and make it active (depth 1 = middle, between rain layers)
-const INITIAL_CODE = [
-  "// rain-2 demo",
-  "function hello(){",
-  '  console.log("hello world");',
-  "}",
-  "",
-  "// @portal",
-].join("\n");
-const initialFileId = tabManager.addFile("main.js", INITIAL_CODE, "javascript");
-tabManager.setActive(initialFileId);
+// Restore previously open tabs from localStorage, or show initial demo file
+(async () => {
+  await tabManager.loadTabsFromStorage();
 
+  // If no tabs were restored, add the initial demo file
+  if (tabManager.files.length === 0) {
+    const INITIAL_CODE = [
+      "// rain-2 demo",
+      "function hello(){",
+      ' console.log("hello world");',
+      "}",
+      "",
+      "// @portal"
+    ].join("\n");
+
+    const initialFileId = tabManager.addFile("main.js", INITIAL_CODE, "javascript");
+    tabManager.setActive(initialFileId);
+  }
+})();
 // Check for ?note= URL param — load named note on startup
 const _urlNote = new URLSearchParams(window.location.search).get("note");
 if (_urlNote) {
@@ -246,34 +253,59 @@ async function _triggerVpsSave() {
 }
 
 // Listen for 3D Cabinet file cube clicks with depth focus logic
-window.addEventListener("fileCubeClicked", async (e) => {
-  const { id, type, name } = e.detail;
+window.addEventListener('fileCubeClicked', async (e) => {
+  const { id, type, name, fileData: eventFileData } = e.detail;
 
   console.log(`Fetching ${type}: ${name}...`);
   // Show loading cursor
   document.body.style.cursor = "wait";
+try {
+  // 1. Fetch the code/json from the backend (handle both VPS remote files and cabinet files)
+  let fileData;
 
-  try {
-    // 1. Fetch the code/json from the backend
-    const fileData = await storageAPI.getFileContent(id, type);
+  if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
+    // Remote VPS file
+    const content = await storageAPI.getVPSFile(eventFileData.vpsPath);
+    const ext = name.split('.').pop().toLowerCase();
+    const languageMap = {
+      js: 'javascript', jsx: 'javascript',
+      ts: 'typescript', tsx: 'typescript',
+      json: 'json',
+      html: 'html', css: 'css',
+      md: 'markdown',
+      py: 'python',
+      glsl: 'glsl', wgsl: 'wgsl',
+      frag: 'glsl', vert: 'glsl'
+    };
+    const language = languageMap[ext] || 'plaintext';
 
-    // 2. Add it to the Tab Manager
-    const newFileId = tabManager.addFile(
-      name,
-      fileData.content,
-      fileData.language,
-    );
+    fileData = { content, language };
+  } else {
+    // Local / Cabinet file (notes, etc.)
+    fileData = await storageAPI.getFileContent(id, type);
+  }
 
-    // Tag the new file with its cabinet origin so save logic can route correctly
-    const newFile = tabManager.files.find((f) => f.id === newFileId);
-    if (newFile) {
+  // 2. Add it to the Tab Manager
+  const newFileId = tabManager.addFile(
+    name,
+    fileData.content,
+    fileData.language
+  );
+
+  // 3. Tag the file so save/open logic knows where it came from
+  const newFile = tabManager.files.find(f => f.id === newFileId);
+  if (newFile) {
+    if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
+      newFile.vpsPath = eventFileData.vpsPath;
+    } else {
+      // Cabinet origin (new system)
       newFile.cabinetType = type;
       newFile.cabinetId = id;
       if (type === "notes") {
-        newFile.noteName = id;
+        newFile.noteName = id;   // for notes, id is the note name
       }
     }
-
+  }
     // 3. DEPTH FOCUS LOGIC (The Immersive Step)
     // Push all current tabs backward into the rain (Depth 1)
     tabManager.files.forEach((file) => {
