@@ -29,7 +29,7 @@ function _extractSymbols(source) {
     { kind: "class",    re: /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/m },
     { kind: "function", re: /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/m },
     { kind: "arrow",    re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/m },
-    { kind: "method",   re: /^\s{2,}(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/m },
+    { kind: "method",   re: /^[\t ]{2,}(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/m },
     { kind: "def",      re: /^def\s+(\w+)\s*\(/m },
     { kind: "const",    re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=/m },
   ];
@@ -1040,13 +1040,15 @@ Drag to change depth`;
           if (this.editor && !file.isImage) {
             const symbols = _extractSymbols(file.model ? file.model.getValue() : "");
             if (symbols.length > 0) {
-              const activeContent = this.editor.getValue ? this.editor.getValue() : "";
-              const firstSymbol = symbols[0].name;
-              const matchIdx = activeContent.indexOf(firstSymbol);
-              if (matchIdx !== -1 && this.editor.revealLineInCenter) {
-                const model = this.editor.getModel();
-                if (model) {
-                  const pos = model.getPositionAt(matchIdx);
+              const activeModel = this.editor.getModel();
+              if (activeModel && this.editor.revealLineInCenter) {
+                const activeContent = activeModel.getValue();
+                const firstSymbol = symbols[0].name;
+                // Use word-boundary to avoid substring false positives
+                const wordRe = new RegExp(`(?<![\\w$])${firstSymbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w$])`);
+                const matchIdx = activeContent.search(wordRe);
+                if (matchIdx !== -1) {
+                  const pos = activeModel.getPositionAt(matchIdx);
                   this.editor.revealLineInCenter(pos.lineNumber);
                   this.editor.setSelection({
                     startLineNumber: pos.lineNumber, startColumn: pos.column,

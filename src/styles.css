@@ -6450,9 +6450,10 @@ body.outline-active .echo-document::before {
 
 /* Rain-drip animation on echo headers in outline mode */
 @keyframes rain-drip {
-  0%   { background-position: 0% 0%;   opacity: 0; }
-  30%  { opacity: 0.6; }
-  100% { background-position: 0% 200%; opacity: 0; }
+  0%   { transform: translateY(-100%); opacity: 0; }
+  20%  { opacity: 0.5; }
+  80%  { opacity: 0.5; }
+  100% { transform: translateY(100%); opacity: 0; }
 }
 
 body.outline-active .echo-header::before {
@@ -6461,15 +6462,14 @@ body.outline-active .echo-header::before {
   top: 0;
   left: 0;
   right: 0;
-  height: 100%;
-  background: repeating-linear-gradient(
-    180deg,
-    transparent 0px,
-    transparent 6px,
-    hsla(var(--echo-tint, 180deg), 100%, 70%, 0.08) 6px,
-    hsla(var(--echo-tint, 180deg), 100%, 70%, 0.08) 7px
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsla(var(--echo-tint, 180deg), 100%, 70%, 0.6),
+    transparent
   );
-  background-size: 100% 14px;
+  will-change: transform;
   animation: rain-drip 2.5s linear infinite;
   pointer-events: none;
   z-index: 0;
