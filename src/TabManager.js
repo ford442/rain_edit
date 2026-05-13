@@ -1044,8 +1044,9 @@ Drag to change depth`;
               if (activeModel && this.editor.revealLineInCenter) {
                 const activeContent = activeModel.getValue();
                 const firstSymbol = symbols[0].name;
-                // Use word-boundary to avoid substring false positives
-                const wordRe = new RegExp(`(?<![\\w$])${firstSymbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\w$])`);
+                // Use \b word boundary for cross-browser compatibility (avoids substring false positives)
+                const escaped = firstSymbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const wordRe = new RegExp(`\\b${escaped}\\b`);
                 const matchIdx = activeContent.search(wordRe);
                 if (matchIdx !== -1) {
                   const pos = activeModel.getPositionAt(matchIdx);
@@ -1116,7 +1117,15 @@ Drag to change depth`;
           const outlineToggle = document.createElement("button");
           outlineToggle.className = "echo-outline-toggle";
           outlineToggle.title = "Toggle symbol outline";
-          outlineToggle.innerHTML = `<span class="outline-icon">⬡</span> Symbols <span class="outline-count">(${symbols.length})</span>`;
+          const toggleIcon = document.createElement("span");
+          toggleIcon.className = "outline-icon";
+          toggleIcon.textContent = "⬡";
+          const toggleCount = document.createElement("span");
+          toggleCount.className = "outline-count";
+          toggleCount.textContent = `(${symbols.length})`;
+          outlineToggle.appendChild(toggleIcon);
+          outlineToggle.append(" Symbols ");
+          outlineToggle.appendChild(toggleCount);
           outlineToggle.addEventListener("click", (e) => {
             e.stopPropagation();
             const isCollapsed = outlineSection.dataset.collapsed === "true";
@@ -1129,7 +1138,22 @@ Drag to change depth`;
             const item = document.createElement("li");
             item.className = `echo-outline-item outline-kind-${sym.kind}`;
             item.title = `${sym.kind}: ${sym.name} (line ${sym.line})`;
-            item.innerHTML = `<span class="outline-kind-icon">${_symbolKindIcon(sym.kind)}</span><span class="outline-sym-name">${sym.name}</span><span class="outline-line">:${sym.line}</span>`;
+
+            const kindIconEl = document.createElement("span");
+            kindIconEl.className = "outline-kind-icon";
+            kindIconEl.textContent = _symbolKindIcon(sym.kind);
+
+            const symNameEl = document.createElement("span");
+            symNameEl.className = "outline-sym-name";
+            symNameEl.textContent = sym.name;
+
+            const lineEl = document.createElement("span");
+            lineEl.className = "outline-line";
+            lineEl.textContent = `:${sym.line}`;
+
+            item.appendChild(kindIconEl);
+            item.appendChild(symNameEl);
+            item.appendChild(lineEl);
             outlineList.appendChild(item);
           });
 
