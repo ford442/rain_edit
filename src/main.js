@@ -1425,6 +1425,7 @@ if (viewModeSelect) {
     else if (view === "blueprint-3d") tabManager.toggleBlueprint3dView();
     else if (view === "cyber-cortex") tabManager.toggleCyberCortexView();
     else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
+    else if (view === "outline") tabManager.toggleOutlineView();
 
     else tabManager._deactivateAllViews(); // Default view
   });
@@ -2722,6 +2723,18 @@ document.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "S") {
     e.preventDefault();
     _triggerVpsSave();
+  }
+});
+
+// Ctrl+Shift+O — Toggle Outline View
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "O") {
+    e.preventDefault();
+    tabManager.toggleOutlineView();
+    const sel = document.getElementById("view-mode-select");
+    if (sel) {
+      sel.value = document.body.classList.contains("outline-active") ? "outline" : "";
+    }
   }
 });
 
