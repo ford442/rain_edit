@@ -1,0 +1,43 @@
+STORAGEAPI.JS PATCH
+===================
+
+1. Find line 16 with STORAGE_CATEGORIES
+2. Add 'notes' to the array:
+
+export const STORAGE_CATEGORIES = [
+  'songs',
+  'patterns', 
+  'banks',
+  'samples',
+  'shaders',
+  'music',
+  'images',
+  'notes'  // <-- ADD THIS LINE
+];
+
+3. Optionally add these helper methods to the StorageAPI class:
+
+  /**
+   * Save a note to the notes category.
+   * @param {string} name - Note name.
+   * @param {string} content - Note content.
+   * @returns {Promise<boolean>}
+   */
+  async saveNote(name, content) {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/songs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'notes',
+          name: name,
+          content: content,
+          timestamp: new Date().toISOString()
+        })
+      });
+      return response.ok;
+    } catch (err) {
+      console.error('Failed to save note:', err);
+      return false;
+    }
+  }

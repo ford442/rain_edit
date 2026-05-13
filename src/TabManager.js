@@ -1,14 +1,20 @@
+import StorageAPI from "./StorageAPI.js";
+const storageAPI = new StorageAPI();
+
+// Duration (ms) the note save toast stays visible
+const TOAST_DISPLAY_DURATION = 2500;
+
 // Z-index assigned to the editor element at each depth level
 const DEPTH_Z_INDEX = [0, 5, 15];
 
 // Visual badge icons for depth 0, 1, 2
-const DEPTH_ICONS = ['▼', '◆', '▲'];
+const DEPTH_ICONS = ["▼", "◆", "▲"];
 
 // Human-readable titles for tooltips
 const DEPTH_TITLES = [
-  'Deep — behind all rain (z-index: 0)',
-  'Middle — between rain layers (z-index: 5)',
-  'Front — above all rain (z-index: 15)',
+  "Deep — behind all rain (z-index: 0)",
+  "Middle — between rain layers (z-index: 5)",
+  "Front — above all rain (z-index: 15)",
 ];
 
 export class TabManager {
@@ -19,21 +25,31 @@ export class TabManager {
    * @param {HTMLElement} tabsEl    - the #tabs-container DOM node
    * @param {HTMLElement} echoLayerEl - the #echo-layer DOM node
    */
-  constructor(editor, monacoApi, editorEl, tabsEl, imageViewerEl = null, echoLayerEl = null) {
+  constructor(
+    editor,
+    monacoApi,
+    editorEl,
+    tabsEl,
+    imageViewerEl = null,
+    echoLayerEl = null,
+  ) {
     this.editor = editor;
     this.monaco = monacoApi;
     this.editorEl = editorEl;
     this.tabsEl = tabsEl;
-    this.imageViewerEl = imageViewerEl || document.getElementById('image-viewer');
-    this.echoLayerEl = echoLayerEl || document.getElementById('echo-layer');
+    this.imageViewerEl =
+      imageViewerEl || document.getElementById("image-viewer");
+    this.echoLayerEl = echoLayerEl || document.getElementById("echo-layer");
     this.files = [];
     this.activeId = null;
     this._nextId = 1;
+    this.isWaterfallView = false;
     this.isCascadeView = false;
     this.isOrbitView = false;
     this.isScatteredView = false;
     this.isIsometricView = false;
     this.isStackView = false;
+    this.isTimelineView = false;
     this.isTunnelView = false;
     this.isGridView = false;
     this.isHelixView = false;
@@ -41,14 +57,33 @@ export class TabManager {
     this.isVortexView = false;
     this.isConstellationView = false;
     this.isPrismView = false;
+    this.isCoverflowView = false;
+    this.isCrystalView = false;
+    this.isWaveView = false;
+    this.isSphereView = false;
+    this.isBlackHoleView = false;
+    this.isRolodexView = false;
+    this.isCylinderView = false;
+    this.isGalaxyView = false;
+    this.isMatrixRainView = false;
+    this.isFractalView = false;
+    this.isSolarSystemView = false;
+    this.isNeonSynthView = false;
+    this.isTesseractView = false;
+    this.isBlueprint3dView = false;
+    this.isCyberCortexView = false;
+    this.isQuantumSuperpositionView = false;
   }
 
   _deactivateAllViews() {
+    this.isCrystalView = false;
+    this.isWaterfallView = false;
     this.isCascadeView = false;
     this.isOrbitView = false;
     this.isScatteredView = false;
     this.isIsometricView = false;
     this.isStackView = false;
+    this.isTimelineView = false;
     this.isTunnelView = false;
     this.isGridView = false;
     this.isHelixView = false;
@@ -56,11 +91,312 @@ export class TabManager {
     this.isVortexView = false;
     this.isConstellationView = false;
     this.isPrismView = false;
-    document.body.classList.remove('cascade-active', 'orbit-active', 'scattered-active', 'isometric-active', 'stack-active', 'tunnel-active', 'grid-active', 'helix-active', 'pinboard-active', 'vortex-active', 'constellation-active', 'prism-active');
-    ['btn-cascade-view', 'btn-orbit-view', 'btn-scattered-view', 'btn-isometric-view', 'btn-stack-view', 'btn-tunnel-view', 'btn-grid-view', 'btn-helix-view', 'btn-pinboard-view', 'btn-vortex-view', 'btn-constellation-view', 'btn-prism-view'].forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) btn.classList.remove('active');
+    this.isCoverflowView = false;
+    this.isWaveView = false;
+    this.isSphereView = false;
+    this.isBlackHoleView = false;
+    this.isRolodexView = false;
+    this.isCylinderView = false;
+    this.isGalaxyView = false;
+    this.isOrigamiView = false;
+    this.isDataHiveView = false;
+    this.isFractalView = false;
+    this.isSolarSystemView = false;
+    this.isNeonSynthView = false;
+    this.isTesseractView = false;
+    this.isBlueprint3dView = false;
+    this.isCyberCortexView = false;
+    this.isQuantumSuperpositionView = false;
+
+    document.body.classList.remove(
+      "waterfall-active",
+      "cascade-active",
+      "orbit-active",
+      "scattered-active",
+      "isometric-active",
+      "stack-active",
+      "timeline-active",
+      "tunnel-active",
+      "grid-active",
+      "helix-active",
+      "pinboard-active",
+      "vortex-active",
+      "constellation-active",
+      "prism-active",
+      "coverflow-active",
+      "wave-active",
+      "sphere-active",
+      "black-hole-active",
+      "rolodex-active",
+      "cylinder-active",
+      "galaxy-active",
+      "origami-active",
+      "data-hive-active",
+      "matrix-rain-active",
+      "fractal-active",
+      "solar-system-active",
+      "neon-synth-active",
+      "tesseract-active",
+      "blueprint-3d-active",
+      "cyber-cortex-active"
+    );
+
+    this.isOrigamiView = false;
+    this.isDataHiveView = false;
+
+    [
+      "btn-waterfall-view",
+      "btn-cascade-view",
+      "btn-orbit-view",
+      "btn-scattered-view",
+      "btn-isometric-view",
+      "btn-stack-view",
+      "btn-timeline-view",
+      "btn-tunnel-view",
+      "btn-grid-view",
+      "btn-helix-view",
+      "btn-pinboard-view",
+      "btn-vortex-view",
+      "btn-constellation-view",
+      "btn-prism-view",
+      "btn-coverflow-view",
+      "btn-wave-view",
+      "btn-sphere-view",
+      "btn-rolodex-view",
+      "btn-data-hive-view",
+      "btn-matrix-rain-view",
+      "btn-fractal-view",
+      "btn-solar-system-view",
+      "btn-neon-synth-view",
+      "btn-tesseract-view",
+      "btn-blueprint-3d-view",
+      "btn-cyber-cortex-view"
+    ].forEach((id) => {
+      const btn = document.getElementById(id);
+      if (btn) btn.classList.remove("active");
     });
+  }
+
+  toggleNeonSynthView() {
+    const wasActive = this.isNeonSynthView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isNeonSynthView = true;
+      document.body.classList.add("neon-synth-active");
+      const btn = document.getElementById("btn-neon-synth-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleBlueprint3dView() {
+    const wasActive = this.isBlueprint3dView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isBlueprint3dView = true;
+      document.body.classList.add("blueprint-3d-active");
+      const btn = document.getElementById("btn-blueprint-3d-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleCyberCortexView() {
+    const wasActive = this.isCyberCortexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCyberCortexView = true;
+      document.body.classList.add("cyber-cortex-active");
+      const btn = document.getElementById("btn-cyber-cortex-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleQuantumSuperpositionView() {
+    this._deactivateAllViews();
+    if (!document.body.classList.contains("quantum-superposition-active")) {
+      this.isQuantumSuperpositionView = true;
+      document.body.classList.add("quantum-superposition-active");
+    }
+    this._renderEchoes();
+  }
+
+
+  toggleTesseractView() {
+    const wasActive = this.isTesseractView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTesseractView = true;
+      document.body.classList.add("tesseract-active");
+      const btn = document.getElementById("btn-tesseract-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleCoverflowView() {
+    const wasActive = this.isCoverflowView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCoverflowView = true;
+      document.body.classList.add("coverflow-active");
+      const btn = document.getElementById("btn-coverflow-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleSolarSystemView() {
+    const wasActive = this.isSolarSystemView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isSolarSystemView = true;
+      document.body.classList.add("solar-system-active");
+      const btn = document.getElementById("btn-solar-system-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleCarouselView() {
+    this._deactivateAllViews();
+    this.isCarouselView = true;
+    document.body.classList.add("carousel-active");
+    this._renderEchoes();
+  }
+
+  toggleInfinityMirrorView() {
+    this._deactivateAllViews();
+    this.isInfinityMirrorView = true;
+    document.body.classList.add("infinity-mirror-active");
+    this._renderEchoes();
+  }
+
+  toggleFractalView() {
+    const wasActive = this.isFractalView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isFractalView = true;
+      document.body.classList.add("fractal-active");
+      const btn = document.getElementById("btn-fractal-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleCrystalView() {
+    const wasActive = this.isCrystalView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCrystalView = true;
+      document.body.classList.add("crystal-active");
+      const btn = document.getElementById("btn-crystal-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleMatrixRainView() {
+    const wasActive = this.isMatrixRainView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isMatrixRainView = true;
+      document.body.classList.add("matrix-rain-active");
+      const btn = document.getElementById("btn-matrix-rain-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleOrigamiView() {
+    const wasActive = this.isOrigamiView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isOrigamiView = true;
+      document.body.classList.add("origami-active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleDataHiveView() {
+    const wasActive = this.isDataHiveView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDataHiveView = true;
+      document.body.classList.add("data-hive-active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleGalaxyView() {
+    const wasActive = this.isGalaxyView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isGalaxyView = true;
+      document.body.classList.add("galaxy-active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleBlackHoleView() {
+    const wasActive = this.isBlackHoleView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isBlackHoleView = true;
+      document.body.classList.add("black-hole-active");
+      const btn = document.getElementById("btn-black-hole-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleRolodexView() {
+    const wasActive = this.isRolodexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isRolodexView = true;
+      document.body.classList.add("rolodex-active");
+      const btn = document.getElementById("btn-rolodex-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleCylinderView() {
+    const wasActive = this.isCylinderView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCylinderView = true;
+      document.body.classList.add("cylinder-active");
+      const btn = document.getElementById("btn-cylinder-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleSphereView() {
+    const wasActive = this.isSphereView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isSphereView = true;
+      document.body.classList.add("sphere-active");
+      const btn = document.getElementById("btn-sphere-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleWaveView() {
+    const wasActive = this.isWaveView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isWaveView = true;
+      document.body.classList.add("wave-active");
+      const btn = document.getElementById("btn-wave-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
   }
 
   togglePrismView() {
@@ -68,9 +404,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isPrismView = true;
-      document.body.classList.add('prism-active');
-      const btn = document.getElementById('btn-prism-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("prism-active");
+      const btn = document.getElementById("btn-prism-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -80,9 +416,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isHelixView = true;
-      document.body.classList.add('helix-active');
-      const btn = document.getElementById('btn-helix-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("helix-active");
+      const btn = document.getElementById("btn-helix-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -92,9 +428,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isConstellationView = true;
-      document.body.classList.add('constellation-active');
-      const btn = document.getElementById('btn-constellation-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("constellation-active");
+      const btn = document.getElementById("btn-constellation-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -104,9 +440,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isPinboardView = true;
-      document.body.classList.add('pinboard-active');
-      const btn = document.getElementById('btn-pinboard-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("pinboard-active");
+      const btn = document.getElementById("btn-pinboard-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -116,9 +452,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isVortexView = true;
-      document.body.classList.add('vortex-active');
-      const btn = document.getElementById('btn-vortex-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("vortex-active");
+      const btn = document.getElementById("btn-vortex-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -128,9 +464,21 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isStackView = true;
-      document.body.classList.add('stack-active');
-      const btn = document.getElementById('btn-stack-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("stack-active");
+      const btn = document.getElementById("btn-stack-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleTimelineView() {
+    const wasActive = this.isTimelineView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTimelineView = true;
+      document.body.classList.add("timeline-active");
+      const btn = document.getElementById("btn-timeline-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -140,9 +488,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isTunnelView = true;
-      document.body.classList.add('tunnel-active');
-      const btn = document.getElementById('btn-tunnel-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("tunnel-active");
+      const btn = document.getElementById("btn-tunnel-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -152,9 +500,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isGridView = true;
-      document.body.classList.add('grid-active');
-      const btn = document.getElementById('btn-grid-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("grid-active");
+      const btn = document.getElementById("btn-grid-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -164,9 +512,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isIsometricView = true;
-      document.body.classList.add('isometric-active');
-      const btn = document.getElementById('btn-isometric-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("isometric-active");
+      const btn = document.getElementById("btn-isometric-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -176,9 +524,21 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isScatteredView = true;
-      document.body.classList.add('scattered-active');
-      const btn = document.getElementById('btn-scattered-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("scattered-active");
+      const btn = document.getElementById("btn-scattered-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleWaterfallView() {
+    const wasActive = this.isWaterfallView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isWaterfallView = true;
+      document.body.classList.add("waterfall-active");
+      const btn = document.getElementById("btn-waterfall-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -188,9 +548,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isCascadeView = true;
-      document.body.classList.add('cascade-active');
-      const btn = document.getElementById('btn-cascade-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("cascade-active");
+      const btn = document.getElementById("btn-cascade-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -200,9 +560,9 @@ export class TabManager {
     this._deactivateAllViews();
     if (!wasActive) {
       this.isOrbitView = true;
-      document.body.classList.add('orbit-active');
-      const btn = document.getElementById('btn-orbit-view');
-      if (btn) btn.classList.add('active');
+      document.body.classList.add("orbit-active");
+      const btn = document.getElementById("btn-orbit-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   }
@@ -214,16 +574,24 @@ export class TabManager {
    * @param {string} language   - Monaco language identifier
    * @returns {number} the new file's id
    */
-  addFile(name, content = '', language = 'javascript') {
+  addFile(name, content = "", language = "javascript") {
     const id = this._nextId++;
-    const isImage = language === 'image';
+    const isImage = language === "image";
 
     let model = null;
     if (!isImage) {
       model = this.monaco.editor.createModel(content, language);
     }
 
-    this.files.push({ id, name, model, depth: 1, isImage, language, url: isImage ? content : null });
+    this.files.push({
+      id,
+      name,
+      model,
+      depth: 1,
+      isImage,
+      language,
+      url: isImage ? content : null,
+    });
     this._renderTabs();
     this._saveTabsToStorage();
     return id;
@@ -235,35 +603,40 @@ export class TabManager {
    * @param {number} id
    */
   setActive(id) {
-    const file = this.files.find(f => f.id === id);
+    const file = this.files.find((f) => f.id === id);
     if (!file) return;
     this.activeId = id;
+
+    const titleBar = document.getElementById('editor-title-bar');
+    if (titleBar) {
+      titleBar.textContent = file.name;
+    }
 
     // Trigger Warp-In animation replacing depth-swap
     const targetEl = file.isImage ? this.imageViewerEl : this.editorEl;
     if (targetEl) {
-        targetEl.classList.remove('warp-in-active');
-        // Force reflow
-        void targetEl.offsetWidth;
-        targetEl.classList.add('warp-in-active');
+      targetEl.classList.remove("warp-in-active");
+      // Force reflow
+      void targetEl.offsetWidth;
+      targetEl.classList.add("warp-in-active");
 
-        // Clean up animation class
-        setTimeout(() => {
-            targetEl.classList.remove('warp-in-active');
-        }, 600);
+      // Clean up animation class
+      setTimeout(() => {
+        targetEl.classList.remove("warp-in-active");
+      }, 600);
     }
 
     if (file.isImage) {
-      this.editorEl.style.display = 'none';
+      this.editorEl.style.display = "none";
       if (this.imageViewerEl) {
-        this.imageViewerEl.style.display = 'flex';
+        this.imageViewerEl.style.display = "flex";
         this.imageViewerEl.innerHTML = `<img src="${file.url}" alt="${file.name}" />`;
       }
     } else {
       if (this.imageViewerEl) {
-        this.imageViewerEl.style.display = 'none';
+        this.imageViewerEl.style.display = "none";
       }
-      this.editorEl.style.display = 'block';
+      this.editorEl.style.display = "block";
       this.editor.setModel(file.model);
       this.editor.focus();
     }
@@ -291,27 +664,28 @@ export class TabManager {
       // If we crossed the middle layer (depth 1), trigger a splash
       // Entering or leaving depth 1 means we broke the water surface
       if (oldDepthLevel === 1 || depthLevel === 1) {
-        const file = this.files.find(f => f.id === this.activeId);
-        const targetEl = (file && file.isImage) ? this.imageViewerEl : this.editorEl;
+        const file = this.files.find((f) => f.id === this.activeId);
+        const targetEl =
+          file && file.isImage ? this.imageViewerEl : this.editorEl;
 
         if (targetEl) {
-            const rect = targetEl.getBoundingClientRect();
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
+          const rect = targetEl.getBoundingClientRect();
+          const x = rect.left + rect.width / 2;
+          const y = rect.top + rect.height / 2;
 
-            // Add splash animation class
-            targetEl.classList.remove('rain-splash-active');
-            void targetEl.offsetWidth; // Force reflow
-            targetEl.classList.add('rain-splash-active');
+          // Add splash animation class
+          targetEl.classList.remove("rain-splash-active");
+          void targetEl.offsetWidth; // Force reflow
+          targetEl.classList.add("rain-splash-active");
 
-            setTimeout(() => {
-                targetEl.classList.remove('rain-splash-active');
-            }, 500);
+          setTimeout(() => {
+            targetEl.classList.remove("rain-splash-active");
+          }, 500);
 
-            const evt = new CustomEvent('document-splash', {
-                detail: { x, y, fileId: this.activeId }
-            });
-            document.dispatchEvent(evt);
+          const evt = new CustomEvent("document-splash", {
+            detail: { x, y, fileId: this.activeId },
+          });
+          document.dispatchEvent(evt);
         }
       }
     }
@@ -323,48 +697,51 @@ export class TabManager {
    * @param {number} delta  — typically +1 or -1
    */
   adjustDepth(delta) {
-    const file = this.files.find(f => f.id === this.activeId);
+    const file = this.files.find((f) => f.id === this.activeId);
     if (!file) return;
     const oldDepth = file.depth;
     file.depth = Math.max(0, Math.min(2, file.depth + delta));
     this.applyDepth(file.depth, oldDepth);
     this._renderTabs();
 
-    // Add snap animation if depth changed
+    // Add snap animation and shatter effect if depth changed
     if (oldDepth !== file.depth && this.echoLayerEl) {
-        // Trigger snap animation on the background documents
-        const targetEl = file.isImage ? this.imageViewerEl : this.editorEl;
-        if (targetEl) {
-            targetEl.classList.remove('echo-snap-active');
-            void targetEl.offsetWidth; // Force reflow
-            targetEl.classList.add('echo-snap-active');
-            setTimeout(() => {
-                targetEl.classList.remove('echo-snap-active');
-            }, 500);
-        }
+      // Trigger snap animation on the background documents
+      const targetEl = file.isImage ? this.imageViewerEl : this.editorEl;
+      if (targetEl) {
+        targetEl.classList.remove("echo-snap-active");
+        targetEl.classList.remove("shatter-active");
+        void targetEl.offsetWidth; // Force reflow
+        targetEl.classList.add("echo-snap-active");
+        targetEl.classList.add("shatter-active");
+        setTimeout(() => {
+          targetEl.classList.remove("echo-snap-active");
+          targetEl.classList.remove("shatter-active");
+        }, 600);
+      }
     }
   }
 
   /** Re-render the tab list inside tabsEl. */
   _renderTabs() {
     if (!this.tabsEl) return;
-    const list = this.tabsEl.querySelector('.tabs-list');
+    const list = this.tabsEl.querySelector(".tabs-list");
     if (!list) return;
-    list.innerHTML = '';
-    this.files.forEach(file => {
-      const tab = document.createElement('div');
-      tab.className = 'tab-item' + (file.id === this.activeId ? ' active' : '');
+    list.innerHTML = "";
+    this.files.forEach((file) => {
+      const tab = document.createElement("div");
+      tab.className = "tab-item" + (file.id === this.activeId ? " active" : "");
       tab.title = `${file.name} — ${DEPTH_TITLES[file.depth]}
 Drag to change depth`;
       tab.draggable = true;
 
-      const badge = document.createElement('span');
+      const badge = document.createElement("span");
       badge.className = `tab-depth-badge depth-${file.depth}`;
       badge.title = DEPTH_TITLES[file.depth];
       badge.textContent = DEPTH_ICONS[file.depth];
 
-      const nameEl = document.createElement('span');
-      nameEl.className = 'tab-name';
+      const nameEl = document.createElement("span");
+      nameEl.className = "tab-name";
       nameEl.textContent = file.name;
 
       const closeBtn = document.createElement('button');
@@ -380,55 +757,65 @@ Drag to change depth`;
       tab.appendChild(nameEl);
       tab.appendChild(closeBtn);
 
-      tab.addEventListener('click', () => this.setActive(file.id));
+      tab.addEventListener("click", () => this.setActive(file.id));
 
       // Drag and Drop Logic
-      tab.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', file.id.toString());
-        tab.classList.add('dragging');
+      tab.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", file.id.toString());
+        tab.classList.add("dragging");
       });
 
-      tab.addEventListener('dragend', () => {
-        tab.classList.remove('dragging');
+      tab.addEventListener("dragend", () => {
+        tab.classList.remove("dragging");
       });
 
       // X-Ray Peek Logic
       if (file.id !== this.activeId) {
-        tab.addEventListener('mouseenter', (e) => {
+        tab.addEventListener("mouseenter", (e) => {
           if (this.echoLayerEl && this.editorEl) {
-            const echoEl = this.echoLayerEl.querySelector(`.echo-document[data-id="${file.id}"]`);
+            const echoEl = this.echoLayerEl.querySelector(
+              `.echo-document[data-id="${file.id}"]`,
+            );
             if (echoEl) {
-              echoEl.classList.add('peek');
+              echoEl.classList.add("peek");
               // Support CSS vars approach for transform
               if (!this.isCascadeView) {
-                  echoEl.style.setProperty('--tx', '0px');
-                  echoEl.style.setProperty('--ty', '0px');
-                  echoEl.style.setProperty('--tz', '100px'); // Pull forward more significantly
+                echoEl.style.setProperty("--tx", "0px");
+                echoEl.style.setProperty("--ty", "0px");
+                echoEl.style.setProperty("--tz", "100px"); // Pull forward more significantly
               }
 
               // Dispatch event to clear fog where the document roughly sits
               const rect = echoEl.getBoundingClientRect();
-              const evt = new CustomEvent('echo-peek', {
-                detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+              const evt = new CustomEvent("echo-peek", {
+                detail: {
+                  x: rect.left + rect.width / 2,
+                  y: rect.top + rect.height / 2,
+                },
               });
               document.dispatchEvent(evt);
             }
-            this.editorEl.classList.add('editor-peek-fade');
+            this.editorEl.classList.add("editor-peek-fade");
           }
         });
 
-        tab.addEventListener('mouseleave', () => {
+        tab.addEventListener("mouseleave", () => {
           if (this.echoLayerEl && this.editorEl) {
-            const echoEl = this.echoLayerEl.querySelector(`.echo-document[data-id="${file.id}"]`);
+            const echoEl = this.echoLayerEl.querySelector(
+              `.echo-document[data-id="${file.id}"]`,
+            );
             if (echoEl) {
-              echoEl.classList.remove('peek');
+              echoEl.classList.remove("peek");
               // Restore CSS vars
               if (!this.isCascadeView) {
-                  const index = parseInt(echoEl.dataset.index || 0);
-                  echoEl.style.setProperty('--tz', `calc(-${index * 50}px + var(--stack-z, 0px))`);
+                const index = parseInt(echoEl.dataset.index || 0);
+                echoEl.style.setProperty(
+                  "--tz",
+                  `calc(-${index * 50}px + var(--stack-z, 0px))`,
+                );
               }
             }
-            this.editorEl.classList.remove('editor-peek-fade');
+            this.editorEl.classList.remove("editor-peek-fade");
           }
         });
       }
@@ -438,17 +825,17 @@ Drag to change depth`;
 
     // Add dragover and drop handling to the body to catch drops anywhere
     if (!this._dndInitialized) {
-      document.body.addEventListener('dragover', (e) => {
+      document.body.addEventListener("dragover", (e) => {
         e.preventDefault(); // Necessary to allow dropping
       });
 
-      document.body.addEventListener('drop', (e) => {
+      document.body.addEventListener("drop", (e) => {
         e.preventDefault();
-        const idStr = e.dataTransfer.getData('text/plain');
+        const idStr = e.dataTransfer.getData("text/plain");
         if (!idStr) return;
 
         const id = parseInt(idStr, 10);
-        const file = this.files.find(f => f.id === id);
+        const file = this.files.find((f) => f.id === id);
         if (!file) return;
 
         // Calculate new depth based on Y position
@@ -481,172 +868,244 @@ Drag to change depth`;
   /** Render inactive files as blurred background echoes. */
   _renderEchoes() {
     if (!this.echoLayerEl) return;
-    this.echoLayerEl.innerHTML = '';
+    this.echoLayerEl.innerHTML = "";
 
-    const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
+    const inactiveFiles = this.files.filter((f) => f.id !== this.activeId);
 
-    const activeFile = this.files.find(f => f.id === this.activeId);
-    const activeExt = activeFile ? activeFile.name.split('.').pop() : '';
-    const activeLang = activeFile ? activeFile.language : '';
+    const activeFile = this.files.find((f) => f.id === this.activeId);
+    const activeExt = activeFile ? activeFile.name.split(".").pop() : "";
+    const activeLang = activeFile ? activeFile.language : "";
 
     inactiveFiles.forEach((file, index) => {
-      const el = document.createElement('div');
-      el.className = 'echo-document';
+      const el = document.createElement("div");
+      el.className = "echo-document";
       el.dataset.id = file.id;
       el.dataset.index = index; // Store for CSS vars restore later
 
-      let tint = '0deg'; // default cyan
-      if (file.name.endsWith('.js')) tint = '60deg'; // yellow
-      else if (file.name.endsWith('.css')) tint = '200deg'; // blue
-      else if (file.name.endsWith('.html') || file.name.endsWith('.md')) tint = '320deg'; // pink/orange
-      el.style.setProperty('--echo-tint', tint);
+      // Chromatic Depth Layering
+      // Shift hue gradually based on depth index. We base it off a base color.
+      let baseTint = 180; // cyan base
+      if (file.name.endsWith(".js"))
+        baseTint = 60; // yellow
+      else if (file.name.endsWith(".css"))
+        baseTint = 200; // blue
+      else if (file.name.endsWith(".html") || file.name.endsWith(".md"))
+        baseTint = 320; // pink
+
+      // Shift hue by 15 degrees per depth level
+      let currentTint = (baseTint + index * 15) % 360;
+      if (this.isMatrixRainView) {
+        currentTint = 120; // Green tint for Matrix Rain
+      }
+      el.style.setProperty("--echo-tint", `${currentTint}deg`);
 
       // Semantic Gravity: Pull files with similar extensions or languages closer
-      const fileExt = file.name.split('.').pop();
-      if ((fileExt === activeExt || file.language === activeLang) && !this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isIsometricView && !this.isStackView && !this.isTunnelView && !this.isGridView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isConstellationView && !this.isPrismView) {
-          el.classList.add('semantic-gravity-pull');
+      const fileExt = file.name.split(".").pop();
+      if (
+        (fileExt === activeExt || file.language === activeLang) &&
+        !this.isCascadeView &&
+        !this.isOrbitView &&
+        !this.isScatteredView &&
+        !this.isIsometricView &&
+        !this.isStackView &&
+        !this.isTunnelView &&
+        !this.isGridView &&
+        !this.isHelixView &&
+        !this.isPinboardView &&
+        !this.isVortexView &&
+        !this.isConstellationView &&
+        !this.isPrismView &&
+        !this.isCoverflowView &&
+        !this.isWaveView &&
+        !this.isSphereView &&
+        !this.isRolodexView &&
+        !this.isCylinderView &&
+        !this.isMatrixRainView &&
+        !this.isFractalView &&
+        !this.isNeonSynthView &&
+        !this.isBlueprint3dView &&
+        !this.isCyberCortexView
+      ) {
+        el.classList.add("semantic-gravity-pull");
       }
 
       // Set parallax factor for vertical scrolling (deeper = moves slower)
-      const parallaxFactor = Math.max(0.05, 0.3 - (index * 0.08));
-      el.style.setProperty('--parallax-factor', parallaxFactor);
+      const parallaxFactor = Math.max(0.05, 0.3 - index * 0.08);
+      el.style.setProperty("--parallax-factor", parallaxFactor);
 
       if (index === 0) {
-          el.classList.add('echo-recent');
+        el.classList.add("echo-recent");
       }
 
       // Add a header so users know what this file is
-      const echoHeader = document.createElement('div');
-      echoHeader.className = 'echo-header';
+      const echoHeader = document.createElement("div");
+      echoHeader.className = "echo-header";
 
-      const headerTitle = document.createElement('div');
-      headerTitle.className = 'echo-header-title';
-      headerTitle.innerHTML = `<span class="echo-file-icon">◈</span> <span class="echo-file-name">${file.name}</span> <span class="echo-file-lang">${file.language || 'text'}</span>`;
+      const headerTitle = document.createElement("div");
+      headerTitle.className = "echo-header-title";
+      headerTitle.innerHTML = `<span class="echo-file-icon">◈</span> <span class="echo-file-name">${file.name}</span> <span class="echo-file-lang">${file.language || "text"}</span>`;
 
-      const headerStatus = document.createElement('div');
-      headerStatus.className = 'echo-header-status';
-      const randomHex = Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0').toUpperCase();
+      const headerStatus = document.createElement("div");
+      headerStatus.className = "echo-header-status";
+      const randomHex = Math.floor(Math.random() * 0xffffff)
+        .toString(16)
+        .padStart(6, "0")
+        .toUpperCase();
       headerStatus.innerHTML = `<span class="echo-status-dot"></span>0x${randomHex}`;
 
-      const peekBtn = document.createElement('button');
-      peekBtn.className = 'echo-peek-btn';
-      peekBtn.title = 'Peek Document';
-      peekBtn.textContent = '👁️';
+      const peekBtn = document.createElement("button");
+      peekBtn.className = "echo-peek-btn";
+      peekBtn.title = "Expanded Peek";
+      peekBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+        </svg>
+      `;
 
       echoHeader.appendChild(headerTitle);
       echoHeader.appendChild(headerStatus);
       echoHeader.appendChild(peekBtn);
 
-      peekBtn.addEventListener('click', (e) => {
-          e.stopPropagation(); // prevent click from making it active
-          const isPeeking = el.classList.contains('is-peeking');
-          if (isPeeking) {
-              el.classList.remove('is-peeking');
-              if (this.editorEl) this.editorEl.classList.remove('editor-peek-fade');
-          } else {
-              // Optionally un-peek others if only one peek at a time is desired:
-              // this.echoLayerEl.querySelectorAll('.is-peeking').forEach(doc => doc.classList.remove('is-peeking'));
-              el.classList.add('is-peeking');
-              if (this.editorEl) this.editorEl.classList.add('editor-peek-fade');
+      peekBtn.addEventListener("click", (e) => {
+        e.stopPropagation(); // prevent click from making it active
+        const isPeeking = el.classList.contains("is-peeking");
+        if (isPeeking) {
+          el.classList.remove("is-peeking");
+          peekBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                </svg>
+              `;
+          if (this.editorEl) this.editorEl.classList.remove("editor-peek-fade");
+        } else {
+          // Un-peek others
+          this.echoLayerEl.querySelectorAll(".is-peeking").forEach((doc) => {
+            doc.classList.remove("is-peeking");
+            const otherBtn = doc.querySelector(".echo-peek-btn");
+            if (otherBtn) {
+              otherBtn.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+                        </svg>
+                      `;
+            }
+          });
 
-              const rect = el.getBoundingClientRect();
-              const evt = new CustomEvent('echo-peek', {
-                detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-              });
-              document.dispatchEvent(evt);
-          }
+          el.classList.add("is-peeking");
+          peekBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
+                </svg>
+              `;
+          if (this.editorEl) this.editorEl.classList.add("editor-peek-fade");
+
+          const rect = el.getBoundingClientRect();
+          const evt = new CustomEvent("echo-peek", {
+            detail: { x: window.innerWidth / 2, y: window.innerHeight / 2 }, // clear center screen
+          });
+          document.dispatchEvent(evt);
+        }
       });
 
       el.appendChild(echoHeader);
 
-      const bodyWrapper = document.createElement('div');
-      bodyWrapper.className = 'echo-body-wrapper';
+      const bodyWrapper = document.createElement("div");
+      bodyWrapper.className = "echo-body-wrapper";
 
-      const lineNumbers = document.createElement('div');
-      lineNumbers.className = 'echo-line-numbers';
-      let linesHtml = '';
-      const lineCount = file.isImage ? 1 : Math.min(40, file.model?.getLineCount ? file.model.getLineCount() : 40);
-      for(let i=1; i<=lineCount; i++) {
-         linesHtml += `<span>${i}</span>`;
+      const lineNumbers = document.createElement("div");
+      lineNumbers.className = "echo-line-numbers";
+      let linesHtml = "";
+      const lineCount = file.isImage
+        ? 1
+        : Math.min(
+            40,
+            file.model?.getLineCount ? file.model.getLineCount() : 40,
+          );
+      for (let i = 1; i <= lineCount; i++) {
+        linesHtml += `<span>${i}</span>`;
       }
       lineNumbers.innerHTML = linesHtml;
       bodyWrapper.appendChild(lineNumbers);
 
       // Extract text or show image placeholder
-      let contentStr = '';
+      let contentStr = "";
       if (file.isImage) {
         contentStr = `[IMAGE: ${file.name}]`;
       } else {
         contentStr = file.model.getValue().substring(0, 1000);
       }
 
-      const pre = document.createElement('pre');
-      const code = document.createElement('code');
+      const pre = document.createElement("pre");
+      const code = document.createElement("code");
       if (file.isImage) {
-          code.textContent = contentStr;
+        code.textContent = contentStr;
       } else {
-          // Asynchronous syntax highlighting for background code blocks
-          code.textContent = 'Loading...'; // Placeholder
-          this.monaco.editor.colorize(contentStr, file.language || 'javascript', {}).then((html) => {
-              // Only update if the element is still in the DOM (the tab manager might have re-rendered)
-              if (el.isConnected) {
-                  code.innerHTML = html;
-              }
-          }).catch((err) => {
-              console.warn('Failed to colorize background document:', err);
-              code.textContent = contentStr; // Fallback to plain text
+        // Asynchronous syntax highlighting for background code blocks
+        code.textContent = "Loading..."; // Placeholder
+        this.monaco.editor
+          .colorize(contentStr, file.language || "javascript", {})
+          .then((html) => {
+            // Only update if the element is still in the DOM (the tab manager might have re-rendered)
+            if (el.isConnected) {
+              code.innerHTML = html;
+            }
+          })
+          .catch((err) => {
+            console.warn("Failed to colorize background document:", err);
+            code.textContent = contentStr; // Fallback to plain text
           });
       }
 
       // Allow drag & drop for Holographic Siphon
       pre.draggable = true;
-      pre.addEventListener('dragstart', (e) => {
-          if (!document.body.classList.contains('siphon-mode-active')) {
-              e.preventDefault();
-              return;
-          }
+      pre.addEventListener("dragstart", (e) => {
+        if (!document.body.classList.contains("siphon-mode-active")) {
+          e.preventDefault();
+          return;
+        }
 
-          const selection = window.getSelection();
-          let text = selection.toString();
+        const selection = window.getSelection();
+        let text = selection.toString();
 
-          if (!text) {
-              // If no text is selected, fallback to the whole content or a snippet
-              text = code.textContent.substring(0, 500);
-          }
+        if (!text) {
+          // If no text is selected, fallback to the whole content or a snippet
+          text = code.textContent.substring(0, 500);
+        }
 
-          e.dataTransfer.setData('text/plain', text);
-          e.dataTransfer.effectAllowed = 'copy';
+        e.dataTransfer.setData("text/plain", text);
+        e.dataTransfer.effectAllowed = "copy";
 
-          // Optional: Add a custom drag image
-          const dragImg = document.createElement('div');
-          dragImg.style.position = 'absolute';
-          dragImg.style.top = '-1000px';
-          dragImg.style.color = '#00e5ff';
-          dragImg.style.background = 'rgba(0, 0, 0, 0.8)';
-          dragImg.style.padding = '8px';
-          dragImg.style.border = '1px solid #00e5ff';
-          dragImg.textContent = text.length > 20 ? text.substring(0, 20) + '...' : text;
-          document.body.appendChild(dragImg);
+        // Optional: Add a custom drag image
+        const dragImg = document.createElement("div");
+        dragImg.style.position = "absolute";
+        dragImg.style.top = "-1000px";
+        dragImg.style.color = "#00e5ff";
+        dragImg.style.background = "rgba(0, 0, 0, 0.8)";
+        dragImg.style.padding = "8px";
+        dragImg.style.border = "1px solid #00e5ff";
+        dragImg.textContent =
+          text.length > 20 ? text.substring(0, 20) + "..." : text;
+        document.body.appendChild(dragImg);
 
-          e.dataTransfer.setDragImage(dragImg, 0, 0);
+        e.dataTransfer.setDragImage(dragImg, 0, 0);
 
-          setTimeout(() => {
-              if (dragImg.parentNode) dragImg.parentNode.removeChild(dragImg);
-          }, 100);
+        setTimeout(() => {
+          if (dragImg.parentNode) dragImg.parentNode.removeChild(dragImg);
+        }, 100);
       });
 
       pre.appendChild(code);
       bodyWrapper.appendChild(pre);
 
-      const minimap = document.createElement('div');
-      minimap.className = 'echo-minimap';
-      minimap.style.transform = 'translateZ(30px)';
-      minimap.style.boxShadow = '-10px 10px 20px rgba(0,0,0,0.5)';
-      let minimapHtml = '';
-      for(let i=0; i<35; i++) {
-         const width = 20 + Math.random() * 80;
-         const opacity = 0.1 + Math.random() * 0.5;
-         minimapHtml += `<div class="minimap-block" style="width: ${width}%; opacity: ${opacity};"></div>`;
+      const minimap = document.createElement("div");
+      minimap.className = "echo-minimap";
+      minimap.style.transform = "translateZ(30px)";
+      minimap.style.boxShadow = "-10px 10px 20px rgba(0,0,0,0.5)";
+      let minimapHtml = "";
+      for (let i = 0; i < 35; i++) {
+        const width = 20 + Math.random() * 80;
+        const opacity = 0.1 + Math.random() * 0.5;
+        minimapHtml += `<div class="minimap-block" style="width: ${width}%; opacity: ${opacity};"></div>`;
       }
       minimap.innerHTML = minimapHtml;
       bodyWrapper.appendChild(minimap);
@@ -654,73 +1113,134 @@ Drag to change depth`;
       el.appendChild(bodyWrapper);
 
       // Add a CSS-animated scanning line effect to the document
-      const scanLineDiv = document.createElement('div');
-      scanLineDiv.className = 'scan-line';
-      scanLineDiv.style.setProperty('--index', index);
+      const scanLineDiv = document.createElement("div");
+      scanLineDiv.className = "scan-line";
+      scanLineDiv.style.setProperty("--index", index);
       el.appendChild(scanLineDiv);
+
+      const semanticLaser = document.createElement("div");
+      semanticLaser.className = "semantic-sync-laser";
+      el.appendChild(semanticLaser);
 
       // Dynamic Opacity and Blur based on depth index via CSS variables
       // (This avoids inline style specificity issues that break hover states)
-      const baseOpacity = Math.max(0.15, 0.7 - (index * 0.2));
-      const baseBlur = Math.min(15, 3 + (index * 3));
-      el.style.setProperty('--base-opacity', baseOpacity);
-      el.style.setProperty('--base-blur', `${baseBlur}px`);
+      const baseOpacity = Math.max(0.15, 0.7 - index * 0.2);
+      const baseBlur = Math.min(15, 3 + index * 3);
+      el.style.setProperty("--base-opacity", baseOpacity);
+      el.style.setProperty("--base-blur", `${baseBlur}px`);
 
-      // Add a CSS-animated scanning line effect to the document
-      const scanLine = document.createElement('div');
-      scanLine.className = 'scan-line';
-      scanLine.style.setProperty('--index', index);
-      el.appendChild(scanLine);
+      // Add visual feedback elements for obscured distant documents
+      if (index >= 2) {
+        el.classList.add("depth-aware-glitch");
+      }
 
-      const hexOverlay = document.createElement('div');
-      hexOverlay.className = 'hex-overlay';
+      const hexOverlay = document.createElement("div");
+      hexOverlay.className = "hex-overlay";
       el.appendChild(hexOverlay);
 
-      const lightLeak = document.createElement('div');
-      lightLeak.className = 'light-leak';
+      const lightLeak = document.createElement("div");
+      lightLeak.className = "light-leak";
       el.appendChild(lightLeak);
 
+      const holoRing = document.createElement("div");
+      holoRing.className = "echo-document-holo-ring";
+      el.appendChild(holoRing);
+
+      const magneticEdge = document.createElement("div");
+      magneticEdge.className = "magnetic-edge";
+      el.appendChild(magneticEdge);
+
+      const edgeBleedLayer = document.createElement("div");
+      edgeBleedLayer.className = "edge-bleed-layer";
+      el.appendChild(edgeBleedLayer);
+
+      const spotlight = document.createElement("div");
+      spotlight.className = "volumetric-spotlight";
+      el.appendChild(spotlight);
+
       // Ghost Scroll feature: allow scrolling without bringing document to front
-      pre.addEventListener('wheel', (e) => {
+      pre.addEventListener("wheel", (e) => {
         e.stopPropagation(); // prevent main editor from scrolling
         // Dispatch echo-peek to clear fog locally
-        const evt = new CustomEvent('echo-peek', {
-          detail: { x: e.clientX, y: e.clientY }
+        const evt = new CustomEvent("echo-peek", {
+          detail: { x: e.clientX, y: e.clientY },
         });
         document.dispatchEvent(evt);
+      });
+
+      // Holographic Glitch on Hover
+      el.addEventListener("mouseenter", () => {
+        el.classList.add("glitch-active");
+        setTimeout(() => el.classList.remove("glitch-active"), 300); // Glitch duration
+      });
+
+      // Echo Pulse Focus (on double click)
+      el.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        // Apply pulse to clicked document immediately
+        el.classList.add("echo-pulse");
+        setTimeout(() => el.classList.remove("echo-pulse"), 1500);
+
+        // Get center coordinates of clicked document
+        const rect = el.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        // Propagate pulse to other documents based on distance
+        const otherEchoes = Array.from(
+          this.echoLayerEl.querySelectorAll(".echo-document"),
+        ).filter((doc) => doc !== el);
+
+        otherEchoes.forEach((doc) => {
+          const docRect = doc.getBoundingClientRect();
+          const docCenterX = docRect.left + docRect.width / 2;
+          const docCenterY = docRect.top + docRect.height / 2;
+
+          const dx = docCenterX - centerX;
+          const dy = docCenterY - centerY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          // Delay based on distance (speed of ripple)
+          const delay = distance * 0.5; // adjust multiplier for speed
+
+          setTimeout(() => {
+            doc.classList.add("echo-pulse");
+            setTimeout(() => doc.classList.remove("echo-pulse"), 1500);
+          }, delay);
+        });
       });
 
       // Calculate Exploded Orbit View variables
       const totalEchoes = inactiveFiles.length;
       if (totalEchoes > 0) {
-          const angle = (index / totalEchoes) * Math.PI * 2;
-          const radius = 300; // Orbit radius
-          const explodeX = Math.cos(angle) * radius;
-          const explodeY = Math.sin(angle) * radius;
-          el.style.setProperty('--explode-x', `${explodeX}px`);
-          el.style.setProperty('--explode-y', `${explodeY}px`);
+        const angle = (index / totalEchoes) * Math.PI * 2;
+        const radius = 300; // Orbit radius
+        const explodeX = Math.cos(angle) * radius;
+        const explodeY = Math.sin(angle) * radius;
+        el.style.setProperty("--explode-x", `${explodeX}px`);
+        el.style.setProperty("--explode-y", `${explodeY}px`);
 
-          // Expose Mode (Grid view) coordinates
-          const cols = Math.ceil(Math.sqrt(totalEchoes));
-          const rows = Math.ceil(totalEchoes / cols);
+        // Expose Mode (Grid view) coordinates
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const rows = Math.ceil(totalEchoes / cols);
 
-          const col = index % cols;
-          const row = Math.floor(index / cols);
+        const col = index % cols;
+        const row = Math.floor(index / cols);
 
-          const exposeW = window.innerWidth * 0.7; // Spread width
-          const exposeH = window.innerHeight * 0.7; // Spread height
+        const exposeW = window.innerWidth * 0.7; // Spread width
+        const exposeH = window.innerHeight * 0.7; // Spread height
 
-          const spacingX = cols > 1 ? exposeW / (cols - 1) : 0;
-          const spacingY = rows > 1 ? exposeH / (rows - 1) : 0;
+        const spacingX = cols > 1 ? exposeW / (cols - 1) : 0;
+        const spacingY = rows > 1 ? exposeH / (rows - 1) : 0;
 
-          const offsetX = -exposeW / 2;
-          const offsetY = -exposeH / 2;
+        const offsetX = -exposeW / 2;
+        const offsetY = -exposeH / 2;
 
-          const exposeX = offsetX + (col * spacingX);
-          const exposeY = offsetY + (row * spacingY);
+        const exposeX = offsetX + col * spacingX;
+        const exposeY = offsetY + row * spacingY;
 
-          el.style.setProperty('--expose-tx', `${exposeX}px`);
-          el.style.setProperty('--expose-ty', `${exposeY}px`);
+        el.style.setProperty("--expose-tx", `${exposeX}px`);
+        el.style.setProperty("--expose-ty", `${exposeY}px`);
       }
 
       if (this.isTunnelView) {
@@ -732,12 +1252,12 @@ Drag to change depth`;
         const tz = -index * 150;
         const rotZ = (angle * 180) / Math.PI;
 
-        el.style.setProperty('--tx', `${tx}px`);
-        el.style.setProperty('--ty', `${ty}px`);
-        el.style.setProperty('--tz', `${tz}px`);
-        el.style.setProperty('--rot-z', `${rotZ}deg`);
-        el.style.setProperty('--rot-x', '0deg');
-        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
       } else if (this.isGridView) {
         // Grid View: neat 3D matrix-style wall
         const cols = Math.ceil(Math.sqrt(totalEchoes));
@@ -754,47 +1274,76 @@ Drag to change depth`;
         const ty = offsetY + row * spacingY;
         const tz = -300; // Push back slightly
 
-        el.style.setProperty('--tx', `${tx}px`);
-        el.style.setProperty('--ty', `${ty}px`);
-        el.style.setProperty('--tz', `${tz}px`);
-        el.style.setProperty('--rot-x', '0deg');
-        el.style.setProperty('--rot-y', '0deg');
-        el.style.setProperty('--rot-z', '0deg');
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
       } else if (this.isOrbitView) {
         // Orbit View (3D Carousel Cylindrical) positions
         const angle = (index / totalEchoes) * 360; // Degrees
         const orbitRadius = Math.max(500, totalEchoes * 120); // Dynamic radius based on file count
 
-        el.style.setProperty('--orbit-rot-y', `${angle}deg`);
-        el.style.setProperty('--orbit-tz', `${orbitRadius}px`);
+        el.style.setProperty("--orbit-rot-y", `${angle}deg`);
+        el.style.setProperty("--orbit-tz", `${orbitRadius}px`);
 
         // Remove standard tx, ty offsets to center the carousel properly
-        el.style.setProperty('--tx', `0px`);
-        el.style.setProperty('--ty', `0px`);
-        el.style.setProperty('--tz', `0px`);
+        el.style.setProperty("--tx", `0px`);
+        el.style.setProperty("--ty", `0px`);
+        el.style.setProperty("--tz", `0px`);
+      } else if (this.isWaterfallView) {
+        // Waterfall Layout: Cascade downwards and slightly backwards
+        const tx = index % 2 === 0 ? 50 : -50; // slight alternating zigzag
+        const ty = index * 120 + 50; // cascade down heavily
+        const tz = -index * 60; // push backwards
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-x", "15deg"); // slight tilt up to see the flow
+        el.style.setProperty("--rot-z", "0deg");
       } else if (this.isCascadeView) {
         // Cascade positions
         const vw = window.innerWidth;
-        const tx = (vw * 0.3) + (index * 40);
+        const tx = vw * 0.3 + index * 40;
         const ty = index * 20;
         const tz = -index * 50;
-        el.style.setProperty('--tx', `${tx}px`);
-        el.style.setProperty('--ty', `${ty}px`);
-        el.style.setProperty('--tz', `${tz}px`);
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+      } else if (this.isTimelineView) {
+        // Timeline View positions
+        const totalEchoes = inactiveFiles.length;
+        const width = window.innerWidth * 1.5;
+        // Position them in a line from left to right, going backwards in Z
+        const spacingX = totalEchoes > 1 ? width / (totalEchoes - 1) : 0;
+        const xPos = -width / 2 + index * spacingX;
+        const zPos = -index * 150;
+
+        el.style.setProperty("--tx", `${xPos}px`);
+        el.style.setProperty("--ty", "0px");
+        el.style.setProperty("--tz", `${zPos}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
       } else if (this.isStackView) {
         // Time Machine Stack View
-        el.style.setProperty('--tx', `0px`);
-        el.style.setProperty('--ty', `0px`);
-        el.style.setProperty('--tz', `${-index * 300 + (parseFloat(document.getElementById('echo-layer').style.getPropertyValue('--stack-z')) || 0)}px`);
-        el.style.setProperty('--rot-x', '0deg');
-        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty("--tx", `0px`);
+        el.style.setProperty("--ty", `0px`);
+        el.style.setProperty(
+          "--tz",
+          `${-index * 300 + (parseFloat(document.getElementById("echo-layer").style.getPropertyValue("--stack-z")) || 0)}px`,
+        );
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
       } else if (this.isIsometricView) {
         // Simple stacked positioning for isometric view
-        el.style.setProperty('--tx', `0px`);
-        el.style.setProperty('--ty', `${index * 20}px`);
-        el.style.setProperty('--tz', `${index * 50}px`);
-        el.style.setProperty('--rot-x', '0deg');
-        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty("--tx", `0px`);
+        el.style.setProperty("--ty", `${index * 20}px`);
+        el.style.setProperty("--tz", `${index * 50}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
       } else if (this.isHelixView) {
         // Helix View positions
         const totalEchoes = inactiveFiles.length;
@@ -806,58 +1355,114 @@ Drag to change depth`;
         const angle = indexRatio * Math.PI * 2 * cycles;
 
         const tx = Math.cos(angle) * radius;
-        const ty = (indexRatio * yRange) - (yRange / 2);
+        const ty = indexRatio * yRange - yRange / 2;
         const tz = Math.sin(angle) * radius - 200; // Push back a bit
 
-        const rotY = -(angle * 180 / Math.PI) + 90; // Face inwards/outwards appropriately
+        const rotY = -((angle * 180) / Math.PI) + 90; // Face inwards/outwards appropriately
 
-        el.style.setProperty('--tx', `${tx}px`);
-        el.style.setProperty('--ty', `${ty}px`);
-        el.style.setProperty('--tz', `${tz}px`);
-        el.style.setProperty('--rot-y', `${rotY}deg`);
-        el.style.setProperty('--rot-x', '0deg');
-        el.style.setProperty('--rot-z', '0deg');
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
       } else if (this.isConstellationView) {
         // Constellation View: Map to a 3D spherical point cloud
         const totalEchoes = inactiveFiles.length;
-        const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
         const theta = Math.PI * (1 + Math.sqrt(5)) * index;
 
-        const radius = 400 + (Math.sin(index * 123) * 100); // 400-500 radius with some jitter
+        const radius = 400 + Math.sin(index * 123) * 100; // 400-500 radius with some jitter
         const tx = radius * Math.sin(phi) * Math.cos(theta);
         const ty = radius * Math.sin(phi) * Math.sin(theta);
         const tz = radius * Math.cos(phi) - 200; // Offset back
 
         // Random tilt for constellation nodes
-        const rotX = (Math.sin(index * 22) * 20);
-        const rotY = (Math.cos(index * 33) * 20);
-        const rotZ = (Math.sin(index * 44) * 20);
+        const rotX = Math.sin(index * 22) * 20;
+        const rotY = Math.cos(index * 33) * 20;
+        const rotZ = Math.sin(index * 44) * 20;
 
-        el.style.setProperty('--tx', `${tx}px`);
-        el.style.setProperty('--ty', `${ty}px`);
-        el.style.setProperty('--tz', `${tz}px`);
-        el.style.setProperty('--rot-x', `${rotX}deg`);
-        el.style.setProperty('--rot-y', `${rotY}deg`);
-        el.style.setProperty('--rot-z', `${rotZ}deg`);
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+      } else if (this.isMatrixRainView) {
+        // Arrange items randomly on X and Z, falling down from Y
+        const maxCols = 10;
+        const col = index % maxCols;
+        const colWidth = window.innerWidth / maxCols;
+
+        // Spread out evenly but with some jitter
+        const tX = -window.innerWidth / 2 + col * colWidth + Math.random() * 50;
+
+        // Random Y start position for staggered falling effect
+        // We set startY uniformly within a viewport height so that
+        // they loop inside the animation keyframes (-100vh to 100vh) consistently
+        const startY =
+          -window.innerHeight / 2 - Math.random() * window.innerHeight;
+
+        // Z-depth spread
+        const tZ = -300 - Math.random() * 600;
+
+        const rX = 0;
+        const rY = 0;
+        const rZ = 0;
+
+        el.style.setProperty("--tx", `${tX}px`);
+        el.style.setProperty("--ty", `${startY}px`);
+        el.style.setProperty("--tz", `${tZ}px`);
+        el.style.setProperty("--rot-x", `${rX}deg`);
+        el.style.setProperty("--rot-y", `${rY}deg`);
+        el.style.setProperty("--rot-z", `${rZ}deg`);
+
+        // Use animation delay to randomize falling
+        el.style.setProperty("--matrix-delay", `${Math.random() * 5}s`);
+      } else if (this.isFractalView) {
+        // Fractal Tree positioning
+        const depth = Math.floor(Math.log2(index + 1)); // 0, 1, 2, 3...
+        const indexInLevel = index - (Math.pow(2, depth) - 1); // 0, 0,1, 0,1,2,3...
+        const itemsInLevel = Math.pow(2, depth);
+
+        // Spread evenly horizontally based on depth
+        const xSpread = window.innerWidth * 0.8;
+        const startX = -xSpread / 2;
+        const stepX = itemsInLevel > 1 ? xSpread / (itemsInLevel - 1) : 0;
+
+        const tX = startX + indexInLevel * stepX;
+        const tY = depth * 300 - 400; // Go down as depth increases
+        const tZ = -depth * 200; // Go back as depth increases
+
+        const rX = 0;
+        const rY = 0;
+        const rZ = 0;
+
+        el.style.setProperty("--tx", `${tX}px`);
+        el.style.setProperty("--ty", `${tY}px`);
+        el.style.setProperty("--tz", `${tZ}px`);
+        el.style.setProperty("--rot-x", `${rX}deg`);
+        el.style.setProperty("--rot-y", `${rY}deg`);
+        el.style.setProperty("--rot-z", `${rZ}deg`);
       } else if (this.isVortexView) {
         // Vortex View positions
         const totalEchoes = inactiveFiles.length;
         const indexRatio = index / Math.max(1, totalEchoes - 1);
-        const radius = 200 + (index * 40); // Expanding radius
+        const radius = 200 + index * 40; // Expanding radius
         const angle = indexRatio * Math.PI * 2 * 4; // 4 swirls
 
         const tx = Math.cos(angle) * radius;
         const ty = Math.sin(angle) * radius;
         const tz = -index * 120 - 100;
 
-        const rotZ = (angle * 180 / Math.PI) + 90;
+        const rotZ = (angle * 180) / Math.PI + 90;
 
-        el.style.setProperty('--tx', `${tx}px`);
-        el.style.setProperty('--ty', `${ty}px`);
-        el.style.setProperty('--tz', `${tz}px`);
-        el.style.setProperty('--rot-z', `${rotZ}deg`);
-        el.style.setProperty('--rot-x', '0deg');
-        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
       } else if (this.isPinboardView) {
         // Pinboard View positions (Organic spread on a wall)
         const totalEchoes = inactiveFiles.length;
@@ -875,24 +1480,383 @@ Drag to change depth`;
         const randomSeedX = Math.sin(index * 123) * 0.5;
         const randomSeedY = Math.cos(index * 456) * 0.5;
 
-        const tx = (col * cellW) - (spreadW / 2) + (cellW / 2) + (randomSeedX * cellW * 0.5);
-        const ty = (row * cellH) - (spreadH / 2) + (cellH / 2) + (randomSeedY * cellH * 0.5);
-        const tz = -150 + (Math.sin(index * 789) * 50); // slight depth variation
+        const tx =
+          col * cellW - spreadW / 2 + cellW / 2 + randomSeedX * cellW * 0.5;
+        const ty =
+          row * cellH - spreadH / 2 + cellH / 2 + randomSeedY * cellH * 0.5;
+        const tz = -150 + Math.sin(index * 789) * 50; // slight depth variation
 
         const rotZ = Math.sin(index * 111) * 15; // -15 to 15 deg tilt
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+      } else if (this.isSphereView) {
+        // Fibonacci Sphere logic
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+
+        const radius = 600;
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200;
+
+        const rotX = (ty / radius) * -90;
+        const rotY = (tx / radius) * 90;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+      } else if (this.isCarouselView) {
+        const total = Math.max(1, inactiveFiles.length);
+        const radius = Math.max(800, total * 150); // Dynamic radius
+
+        // We'll calculate a base angle per item
+        const angleStep = 360 / total;
+        const currentAngle = index * angleStep;
+
+        // We can pass these to CSS
+        el.style.setProperty('--carousel-angle', `${currentAngle}deg`);
+        el.style.setProperty('--carousel-radius', `${radius}px`);
+
+        el.style.transform = `
+          translate3d(-50%, -50%, 0)
+          rotateY(var(--carousel-angle))
+          translateZ(var(--carousel-radius))
+        `;
+      } else if (this.isCylinderView) {
+        // Cylinder View: vertical carousel
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const angle = (index / totalEchoes) * Math.PI * 2;
+        const radius = 600;
+
+        const tx = Math.sin(angle) * radius;
+        const ty = 0;
+        const tz = Math.cos(angle) * radius - 200; // offset back
+
+        // Orient planes facing outward (along Y axis)
+        const rotY = (angle * 180) / Math.PI;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+      } else if (this.isSolarSystemView) {
+        // Concentric orbits around the center.
+        // Index determines the orbit radius and speed.
+        const orbitSpacing = 200; // Distance between orbits
+        const radius = 300 + index * orbitSpacing;
+
+        // Stagger the starting angles
+        const startAngle = (index * Math.PI * 0.7) % (Math.PI * 2);
+
+        // Pass the radius to CSS for animation
+        el.style.setProperty("--orbit-radius", `${radius}px`);
+        el.style.setProperty("--orbit-start-angle", `${startAngle}rad`);
+
+        // We'll let CSS keyframes handle the x/y translation for the orbit,
+        // but we'll set base transforms here to position the orbital plane.
+        // By default we use a tilted plane
+        el.style.setProperty("--tx", "0px");
+        el.style.setProperty("--ty", "0px");
+        el.style.setProperty("--tz", "-200px"); // Push back slightly
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+
+        // Pass index to CSS to vary the orbit duration
+        el.style.setProperty("--orbit-index", index + 1);
+      } else if (this.isTesseractView) {
+        const face = index % 6;
+        const isOuter = Math.floor(index / 6) % 2 === 0;
+        const r = isOuter ? 400 : 200;
+        let tx = 0, ty = 0, tz = 0, rx = 0, ry = 0;
+        if (face===0) { tz = r; }
+        else if (face===1) { tz = -r; ry = 180; }
+        else if (face===2) { tx = r; ry = 90; }
+        else if (face===3) { tx = -r; ry = -90; }
+        else if (face===4) { ty = r; rx = -90; }
+        else if (face===5) { ty = -r; rx = 90; }
 
         el.style.setProperty('--tx', `${tx}px`);
         el.style.setProperty('--ty', `${ty}px`);
         el.style.setProperty('--tz', `${tz}px`);
-        el.style.setProperty('--rot-z', `${rotZ}deg`);
-        el.style.setProperty('--rot-x', '0deg');
-        el.style.setProperty('--rot-y', '0deg');
+        el.style.setProperty('--rot-x', `${rx}deg`);
+        el.style.setProperty('--rot-y', `${ry}deg`);
+        el.style.setProperty('--rot-z', '0deg');
+
+      } else if (this.isBlueprint3dView) {
+        // Semi-circle arrangement like an architect's desk
+        const totalEchoes = inactiveFiles.length;
+        const r = 400;
+        const angle = (index / Math.max(1, totalEchoes - 1)) * Math.PI;
+
+        const tx = Math.cos(angle) * r;
+        const ty = 50; // slightly down
+        const tz = -Math.sin(angle) * r - 100;
+
+        const rotY = (angle * 180 / Math.PI) - 90; // Face user
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+
+
+    } else if (this.isQuantumSuperpositionView) {
+      // Quantum Superposition: Scatter in 3D cloud
+      const maxDist = 800;
+      const tX = (Math.random() - 0.5) * maxDist * 2;
+      const tY = (Math.random() - 0.5) * maxDist * 2;
+      const tZ = -(Math.random() * 2000 + 200); // Back into screen
+
+      const rX = (Math.random() - 0.5) * 60; // -30 to 30 deg
+      const rY = (Math.random() - 0.5) * 60;
+      const rZ = (Math.random() - 0.5) * 60;
+
+      el.style.setProperty("--tx", `${tX}px`);
+      el.style.setProperty("--ty", `${tY}px`);
+      el.style.setProperty("--tz", `${tZ}px`);
+      el.style.setProperty("--rot-x", `${rX}deg`);
+      el.style.setProperty("--rot-y", `${rY}deg`);
+      el.style.setProperty("--rot-z", `${rZ}deg`);
+
+    } else if (this.isCyberCortexView) {
+        // Brain-like cluster / spherical node map
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+
+        const radius = 500;
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200;
+
+        // Add some organic jitter
+        const rotX = Math.sin(index * 13) * 30;
+        const rotY = Math.cos(index * 17) * 30;
+        const rotZ = Math.sin(index * 19) * 30;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+
+      } else if (this.isOrigamiView) {
+        // Origami spatial view calculation
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const foldAngle = 35; // degrees for each fold
+        const spacing = 180;
+
+        // Alternating folds
+        const direction = index % 2 === 0 ? 1 : -1;
+        const tx = (index - totalEchoes / 2) * spacing;
+        const ty = (index % 3) * 60 - 60; // stagger y
+        const tz = Math.abs(index - totalEchoes / 2) * -150 - 200; // V-shape depth
+        const rotY = direction * foldAngle;
+        const rotZ = direction * 5;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+      } else if (this.isDataHiveView) {
+        // Data Hive View: Hexagonal grid arrangement
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const hexWidth = 240;
+        const hexHeight = 200;
+
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        // Stagger rows for hexagonal tiling
+        const xOffset = row % 2 === 1 ? hexWidth / 2 : 0;
+        const tx = (col - cols / 2) * hexWidth + xOffset;
+        const ty = (row - cols / 2) * hexHeight;
+        const tz = -400 - row * 50; // Slight slant backward
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+      } else if (this.isCrystalView) {
+        // Crystal Lattice View: 3D Grid Arrangement
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const size = Math.ceil(Math.cbrt(totalEchoes)); // Cube root for 3D grid
+        const spacing = 350; // Spacing between nodes
+
+        const zLayer = Math.floor(index / (size * size));
+        const rem = index % (size * size);
+        const yLayer = Math.floor(rem / size);
+        const xLayer = rem % size;
+
+        const tx = (xLayer - size / 2) * spacing;
+        const ty = (yLayer - size / 2) * spacing;
+        const tz = -600 - zLayer * spacing;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+      } else if (this.isNeonSynthView) {
+        // Neon Synth View: Retro-futuristic grid highway stretching backwards
+        const laneWidth = 400;
+        const zSpacing = 300;
+        // Alternate between left and right lanes
+        const isLeftLane = index % 2 === 0;
+        const tx = isLeftLane ? -laneWidth / 2 : laneWidth / 2;
+        // Position at the bottom to form the 'highway' feel
+        const ty = 300;
+        const tz = -index * zSpacing;
+
+        // Tilt backwards to lay flat like a road
+        const rotX = 70;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+      } else if (this.isGalaxyView) {
+        // Galaxy Spiral View: Logarithmic spiral arrangement on X-Z plane
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const spiralRotations = 3; // How many times the arms wrap
+        const maxRadius = 1500;
+
+        // Progress along the spiral (0 at center, 1 at edge)
+        const t = index / totalEchoes;
+
+        // Logarithmic scaling for tighter clustering at the core
+        const r = maxRadius * Math.pow(t, 0.7);
+        const theta = t * Math.PI * 2 * spiralRotations;
+
+        // Two spiral arms offset by PI
+        const armOffset = index % 2 === 0 ? 0 : Math.PI;
+
+        const tx = r * Math.cos(theta + armOffset);
+        // Add slight vertical variation
+        const ty = (Math.random() - 0.5) * 200 * t;
+        const tz = r * Math.sin(theta + armOffset) - 600; // Shift galaxy backwards
+
+        // Tilt elements slightly inwards towards the core, rotate to face camera somewhat
+        const rotX = 15 * Math.cos(theta);
+        const rotY = 25 * Math.sin(theta);
+        const rotZ = 0;
+
+        // Core elements are smaller and brighter
+        const scale = 0.5 + 0.5 * (1 - t);
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+        el.style.setProperty("--scale", scale.toFixed(2));
+      } else if (this.isCoverflowView) {
+        // Coverflow View positions
+        const totalEchoes = inactiveFiles.length;
+        const middleIndex = Math.floor(totalEchoes / 2);
+        const diff = index - middleIndex;
+
+        const spacingX = 150;
+        const tx = diff * spacingX;
+
+        // Push back non-center items, scale them down, rotate them inwards
+        const absDiff = Math.abs(diff);
+        const tz = absDiff === 0 ? 0 : -200 - absDiff * 50;
+        const rotY = diff === 0 ? 0 : diff < 0 ? 45 : -45; // Left items face right, right items face left
+        const scale = 1 - absDiff * 0.1;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `0px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--scale", `${Math.max(0.3, scale)}`);
+        el.style.setProperty("--z-index", `${100 - absDiff}`);
+
+        // Reset others
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+      } else if (this.isWaveView) {
+        // Wave View positions (Sine wave floating)
+        const totalEchoes = inactiveFiles.length;
+        const spreadW = window.innerWidth * 1.2;
+        const startX = -spreadW / 2;
+
+        const stepX = totalEchoes > 1 ? spreadW / (totalEchoes - 1) : 0;
+        const tx = startX + index * stepX;
+
+        // Sine wave for Y
+        const frequency = 2; // Number of full waves
+        const amplitude = 300; // Height of wave
+        const phase =
+          (index / Math.max(1, totalEchoes - 1)) * Math.PI * 2 * frequency;
+        const ty = Math.sin(phase) * amplitude;
+
+        const tz = -150; // Constant depth
+
+        // Derivative of sine is cosine, use for tangent rotation
+        const rotZ = Math.cos(phase) * 30; // Max tilt 30deg
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+
+        // Reset others
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
       } else if (this.isPrismView) {
         // Prism View positions (Polyhedron shape)
         const totalEchoes = inactiveFiles.length;
 
         // Calculate spherical coordinates for an even distribution
-        const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
         const theta = Math.PI * (1 + Math.sqrt(5)) * index;
 
         const radius = 450;
@@ -906,227 +1870,526 @@ Drag to change depth`;
         const rotY = theta * (180 / Math.PI);
         const rotZ = 0;
 
-        el.style.setProperty('--tx', `${tx}px`);
-        el.style.setProperty('--ty', `${ty}px`);
-        el.style.setProperty('--tz', `${tz}px`);
-        el.style.setProperty('--rot-x', `${rotX}deg`);
-        el.style.setProperty('--rot-y', `${rotY}deg`);
-        el.style.setProperty('--rot-z', `${rotZ}deg`);
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
       } else if (this.isScatteredView) {
         // Scattered View positions
         const totalEchoes = inactiveFiles.length;
 
         // Use a simple pseudo-random function based on index
         const randomSeed = index * 12345.6789;
-        const randX = (Math.sin(randomSeed) * 0.5) + 0.5; // 0 to 1
-        const randY = (Math.cos(randomSeed * 1.5) * 0.5) + 0.5; // 0 to 1
+        const randX = Math.sin(randomSeed) * 0.5 + 0.5; // 0 to 1
+        const randY = Math.cos(randomSeed * 1.5) * 0.5 + 0.5; // 0 to 1
 
         const spreadW = window.innerWidth * 0.8;
         const spreadH = window.innerHeight * 0.8;
 
-        const sx = (randX * spreadW) - (spreadW / 2);
-        const sy = (randY * spreadH) - (spreadH / 2);
+        const sx = randX * spreadW - spreadW / 2;
+        const sy = randY * spreadH - spreadH / 2;
 
         // Further back ones are smaller/further
-        const sz = -100 - (index * 80);
-        const rotZ = (Math.sin(randomSeed * 2) * 20); // -20deg to 20deg
+        const sz = -100 - index * 80;
+        const rotZ = Math.sin(randomSeed * 2) * 20; // -20deg to 20deg
 
-        el.style.setProperty('--scatter-x', `${sx}px`);
-        el.style.setProperty('--scatter-y', `${sy}px`);
-        el.style.setProperty('--scatter-z', `${sz}px`);
-        el.style.setProperty('--scatter-rot', `${rotZ}deg`);
+        el.style.setProperty("--scatter-x", `${sx}px`);
+        el.style.setProperty("--scatter-y", `${sy}px`);
+        el.style.setProperty("--scatter-z", `${sz}px`);
+        el.style.setProperty("--scatter-rot", `${rotZ}deg`);
 
         // Remove standard offsets
-        el.style.setProperty('--tx', `0px`);
-        el.style.setProperty('--ty', `0px`);
-        el.style.setProperty('--tz', `0px`);
+        el.style.setProperty("--tx", `0px`);
+        el.style.setProperty("--ty", `0px`);
+        el.style.setProperty("--tz", `0px`);
+      } else if (this.isBlackHoleView) {
+        // Black Hole View positions
+        const angle = (index * Math.PI) / 4;
+        const radius = Math.max(0, 200 - index * 20);
+
+        el.style.setProperty("--tx", `${Math.cos(angle) * radius}px`);
+        el.style.setProperty("--ty", `${Math.sin(angle) * radius}px`);
+        el.style.setProperty("--tz", `${-100 - index * 50}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", `${index * 15}deg`);
+      } else if (this.isRolodexView) {
+        // Rolodex View: revolving file cabinet cylinder
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const angle = (index / totalEchoes) * Math.PI * 2;
+        const radius = 600;
+
+        const tx = 0;
+        const ty = Math.sin(angle) * radius;
+        const tz = Math.cos(angle) * radius - 200; // offset back
+
+        // Orient planes facing outward
+        const rotX = -((angle * 180) / Math.PI);
+        const rotY = 0;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
       } else {
         // Original Parallax depth offsets
         const depthOffset = (index + 1) * 2;
         // tx/ty will be overwritten by mousemove, but we set initial values here
-        el.style.setProperty('--tx', `${depthOffset * 2}px`);
-        el.style.setProperty('--ty', `${depthOffset * 2}px`);
+        el.style.setProperty("--tx", `${depthOffset * 2}px`);
+        el.style.setProperty("--ty", `${depthOffset * 2}px`);
         // Add var(--stack-z) for the MRI scroll effect
-        el.style.setProperty('--tz', `calc(-${index * 50}px + var(--stack-z, 0px))`);
+        el.style.setProperty(
+          "--tz",
+          `calc(-${index * 50}px + var(--stack-z, 0px))`,
+        );
 
         // Glitch distant echoes
         if (index > 2) {
-            el.classList.add('distant-echo');
+          el.classList.add("distant-echo");
         }
       }
 
       let clickTimeout = null;
 
+      // Add context menu (right click) for Holographic Side-by-Side Projection
+      el.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isProjected = el.classList.contains('holo-projected');
+
+        // Remove from all other echoes
+        this.echoLayerEl.querySelectorAll('.echo-document').forEach(doc => {
+          doc.classList.remove('holo-projected');
+        });
+
+        if (!isProjected) {
+          el.classList.add('holo-projected');
+        }
+      });
+
       // Add double click listener to break through the active document
-      el.addEventListener('dblclick', (e) => {
-          e.stopPropagation();
-          if (clickTimeout) {
-             clearTimeout(clickTimeout);
-             clickTimeout = null;
-          }
-          const isBreakthrough = el.classList.contains('breakthrough');
-          // Remove breakthrough from all other echoes
-          this.echoLayerEl.querySelectorAll('.echo-document').forEach(doc => {
-              doc.classList.remove('breakthrough');
-          });
-          if (!isBreakthrough) {
-              el.classList.add('breakthrough');
-          }
+      el.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
+        if (clickTimeout) {
+          clearTimeout(clickTimeout);
+          clickTimeout = null;
+        }
+        const isBreakthrough = el.classList.contains("breakthrough");
+        // Remove breakthrough from all other echoes
+        this.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          doc.classList.remove("breakthrough");
+        });
+        if (!isBreakthrough) {
+          el.classList.add("breakthrough");
+        }
       });
 
       // Add click listener to switch to this document
       // We use a small timeout to distinguish single click from double click,
       // preventing the active document from switching when the user is trying to double click.
-      el.addEventListener('click', (e) => {
-          if (e.detail === 1) { // single click only
-              clickTimeout = setTimeout(() => {
-                  this.setActive(file.id);
-                  clickTimeout = null;
-              }, 250); // wait 250ms to see if it's a double click
-          }
+      el.addEventListener("click", (e) => {
+        if (e.detail === 1) {
+          // Add Kaleidoscope Effect
+          el.classList.add("kaleidoscope-fx");
+
+          clickTimeout = setTimeout(() => {
+            this.setActive(file.id);
+            el.classList.remove("kaleidoscope-fx"); // clean up
+            clickTimeout = null;
+          }, 600); // Wait for the animation (600ms) to complete before switching
+        }
       });
 
       // Add sci-fi glass pane identifier styling to the existing header
-      echoHeader.style.position = 'absolute';
-      echoHeader.style.top = '0';
-      echoHeader.style.left = '0';
-      echoHeader.style.width = '100%';
-      echoHeader.style.padding = '8px 16px';
-      echoHeader.style.background = 'rgba(0, 229, 255, 0.1)';
-      echoHeader.style.borderBottom = '1px solid rgba(0, 229, 255, 0.2)';
-      echoHeader.style.fontWeight = 'bold';
-      echoHeader.style.letterSpacing = '1px';
-      echoHeader.style.textTransform = 'uppercase';
-      echoHeader.style.transform = 'translateZ(30px)';
-      echoHeader.style.boxShadow = '0 10px 20px rgba(0,0,0,0.5)';
+      echoHeader.style.position = "absolute";
+      echoHeader.style.top = "0";
+      echoHeader.style.left = "0";
+      echoHeader.style.width = "100%";
+      echoHeader.style.padding = "8px 16px";
+      echoHeader.style.background = "rgba(0, 229, 255, 0.1)";
+      echoHeader.style.borderBottom = "1px solid rgba(0, 229, 255, 0.2)";
+      echoHeader.style.fontWeight = "bold";
+      echoHeader.style.letterSpacing = "1px";
+      echoHeader.style.textTransform = "uppercase";
+      echoHeader.style.transform = "translateZ(30px)";
+      echoHeader.style.boxShadow = "0 10px 20px rgba(0,0,0,0.5)";
 
-      bodyWrapper.style.marginTop = '40px'; // Offset for header
-      bodyWrapper.style.height = 'calc(100% - 40px)';
+      bodyWrapper.style.marginTop = "40px"; // Offset for header
+      bodyWrapper.style.height = "calc(100% - 40px)";
 
       // Interactive 3D Card Hover Effect
-      el.addEventListener('mousemove', (e) => {
-          const rect = el.getBoundingClientRect();
-          const localX = e.clientX - rect.left;
-          const localY = e.clientY - rect.top;
+      el.addEventListener("mousemove", (e) => {
+        const rect = el.getBoundingClientRect();
+        const localX = e.clientX - rect.left;
+        const localY = e.clientY - rect.top;
 
-          const centerX = rect.width / 2;
-          const centerY = rect.height / 2;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
 
-          // -1 to 1 based on position from center
-          const normX = (localX - centerX) / centerX;
-          const normY = (localY - centerY) / centerY;
+        // -1 to 1 based on position from center
+        const normX = (localX - centerX) / centerX;
+        const normY = (localY - centerY) / centerY;
 
-          // Max tilt 15 degrees
-          const rotX = -normY * 15;
-          const rotY = normX * 15;
+        // Max tilt 15 degrees
+        const rotX = -normY * 15;
+        const rotY = normX * 15;
 
-          el.style.setProperty('--hover-rot-x', `${rotX}deg`);
-          el.style.setProperty('--hover-rot-y', `${rotY}deg`);
+        el.style.setProperty("--hover-rot-x", `${rotX}deg`);
+        el.style.setProperty("--hover-rot-y", `${rotY}deg`);
 
-          // Set local mouse variables for glossy reflection
-          const pctX = (localX / rect.width) * 100;
-          const pctY = (localY / rect.height) * 100;
-          el.style.setProperty('--mouse-local-x', `${pctX}%`);
-          el.style.setProperty('--mouse-local-y', `${pctY}%`);
+        // Set local mouse variables for glossy reflection
+        const pctX = (localX / rect.width) * 100;
+        const pctY = (localY / rect.height) * 100;
+        el.style.setProperty("--mouse-local-x", `${pctX}%`);
+        el.style.setProperty("--mouse-local-y", `${pctY}%`);
       });
 
       // Add hover listener to fade editor
-      el.addEventListener('mouseenter', (e) => {
-          if (this.editorEl) {
-              this.editorEl.classList.add('editor-peek-fade');
-              // Bring forward while hovering the doc itself
-              if (!this.isCascadeView && !this.isOrbitView && !this.isScatteredView && !this.isHelixView && !this.isPinboardView && !this.isVortexView && !this.isPrismView) {
-                  el.style.setProperty('--tz', '100px');
-              } else if (this.isOrbitView) {
-                  // Push out slightly to emphasize selection in orbit view
-                  const tEchoes = inactiveFiles.length;
-                  const oRad = Math.max(500, tEchoes * 120);
-                  el.style.setProperty('--orbit-tz', `${oRad + 100}px`);
-              } else if (this.isScatteredView) {
-                  // Bring forward slightly in scattered view
-                  const originalZ = parseFloat(el.style.getPropertyValue('--scatter-z') || '0');
-                  el.style.setProperty('--scatter-z', `${originalZ + 150}px`);
-              } else if (this.isPinboardView || this.isHelixView || this.isVortexView || this.isPrismView) {
-                  // Pop out for pinboard/helix/vortex/prism
-                  const tz = parseFloat(el.style.getPropertyValue('--tz')) || 0;
-                  el.style.setProperty('--tz', `${tz + 150}px`);
-                  if (this.isPinboardView || this.isVortexView) {
-                      el.style.setProperty('--rot-z', '0deg');
-                  }
-              }
-              // Focus Spotlight: Dispatch event to heavily clear fog and rain when peeking
-              const rect = el.getBoundingClientRect();
-              const evt = new CustomEvent('echo-peek', {
-                detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, radius: Math.max(rect.width, rect.height) / 1.5, isFocusSpotlight: true }
-              });
-              document.dispatchEvent(evt);
+      el.addEventListener("mouseenter", (e) => {
+        if (this.editorEl) {
+          this.editorEl.classList.add("editor-peek-fade");
+          // Bring forward while hovering the doc itself
+          if (
+            !this.isCascadeView &&
+            !this.isOrbitView &&
+            !this.isScatteredView &&
+            !this.isHelixView &&
+            !this.isPinboardView &&
+            !this.isVortexView &&
+            !this.isPrismView &&
+            !this.isCoverflowView &&
+            !this.isWaveView &&
+            !this.isSphereView &&
+            !this.isRolodexView &&
+            !this.isCylinderView &&
+            !this.isMatrixRainView &&
+            !this.isNeonSynthView &&
+            !this.isBlueprint3dView &&
+            !this.isCyberCortexView
+          ) {
+            el.style.setProperty("--tz", "100px");
+          } else if (this.isOrbitView) {
+            // Push out slightly to emphasize selection in orbit view
+            const tEchoes = inactiveFiles.length;
+            const oRad = Math.max(500, tEchoes * 120);
+            el.style.setProperty("--orbit-tz", `${oRad + 100}px`);
+          } else if (this.isScatteredView) {
+            // Bring forward slightly in scattered view
+            const originalZ = parseFloat(
+              el.style.getPropertyValue("--scatter-z") || "0",
+            );
+            el.style.setProperty("--scatter-z", `${originalZ + 150}px`);
+          } else if (
+            this.isPinboardView ||
+            this.isHelixView ||
+            this.isVortexView ||
+            this.isPrismView ||
+            this.isWaveView ||
+            this.isSphereView ||
+            this.isRolodexView ||
+            this.isCylinderView ||
+            this.isMatrixRainView ||
+            this.isFractalView ||
+            this.isNeonSynthView ||
+            this.isBlueprint3dView ||
+            this.isCyberCortexView
+          ) {
+            // Pop out for pinboard/helix/vortex/prism/wave/rolodex/cylinder/fractal/neon-synth
+            const tz = parseFloat(el.style.getPropertyValue("--tz")) || 0;
+            el.style.setProperty("--tz", `${tz + 150}px`);
+            if (this.isPinboardView || this.isVortexView) {
+              el.style.setProperty("--rot-z", "0deg");
+            }
           }
+          // Focus Spotlight: Dispatch event to heavily clear fog and rain when peeking
+          const rect = el.getBoundingClientRect();
+          const evt = new CustomEvent("echo-peek", {
+            detail: {
+              x: rect.left + rect.width / 2,
+              y: rect.top + rect.height / 2,
+              radius: Math.max(rect.width, rect.height) / 1.5,
+              isFocusSpotlight: true,
+            },
+          });
+          document.dispatchEvent(evt);
+        }
       });
 
-      el.addEventListener('mouseleave', () => {
-          // Reset 3D tilt
-          el.style.setProperty('--hover-rot-x', `0deg`);
-          el.style.setProperty('--hover-rot-y', `0deg`);
+      el.addEventListener("mouseleave", () => {
+        // Reset 3D tilt
+        el.style.setProperty("--hover-rot-x", `0deg`);
+        el.style.setProperty("--hover-rot-y", `0deg`);
 
-          if (this.editorEl) {
-              this.editorEl.classList.remove('editor-peek-fade');
-              // Restore Z
-              if (this.isOrbitView) {
-                  const tEchoes = inactiveFiles.length;
-                  const oRad = Math.max(500, tEchoes * 120);
-                  el.style.setProperty('--orbit-tz', `${oRad}px`);
-              } else if (this.isScatteredView) {
-                  // Restore scatter Z
-                  const index = parseInt(el.dataset.index || 0);
-                  const sz = -100 - (index * 80);
-                  el.style.setProperty('--scatter-z', `${sz}px`);
-              } else if (this.isVortexView) {
-                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
-                  const totalEchoes = inactiveFiles.length;
-                  const index = parseInt(el.dataset.index || 0);
-                  const indexRatio = index / Math.max(1, totalEchoes - 1);
-                  const radius = 200 + (index * 40);
-                  const angle = indexRatio * Math.PI * 2 * 4;
-                  const tz = -index * 120 - 100;
-                  const rotZ = (angle * 180 / Math.PI) + 90;
-                  el.style.setProperty('--tz', `${tz}px`);
-                  el.style.setProperty('--rot-z', `${rotZ}deg`);
-              } else if (this.isPinboardView) {
-                  const index = parseInt(el.dataset.index || 0);
-                  const tz = -150 + (Math.sin(index * 789) * 50);
-                  const rotZ = Math.sin(index * 111) * 15;
-                  el.style.setProperty('--tz', `${tz}px`);
-                  el.style.setProperty('--rot-z', `${rotZ}deg`);
-              } else if (this.isHelixView) {
-                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
-                  const totalEchoes = inactiveFiles.length;
-                  const index = parseInt(el.dataset.index || 0);
-                  const indexRatio = index / Math.max(1, totalEchoes - 1);
-                  const radius = 300;
-                  const cycles = 2;
-                  const angle = indexRatio * Math.PI * 2 * cycles;
-                  const tz = Math.sin(angle) * radius - 200;
-                  el.style.setProperty('--tz', `${tz}px`);
-              } else if (this.isPrismView) {
-                  const inactiveFiles = this.files.filter(f => f.id !== this.activeId);
-                  const totalEchoes = inactiveFiles.length;
-                  const index = parseInt(el.dataset.index || 0);
-                  const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
-                  const radius = 450;
-                  const tz = radius * Math.cos(phi) - 200;
-                  el.style.setProperty('--tz', `${tz}px`);
-              } else if (!this.isCascadeView) {
-                  const idx = parseInt(el.dataset.index || 0);
-                  el.style.setProperty('--tz', `calc(-${idx * 50}px + var(--stack-z, 0px))`);
-              }
+        if (this.editorEl) {
+          this.editorEl.classList.remove("editor-peek-fade");
+          // Restore Z
+          if (this.isOrbitView) {
+            const tEchoes = inactiveFiles.length;
+            const oRad = Math.max(500, tEchoes * 120);
+            el.style.setProperty("--orbit-tz", `${oRad}px`);
+          } else if (this.isScatteredView) {
+            // Restore scatter Z
+            const index = parseInt(el.dataset.index || 0);
+            const sz = -100 - index * 80;
+            el.style.setProperty("--scatter-z", `${sz}px`);
+          } else if (this.isVortexView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = inactiveFiles.length;
+            const index = parseInt(el.dataset.index || 0);
+            const indexRatio = index / Math.max(1, totalEchoes - 1);
+            const radius = 200 + index * 40;
+            const angle = indexRatio * Math.PI * 2 * 4;
+            const tz = -index * 120 - 100;
+            const rotZ = (angle * 180) / Math.PI + 90;
+            el.style.setProperty("--tz", `${tz}px`);
+            el.style.setProperty("--rot-z", `${rotZ}deg`);
+          } else if (this.isPinboardView) {
+            const index = parseInt(el.dataset.index || 0);
+            const tz = -150 + Math.sin(index * 789) * 50;
+            const rotZ = Math.sin(index * 111) * 15;
+            el.style.setProperty("--tz", `${tz}px`);
+            el.style.setProperty("--rot-z", `${rotZ}deg`);
+          } else if (this.isHelixView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = inactiveFiles.length;
+            const index = parseInt(el.dataset.index || 0);
+            const indexRatio = index / Math.max(1, totalEchoes - 1);
+            const radius = 300;
+            const cycles = 2;
+            const angle = indexRatio * Math.PI * 2 * cycles;
+            const tz = Math.sin(angle) * radius - 200;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isPrismView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = inactiveFiles.length;
+            const index = parseInt(el.dataset.index || 0);
+            const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+            const radius = 450;
+            const tz = radius * Math.cos(phi) - 200;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isSphereView) {
+            // Fibonacci Sphere logic
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+            const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+
+            const radius = 600;
+            const tx = radius * Math.sin(phi) * Math.cos(theta);
+            const ty = radius * Math.sin(phi) * Math.sin(theta);
+            const tz = radius * Math.cos(phi) - 200;
+
+            const rotX = (ty / radius) * -90;
+            const rotY = (tx / radius) * 90;
+
+            el.style.setProperty("--tx", `${tx}px`);
+            el.style.setProperty("--ty", `${ty}px`);
+            el.style.setProperty("--tz", `${tz}px`);
+            el.style.setProperty("--rot-x", `${rotX}deg`);
+            el.style.setProperty("--rot-y", `${rotY}deg`);
+            el.style.setProperty("--rot-z", "0deg");
+            el.style.setProperty("--scatter-x", "0px");
+            el.style.setProperty("--scatter-y", "0px");
+            el.style.setProperty("--scatter-z", "0px");
+            el.style.setProperty("--scatter-rot", "0deg");
+          } else if (this.isCoverflowView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = inactiveFiles.length;
+            const index = parseInt(el.dataset.index || 0);
+            const middleIndex = Math.floor(totalEchoes / 2);
+            const diff = index - middleIndex;
+            const absDiff = Math.abs(diff);
+            const tz = absDiff === 0 ? 0 : -200 - absDiff * 50;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isSphereView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const index = parseInt(el.dataset.index || 0);
+            const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+            const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+            const radius = 600;
+            const tz = radius * Math.cos(phi) - 200;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isRolodexView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const index = parseInt(el.dataset.index || 0);
+            const angle = (index / totalEchoes) * Math.PI * 2;
+            const radius = 600;
+            const tz = Math.cos(angle) * radius - 200;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isCylinderView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const index = parseInt(el.dataset.index || 0);
+            const angle = (index / totalEchoes) * Math.PI * 2;
+            const radius = 600;
+            const tz = Math.cos(angle) * radius - 200;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isSolarSystemView) {
+            // In hover out, we just need to make sure we don't clobber the animation properties
+            // We'll set a base tz. The orbit animation handles the rest.
+            el.style.setProperty("--tz", `-200px`);
+          } else if (this.isOrigamiView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const index = parseInt(el.dataset.index || 0);
+            const tz = Math.abs(index - totalEchoes / 2) * -150 - 200;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isGalaxyView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const index = parseInt(el.dataset.index || 0);
+            const maxRadius = 1500;
+            const spiralRotations = 3;
+            const t = index / totalEchoes;
+            const r = maxRadius * Math.pow(t, 0.7);
+            const theta = t * Math.PI * 2 * spiralRotations;
+            const armOffset = index % 2 === 0 ? 0 : Math.PI;
+            const tz = r * Math.sin(theta + armOffset) - 600;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isDataHiveView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const cols = Math.ceil(Math.sqrt(totalEchoes));
+            const index = parseInt(el.dataset.index || 0);
+            const row = Math.floor(index / cols);
+            const tz = -400 - row * 50;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isCrystalView) {
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const size = Math.ceil(Math.cbrt(totalEchoes));
+            const index = parseInt(el.dataset.index || 0);
+            const spacing = 350;
+            const zLayer = Math.floor(index / (size * size));
+            const tz = -600 - zLayer * spacing;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isNeonSynthView) {
+            const index = parseInt(el.dataset.index || 0);
+            const zSpacing = 300;
+            const tz = -index * zSpacing;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isTesseractView) {
+            const face = parseInt(el.dataset.index || 0) % 6;
+            const isOuter = Math.floor(parseInt(el.dataset.index || 0) / 6) % 2 === 0;
+            const r = isOuter ? 400 : 200;
+            let tz = 0;
+            if (face === 0) { tz = r; }
+            else if (face === 1) { tz = -r; }
+            else { tz = 0; }
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isBlueprint3dView) {
+            const totalEchoes = Math.max(1, document.querySelectorAll(".echo-document").length - 1);
+            const index = parseInt(el.dataset.index || 0);
+            const r = 400;
+            const angle = (index / Math.max(1, totalEchoes - 1)) * Math.PI; // Semi-circle
+            const tz = -Math.sin(angle) * r - 100;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isCyberCortexView) {
+            const totalEchoes = Math.max(1, document.querySelectorAll(".echo-document").length - 1);
+            const index = parseInt(el.dataset.index || 0);
+            const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+            const radius = 500;
+            const tz = radius * Math.cos(phi) - 200;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isWaveView) {
+            el.style.setProperty("--tz", `-150px`);
+          } else if (!this.isCascadeView) {
+            const idx = parseInt(el.dataset.index || 0);
+            el.style.setProperty(
+              "--tz",
+              `calc(-${idx * 50}px + var(--stack-z, 0px))`,
+            );
           }
+        }
+      });
+      // Calculate atmospheric depth based on tz
+      const tzVal = parseFloat(el.style.getPropertyValue("--tz")) || 0;
+      el.style.setProperty("--tz-val", tzVal);
+      if (tzVal < -100) {
+        el.classList.add("depth-desaturate");
+      } else {
+        el.classList.remove("depth-desaturate");
+      }
+
+      // Depth Parting (The Moses Effect)
+      el.addEventListener("mouseenter", () => {
+        const hoveredRect = el.getBoundingClientRect();
+        const hcx = hoveredRect.left + hoveredRect.width / 2;
+        const hcy = hoveredRect.top + hoveredRect.height / 2;
+
+        this.echoLayerEl
+          .querySelectorAll(".echo-document")
+          .forEach((sibling) => {
+            if (sibling === el) return;
+
+            const siblingRect = sibling.getBoundingClientRect();
+            const scx = siblingRect.left + siblingRect.width / 2;
+            const scy = siblingRect.top + siblingRect.height / 2;
+
+            const dx = scx - hcx;
+            const dy = scy - hcy;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Only push siblings within a certain radius
+            if (dist < 600 && dist > 0) {
+              const pushFactor = (600 - dist) / 600; // 0 to 1
+              const pushDist = pushFactor * 150; // max push 150px
+
+              const nx = dx / dist;
+              const ny = dy / dist;
+
+              sibling.style.setProperty("--part-tx", `${nx * pushDist}px`);
+              sibling.style.setProperty("--part-ty", `${ny * pushDist}px`);
+            }
+          });
+      });
+
+      el.addEventListener("mouseleave", () => {
+        this.echoLayerEl
+          .querySelectorAll(".echo-document")
+          .forEach((sibling) => {
+            if (sibling === el) return;
+            sibling.style.setProperty("--part-tx", "0px");
+            sibling.style.setProperty("--part-ty", "0px");
+          });
       });
 
       this.echoLayerEl.appendChild(el);
     });
   }
-
-  /**
+/**
    * Save the current tab list to localStorage for session restoration.
    * Stores: [{fileId, name, language, vpsPath}, ...]
    */
@@ -1138,7 +2401,8 @@ Drag to change depth`;
         language: file.language,
         vpsPath: file.vpsPath || null,
         isImage: file.isImage,
-        url: file.url || null
+        url: file.url || null,
+        noteName: file.noteName || null   // ← Added for notes compatibility
       }));
       localStorage.setItem('rain_edit_open_tabs', JSON.stringify(tabData));
     } catch (err) {
@@ -1155,11 +2419,9 @@ Drag to change depth`;
     try {
       const stored = localStorage.getItem('rain_edit_open_tabs');
       if (!stored) return;
-
       const tabData = JSON.parse(stored);
       if (!Array.isArray(tabData) || tabData.length === 0) return;
 
-      // Import StorageAPI to fetch file content
       const { StorageAPI } = await import('./StorageAPI.js');
       const storageAPI = new StorageAPI();
 
@@ -1168,31 +2430,30 @@ Drag to change depth`;
           let content = '';
           let language = tab.language || 'plaintext';
 
-          // Fetch content based on file source
           if (tab.isImage) {
-            // For images, url is already stored
             content = tab.url;
           } else if (tab.vpsPath) {
-            // Fetch from VPS
             content = await storageAPI.getVPSFile(tab.vpsPath);
+          } else if (tab.noteName) {
+            // New: restore note content from backend
+            const note = await storageAPI.loadNote(tab.noteName);
+            content = note ? note.content : '';
+            language = 'markdown';
           }
-          // If no vpsPath and not image, file is new/unsaved, just restore with empty content
+          // else: unsaved file → empty content
 
-          // Add file to tabs
           const fileId = this.addFile(tab.name, content, language);
-
-          // Update vpsPath if it was a VPS file
           const file = this.files.find(f => f.id === fileId);
-          if (file && tab.vpsPath) {
-            file.vpsPath = tab.vpsPath;
+
+          if (file) {
+            if (tab.vpsPath) file.vpsPath = tab.vpsPath;
+            if (tab.noteName) file.noteName = tab.noteName;
           }
         } catch (err) {
           console.error(`Failed to restore tab ${tab.name}:`, err);
-          // Continue with next tab if one fails
         }
       }
 
-      // Set first tab as active if any were restored
       if (this.files.length > 0) {
         this.setActive(this.files[0].id);
       }
@@ -1209,32 +2470,117 @@ Drag to change depth`;
     const index = this.files.findIndex(f => f.id === id);
     if (index === -1) return;
 
-    // Dispose of Monaco model if it exists
     const file = this.files[index];
     if (file.model && file.model.dispose) {
       file.model.dispose();
     }
 
-    // Remove from array
     this.files.splice(index, 1);
 
-    // If this was the active file, activate another one
     if (this.activeId === id) {
       if (this.files.length > 0) {
-        // Activate the file that was after this one, or the last one
         const newActiveIndex = Math.min(index, this.files.length - 1);
         this.setActive(this.files[newActiveIndex].id);
       } else {
         this.activeId = null;
         this.editorEl.style.display = 'none';
-        if (this.imageViewerEl) {
-          this.imageViewerEl.style.display = 'none';
-        }
+        if (this.imageViewerEl) this.imageViewerEl.style.display = 'none';
       }
     }
 
     this._renderTabs();
     this._renderEchoes();
     this._saveTabsToStorage();
+  }
+
+  /**
+   * Load a named note from the backend and open it as a new tab.
+   * If the note doesn't exist (null returned), creates a blank tab named `noteName`.
+   * @param {string} noteName - The note name (no extension)
+   * @returns {Promise<number>} the new file's id
+   */
+  async openNoteAsTab(noteName) {
+    document.body.style.cursor = "wait";
+    try {
+      const note = await storageAPI.loadNote(noteName);
+      const content = note ? note.content : "";
+      const id = this.addFile(noteName, content, "markdown");
+      const file = this.files.find((f) => f.id === id);
+      if (file) file.noteName = noteName;
+      this.setActive(id);
+      return id;
+    } catch (err) {
+      console.error("[TabManager] openNoteAsTab error:", err);
+      const id = this.addFile(noteName, "", "markdown");
+      const file = this.files.find((f) => f.id === id);
+      if (file) file.noteName = noteName;
+      this.setActive(id);
+      return id;
+    } finally {
+      document.body.style.cursor = "default";
+    }
+  }
+
+  /**
+   * Save the current tab's content to the backend as a named note.
+   * If the tab has no `noteName`, prompts the user for one.
+   * @returns {Promise<void>}
+   */
+  async saveCurrentTabAsNote() {
+    const activeFile = this.files.find((f) => f.id === this.activeId);
+    if (!activeFile || activeFile.isImage) return;
+
+    let noteName = activeFile.noteName;
+    if (!noteName) {
+      noteName = window.prompt("Note name:", activeFile.name || "");
+      if (!noteName) return;
+      activeFile.noteName = noteName;
+    }
+
+    const content = activeFile.model ? activeFile.model.getValue() : "";
+    document.body.style.cursor = "wait";
+
+    try {
+      const result = await storageAPI.saveNote(noteName, content);
+      if (result && result.success) {
+        this._showToast(`✅ Note "${noteName}" saved!`);
+      } else {
+        this._showToast(`❌ Failed to save note "${noteName}"`, true);
+      }
+    } catch (err) {
+      console.error("[TabManager] saveCurrentTabAsNote error:", err);
+      this._showToast(`❌ Error saving note: ${err.message}`, true);
+    } finally {
+      document.body.style.cursor = "default";
+    }
+  }
+
+  /**
+   * Show a brief status toast notification.
+   * @param {string} message
+   * @param {boolean} [isError=false]
+   */
+  _showToast(message, isError = false) {
+    let toast = document.getElementById("note-save-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "note-save-toast";
+      toast.style.cssText =
+        'position:fixed;bottom:20px;right:20px;padding:10px 16px;background:rgba(0,0,0,0.85);border-radius:4px;font-family:"JetBrains Mono",monospace;font-size:13px;z-index:9999;transition:opacity 0.3s;pointer-events:none;';
+      document.body.appendChild(toast);
+    }
+    if (isError) {
+      toast.style.color = "#ff4444";
+      toast.style.border = "1px solid #ff4444";
+    } else {
+      toast.style.color = "#00e5ff";
+      toast.style.border = "1px solid #00e5ff";
+    }
+    toast.textContent = message;
+    toast.style.opacity = "1";
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      toast.style.opacity = "0";
+    }, TOAST_DISPLAY_DURATION);
   }
 }

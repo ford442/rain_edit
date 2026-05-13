@@ -10,9 +10,9 @@
  *    in the Monaco editor via TabManager.addFile()
  */
 
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { STORAGE_CATEGORIES } from "./StorageAPI.js";
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { STORAGE_CATEGORIES } from './StorageAPI.js';
 
 // ─── Visual constants ────────────────────────────────────────────────────────
 
@@ -28,10 +28,10 @@ const CATEGORY_COLORS = [
   0xffff00, // notes    — yellow
 ];
 
-const CAT_CUBE_SIZE = 1.4; // side-length of each category cube
-const FILE_CUBE_SIZE = 0.25; // side-length of each file cube
-const GRID_GAP = 0.35; // gap between category cubes in the Rubik's grid
-const FILE_ORBIT_R = 1.0; // radius of the file-cube shell around its parent
+const CAT_CUBE_SIZE  = 1.4;   // side-length of each category cube
+const FILE_CUBE_SIZE = 0.25;  // side-length of each file cube
+const GRID_GAP       = 0.35;  // gap between category cubes in the Rubik's grid
+const FILE_ORBIT_R   = 1.0;   // radius of the file-cube shell around its parent
 
 // Camera animation duration in ms
 const CAM_ANIM_MS = 800;
@@ -39,14 +39,10 @@ const CAM_ANIM_MS = 800;
 // ─── Utility helpers ─────────────────────────────────────────────────────────
 
 /** Linear interpolation */
-function lerp(a, b, t) {
-  return a + (b - a) * t;
-}
+function lerp(a, b, t) { return a + (b - a) * t; }
 
 /** Ease-out cubic */
-function easeOut(t) {
-  return 1 - Math.pow(1 - t, 3);
-}
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 
 // ─── Main class ──────────────────────────────────────────────────────────────
 
@@ -56,23 +52,23 @@ export class Cabinet3D {
    * @param {import('./TabManager.js').TabManager}  tabManager
    */
   constructor(storageAPI, tabManager) {
-    this.storageAPI = storageAPI;
-    this.tabManager = tabManager;
-    this.visible = false;
+    this.storageAPI  = storageAPI;
+    this.tabManager  = tabManager;
+    this.visible     = false;
 
     // Overlay DOM element
     this._overlay = null;
     // Three.js core
     this._renderer = null;
-    this._scene = null;
-    this._camera = null;
+    this._scene    = null;
+    this._camera   = null;
     this._controls = null;
     this._raycaster = new THREE.Raycaster();
-    this._mouse = new THREE.Vector2();
+    this._mouse     = new THREE.Vector2();
 
     // Scene objects
-    this._catMeshes = []; // { mesh, catIndex, catName }
-    this._fileMeshes = []; // { mesh, catIndex, fileData }
+    this._catMeshes  = [];   // { mesh, catIndex, catName }
+    this._fileMeshes = [];   // { mesh, catIndex, fileData }
 
     // Camera animation state
     this._camAnim = null;
@@ -94,7 +90,7 @@ export class Cabinet3D {
   show() {
     if (this.visible) return;
     this.visible = true;
-    this._overlay.style.display = "flex";
+    this._overlay.style.display = 'flex';
     this._onResize();
     this._startLoop();
   }
@@ -103,7 +99,7 @@ export class Cabinet3D {
   hide() {
     if (!this.visible) return;
     this.visible = false;
-    this._overlay.style.display = "none";
+    this._overlay.style.display = 'none';
     this._stopLoop();
   }
 
@@ -123,54 +119,53 @@ export class Cabinet3D {
 
   /** Create the full-screen transparent HTML overlay. */
   _buildOverlay() {
-    const overlay = document.createElement("div");
-    overlay.id = "cabinet-overlay";
+    const overlay = document.createElement('div');
+    overlay.id = 'cabinet-overlay';
     overlay.style.cssText = [
-      "position: fixed",
-      "inset: 0",
-      "display: none",
-      "align-items: center",
-      "justify-content: center",
-      "z-index: 50",
-      "background: rgba(0,0,0,0.75)",
-      "backdrop-filter: blur(4px)",
-    ].join(";");
+      'position: fixed',
+      'inset: 0',
+      'display: none',
+      'align-items: center',
+      'justify-content: center',
+      'z-index: 50',
+      'background: rgba(0,0,0,0.75)',
+      'backdrop-filter: blur(4px)',
+    ].join(';');
 
     // Close button
-    const closeBtn = document.createElement("button");
-    closeBtn.textContent = "✕  Close Cabinet";
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕  Close Cabinet';
     closeBtn.style.cssText = [
-      "position: absolute",
-      "top: 16px",
-      "right: 20px",
-      "background: rgba(255,255,255,0.08)",
-      "border: 1px solid rgba(255,255,255,0.18)",
-      "color: #c0d0e0",
-      "font-family: inherit",
-      "font-size: 13px",
-      "padding: 6px 14px",
-      "border-radius: 6px",
-      "cursor: pointer",
-      "z-index: 51",
-    ].join(";");
-    closeBtn.addEventListener("click", () => this.hide());
+      'position: absolute',
+      'top: 16px',
+      'right: 20px',
+      'background: rgba(255,255,255,0.08)',
+      'border: 1px solid rgba(255,255,255,0.18)',
+      'color: #c0d0e0',
+      'font-family: inherit',
+      'font-size: 13px',
+      'padding: 6px 14px',
+      'border-radius: 6px',
+      'cursor: pointer',
+      'z-index: 51',
+    ].join(';');
+    closeBtn.addEventListener('click', () => this.hide());
     overlay.appendChild(closeBtn);
 
     // Status / hint label
-    const hint = document.createElement("div");
-    hint.id = "cabinet-hint";
+    const hint = document.createElement('div');
+    hint.id = 'cabinet-hint';
     hint.style.cssText = [
-      "position: absolute",
-      "bottom: 20px",
-      "left: 0",
-      "right: 0",
-      "text-align: center",
-      "color: rgba(192,208,224,0.7)",
-      "font-size: 12px",
-      "pointer-events: none",
-    ].join(";");
-    hint.textContent =
-      "Click a category cube to explore · Click a file cube to open it";
+      'position: absolute',
+      'bottom: 20px',
+      'left: 0',
+      'right: 0',
+      'text-align: center',
+      'color: rgba(192,208,224,0.7)',
+      'font-size: 12px',
+      'pointer-events: none',
+    ].join(';');
+    hint.textContent = 'Click a category cube to explore · Click a file cube to open it';
     overlay.appendChild(hint);
 
     this._hint = hint;
@@ -184,8 +179,7 @@ export class Cabinet3D {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setClearColor(0x000000, 0);
-    renderer.domElement.style.cssText =
-      "position:absolute;inset:0;width:100%;height:100%;";
+    renderer.domElement.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
     this._overlay.appendChild(renderer.domElement);
     this._renderer = renderer;
 
@@ -215,7 +209,7 @@ export class Cabinet3D {
 
   /** Place one category cube per STORAGE_CATEGORIES entry in a grid. */
   _buildCategoryCubes() {
-    const n = STORAGE_CATEGORIES.length;
+    const n    = STORAGE_CATEGORIES.length;
     const cols = Math.ceil(Math.sqrt(n));
     const rows = Math.ceil(n / cols);
     const step = CAT_CUBE_SIZE + GRID_GAP;
@@ -227,12 +221,8 @@ export class Cabinet3D {
       const col = i % cols;
       const row = Math.floor(i / cols);
 
-      const geo = new THREE.BoxGeometry(
-        CAT_CUBE_SIZE,
-        CAT_CUBE_SIZE,
-        CAT_CUBE_SIZE,
-      );
-      const mat = new THREE.MeshStandardMaterial({
+      const geo  = new THREE.BoxGeometry(CAT_CUBE_SIZE, CAT_CUBE_SIZE, CAT_CUBE_SIZE);
+      const mat  = new THREE.MeshStandardMaterial({
         color: CATEGORY_COLORS[i % CATEGORY_COLORS.length],
         transparent: true,
         opacity: 0.85,
@@ -241,17 +231,13 @@ export class Cabinet3D {
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(col * step - offsetX, -(row * step - offsetY), 0);
-      mesh.userData = { type: "category", catIndex: i, catName: name };
+      mesh.userData = { type: 'category', catIndex: i, catName: name };
       this._scene.add(mesh);
       this._catMeshes.push(mesh);
 
       // Wireframe outline
-      const wGeo = new THREE.EdgesGeometry(geo);
-      const wMat = new THREE.LineBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.3,
-      });
+      const wGeo  = new THREE.EdgesGeometry(geo);
+      const wMat  = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
       const wMesh = new THREE.LineSegments(wGeo, wMat);
       mesh.add(wMesh);
 
@@ -268,127 +254,23 @@ export class Cabinet3D {
    * @returns {THREE.Sprite}
    */
   _makeTextSprite(text) {
-    const canvas = document.createElement("canvas");
-    canvas.width = 256;
+    const canvas  = document.createElement('canvas');
+    canvas.width  = 256;
     canvas.height = 64;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "rgba(0,0,0,0)";
+    const ctx     = canvas.getContext('2d');
+    ctx.fillStyle = 'rgba(0,0,0,0)';
     ctx.fillRect(0, 0, 256, 64);
-    ctx.fillStyle = "#c0d0e0";
-    ctx.font = "bold 28px monospace";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    ctx.fillStyle = '#c0d0e0';
+    ctx.font      = 'bold 28px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
     ctx.fillText(text, 128, 32);
 
     const tex = new THREE.CanvasTexture(canvas);
-    const mat = new THREE.SpriteMaterial({
-      map: tex,
-      transparent: true,
-      depthWrite: false,
-    });
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
     const spr = new THREE.Sprite(mat);
     spr.scale.set(1.2, 0.3, 1);
     return spr;
-  }
-
-  /**
-   * Add a visual badge indicator to mark remote VPS files.
-   * Creates a small canvas texture with a cloud icon.
-   * @param {THREE.Mesh} fileMesh
-   */
-  _addRemoteFileBadge(fileMesh) {
-    try {
-      // Create a small canvas for the badge
-      const canvas = document.createElement('canvas');
-      canvas.width = 64;
-      canvas.height = 64;
-      const ctx = canvas.getContext('2d');
-
-      // Draw badge background (semi-transparent white circle)
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.beginPath();
-      ctx.arc(32, 32, 28, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Draw cloud icon (☁️ representation)
-      ctx.fillStyle = '#0066ff';
-      ctx.font = 'bold 40px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('☁', 32, 32);
-
-      // Create texture from canvas
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.magFilter = THREE.LinearFilter;
-      texture.minFilter = THREE.LinearFilter;
-
-      // Create a small sprite positioned at the top-right of the file cube
-      const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-      const sprite = new THREE.Sprite(spriteMaterial);
-      sprite.scale.set(0.4, 0.4, 1);
-      sprite.position.set(FILE_CUBE_SIZE * 0.4, FILE_CUBE_SIZE * 0.4, FILE_CUBE_SIZE * 0.4);
-
-      fileMesh.add(sprite);
-    } catch (err) {
-      console.warn('Failed to add remote file badge:', err);
-    }
-  }
-
-  /**
-   * Fetch files from both local storage and remote VPS for a category.
-   * Merges local and remote files, marking remote files with isRemote flag.
-   * @param {string} catName
-   * @returns {Promise<Array>}
-   */
-  async _fetchCategoryFilesWithRemote(catName) {
-    try {
-      // Fetch local files from StorageAPI
-      let localFiles = [];
-      try {
-        const localData = await this.storageAPI.getCategoryFiles(catName);
-        localFiles = Array.isArray(localData) ? localData : (localData.items || localData.data || []);
-        // Mark local files
-        localFiles = localFiles.map(f => ({ ...f, isRemote: false }));
-      } catch (err) {
-        console.warn(`Could not fetch local files for ${catName}:`, err);
-      }
-
-      // Try to fetch remote files from VPS
-      let remoteFiles = [];
-      try {
-        // Try to browse a category-specific path first, then fall back to root
-        const paths = [`/${catName}`, '/'];
-        for (const path of paths) {
-          try {
-            const items = await this.storageAPI.browseVPS(path);
-            if (items && items.length > 0) {
-              // Filter for files only (not directories), limit to 32
-              remoteFiles = items
-                .filter(item => item.type === 'file')
-                .slice(0, 32)
-                .map(item => ({
-                  ...item,
-                  id: `vps_${item.path}`, // Use path as unique ID for VPS files
-                  name: item.name || item.path.split('/').pop(),
-                  isRemote: true,
-                  vpsPath: item.path
-                }));
-              break; // Successfully loaded, don't try other paths
-            }
-          } catch (err) {
-            // Continue to next path
-          }
-        }
-      } catch (err) {
-        console.warn(`Could not fetch remote files for ${catName}:`, err);
-      }
-
-      // Merge and return both lists
-      return [...localFiles, ...remoteFiles];
-    } catch (err) {
-      console.error(`Error fetching files for ${catName}:`, err);
-      return [];
-    }
   }
 
   /**
@@ -401,15 +283,11 @@ export class Cabinet3D {
     if (this._loadedCats.has(catIndex)) return;
     this._loadedCats.add(catIndex);
 
-    const catMesh = this._catMeshes[catIndex];
+    const catMesh  = this._catMeshes[catIndex];
     const catName = STORAGE_CATEGORIES[catIndex];
     const maxShown = Math.min(files.length, 32); // cap at 32 to keep geometry count manageable; remaining files are not lost — re-fetching the category always returns the full list
 
-    const geo = new THREE.BoxGeometry(
-      FILE_CUBE_SIZE,
-      FILE_CUBE_SIZE,
-      FILE_CUBE_SIZE,
-    );
+    const geo = new THREE.BoxGeometry(FILE_CUBE_SIZE, FILE_CUBE_SIZE, FILE_CUBE_SIZE);
 
     for (let i = 0; i < maxShown; i++) {
       const fileData = files[i];
@@ -420,18 +298,18 @@ export class Cabinet3D {
         // Map coordinate (0-1000) to a spherical shell position
         const coord = Math.max(0, Math.min(1000, fileData.coordinate));
         const normalizedCoord = coord / 1000; // 0 to 1
-
+        
         // Create a spiral distribution based on coordinate
         const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // Golden angle for even distribution
         const theta = normalizedCoord * Math.PI * 4; // 2 full rotations
         const phi = goldenAngle * i;
-
+        
         x = FILE_ORBIT_R * Math.sin(theta) * Math.cos(phi);
         y = FILE_ORBIT_R * Math.sin(theta) * Math.sin(phi);
         z = FILE_ORBIT_R * Math.cos(theta);
       } else {
         // Default Fibonacci sphere distribution
-        const phi = Math.acos(1 - (2 * (i + 0.5)) / maxShown);
+        const phi   = Math.acos(1 - (2 * (i + 0.5)) / maxShown);
         const theta = Math.PI * (1 + Math.sqrt(5)) * i;
 
         x = FILE_ORBIT_R * Math.sin(phi) * Math.cos(theta);
@@ -439,7 +317,7 @@ export class Cabinet3D {
         z = FILE_ORBIT_R * Math.cos(phi);
       }
 
-      const mat = new THREE.MeshStandardMaterial({
+      const mat  = new THREE.MeshStandardMaterial({
         color: CATEGORY_COLORS[catIndex % CATEGORY_COLORS.length],
         transparent: true,
         opacity: 0.9,
@@ -449,27 +327,16 @@ export class Cabinet3D {
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(x, y, z);
-      mesh.userData = {
-        type: 'file',
-        catIndex,
-        fileData,
-        catName,
-        isRemote: fileData.isRemote || false
-      };
+      mesh.userData = { type: 'file', catIndex, fileData, catName };
       catMesh.add(mesh); // parented to the category cube
       this._fileMeshes.push(mesh);
-
-      // Add visual badge for remote files
-      if (fileData.isRemote) {
-        this._addRemoteFileBadge(mesh);
-      }
     }
   }
 
   /** Bind window events. */
   _bindEvents() {
-    window.addEventListener("resize", () => this._onResize());
-    this._overlay.addEventListener("click", (e) => this._onClick(e));
+    window.addEventListener('resize', () => this._onResize());
+    this._overlay.addEventListener('click', (e) => this._onClick(e));
   }
 
   /** Handle window resize. */
@@ -487,22 +354,19 @@ export class Cabinet3D {
     if (e.target !== this._renderer.domElement) return;
 
     const rect = this._renderer.domElement.getBoundingClientRect();
-    this._mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    this._mouse.y = ((e.clientY - rect.top) / rect.height) * -2 + 1;
+    this._mouse.x = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
+    this._mouse.y = ((e.clientY - rect.top)  / rect.height) * -2 + 1;
 
     this._raycaster.setFromCamera(this._mouse, this._camera);
-    const intersects = this._raycaster.intersectObjects(
-      this._scene.children,
-      true,
-    );
+    const intersects = this._raycaster.intersectObjects(this._scene.children, true);
 
     for (const hit of intersects) {
       const ud = hit.object.userData;
-      if (ud.type === "category") {
+      if (ud.type === 'category') {
         this._onCategoryClick(ud.catIndex, ud.catName);
         return;
       }
-      if (ud.type === "file") {
+      if (ud.type === 'file') {
         this._onFileClick(ud.catIndex, ud.fileData);
         return;
       }
@@ -518,38 +382,34 @@ export class Cabinet3D {
     if (this._focusedCat === catIndex) {
       // Second click: zoom back out
       this._focusedCat = -1;
-      this._animateCamera(
-        new THREE.Vector3(0, 0, 10),
-        new THREE.Vector3(0, 0, 0),
-      );
-      this._hint.textContent =
-        "Click a category cube to explore · Click a file cube to open it";
+      this._animateCamera(new THREE.Vector3(0, 0, 10), new THREE.Vector3(0, 0, 0));
+      this._hint.textContent = 'Click a category cube to explore · Click a file cube to open it';
       return;
     }
 
     this._focusedCat = catIndex;
     const target = this._catMeshes[catIndex].position.clone();
-    const camPos = target.clone().add(new THREE.Vector3(0, 0, 4));
+    const camPos  = target.clone().add(new THREE.Vector3(0, 0, 4));
     this._animateCamera(camPos, target);
     this._hint.textContent = `Loading ${catName}…`;
-// Lazy-load files for this category
-if (!this._loadedCats.has(catIndex)) {
-  this.storageAPI
-    .getCategoryFiles(catName)
-    .then((files) => {
-      const list = Array.isArray(files)
-        ? files
-        : files.items || files.data || [];
-      
-      this._buildFileCubes(catIndex, list);
-      this._hint.textContent = `${catName}: ${list.length} file(s) · Click a file cube to open`;
-    })
-    .catch(() => {
-      this._hint.textContent = `${catName}: could not load files (check backend)`;
-    });
-} else {
-  this._hint.textContent = `${catName} · Click a file cube to open it`;
-}
+
+    // Lazy-load files for this category
+    if (!this._loadedCats.has(catIndex)) {
+      this.storageAPI
+        .getCategoryFiles(catName)
+        .then((files) => {
+          const list = Array.isArray(files) ? files : (files.items || files.data || []);
+          this._buildFileCubes(catIndex, list);
+          this._hint.textContent = `${catName}: ${list.length} file(s) · Click a file cube to open`;
+        })
+        .catch(() => {
+          this._hint.textContent = `${catName}: could not load files (check backend)`;
+        });
+    } else {
+      this._hint.textContent = `${catName} · Click a file cube to open it`;
+    }
+  }
+
   /**
    * Open a file in the Monaco editor via TabManager.
    * Dispatches 'fileCubeClicked' event for main.js to handle with depth focus logic.
@@ -558,18 +418,18 @@ if (!this._loadedCats.has(catIndex)) {
    */
   _onFileClick(catIndex, fileData) {
     const catName = STORAGE_CATEGORIES[catIndex];
-    const id = fileData.id || fileData._id || fileData.name || "unknown";
+    const id      = fileData.id || fileData._id || fileData.name || 'unknown';
     const filename = fileData.filename || fileData.name || `${catName}-${id}`;
 
     // Dispatch custom event for main.js to handle with depth focus
-    const event = new CustomEvent("fileCubeClicked", {
-      detail: {
-        id,
-        type: catName,
+    const event = new CustomEvent('fileCubeClicked', {
+      detail: { 
+        id, 
+        type: catName, 
         name: filename,
         fileData,
-        catIndex,
-      },
+        catIndex
+      }
     });
     window.dispatchEvent(event);
 
@@ -583,37 +443,18 @@ if (!this._loadedCats.has(catIndex)) {
    * @returns {string}
    */
   _detectLanguage(catName, data) {
-    if (catName === "shaders") return "glsl";
-    if (catName === "images") return "image";
-    if (catName === "notes") return "markdown";
+    if (catName === 'shaders') return 'glsl';
+    if (catName === 'images') return 'image';
     if (data.language) return data.language;
-    const name = (data.filename || data.name || "").toLowerCase();
-    if (
-      name.endsWith(".png") ||
-      name.endsWith(".jpg") ||
-      name.endsWith(".jpeg") ||
-      name.endsWith(".gif") ||
-      name.endsWith(".webp")
-    )
-      return "image";
-    if (name.endsWith(".js")) return "javascript";
-    if (name.endsWith(".ts")) return "typescript";
-    if (name.endsWith(".json")) return "json";
-    if (name.endsWith(".py")) return "python";
-    if (
-      name.endsWith(".glsl") ||
-      name.endsWith(".frag") ||
-      name.endsWith(".vert")
-    )
-      return "glsl";
-    if (
-      catName === "songs" ||
-      catName === "patterns" ||
-      catName === "banks" ||
-      catName === "music"
-    )
-      return "json";
-    return "plaintext";
+    const name = (data.filename || data.name || '').toLowerCase();
+    if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.gif') || name.endsWith('.webp')) return 'image';
+    if (name.endsWith('.js'))   return 'javascript';
+    if (name.endsWith('.ts'))   return 'typescript';
+    if (name.endsWith('.json')) return 'json';
+    if (name.endsWith('.py'))   return 'python';
+    if (name.endsWith('.glsl') || name.endsWith('.frag') || name.endsWith('.vert')) return 'glsl';
+    if (catName === 'songs' || catName === 'patterns' || catName === 'banks' || catName === 'music') return 'json';
+    return 'plaintext';
   }
 
   /**
@@ -622,9 +463,9 @@ if (!this._loadedCats.has(catIndex)) {
    * @param {THREE.Vector3} toTarget
    */
   _animateCamera(toPos, toTarget) {
-    const fromPos = this._camera.position.clone();
+    const fromPos    = this._camera.position.clone();
     const fromTarget = this._controls.target.clone();
-    const startTime = performance.now();
+    const startTime  = performance.now();
 
     this._camAnim = { fromPos, toPos, fromTarget, toTarget, startTime };
   }

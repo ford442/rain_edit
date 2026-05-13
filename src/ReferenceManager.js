@@ -12,14 +12,14 @@ export class ReferenceManager {
     this.mouseY = 0;
 
     // Spotlight Layer
-    this.spotlightLayer = document.createElement('div');
-    this.spotlightLayer.id = 'spotlight-layer';
-    this.spotlightLayer.style.position = 'absolute';
-    this.spotlightLayer.style.inset = '0';
-    this.spotlightLayer.style.zIndex = '20'; // Above overlay and editor
-    this.spotlightLayer.style.pointerEvents = 'none'; // Allow clicks to pass through empty areas
+    this.spotlightLayer = document.createElement("div");
+    this.spotlightLayer.id = "spotlight-layer";
+    this.spotlightLayer.style.position = "absolute";
+    this.spotlightLayer.style.inset = "0";
+    this.spotlightLayer.style.zIndex = "20"; // Above overlay and editor
+    this.spotlightLayer.style.pointerEvents = "none"; // Allow clicks to pass through empty areas
     if (this.layer && this.layer.parentElement) {
-        this.layer.parentElement.appendChild(this.spotlightLayer);
+      this.layer.parentElement.appendChild(this.spotlightLayer);
     }
 
     // Draggable state
@@ -40,36 +40,48 @@ export class ReferenceManager {
   }
 
   setFogManager(fm) {
-      this.fogManager = fm;
+    this.fogManager = fm;
   }
 
   initEvents() {
-    window.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-    window.addEventListener('mouseup', () => this.handleMouseUp());
+    window.addEventListener("mousemove", (e) => this.handleMouseMove(e));
+    window.addEventListener("mouseup", () => this.handleMouseUp());
     // Use capture phase for dblclick to intercept it before normal cards handle it and call stopPropagation()
-    window.addEventListener('dblclick', (e) => this.handleGlobalDoubleClick(e), true);
+    window.addEventListener(
+      "dblclick",
+      (e) => this.handleGlobalDoubleClick(e),
+      true,
+    );
   }
 
   handleGlobalDoubleClick(e) {
-      if (e.shiftKey) {
-          // Check for frosted cards under the mouse cursor to un-frost them,
-          // since they have pointer-events: none and won't receive normal events.
-          const cards = this.getCards().filter(c => c.classList.contains('frosted'));
-          // Sort by z-index descending to get the top-most card
-          cards.sort((a, b) => parseInt(b.style.zIndex || 0) - parseInt(a.style.zIndex || 0));
+    if (e.shiftKey) {
+      // Check for frosted cards under the mouse cursor to un-frost them,
+      // since they have pointer-events: none and won't receive normal events.
+      const cards = this.getCards().filter((c) =>
+        c.classList.contains("frosted"),
+      );
+      // Sort by z-index descending to get the top-most card
+      cards.sort(
+        (a, b) => parseInt(b.style.zIndex || 0) - parseInt(a.style.zIndex || 0),
+      );
 
-          for (let card of cards) {
-              const rect = card.getBoundingClientRect();
-              if (e.clientX >= rect.left && e.clientX <= rect.right &&
-                  e.clientY >= rect.top && e.clientY <= rect.bottom) {
-                  card.classList.remove('frosted');
-                  // Stop capturing early to prevent frosting the card underneath
-                  e.stopPropagation();
-                  e.preventDefault();
-                  return; // Un-frost only the top-most hit
-              }
-          }
+      for (let card of cards) {
+        const rect = card.getBoundingClientRect();
+        if (
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom
+        ) {
+          card.classList.remove("frosted");
+          // Stop capturing early to prevent frosting the card underneath
+          e.stopPropagation();
+          e.preventDefault();
+          return; // Un-frost only the top-most hit
+        }
       }
+    }
   }
 
   handleMouseMove(e) {
@@ -78,16 +90,16 @@ export class ReferenceManager {
 
     // Rain Interaction (Shield Effect)
     if (this.raindrops) {
-        // Check if mouse is over a note card
-        if (e.target && e.target.closest('.note-card')) {
-            this.raindrops.clearDroplets(this.mouseX, this.mouseY, 80);
-        }
+      // Check if mouse is over a note card
+      if (e.target && e.target.closest(".note-card")) {
+        this.raindrops.clearDroplets(this.mouseX, this.mouseY, 80);
+      }
     }
 
     // Lantern Mask Logic
     if (this.overlay) {
-      this.overlay.style.setProperty('--mouse-x', `${this.mouseX}px`);
-      this.overlay.style.setProperty('--mouse-y', `${this.mouseY}px`);
+      this.overlay.style.setProperty("--mouse-x", `${this.mouseX}px`);
+      this.overlay.style.setProperty("--mouse-y", `${this.mouseY}px`);
     }
 
     // Drag Logic
@@ -100,10 +112,14 @@ export class ReferenceManager {
 
       // Liquid Interface: Clear fog when dragging
       if (this.fogManager) {
-          const rect = this.draggedNote.getBoundingClientRect();
-          const cx = rect.left + rect.width / 2;
-          const cy = rect.top + rect.height / 2;
-          this.fogManager.clearFogAt(cx, cy, Math.max(rect.width, rect.height) / 1.5);
+        const rect = this.draggedNote.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        this.fogManager.clearFogAt(
+          cx,
+          cy,
+          Math.max(rect.width, rect.height) / 1.5,
+        );
       }
     }
 
@@ -111,156 +127,167 @@ export class ReferenceManager {
   }
 
   render(time) {
-      this.updateParallax(this.layer, time);
-      if (this.spotlightLayer) this.updateParallax(this.spotlightLayer, time);
+    this.updateParallax(this.layer, time);
+    if (this.spotlightLayer) this.updateParallax(this.spotlightLayer, time);
   }
 
   updateParallax(container, time) {
-        if (!container) return;
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        const normX = (this.mouseX / w) * 2 - 1;
-        const normY = (this.mouseY / h) * 2 - 1;
+    if (!container) return;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const normX = (this.mouseX / w) * 2 - 1;
+    const normY = (this.mouseY / h) * 2 - 1;
 
-        // Check if any card is matched to trigger Tunnel Mode
-        let hasMatch = false;
-        const notes = Array.from(container.children);
-        for (let note of notes) {
-            if (note.classList.contains('matched-card')) {
-                hasMatch = true;
-                break;
-            }
+    // Check if any card is matched to trigger Tunnel Mode
+    let hasMatch = false;
+    const notes = Array.from(container.children);
+    for (let note of notes) {
+      if (note.classList.contains("matched-card")) {
+        hasMatch = true;
+        break;
+      }
+    }
+
+    for (let note of notes) {
+      if (!note.classList.contains("note-card")) continue;
+
+      let depth = parseFloat(note.dataset.depth) || 1;
+      const initialRot = parseFloat(note.dataset.initialRot) || 0;
+      const isMatched = note.classList.contains("matched-card");
+      const tags = note.dataset.tags || "";
+
+      // Semantic Layering Override
+      if (tags.includes("#bug")) depth = 0.2; // Very close
+      if (tags.includes("#urgent")) depth = 0.1;
+      if (tags.includes("#todo")) depth = 0.5;
+
+      // Enhanced Parallax
+      const moveX = -normX * 50 * depth;
+      const moveY = -normY * 50 * depth;
+
+      // Enhanced Tilt (3D Depth)
+      // Closer items tilt more
+      const rotateX = -normY * (5 + (1 - depth) * 5);
+      const rotateY = normX * (5 + (1 - depth) * 5);
+
+      // Depth-Aware Lighting
+      // Calculate light based on how the card faces the light source (assumed top-left or centered)
+      // normX and normY tell us the mouse position. The card tilts towards the mouse.
+      const lightIntensity = (rotateX * 0.05 + rotateY * 0.05) * (1.5 - depth);
+      const brightness = 1 + Math.max(0, lightIntensity); // Only brighten, don't darken too much
+
+      // --- Tunnel Effect Logic ---
+      let translateZ = depth * 50;
+      if (isMatched) {
+        // Fly towards screen
+        translateZ += 200;
+      } else if (hasMatch) {
+        // Push others back
+        translateZ -= 100;
+      }
+
+      // Dynamic Depth of Field (Focus based on mouse proximity)
+      const rect = note.getBoundingClientRect();
+      const cardCenterX = rect.left + rect.width / 2;
+      const cardCenterY = rect.top + rect.height / 2;
+      const dist = Math.hypot(
+        this.mouseX - cardCenterX,
+        this.mouseY - cardCenterY,
+      );
+
+      const focusRange = this.isLensMode ? 500 : 300;
+      const focusFactor = Math.max(0, 1 - dist / focusRange); // 0 to 1 (1 is closest)
+
+      // Base blur comes from depth
+      let blurAmount = Math.max(0, (1.2 - depth) * 3);
+
+      // Proximity reduces blur
+      // If Lens Mode is active, we want to aggressively sharpen
+      const sharpenFactor = this.isLensMode ? 1.0 : 0.8;
+      blurAmount = blurAmount * (1 - focusFactor * sharpenFactor);
+
+      // Tunnel Effect Blur
+      if (isMatched) {
+        blurAmount = 0; // Force sharp
+      } else if (hasMatch) {
+        blurAmount += 4; // Blur background more
+      }
+
+      // Breathing Effect
+      // Scale oscillates based on time and storm intensity
+      const breathe =
+        Math.sin(time * 2 + depth * 10) * 0.02 * this.stormIntensity;
+
+      // Subtle scale up when focused
+      let focusScale = 1 + focusFactor * 0.05 + breathe;
+
+      // Smart Focus Scale
+      if (isMatched) {
+        focusScale = 1.1; // Pop out
+      }
+
+      let zIndexOverride = "";
+
+      // Semantic Magnifier (Lens Mode Enhancement)
+      if (
+        this.isLensMode &&
+        dist < 180 &&
+        !note.classList.contains("spotlight")
+      ) {
+        focusScale = 1.35;
+        blurAmount = 0;
+        zIndexOverride = "100";
+
+        // Temporarily un-collapse to peek
+        if (note.classList.contains("collapsed")) {
+          note.classList.remove("collapsed");
+          note.dataset.wasCollapsed = "true";
         }
-
-        for (let note of notes) {
-            if (!note.classList.contains('note-card')) continue;
-
-            let depth = parseFloat(note.dataset.depth) || 1;
-            const initialRot = parseFloat(note.dataset.initialRot) || 0;
-            const isMatched = note.classList.contains('matched-card');
-            const tags = note.dataset.tags || '';
-
-            // Semantic Layering Override
-            if (tags.includes('#bug')) depth = 0.2; // Very close
-            if (tags.includes('#urgent')) depth = 0.1;
-            if (tags.includes('#todo')) depth = 0.5;
-
-            // Enhanced Parallax
-            const moveX = -normX * 50 * depth;
-            const moveY = -normY * 50 * depth;
-
-            // Enhanced Tilt (3D Depth)
-            // Closer items tilt more
-            const rotateX = -normY * (5 + (1-depth)*5);
-            const rotateY = normX * (5 + (1-depth)*5);
-
-            // Depth-Aware Lighting
-            // Calculate light based on how the card faces the light source (assumed top-left or centered)
-            // normX and normY tell us the mouse position. The card tilts towards the mouse.
-            const lightIntensity = ((rotateX * 0.05) + (rotateY * 0.05)) * (1.5 - depth);
-            const brightness = 1 + Math.max(0, lightIntensity); // Only brighten, don't darken too much
-
-            // --- Tunnel Effect Logic ---
-            let translateZ = depth * 50;
-            if (isMatched) {
-                // Fly towards screen
-                translateZ += 200;
-            } else if (hasMatch) {
-                // Push others back
-                translateZ -= 100;
-            }
-
-            // Dynamic Depth of Field (Focus based on mouse proximity)
-            const rect = note.getBoundingClientRect();
-            const cardCenterX = rect.left + rect.width / 2;
-            const cardCenterY = rect.top + rect.height / 2;
-            const dist = Math.hypot(this.mouseX - cardCenterX, this.mouseY - cardCenterY);
-
-            const focusRange = this.isLensMode ? 500 : 300;
-            const focusFactor = Math.max(0, 1 - dist / focusRange); // 0 to 1 (1 is closest)
-
-            // Base blur comes from depth
-            let blurAmount = Math.max(0, (1.2 - depth) * 3);
-
-            // Proximity reduces blur
-            // If Lens Mode is active, we want to aggressively sharpen
-            const sharpenFactor = this.isLensMode ? 1.0 : 0.8;
-            blurAmount = blurAmount * (1 - focusFactor * sharpenFactor);
-
-            // Tunnel Effect Blur
-            if (isMatched) {
-                blurAmount = 0; // Force sharp
-            } else if (hasMatch) {
-                blurAmount += 4; // Blur background more
-            }
-
-            // Breathing Effect
-            // Scale oscillates based on time and storm intensity
-            const breathe = Math.sin(time * 2 + depth * 10) * 0.02 * this.stormIntensity;
-
-            // Subtle scale up when focused
-            let focusScale = 1 + (focusFactor * 0.05) + breathe;
-
-            // Smart Focus Scale
-            if (isMatched) {
-                focusScale = 1.1; // Pop out
-            }
-
-            let zIndexOverride = '';
-
-            // Semantic Magnifier (Lens Mode Enhancement)
-            if (this.isLensMode && dist < 180 && !note.classList.contains('spotlight')) {
-                focusScale = 1.35;
-                blurAmount = 0;
-                zIndexOverride = '100';
-
-                // Temporarily un-collapse to peek
-                if (note.classList.contains('collapsed')) {
-                    note.classList.remove('collapsed');
-                    note.dataset.wasCollapsed = 'true';
-                }
-            } else {
-                // Restore collapse state if it was temporarily un-collapsed
-                if (note.dataset.wasCollapsed === 'true') {
-                    note.classList.add('collapsed');
-                    delete note.dataset.wasCollapsed;
-                }
-            }
-
-            note.style.transform = `translate3d(${moveX}px, ${moveY}px, ${translateZ}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${focusScale})`;
-
-            if (zIndexOverride) {
-                note.style.zIndex = zIndexOverride;
-            } else if (!note.classList.contains('spotlight')) {
-                // Revert z-index override if any (though ReferenceManager handles z-index manually on mousedown)
-                if (note.style.zIndex === '100') note.style.zIndex = '';
-            }
-
-            // Lens Mode & Smart Focus Opacity Logic
-            if (isMatched) {
-                note.style.opacity = 1;
-            } else if (hasMatch) {
-                // Tunnel fade
-                note.style.opacity = 0.3;
-            } else if (this.isLensMode && !note.classList.contains('spotlight')) {
-                if (dist < 180) {
-                     note.style.opacity = 1; // Full opacity when magnifying
-                } else {
-                     // Fade out distant notes, bring focused one to full opacity
-                     note.style.opacity = 0.3 + (focusFactor * 0.7);
-                }
-            } else if (!note.classList.contains('spotlight')) {
-                 note.style.opacity = ''; // Revert to CSS default
-            }
-
-            if (!note.classList.contains('spotlight') && !note.classList.contains('dimmed')) {
-                note.style.filter = `blur(${blurAmount}px) brightness(${brightness})`;
-            } else if (note.classList.contains('spotlight')) {
-                note.style.filter = `brightness(${brightness})`;
-                // Keep scale for spotlight
-                note.style.transform += ' scale(1.05)';
-            }
+      } else {
+        // Restore collapse state if it was temporarily un-collapsed
+        if (note.dataset.wasCollapsed === "true") {
+          note.classList.add("collapsed");
+          delete note.dataset.wasCollapsed;
         }
+      }
+
+      note.style.transform = `translate3d(${moveX}px, ${moveY}px, ${translateZ}px) rotate(${initialRot}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(${focusScale})`;
+
+      if (zIndexOverride) {
+        note.style.zIndex = zIndexOverride;
+      } else if (!note.classList.contains("spotlight")) {
+        // Revert z-index override if any (though ReferenceManager handles z-index manually on mousedown)
+        if (note.style.zIndex === "100") note.style.zIndex = "";
+      }
+
+      // Lens Mode & Smart Focus Opacity Logic
+      if (isMatched) {
+        note.style.opacity = 1;
+      } else if (hasMatch) {
+        // Tunnel fade
+        note.style.opacity = 0.3;
+      } else if (this.isLensMode && !note.classList.contains("spotlight")) {
+        if (dist < 180) {
+          note.style.opacity = 1; // Full opacity when magnifying
+        } else {
+          // Fade out distant notes, bring focused one to full opacity
+          note.style.opacity = 0.3 + focusFactor * 0.7;
+        }
+      } else if (!note.classList.contains("spotlight")) {
+        note.style.opacity = ""; // Revert to CSS default
+      }
+
+      if (
+        !note.classList.contains("spotlight") &&
+        !note.classList.contains("dimmed")
+      ) {
+        note.style.filter = `blur(${blurAmount}px) brightness(${brightness})`;
+      } else if (note.classList.contains("spotlight")) {
+        note.style.filter = `brightness(${brightness})`;
+        // Keep scale for spotlight
+        note.style.transform += " scale(1.05)";
+      }
+    }
   }
 
   handleMouseUp() {
@@ -269,54 +296,56 @@ export class ReferenceManager {
 
   update(text) {
     if (!this.layer) return;
-    this.layer.innerHTML = '';
-    if (this.spotlightLayer) this.spotlightLayer.innerHTML = '';
+    this.layer.innerHTML = "";
+    if (this.spotlightLayer) this.spotlightLayer.innerHTML = "";
 
     if (!text) return;
 
     // Split by headings (# ) or horizontal rules (---)
-    const parts = text.split(/(?:^|\n)(?=# )|(?:\n---)/g).filter(p => p && p.trim().length > 0);
+    const parts = text
+      .split(/(?:^|\n)(?=# )|(?:\n---)/g)
+      .filter((p) => p && p.trim().length > 0);
 
     const cols = 3;
     const colWidth = 90 / cols;
 
     parts.forEach((part, index) => {
       // Extract tags
-      const tags = (part.match(/#[a-zA-Z0-9_]+/g) || []).join(' ');
+      const tags = (part.match(/#[a-zA-Z0-9_]+/g) || []).join(" ");
 
       const html = this.parseMarkdown(part);
-      const card = document.createElement('div');
-      card.className = 'note-card floating';
+      const card = document.createElement("div");
+      card.className = "note-card floating";
       if (tags) card.dataset.tags = tags;
 
-      const content = document.createElement('div');
-      content.className = 'card-content';
+      const content = document.createElement("div");
+      content.className = "card-content";
       content.innerHTML = html;
       card.appendChild(content);
 
       // Deterministic random positioning based on index
       const seed = index * 1337;
       const rnd = (n) => {
-          const x = Math.sin(seed + n) * 10000;
-          return x - Math.floor(x);
+        const x = Math.sin(seed + n) * 10000;
+        return x - Math.floor(x);
       };
 
       // Grid Layout
       const colIndex = index % cols;
       const rowInCol = Math.floor(index / cols);
 
-      const left = 5 + (colIndex * colWidth) + rnd(1) * 5;
-      const top = 10 + (rowInCol * 40) + rnd(2) * 10;
+      const left = 5 + colIndex * colWidth + rnd(1) * 5;
+      const top = 10 + rowInCol * 40 + rnd(2) * 10;
 
       const rot = -2 + rnd(3) * 4;
       const depth = 0.4 + rnd(4) * 0.8;
 
-      card.style.left = left + '%';
-      card.style.top = top + '%';
+      card.style.left = left + "%";
+      card.style.top = top + "%";
       card.style.transform = `rotate(${rot}deg)`;
 
       // Animation Configuration
-      card.style.animationName = 'float-in, float';
+      card.style.animationName = "float-in, float";
       card.style.animationDuration = `0.6s, 6s`;
       card.style.animationTimingFunction = `ease-out, ease-in-out`;
       card.style.animationIterationCount = `1, infinite`;
@@ -334,277 +363,320 @@ export class ReferenceManager {
       card.dataset.depth = depth;
 
       // Bring to front on click (Z-Index Management)
-      card.addEventListener('mousedown', () => {
-         this.zIndexCounter++;
-         card.style.zIndex = this.zIndexCounter;
+      card.addEventListener("mousedown", () => {
+        this.zIndexCounter++;
+        card.style.zIndex = this.zIndexCounter;
       });
 
       // Add drag listener
-      card.addEventListener('mousedown', (e) => {
+      card.addEventListener("mousedown", (e) => {
         // Drag if Alt is pressed
         if (e.altKey) {
-            this.draggedNote = card;
-            const rect = card.getBoundingClientRect();
-            this.dragOffset = {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
-            };
-            e.preventDefault();
+          this.draggedNote = card;
+          const rect = card.getBoundingClientRect();
+          this.dragOffset = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+          };
+          e.preventDefault();
         }
       });
 
       // Collapse Logic
-      const headers = card.querySelectorAll('h1, h2, h3');
-      headers.forEach(header => {
-          header.style.cursor = 'pointer';
-          header.title = 'Click to collapse/expand';
-          header.addEventListener('click', (e) => {
-               if (!e.altKey) {
-                   card.classList.toggle('collapsed');
-               }
-          });
+      const headers = card.querySelectorAll("h1, h2, h3");
+      headers.forEach((header) => {
+        header.style.cursor = "pointer";
+        header.title = "Click to collapse/expand";
+        header.addEventListener("click", (e) => {
+          if (!e.altKey) {
+            card.classList.toggle("collapsed");
+          }
+        });
       });
 
       // Spotlight / Frosting Logic
-      card.addEventListener('dblclick', (e) => {
+      card.addEventListener("dblclick", (e) => {
         e.stopPropagation();
 
         if (e.shiftKey) {
-            // Toggle Frosted State
-            // Note: Once frosted, pointer-events are disabled, so un-frosting is
-            // handled by the global handleGlobalDoubleClick listener.
-            card.classList.add('frosted');
-            return; // Prevent spotlight
+          // Toggle Frosted State
+          // Note: Once frosted, pointer-events are disabled, so un-frosting is
+          // handled by the global handleGlobalDoubleClick listener.
+          card.classList.add("frosted");
+          return; // Prevent spotlight
         }
 
-        const wasSpotlit = card.classList.contains('spotlight');
+        const wasSpotlit = card.classList.contains("spotlight");
 
         // Remove spotlight from all others and move back to layer
         if (this.spotlightLayer) {
-            const currentSpotlights = Array.from(this.spotlightLayer.children);
-            currentSpotlights.forEach(c => {
-                c.classList.remove('spotlight');
-                this.layer.appendChild(c);
-            });
+          const currentSpotlights = Array.from(this.spotlightLayer.children);
+          currentSpotlights.forEach((c) => {
+            c.classList.remove("spotlight");
+            this.layer.appendChild(c);
+          });
         }
 
-        const notes = this.layer.querySelectorAll('.note-card');
-        notes.forEach(c => {
-            c.classList.remove('spotlight');
-            c.classList.remove('dimmed');
+        const notes = this.layer.querySelectorAll(".note-card");
+        notes.forEach((c) => {
+          c.classList.remove("spotlight");
+          c.classList.remove("dimmed");
         });
-        this.layer.classList.remove('has-spotlight');
+        this.layer.classList.remove("has-spotlight");
 
         if (!wasSpotlit) {
-            card.classList.add('spotlight');
-            this.layer.classList.add('has-spotlight');
+          card.classList.add("spotlight");
+          this.layer.classList.add("has-spotlight");
 
-            // Dim others
-            const otherNotes = this.layer.querySelectorAll('.note-card');
-            otherNotes.forEach(c => {
-                 if (c !== card) c.classList.add('dimmed');
-            });
+          // Dim others
+          const otherNotes = this.layer.querySelectorAll(".note-card");
+          otherNotes.forEach((c) => {
+            if (c !== card) c.classList.add("dimmed");
+          });
 
-            // Move to spotlight layer
-            if (this.spotlightLayer) {
-                this.spotlightLayer.appendChild(card);
-            }
+          // Move to spotlight layer
+          if (this.spotlightLayer) {
+            this.spotlightLayer.appendChild(card);
+          }
         }
       });
 
       // Rain Shield Logic
-      card.addEventListener('mousemove', (e) => {
+      card.addEventListener("mousemove", (e) => {
         if (this.raindrops) {
-            this.raindrops.clearDroplets(e.clientX, e.clientY, 30);
+          this.raindrops.clearDroplets(e.clientX, e.clientY, 30);
         }
       });
 
       // Syntax Highlighting
       if (this.monaco) {
-          const codeBlocks = card.querySelectorAll('pre code');
-          codeBlocks.forEach(async (block) => {
-              let lang = 'javascript';
-              // Check class for language
-              const classes = block.className.split(' ');
-              const langClass = classes.find(c => c.startsWith('language-'));
-              if (langClass) {
-                  lang = langClass.replace('language-', '');
-              }
+        const codeBlocks = card.querySelectorAll("pre code");
+        codeBlocks.forEach(async (block) => {
+          let lang = "javascript";
+          // Check class for language
+          const classes = block.className.split(" ");
+          const langClass = classes.find((c) => c.startsWith("language-"));
+          if (langClass) {
+            lang = langClass.replace("language-", "");
+          }
 
-              const code = block.innerText;
-              try {
-                  const colorized = await this.monaco.editor.colorize(code, lang, {});
-                  block.innerHTML = colorized;
-              } catch (err) {
-                  console.warn('Colorize failed:', err);
-              }
-          });
+          const code = block.innerText;
+          try {
+            const colorized = await this.monaco.editor.colorize(code, lang, {});
+            block.innerHTML = colorized;
+          } catch (err) {
+            console.warn("Colorize failed:", err);
+          }
+        });
       }
 
       this.layer.appendChild(card);
     });
 
-    if (this.connectionManager) {
-        this.connectionManager.updateKeywords();
+    if (this.connectionManager && typeof this.connectionManager.updateKeywords === 'function') {
+      this.connectionManager.updateKeywords();
     }
   }
 
   toggleRainStreaks(enable) {
-      const cards = this.getCards();
-      cards.forEach(card => {
-          if (enable) {
-              card.classList.add('rain-streaks');
-          } else {
-              card.classList.remove('rain-streaks');
-          }
-      });
+    const cards = this.getCards();
+    cards.forEach((card) => {
+      if (enable) {
+        card.classList.add("rain-streaks");
+      } else {
+        card.classList.remove("rain-streaks");
+      }
+    });
   }
 
   parseMarkdown(text) {
-    let safeText = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    let safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
     // Enhanced Table Support
     safeText = safeText.replace(/((?:^\|.*\|\r?\n?)+)/gm, (match) => {
-        const lines = match.trim().split(/\r?\n/);
-        if (lines.length < 2) return match;
+      const lines = match.trim().split(/\r?\n/);
+      if (lines.length < 2) return match;
 
-        // Separator check
-        if (!lines[1].match(/^[|\s-:.]+$/)) return match;
+      // Separator check
+      if (!lines[1].match(/^[|\s-:.]+$/)) return match;
 
-        let html = '<table class="md-table">';
+      let html = '<table class="md-table">';
 
-        // Header
-        const headers = lines[0].replace(/^\||\|$/g, '').split('|').map(c => c.trim());
-        html += '<thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead>';
+      // Header
+      const headers = lines[0]
+        .replace(/^\||\|$/g, "")
+        .split("|")
+        .map((c) => c.trim());
+      html +=
+        "<thead><tr>" +
+        headers.map((h) => `<th>${h}</th>`).join("") +
+        "</tr></thead>";
 
-        // Body
-        html += '<tbody>';
-        for(let i = 2; i < lines.length; i++) {
-             const row = lines[i].replace(/^\||\|$/g, '').trim();
-             if(!row) continue;
-             const cols = row.split('|').map(c => c.trim());
-             html += '<tr>' + cols.map(c => `<td>${c}</td>`).join('') + '</tr>';
-        }
-        html += '</tbody></table>';
-        return html;
+      // Body
+      html += "<tbody>";
+      for (let i = 2; i < lines.length; i++) {
+        const row = lines[i].replace(/^\||\|$/g, "").trim();
+        if (!row) continue;
+        const cols = row.split("|").map((c) => c.trim());
+        html += "<tr>" + cols.map((c) => `<td>${c}</td>`).join("") + "</tr>";
+      }
+      html += "</tbody></table>";
+      return html;
     });
 
     // Process callouts
     // Support [!NOTE], [!WARN], [!INFO]
-    safeText = safeText.replace(/^> \[!NOTE\] (.*$)/gim, '<div class="callout note">$1</div>');
-    safeText = safeText.replace(/^> \[!WARN\] (.*$)/gim, '<div class="callout warn">$1</div>');
-    safeText = safeText.replace(/^> \[!INFO\] (.*$)/gim, '<div class="callout info">$1</div>');
+    safeText = safeText.replace(
+      /^> \[!NOTE\] (.*$)/gim,
+      '<div class="callout note">$1</div>',
+    );
+    safeText = safeText.replace(
+      /^> \[!WARN\] (.*$)/gim,
+      '<div class="callout warn">$1</div>',
+    );
+    safeText = safeText.replace(
+      /^> \[!INFO\] (.*$)/gim,
+      '<div class="callout info">$1</div>',
+    );
 
     // Process blockquotes first to avoid conflicts (non-callout blockquotes)
-    safeText = safeText.replace(/^> (?!\[!)(.*$)/gim, '<blockquote>$1</blockquote>');
+    safeText = safeText.replace(
+      /^> (?!\[!)(.*$)/gim,
+      "<blockquote>$1</blockquote>",
+    );
 
     // Process task lists
-    safeText = safeText.replace(/^- \[x\] (.*$)/gim, '<div class="md-list-item checked"><input type="checkbox" checked disabled> $1</div>');
-    safeText = safeText.replace(/^- \[ \] (.*$)/gim, '<div class="md-list-item"><input type="checkbox" disabled> $1</div>');
+    safeText = safeText.replace(
+      /^- \[x\] (.*$)/gim,
+      '<div class="md-list-item checked"><input type="checkbox" checked disabled> $1</div>',
+    );
+    safeText = safeText.replace(
+      /^- \[ \] (.*$)/gim,
+      '<div class="md-list-item"><input type="checkbox" disabled> $1</div>',
+    );
 
     // Improved list parsing with indentation support
     // Replaces "- content" with indented div
-    safeText = safeText.replace(/^(\s*)- (.*$)/gim, (match, indent, content) => {
+    safeText = safeText.replace(
+      /^(\s*)- (.*$)/gim,
+      (match, indent, content) => {
         let depth = 0;
         for (let char of indent) {
-            depth += (char === '\t') ? 4 : 1;
+          depth += char === "\t" ? 4 : 1;
         }
-        const padding = (depth * 12) + 20; // Increased padding per level
+        const padding = depth * 12 + 20; // Increased padding per level
         return `<div class="md-list-item" style="padding-left: ${padding}px">${content}</div>`;
-    });
+      },
+    );
 
     return safeText
-      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-      .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
-      .replace(/`(.*?)`/gim, '<code>$1</code>')
+      .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+      .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+      .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+      .replace(/\*\*(.*?)\*\*/gim, "<b>$1</b>")
+      .replace(/`(.*?)`/gim, "<code>$1</code>")
       .replace(/```(\w+)?\s*\n([\s\S]*?)```/gim, (match, lang, code) => {
-          return `<pre><code class="language-${lang || 'javascript'}">${code}</code></pre>`;
+        return `<pre><code class="language-${lang || "javascript"}">${code}</code></pre>`;
       })
-      .replace(/```([\s\S]*?)```/gim, '<pre><code class="language-javascript">$1</code></pre>')
-      .replace(/\n/gim, '<br>');
+      .replace(
+        /```([\s\S]*?)```/gim,
+        '<pre><code class="language-javascript">$1</code></pre>',
+      )
+      .replace(/\n/gim, "<br>");
   }
 
   setStormIntensity(level) {
-      if (!this.layer) return;
-      this.stormIntensity = Math.min(1, level / 60);
+    if (!this.layer) return;
+    this.stormIntensity = Math.min(1, level / 60);
 
-      // Threshold for visual shaking
-      if (level > 40) {
-          this.layer.classList.add('storm-shaking');
-          if (this.spotlightLayer) this.spotlightLayer.classList.add('storm-shaking');
-      } else {
-          this.layer.classList.remove('storm-shaking');
-          if (this.spotlightLayer) this.spotlightLayer.classList.remove('storm-shaking');
-      }
+    // Threshold for visual shaking
+    if (level > 40) {
+      this.layer.classList.add("storm-shaking");
+      if (this.spotlightLayer)
+        this.spotlightLayer.classList.add("storm-shaking");
+    } else {
+      this.layer.classList.remove("storm-shaking");
+      if (this.spotlightLayer)
+        this.spotlightLayer.classList.remove("storm-shaking");
+    }
   }
 
   setLanternMode(enabled) {
-      this.isLanternMode = enabled;
-      if (this.overlay) {
-          if (enabled) {
-            this.overlay.classList.add('lantern-active');
-            this.overlay.classList.remove('lantern-inactive');
-          } else {
-            this.overlay.classList.remove('lantern-active');
-            this.overlay.classList.add('lantern-inactive');
-          }
+    this.isLanternMode = enabled;
+    if (this.overlay) {
+      if (enabled) {
+        this.overlay.classList.add("lantern-active");
+        this.overlay.classList.remove("lantern-inactive");
+      } else {
+        this.overlay.classList.remove("lantern-active");
+        this.overlay.classList.add("lantern-inactive");
       }
+    }
   }
 
   getFocusedNoteRect() {
-      if (!this.layer) return null;
-      const focused = this.layer.querySelector('.focused-behind') ||
-                      (this.spotlightLayer && this.spotlightLayer.querySelector('.focused-behind'));
-      if (focused) {
-          return focused.getBoundingClientRect();
-      }
-      return null;
+    if (!this.layer) return null;
+    const focused =
+      this.layer.querySelector(".focused-behind") ||
+      (this.spotlightLayer &&
+        this.spotlightLayer.querySelector(".focused-behind"));
+    if (focused) {
+      return focused.getBoundingClientRect();
+    }
+    return null;
   }
 
   highlightNoteAt(x, y) {
-      if (!this.layer) return null;
-      let hit = null;
+    if (!this.layer) return null;
+    let hit = null;
 
-      // Check main layer
-      const checkContainer = (container) => {
-          if (!container) return null;
-          const notes = container.children;
-          for (let note of notes) {
-              if (!note.classList.contains('note-card')) continue;
-              const rect = note.getBoundingClientRect();
-              if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-                  return note;
-              }
-          }
-          return null;
+    // Check main layer
+    const checkContainer = (container) => {
+      if (!container) return null;
+      const notes = container.children;
+      for (let note of notes) {
+        if (!note.classList.contains("note-card")) continue;
+        const rect = note.getBoundingClientRect();
+        if (
+          x >= rect.left &&
+          x <= rect.right &&
+          y >= rect.top &&
+          y <= rect.bottom
+        ) {
+          return note;
+        }
       }
+      return null;
+    };
 
-      hit = checkContainer(this.spotlightLayer) || checkContainer(this.layer);
+    hit = checkContainer(this.spotlightLayer) || checkContainer(this.layer);
 
-      // Reset all first
-      const allNotes = [
-          ...this.layer.querySelectorAll('.note-card'),
-          ...(this.spotlightLayer ? this.spotlightLayer.querySelectorAll('.note-card') : [])
-      ];
+    // Reset all first
+    const allNotes = [
+      ...this.layer.querySelectorAll(".note-card"),
+      ...(this.spotlightLayer
+        ? this.spotlightLayer.querySelectorAll(".note-card")
+        : []),
+    ];
 
-      allNotes.forEach(n => {
-          if (n !== hit) n.classList.remove('focused-behind');
-      });
+    allNotes.forEach((n) => {
+      if (n !== hit) n.classList.remove("focused-behind");
+    });
 
-      if (hit) {
-          hit.classList.add('focused-behind');
-      }
-      return hit;
+    if (hit) {
+      hit.classList.add("focused-behind");
+    }
+    return hit;
   }
 
   getCards() {
-      if (!this.layer) return [];
-      const cards = [
-          ...Array.from(this.layer.querySelectorAll('.note-card')),
-          ...(this.spotlightLayer ? Array.from(this.spotlightLayer.querySelectorAll('.note-card')) : [])
-      ];
-      return cards;
+    if (!this.layer) return [];
+    const cards = [
+      ...Array.from(this.layer.querySelectorAll(".note-card")),
+      ...(this.spotlightLayer
+        ? Array.from(this.spotlightLayer.querySelectorAll(".note-card"))
+        : []),
+    ];
+    return cards;
   }
 }
