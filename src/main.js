@@ -2084,68 +2084,59 @@ document.addEventListener("keyup", (e) => {
   }
 });
 
-let stackZ = 0;
+let zCameraOffset = 0;
 window.addEventListener(
   "wheel",
   (e) => {
-    // "Layered Depth Explorer" feature mapped to Shift+Alt
-    if (e.shiftKey && e.altKey && !tabManager.isCascadeView) {
+    // "Z-Axis Camera Fly-Through" mapped to Alt + Scroll (replacing old Layered Depth Explorer)
+    if (e.altKey && !tabManager.isCascadeView) {
       e.preventDefault();
-      const delta = e.deltaY * 0.8; // Faster scroll
-      stackZ += delta;
+      const delta = e.deltaY * 1.5; // Smooth camera fly speed
+      zCameraOffset += delta;
 
-      // Clamp scroll stack depth roughly to available echoes with some padding
-      const maxDepth = tabManager.files.length * 50 + 200;
-      stackZ = Math.max(-100, Math.min(maxDepth, stackZ));
+      // Clamp scroll camera depth roughly to available echoes with some padding
+      const maxDepth = tabManager.files.length * 100 + 400; // Allow deeper fly-through
+      zCameraOffset = Math.max(-200, Math.min(maxDepth, zCameraOffset));
+
+      // Apply the global camera offset to the body so all layers get it
+      document.body.style.setProperty("--z-camera-offset", `${zCameraOffset}px`);
 
       if (echoLayerEl) {
-        echoLayerEl.style.setProperty("--stack-z", `${stackZ}px`);
-
         // Highlight intersecting documents (Layered Depth Explorer visual feedback)
         const echoes = echoLayerEl.querySelectorAll(".echo-document");
         echoes.forEach((echo) => {
-          // Original Z position (from TabManager: index * 50)
-          const docZ = parseInt(echo.dataset.index || 0) * 50;
+          // Original Z position (from TabManager: mostly derived from index, though varies by view mode. Using a general approach here)
+          const docZ = (parseInt(echo.dataset.index || 0) * 50) + parseInt(echo.style.getPropertyValue('--tz') || 0);
 
-          // If stackZ is near docZ, it's intersecting the viewing plane
-          const distance = Math.abs(docZ - stackZ);
-          if (distance < 40) {
+          // If zCameraOffset is near docZ, it's intersecting the viewing plane and we can apply visual feedback
+          const distance = Math.abs(docZ - zCameraOffset);
+          if (distance < 60) {
             echo.classList.add("z-intersect");
           } else {
             echo.classList.remove("z-intersect");
           }
         });
       }
-    } else if (e.altKey) {
-      e.preventDefault();
-      const delta = e.deltaY * 0.001;
-
-      // Adjust the preferred depth, clamping between 0.1 and 1
-      userPreferredDepth = Math.max(
-        0.1,
-        Math.min(1, userPreferredDepth + delta),
-      );
-
-      // Update current focus depth immediately if Alt is held
-      setFocusDepth(userPreferredDepth);
     }
   },
   { passive: false },
 );
 
 document.addEventListener("keyup", (e) => {
-  if (e.key === "Shift" || e.key === "Alt") {
-    // Only reset if BOTH are not held
-    if (!e.shiftKey || !e.altKey) {
-      stackZ = 0;
-      if (echoLayerEl) {
-        echoLayerEl.style.setProperty("--stack-z", "0px");
-        const echoes = echoLayerEl.querySelectorAll(".echo-document");
-        echoes.forEach((echo) => {
-          echo.classList.remove("z-intersect");
-        });
-      }
+  if (e.key === "Alt") {
+    zCameraOffset = 0;
+    document.body.style.setProperty("--z-camera-offset", "0px");
+    if (echoLayerEl) {
+      const echoes = echoLayerEl.querySelectorAll(".echo-document");
+      echoes.forEach((echo) => {
+        echo.classList.remove("z-intersect");
+      });
     }
+
+    // Also clear the old alt focus state
+    isAltDown = false;
+    setFocusDepth(0);
+    document.body.classList.remove("alt-focus-active");
   }
 });
 
