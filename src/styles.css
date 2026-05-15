@@ -6653,3 +6653,104 @@ body.outline-active .echo-document[data-depth="2"] {
   border-color: hsla(160deg, 100%, 65%, 0.65);
 }
 
+
+/* Veil Excavator Styles */
+body.veil-excavator-active {
+  cursor: crosshair !important;
+}
+
+body.veil-excavator-active .echo-document {
+  /* Use the generated canvas data URL as a mask */
+  mask-image: var(--veil-mask-url, none);
+  -webkit-mask-image: var(--veil-mask-url, none);
+  mask-size: 100vw 100vh;
+  -webkit-mask-size: 100vw 100vh;
+  /* Since the document is relative, we align the mask to the viewport using fixed attachment if possible, or calculate position */
+  /* For standard fixed-like masking on transformed elements, fixed attachment doesn't always work. Let's just cover */
+  mask-size: 100vw 100vh;
+  -webkit-mask-size: 100vw 100vh;
+  mask-position: calc(-1 * var(--tx, 0px)) calc(-1 * var(--ty, 0px));
+  -webkit-mask-position: calc(-1 * var(--tx, 0px)) calc(-1 * var(--ty, 0px));
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  pointer-events: none; /* Let pointer events through to canvas/raycaster */
+}
+
+/* Because each echo-document has inline transforms (top/left offset)
+   we need the mask to stretch across the full viewport but remain anchored to the screen.
+   Since mask-attachment: fixed isn't widely supported, we force size and inverse position.
+   Actually `mask-size: 100vw 100vh; mask-position: fixed` might work on some browsers.
+   Let's keep it simple: the background size is 100vw 100vh, and we adjust position relative to document top/left.
+*/
+body.veil-excavator-active #echo-layer .echo-document {
+  -webkit-mask-size: 100vw 100vh;
+  mask-size: 100vw 100vh;
+  -webkit-mask-position: calc(-10vw - var(--tx, 0px) - var(--repel-tx, 0px)) calc(-10vh - var(--ty, 0px) - var(--repel-ty, 0px));
+  mask-position: calc(-10vw - var(--tx, 0px) - var(--repel-tx, 0px)) calc(-10vh - var(--ty, 0px) - var(--repel-ty, 0px));
+}
+
+/* UI overlay for Excavator */
+.veil-excavator-ui {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(0, 229, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+  color: #00e5ff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  z-index: 9999;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  pointer-events: none;
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0% { border-color: rgba(0, 229, 255, 0.2); }
+  50% { border-color: rgba(0, 229, 255, 1); }
+  100% { border-color: rgba(0, 229, 255, 0.2); }
+}
+
+.excavator-particle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: #00e5ff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00e5ff, 0 0 16px #fff;
+  pointer-events: none;
+  z-index: 10000;
+  animation: excavator-sparks 0.8s ease-out forwards;
+}
+
+@keyframes excavator-sparks {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
+}
+
+.excavator-flash {
+  animation: excavator-flash-anim 0.3s ease-out !important;
+}
+
+@keyframes excavator-flash-anim {
+  0% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(3) saturate(2);
+    transform: scale(1.05);
+  }
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+}

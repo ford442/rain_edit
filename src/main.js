@@ -42,6 +42,7 @@ import { StorageAPI } from "./StorageAPI.js";
 import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
 import DataSiphon from "./DataSiphon.js";
+import { VeilExcavator } from "./VeilExcavator.js";
 import backFrag from "./shaders/water-back.frag?glslify";
 import frontFrag from "./shaders/water.frag?glslify";
 import vertSrc from "./shaders/simple.vert?glslify";
@@ -192,6 +193,8 @@ const holoManager = new HoloManager(editor, holoLayerEl);
 // Initialize 3D File Cabinet
 const storageAPI = new StorageAPI();
 const cabinet3D = new Cabinet3D(storageAPI, tabManager);
+const veilExcavator = new VeilExcavator(tabManager);
+window.veilExcavator = veilExcavator; // Expose globally for testing
 const cabinetBtn = document.getElementById("btn-cabinet");
 if (cabinetBtn) {
   cabinetBtn.addEventListener("click", () => cabinet3D.toggle());
