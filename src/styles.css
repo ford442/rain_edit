@@ -2106,7 +2106,7 @@ body.x-ray-active #echo-layer {
       calc(
         var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + (var(--scroll-vel, 0) * 0.5px)
       ),
-      calc(var(--tz, 0px) + (var(--scroll-vel, 0) * 1px))
+      calc(var(--tz, 0px) + var(--z-camera-offset, 0px) + (var(--scroll-vel, 0) * 1px))
     )
     rotateX(calc(var(--rot-x, 0deg) + (var(--mouse-ny, 0) * -10deg)))
     rotateY(calc(var(--rot-y, 0deg) + (var(--mouse-nx, 0) * 10deg)))
@@ -3347,7 +3347,7 @@ body.expose-active .echo-document:hover {
   transform: translate3d(
       calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
       calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
-      0px
+      calc(var(--tz, 0px) + var(--z-camera-offset, 0px))
     )
     scale(1.05) !important;
   z-index: 20;

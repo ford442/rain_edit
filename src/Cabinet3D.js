@@ -550,6 +550,8 @@ if (!this._loadedCats.has(catIndex)) {
 } else {
   this._hint.textContent = `${catName} · Click a file cube to open it`;
 }
+  }
+
   /**
    * Open a file in the Monaco editor via TabManager.
    * Dispatches 'fileCubeClicked' event for main.js to handle with depth focus logic.
