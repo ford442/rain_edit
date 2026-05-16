@@ -174,10 +174,14 @@ const tabManager = new TabManager(
       ' console.log("hello world");',
       "}",
       "",
-      "// @portal"
+      "// @portal",
     ].join("\n");
 
-    const initialFileId = tabManager.addFile("main.js", INITIAL_CODE, "javascript");
+    const initialFileId = tabManager.addFile(
+      "main.js",
+      INITIAL_CODE,
+      "javascript",
+    );
     tabManager.setActive(initialFileId);
   }
 })();
@@ -256,59 +260,64 @@ async function _triggerVpsSave() {
 }
 
 // Listen for 3D Cabinet file cube clicks with depth focus logic
-window.addEventListener('fileCubeClicked', async (e) => {
+window.addEventListener("fileCubeClicked", async (e) => {
   const { id, type, name, fileData: eventFileData } = e.detail;
 
   console.log(`Fetching ${type}: ${name}...`);
   // Show loading cursor
   document.body.style.cursor = "wait";
-try {
-  // 1. Fetch the code/json from the backend (handle both VPS remote files and cabinet files)
-  let fileData;
+  try {
+    // 1. Fetch the code/json from the backend (handle both VPS remote files and cabinet files)
+    let fileData;
 
-  if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
-    // Remote VPS file
-    const content = await storageAPI.getVPSFile(eventFileData.vpsPath);
-    const ext = name.split('.').pop().toLowerCase();
-    const languageMap = {
-      js: 'javascript', jsx: 'javascript',
-      ts: 'typescript', tsx: 'typescript',
-      json: 'json',
-      html: 'html', css: 'css',
-      md: 'markdown',
-      py: 'python',
-      glsl: 'glsl', wgsl: 'wgsl',
-      frag: 'glsl', vert: 'glsl'
-    };
-    const language = languageMap[ext] || 'plaintext';
-
-    fileData = { content, language };
-  } else {
-    // Local / Cabinet file (notes, etc.)
-    fileData = await storageAPI.getFileContent(id, type);
-  }
-
-  // 2. Add it to the Tab Manager
-  const newFileId = tabManager.addFile(
-    name,
-    fileData.content,
-    fileData.language
-  );
-
-  // 3. Tag the file so save/open logic knows where it came from
-  const newFile = tabManager.files.find(f => f.id === newFileId);
-  if (newFile) {
     if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
-      newFile.vpsPath = eventFileData.vpsPath;
+      // Remote VPS file
+      const content = await storageAPI.getVPSFile(eventFileData.vpsPath);
+      const ext = name.split(".").pop().toLowerCase();
+      const languageMap = {
+        js: "javascript",
+        jsx: "javascript",
+        ts: "typescript",
+        tsx: "typescript",
+        json: "json",
+        html: "html",
+        css: "css",
+        md: "markdown",
+        py: "python",
+        glsl: "glsl",
+        wgsl: "wgsl",
+        frag: "glsl",
+        vert: "glsl",
+      };
+      const language = languageMap[ext] || "plaintext";
+
+      fileData = { content, language };
     } else {
-      // Cabinet origin (new system)
-      newFile.cabinetType = type;
-      newFile.cabinetId = id;
-      if (type === "notes") {
-        newFile.noteName = id;   // for notes, id is the note name
+      // Local / Cabinet file (notes, etc.)
+      fileData = await storageAPI.getFileContent(id, type);
+    }
+
+    // 2. Add it to the Tab Manager
+    const newFileId = tabManager.addFile(
+      name,
+      fileData.content,
+      fileData.language,
+    );
+
+    // 3. Tag the file so save/open logic knows where it came from
+    const newFile = tabManager.files.find((f) => f.id === newFileId);
+    if (newFile) {
+      if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
+        newFile.vpsPath = eventFileData.vpsPath;
+      } else {
+        // Cabinet origin (new system)
+        newFile.cabinetType = type;
+        newFile.cabinetId = id;
+        if (type === "notes") {
+          newFile.noteName = id; // for notes, id is the note name
+        }
       }
     }
-  }
     // 3. DEPTH FOCUS LOGIC (The Immersive Step)
     // Push all current tabs backward into the rain (Depth 1)
     tabManager.files.forEach((file) => {
@@ -590,9 +599,9 @@ async function initLayers() {
     if (fgLayer) fgLayer.bindTexture("u_waterMap", raindrops.canvas);
 
     const time = performance.now() / 1000;
-    if (connectionManager && typeof connectionManager.draw === 'function') {
+    if (connectionManager && typeof connectionManager.draw === "function") {
       connectionManager.draw(time);
-      if (typeof connectionManager.drawRadar === 'function') {
+      if (typeof connectionManager.drawRadar === "function") {
         connectionManager.drawRadar(time);
       }
     }
@@ -640,11 +649,11 @@ let currentSceneRotY = 0;
 
 document.addEventListener("mousedown", (e) => {
   // Clear any active holo projection if clicking outside
-  if (!e.target.closest('.echo-document')) {
+  if (!e.target.closest(".echo-document")) {
     const echoLayerEl = document.getElementById("echo-layer");
     if (echoLayerEl) {
-      echoLayerEl.querySelectorAll('.holo-projected').forEach(doc => {
-        doc.classList.remove('holo-projected');
+      echoLayerEl.querySelectorAll(".holo-projected").forEach((doc) => {
+        doc.classList.remove("holo-projected");
       });
     }
   }
@@ -718,18 +727,21 @@ document.addEventListener("mousemove", (e) => {
   const mx = e.clientX;
   const my = e.clientY;
 
-// Track cursor position globally for CSS effects
+  // Track cursor position globally for CSS effects
   document.body.style.setProperty("--mouse-x", `${mx}px`);
   document.body.style.setProperty("--mouse-y", `${my}px`);
 
   // Normalized mouse coordinates from -1 to 1 for advanced 3D tilting
   const nx = (mx / window.innerWidth) * 2 - 1;
   const ny = (my / window.innerHeight) * 2 - 1;
-  document.body.style.setProperty('--mouse-nx', nx);
-  document.body.style.setProperty('--mouse-ny', ny);
+  document.body.style.setProperty("--mouse-nx", nx);
+  document.body.style.setProperty("--mouse-ny", ny);
 
   // Update targets for Depth Spotlight and Hologram Preview
-  if (document.body.classList.contains("depth-spotlight-active") || document.body.classList.contains("hologram-preview-active")) {
+  if (
+    document.body.classList.contains("depth-spotlight-active") ||
+    document.body.classList.contains("hologram-preview-active")
+  ) {
     const echoes = Array.from(document.querySelectorAll(".echo-document"));
     let closestEcho = null;
     let minDistance = Infinity;
@@ -759,7 +771,6 @@ document.addEventListener("mousemove", (e) => {
       }
     }
   }
-
 
   // 3D Magnifying Glass Effect (Shift Key)
   if (e.shiftKey && tabManager && tabManager.files) {
@@ -794,14 +805,14 @@ document.addEventListener("mousemove", (e) => {
   // --- NEW: Calculate local coordinates for echo-documents (for magnetic-edge and holographic glares) ---
   if (echoLayerEl) {
     const echoes = echoLayerEl.querySelectorAll(".echo-document");
-    echoes.forEach(echo => {
+    echoes.forEach((echo) => {
       const rect = echo.getBoundingClientRect();
       // Only calculate if document is reasonably visible or nearby to save performance
       const localX = mx - rect.left;
       const localY = my - rect.top;
 
-      echo.style.setProperty('--mouse-local-x', `${localX}px`);
-      echo.style.setProperty('--mouse-local-y', `${localY}px`);
+      echo.style.setProperty("--mouse-local-x", `${localX}px`);
+      echo.style.setProperty("--mouse-local-y", `${localY}px`);
 
       // Calculate normalized local coords for 3D tilt
       const centerX = rect.width / 2;
@@ -809,8 +820,8 @@ document.addEventListener("mousemove", (e) => {
       const hoverRotY = ((localX - centerX) / centerX) * 5; // max 5deg tilt
       const hoverRotX = -((localY - centerY) / centerY) * 5;
 
-      echo.style.setProperty('--hover-rot-x', `${hoverRotX}deg`);
-      echo.style.setProperty('--hover-rot-y', `${hoverRotY}deg`);
+      echo.style.setProperty("--hover-rot-x", `${hoverRotX}deg`);
+      echo.style.setProperty("--hover-rot-y", `${hoverRotY}deg`);
     });
   }
   // --- END NEW ---
@@ -1127,8 +1138,14 @@ document.addEventListener("mousemove", (e) => {
         const normalizedDx = dx / (dist || 1);
         const normalizedDy = dy / (dist || 1);
         const maxRepel = 80; // pixels to repel
-        echo.style.setProperty("--repel-tx", `${normalizedDx * maxRepel * repelFactor}px`);
-        echo.style.setProperty("--repel-ty", `${normalizedDy * maxRepel * repelFactor}px`);
+        echo.style.setProperty(
+          "--repel-tx",
+          `${normalizedDx * maxRepel * repelFactor}px`,
+        );
+        echo.style.setProperty(
+          "--repel-ty",
+          `${normalizedDy * maxRepel * repelFactor}px`,
+        );
       } else {
         echo.style.setProperty("--repel-tx", `0px`);
         echo.style.setProperty("--repel-ty", `0px`);
@@ -1420,7 +1437,7 @@ if (viewModeSelect) {
     else if (view === "galaxy") tabManager.toggleGalaxyView();
     else if (view === "origami") tabManager.toggleOrigamiView();
     else if (view === "matrix-rain") tabManager.toggleMatrixRainView();
-            else if (view === 'data-hive') tabManager.toggleDataHiveView();
+    else if (view === "data-hive") tabManager.toggleDataHiveView();
     else if (view === "crystal") tabManager.toggleCrystalView();
     else if (view === "fractal") tabManager.toggleFractalView();
     else if (view === "solar-system") tabManager.toggleSolarSystemView();
@@ -1429,7 +1446,6 @@ if (viewModeSelect) {
     else if (view === "cyber-cortex") tabManager.toggleCyberCortexView();
     else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
     else if (view === "outline") tabManager.toggleOutlineView();
-
     else tabManager._deactivateAllViews(); // Default view
   });
 }
@@ -2102,14 +2118,19 @@ window.addEventListener(
       zCameraOffset = Math.max(-200, Math.min(maxDepth, zCameraOffset));
 
       // Apply the global camera offset to the body so all layers get it
-      document.body.style.setProperty("--z-camera-offset", `${zCameraOffset}px`);
+      document.body.style.setProperty(
+        "--z-camera-offset",
+        `${zCameraOffset}px`,
+      );
 
       if (echoLayerEl) {
         // Highlight intersecting documents (Layered Depth Explorer visual feedback)
         const echoes = echoLayerEl.querySelectorAll(".echo-document");
         echoes.forEach((echo) => {
           // Original Z position (from TabManager: mostly derived from index, though varies by view mode. Using a general approach here)
-          const docZ = (parseInt(echo.dataset.index || 0) * 50) + parseInt(echo.style.getPropertyValue('--tz') || 0);
+          const docZ =
+            parseInt(echo.dataset.index || 0) * 50 +
+            parseInt(echo.style.getPropertyValue("--tz") || 0);
 
           // If zCameraOffset is near docZ, it's intersecting the viewing plane and we can apply visual feedback
           const distance = Math.abs(docZ - zCameraOffset);
@@ -2727,7 +2748,9 @@ document.addEventListener("keydown", (e) => {
     tabManager.toggleOutlineView();
     const sel = document.getElementById("view-mode-select");
     if (sel) {
-      sel.value = document.body.classList.contains("outline-active") ? "outline" : "";
+      sel.value = document.body.classList.contains("outline-active")
+        ? "outline"
+        : "";
     }
   }
 });
@@ -2764,13 +2787,53 @@ document.addEventListener("keydown", (e) => {
 
 // Expose tabManager for testing
 window.tabManager = tabManager;
-  initSemanticResonance(editor, tabManager);
-  initKineticTypingPulse(editor);
+initSemanticResonance(editor, tabManager);
+initKineticTypingPulse(editor);
 
-// Hyper-Jump & Magnetic Peel
+// Document Fanning (Card Hand View) & Hyper-Jump & Magnetic Peel
 let isPeelActive = false;
+let isFanningActive = false;
 
 document.addEventListener("keydown", (e) => {
+  // Document Fanning (Alt + C)
+  if (e.altKey && e.code === "KeyC") {
+    if (!isFanningActive) {
+      isFanningActive = true;
+      document.body.classList.add("fanning-active");
+
+      if (echoLayerEl) {
+        const echoes = echoLayerEl.querySelectorAll(
+          ".echo-document:not(.peek)",
+        );
+        const total = echoes.length;
+        if (total > 0) {
+          const maxAngle = Math.min(120, total * 15); // max spread 120deg
+          const startAngle = -maxAngle / 2;
+          const angleStep = total > 1 ? maxAngle / (total - 1) : 0;
+          const radius = 600; // Radius of the fanning arc
+
+          echoes.forEach((echo, index) => {
+            const angleDeg = startAngle + index * angleStep;
+            const angleRad = (angleDeg * Math.PI) / 180;
+            const tx = Math.sin(angleRad) * radius;
+            // Negative ty to push them slightly upwards forming an arch
+            const ty = -Math.cos(angleRad) * radius + radius * 0.8;
+
+            // Optional: push them a bit forward to pop them
+            const tz = 100 + index * 5;
+
+            echo.style.setProperty("--fan-tx", `${tx}px`);
+            echo.style.setProperty("--fan-ty", `${ty}px`);
+            echo.style.setProperty("--fan-tz", `${tz}px`);
+            echo.style.setProperty("--fan-rot-z", `${angleDeg}deg`);
+          });
+        }
+      }
+    }
+    e.preventDefault();
+    return;
+  }
+
   // Hyper-Jump
   if (e.altKey && e.shiftKey && e.key === "J") {
     if (!document.body.classList.contains("hyper-jump-active")) {
@@ -2793,6 +2856,22 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  if (e.key === "c" || e.key === "C" || e.key === "Alt") {
+    if (isFanningActive && (!e.altKey || (e.code === "KeyC" && !e.altKey))) {
+      isFanningActive = false;
+      document.body.classList.remove("fanning-active");
+      if (echoLayerEl) {
+        const echoes = echoLayerEl.querySelectorAll(".echo-document");
+        echoes.forEach((echo) => {
+          echo.style.removeProperty("--fan-tx");
+          echo.style.removeProperty("--fan-ty");
+          echo.style.removeProperty("--fan-tz");
+          echo.style.removeProperty("--fan-rot-z");
+        });
+      }
+    }
+  }
+
   if (e.key === "Shift") {
     if (echoLayerEl && window.__lensActive) {
       const echoes = echoLayerEl.querySelectorAll(".echo-document");
@@ -2814,7 +2893,7 @@ document.addEventListener("keyup", (e) => {
         typeof tabManager !== "undefined" &&
         !tabManager.isCascadeView &&
         !tabManager.isOrbitView &&
-    !tabManager.isSolarSystemView &&
+        !tabManager.isSolarSystemView &&
         !tabManager.isScatteredView &&
         !tabManager.isIsometricView &&
         !tabManager.isStackView &&
@@ -2827,8 +2906,8 @@ document.addEventListener("keyup", (e) => {
         !tabManager.isPrismView &&
         !tabManager.isCoverflowView &&
         !tabManager.isWaveView &&
-    !tabManager.isSphereView &&
-    !tabManager.isMatrixRainView
+        !tabManager.isSphereView &&
+        !tabManager.isMatrixRainView
       ) {
         const echoes = echoLayerEl.querySelectorAll(".echo-document");
         echoes.forEach((echo) => {
@@ -2887,28 +2966,30 @@ function initSemanticResonance(editor, tabManager) {
       }
 
       // 4. Check background files for the text
-      tabManager.files.forEach(file => {
+      tabManager.files.forEach((file) => {
         // Skip the currently active file
         if (file.id === tabManager.activeId) return;
 
         // Find the DOM element for this file's echo document
-        const echoNode = document.querySelector(`.echo-document[data-id="${file.id}"]`);
+        const echoNode = document.querySelector(
+          `.echo-document[data-id="${file.id}"]`,
+        );
         if (!echoNode) return;
 
         // Check if the background model contains the selected text
         const fileContent = file.model.getValue();
         if (fileContent.includes(selectedText)) {
-          echoNode.classList.add('semantic-resonance');
+          echoNode.classList.add("semantic-resonance");
         } else {
-          echoNode.classList.remove('semantic-resonance');
+          echoNode.classList.remove("semantic-resonance");
         }
       });
     }, 150); // 150ms debounce
   });
 
   function clearAllResonances() {
-    document.querySelectorAll('.semantic-resonance').forEach(node => {
-      node.classList.remove('semantic-resonance');
+    document.querySelectorAll(".semantic-resonance").forEach((node) => {
+      node.classList.remove("semantic-resonance");
     });
   }
 }
@@ -2922,13 +3003,13 @@ function initKineticTypingPulse(editor) {
     if (!echoLayerEl) return;
 
     const echoes = echoLayerEl.querySelectorAll(".echo-document");
-    echoes.forEach(echo => {
+    echoes.forEach((echo) => {
       echo.classList.add("typing-pulse");
     });
 
     clearTimeout(pulseTimeout);
     pulseTimeout = setTimeout(() => {
-      echoes.forEach(echo => {
+      echoes.forEach((echo) => {
         echo.classList.remove("typing-pulse");
       });
     }, 150);
