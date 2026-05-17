@@ -3026,4 +3026,16 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     document.body.classList.toggle("hologram-preview-active");
   }
+  // Holographic Document Dispersion (Alt+X)
+  if (e.altKey && e.code === "KeyX" && !e.shiftKey) {
+    e.preventDefault();
+    document.body.classList.add("dispersion-active");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  // Holographic Document Dispersion (Alt+X)
+  if (e.key === "x" || e.key === "X" || e.key === "Alt") {
+    document.body.classList.remove("dispersion-active");
+  }
 });

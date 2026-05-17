@@ -161,6 +161,8 @@ export class TabManager {
     this.isCyberCortexView = false;
     this.isQuantumSuperpositionView = false;
     this.isOutlineView = false;
+    this.isInfinityMirrorView = false;
+    this.isCarouselView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -194,6 +196,8 @@ export class TabManager {
       "blueprint-3d-active",
       "cyber-cortex-active",
       "outline-active",
+      "infinity-mirror-active",
+      "carousel-active",
     );
 
     this.isOrigamiView = false;
