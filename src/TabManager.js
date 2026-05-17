@@ -26,12 +26,15 @@ const DEPTH_TITLES = [
 function _extractSymbols(source) {
   const symbols = [];
   const patterns = [
-    { kind: "class",    re: /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/m },
+    { kind: "class", re: /^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/m },
     { kind: "function", re: /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/m },
-    { kind: "arrow",    re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/m },
-    { kind: "method",   re: /^[\t ]{2,}(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/m },
-    { kind: "def",      re: /^def\s+(\w+)\s*\(/m },
-    { kind: "const",    re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=/m },
+    {
+      kind: "arrow",
+      re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/m,
+    },
+    { kind: "method", re: /^[\t ]{2,}(?:async\s+)?(\w+)\s*\([^)]*\)\s*\{/m },
+    { kind: "def", re: /^def\s+(\w+)\s*\(/m },
+    { kind: "const", re: /^(?:export\s+)?(?:const|let|var)\s+(\w+)\s*=/m },
   ];
   const lines = source.split("\n");
   lines.forEach((line, idx) => {
@@ -39,7 +42,7 @@ function _extractSymbols(source) {
       const m = line.match(re);
       if (m) {
         // Avoid duplicate names at same line
-        if (!symbols.some(s => s.name === m[1] && s.line === idx + 1)) {
+        if (!symbols.some((s) => s.name === m[1] && s.line === idx + 1)) {
           symbols.push({ name: m[1], kind, line: idx + 1 });
         }
         break;
@@ -55,7 +58,14 @@ function _extractSymbols(source) {
  * @returns {string}
  */
 function _symbolKindIcon(kind) {
-  const map = { class: "◉", function: "ƒ", arrow: "→", method: "⬡", def: "δ", const: "κ" };
+  const map = {
+    class: "◉",
+    function: "ƒ",
+    arrow: "→",
+    method: "⬡",
+    def: "δ",
+    const: "κ",
+  };
   return map[kind] ?? "·";
 }
 
@@ -183,7 +193,7 @@ export class TabManager {
       "tesseract-active",
       "blueprint-3d-active",
       "cyber-cortex-active",
-      "outline-active"
+      "outline-active",
     );
 
     this.isOrigamiView = false;
@@ -215,7 +225,7 @@ export class TabManager {
       "btn-neon-synth-view",
       "btn-tesseract-view",
       "btn-blueprint-3d-view",
-      "btn-cyber-cortex-view"
+      "btn-cyber-cortex-view",
     ].forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) btn.classList.remove("active");
@@ -276,7 +286,6 @@ export class TabManager {
     }
     this._renderEchoes();
   }
-
 
   toggleTesseractView() {
     const wasActive = this.isTesseractView;
@@ -662,7 +671,7 @@ export class TabManager {
     if (!file) return;
     this.activeId = id;
 
-    const titleBar = document.getElementById('editor-title-bar');
+    const titleBar = document.getElementById("editor-title-bar");
     if (titleBar) {
       titleBar.textContent = file.name;
     }
@@ -799,11 +808,11 @@ Drag to change depth`;
       nameEl.className = "tab-name";
       nameEl.textContent = file.name;
 
-      const closeBtn = document.createElement('button');
-      closeBtn.className = 'tab-close-btn';
-      closeBtn.textContent = '×';
-      closeBtn.title = 'Close tab';
-      closeBtn.addEventListener('click', (e) => {
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "tab-close-btn";
+      closeBtn.textContent = "×";
+      closeBtn.title = "Close tab";
+      closeBtn.addEventListener("click", (e) => {
         e.stopPropagation(); // Prevent tab activation on close click
         this.removeFile(file.id);
       });
@@ -1025,7 +1034,8 @@ Drag to change depth`;
       // Focus Outline button — highlights matching content in active editor
       const focusOutlineBtn = document.createElement("button");
       focusOutlineBtn.className = "echo-focus-outline-btn";
-      focusOutlineBtn.title = "Focus Outline — highlight this file's symbols in the active editor";
+      focusOutlineBtn.title =
+        "Focus Outline — highlight this file's symbols in the active editor";
       focusOutlineBtn.textContent = "⌖";
       focusOutlineBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -1038,22 +1048,29 @@ Drag to change depth`;
           el.classList.add("outline-focus-active");
           // Apply semantic resonance — find matching symbols in active editor
           if (this.editor && !file.isImage) {
-            const symbols = _extractSymbols(file.model ? file.model.getValue() : "");
+            const symbols = _extractSymbols(
+              file.model ? file.model.getValue() : "",
+            );
             if (symbols.length > 0) {
               const activeModel = this.editor.getModel();
               if (activeModel && this.editor.revealLineInCenter) {
                 const activeContent = activeModel.getValue();
                 const firstSymbol = symbols[0].name;
                 // Use \b word boundary for cross-browser compatibility (avoids substring false positives)
-                const escaped = firstSymbol.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const escaped = firstSymbol.replace(
+                  /[.*+?^${}()|[\]\\]/g,
+                  "\\$&",
+                );
                 const wordRe = new RegExp(`\\b${escaped}\\b`);
                 const matchIdx = activeContent.search(wordRe);
                 if (matchIdx !== -1) {
                   const pos = activeModel.getPositionAt(matchIdx);
                   this.editor.revealLineInCenter(pos.lineNumber);
                   this.editor.setSelection({
-                    startLineNumber: pos.lineNumber, startColumn: pos.column,
-                    endLineNumber: pos.lineNumber, endColumn: pos.column + firstSymbol.length
+                    startLineNumber: pos.lineNumber,
+                    startColumn: pos.column,
+                    endLineNumber: pos.lineNumber,
+                    endColumn: pos.column + firstSymbol.length,
                   });
                 }
               }
@@ -1681,14 +1698,23 @@ Drag to change depth`;
         const currentAngle = index * angleStep;
 
         // We can pass these to CSS
-        el.style.setProperty('--carousel-angle', `${currentAngle}deg`);
-        el.style.setProperty('--carousel-radius', `${radius}px`);
+        el.style.setProperty("--carousel-angle", `${currentAngle}deg`);
+        el.style.setProperty("--carousel-radius", `${radius}px`);
 
         el.style.transform = `
           translate3d(-50%, -50%, 0)
           rotateY(var(--carousel-angle))
           translateZ(var(--carousel-radius))
         `;
+      } else if (this.isInfinityMirrorView) {
+        const isLeft = index % 2 === 0;
+        const tz = -(index + 1) * 300;
+        const tx = isLeft ? -400 : 400;
+        const rotY = isLeft ? 45 : -45;
+
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
       } else if (this.isCylinderView) {
         // Cylinder View: vertical carousel
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -1745,21 +1771,36 @@ Drag to change depth`;
         const face = index % 6;
         const isOuter = Math.floor(index / 6) % 2 === 0;
         const r = isOuter ? 400 : 200;
-        let tx = 0, ty = 0, tz = 0, rx = 0, ry = 0;
-        if (face===0) { tz = r; }
-        else if (face===1) { tz = -r; ry = 180; }
-        else if (face===2) { tx = r; ry = 90; }
-        else if (face===3) { tx = -r; ry = -90; }
-        else if (face===4) { ty = r; rx = -90; }
-        else if (face===5) { ty = -r; rx = 90; }
+        let tx = 0,
+          ty = 0,
+          tz = 0,
+          rx = 0,
+          ry = 0;
+        if (face === 0) {
+          tz = r;
+        } else if (face === 1) {
+          tz = -r;
+          ry = 180;
+        } else if (face === 2) {
+          tx = r;
+          ry = 90;
+        } else if (face === 3) {
+          tx = -r;
+          ry = -90;
+        } else if (face === 4) {
+          ty = r;
+          rx = -90;
+        } else if (face === 5) {
+          ty = -r;
+          rx = 90;
+        }
 
-        el.style.setProperty('--tx', `${tx}px`);
-        el.style.setProperty('--ty', `${ty}px`);
-        el.style.setProperty('--tz', `${tz}px`);
-        el.style.setProperty('--rot-x', `${rx}deg`);
-        el.style.setProperty('--rot-y', `${ry}deg`);
-        el.style.setProperty('--rot-z', '0deg');
-
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rx}deg`);
+        el.style.setProperty("--rot-y", `${ry}deg`);
+        el.style.setProperty("--rot-z", "0deg");
       } else if (this.isBlueprint3dView) {
         // Semi-circle arrangement like an architect's desk
         const totalEchoes = inactiveFiles.length;
@@ -1770,7 +1811,7 @@ Drag to change depth`;
         const ty = 50; // slightly down
         const tz = -Math.sin(angle) * r - 100;
 
-        const rotY = (angle * 180 / Math.PI) - 90; // Face user
+        const rotY = (angle * 180) / Math.PI - 90; // Face user
 
         el.style.setProperty("--tx", `${tx}px`);
         el.style.setProperty("--ty", `${ty}px`);
@@ -1778,27 +1819,24 @@ Drag to change depth`;
         el.style.setProperty("--rot-x", "0deg");
         el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", "0deg");
+      } else if (this.isQuantumSuperpositionView) {
+        // Quantum Superposition: Scatter in 3D cloud
+        const maxDist = 800;
+        const tX = (Math.random() - 0.5) * maxDist * 2;
+        const tY = (Math.random() - 0.5) * maxDist * 2;
+        const tZ = -(Math.random() * 2000 + 200); // Back into screen
 
+        const rX = (Math.random() - 0.5) * 60; // -30 to 30 deg
+        const rY = (Math.random() - 0.5) * 60;
+        const rZ = (Math.random() - 0.5) * 60;
 
-    } else if (this.isQuantumSuperpositionView) {
-      // Quantum Superposition: Scatter in 3D cloud
-      const maxDist = 800;
-      const tX = (Math.random() - 0.5) * maxDist * 2;
-      const tY = (Math.random() - 0.5) * maxDist * 2;
-      const tZ = -(Math.random() * 2000 + 200); // Back into screen
-
-      const rX = (Math.random() - 0.5) * 60; // -30 to 30 deg
-      const rY = (Math.random() - 0.5) * 60;
-      const rZ = (Math.random() - 0.5) * 60;
-
-      el.style.setProperty("--tx", `${tX}px`);
-      el.style.setProperty("--ty", `${tY}px`);
-      el.style.setProperty("--tz", `${tZ}px`);
-      el.style.setProperty("--rot-x", `${rX}deg`);
-      el.style.setProperty("--rot-y", `${rY}deg`);
-      el.style.setProperty("--rot-z", `${rZ}deg`);
-
-    } else if (this.isCyberCortexView) {
+        el.style.setProperty("--tx", `${tX}px`);
+        el.style.setProperty("--ty", `${tY}px`);
+        el.style.setProperty("--tz", `${tZ}px`);
+        el.style.setProperty("--rot-x", `${rX}deg`);
+        el.style.setProperty("--rot-y", `${rY}deg`);
+        el.style.setProperty("--rot-z", `${rZ}deg`);
+      } else if (this.isCyberCortexView) {
         // Brain-like cluster / spherical node map
         const totalEchoes = Math.max(1, inactiveFiles.length);
         const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
@@ -1820,7 +1858,6 @@ Drag to change depth`;
         el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", `${rotZ}deg`);
-
       } else if (this.isOrigamiView) {
         // Origami spatial view calculation
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -2114,19 +2151,19 @@ Drag to change depth`;
       let clickTimeout = null;
 
       // Add context menu (right click) for Holographic Side-by-Side Projection
-      el.addEventListener('contextmenu', (e) => {
+      el.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        const isProjected = el.classList.contains('holo-projected');
+        const isProjected = el.classList.contains("holo-projected");
 
         // Remove from all other echoes
-        this.echoLayerEl.querySelectorAll('.echo-document').forEach(doc => {
-          doc.classList.remove('holo-projected');
+        this.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          doc.classList.remove("holo-projected");
         });
 
         if (!isProjected) {
-          el.classList.add('holo-projected');
+          el.classList.add("holo-projected");
         }
       });
 
@@ -2456,22 +2493,33 @@ Drag to change depth`;
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isTesseractView) {
             const face = parseInt(el.dataset.index || 0) % 6;
-            const isOuter = Math.floor(parseInt(el.dataset.index || 0) / 6) % 2 === 0;
+            const isOuter =
+              Math.floor(parseInt(el.dataset.index || 0) / 6) % 2 === 0;
             const r = isOuter ? 400 : 200;
             let tz = 0;
-            if (face === 0) { tz = r; }
-            else if (face === 1) { tz = -r; }
-            else { tz = 0; }
+            if (face === 0) {
+              tz = r;
+            } else if (face === 1) {
+              tz = -r;
+            } else {
+              tz = 0;
+            }
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isBlueprint3dView) {
-            const totalEchoes = Math.max(1, document.querySelectorAll(".echo-document").length - 1);
+            const totalEchoes = Math.max(
+              1,
+              document.querySelectorAll(".echo-document").length - 1,
+            );
             const index = parseInt(el.dataset.index || 0);
             const r = 400;
             const angle = (index / Math.max(1, totalEchoes - 1)) * Math.PI; // Semi-circle
             const tz = -Math.sin(angle) * r - 100;
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isCyberCortexView) {
-            const totalEchoes = Math.max(1, document.querySelectorAll(".echo-document").length - 1);
+            const totalEchoes = Math.max(
+              1,
+              document.querySelectorAll(".echo-document").length - 1,
+            );
             const index = parseInt(el.dataset.index || 0);
             const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
             const radius = 500;
@@ -2543,24 +2591,24 @@ Drag to change depth`;
       this.echoLayerEl.appendChild(el);
     });
   }
-/**
+  /**
    * Save the current tab list to localStorage for session restoration.
    * Stores: [{fileId, name, language, vpsPath}, ...]
    */
   _saveTabsToStorage() {
     try {
-      const tabData = this.files.map(file => ({
+      const tabData = this.files.map((file) => ({
         fileId: file.id,
         name: file.name,
         language: file.language,
         vpsPath: file.vpsPath || null,
         isImage: file.isImage,
         url: file.url || null,
-        noteName: file.noteName || null   // ← Added for notes compatibility
+        noteName: file.noteName || null, // ← Added for notes compatibility
       }));
-      localStorage.setItem('rain_edit_open_tabs', JSON.stringify(tabData));
+      localStorage.setItem("rain_edit_open_tabs", JSON.stringify(tabData));
     } catch (err) {
-      console.error('Failed to save tabs to localStorage:', err);
+      console.error("Failed to save tabs to localStorage:", err);
     }
   }
 
@@ -2571,18 +2619,18 @@ Drag to change depth`;
    */
   async loadTabsFromStorage() {
     try {
-      const stored = localStorage.getItem('rain_edit_open_tabs');
+      const stored = localStorage.getItem("rain_edit_open_tabs");
       if (!stored) return;
       const tabData = JSON.parse(stored);
       if (!Array.isArray(tabData) || tabData.length === 0) return;
 
-      const { StorageAPI } = await import('./StorageAPI.js');
+      const { StorageAPI } = await import("./StorageAPI.js");
       const storageAPI = new StorageAPI();
 
       for (const tab of tabData) {
         try {
-          let content = '';
-          let language = tab.language || 'plaintext';
+          let content = "";
+          let language = tab.language || "plaintext";
 
           if (tab.isImage) {
             content = tab.url;
@@ -2591,13 +2639,13 @@ Drag to change depth`;
           } else if (tab.noteName) {
             // New: restore note content from backend
             const note = await storageAPI.loadNote(tab.noteName);
-            content = note ? note.content : '';
-            language = 'markdown';
+            content = note ? note.content : "";
+            language = "markdown";
           }
           // else: unsaved file → empty content
 
           const fileId = this.addFile(tab.name, content, language);
-          const file = this.files.find(f => f.id === fileId);
+          const file = this.files.find((f) => f.id === fileId);
 
           if (file) {
             if (tab.vpsPath) file.vpsPath = tab.vpsPath;
@@ -2612,7 +2660,7 @@ Drag to change depth`;
         this.setActive(this.files[0].id);
       }
     } catch (err) {
-      console.error('Failed to load tabs from localStorage:', err);
+      console.error("Failed to load tabs from localStorage:", err);
     }
   }
 
@@ -2621,7 +2669,7 @@ Drag to change depth`;
    * @param {number} id
    */
   removeFile(id) {
-    const index = this.files.findIndex(f => f.id === id);
+    const index = this.files.findIndex((f) => f.id === id);
     if (index === -1) return;
 
     const file = this.files[index];
@@ -2637,8 +2685,8 @@ Drag to change depth`;
         this.setActive(this.files[newActiveIndex].id);
       } else {
         this.activeId = null;
-        this.editorEl.style.display = 'none';
-        if (this.imageViewerEl) this.imageViewerEl.style.display = 'none';
+        this.editorEl.style.display = "none";
+        if (this.imageViewerEl) this.imageViewerEl.style.display = "none";
       }
     }
 
