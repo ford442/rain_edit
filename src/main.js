@@ -1446,6 +1446,7 @@ if (viewModeSelect) {
     else if (view === "cyber-cortex") tabManager.toggleCyberCortexView();
     else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
     else if (view === "outline") tabManager.toggleOutlineView();
+    else if (view === "cyclone") tabManager.toggleCycloneView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }
@@ -3031,11 +3032,31 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     document.body.classList.add("dispersion-active");
   }
+
+  // Holographic Curtain Pull (Alt+P)
+  if (e.altKey && e.code === "KeyP" && !e.shiftKey) {
+    e.preventDefault();
+    document.body.classList.add("curtain-pull-active");
+  }
 });
 
 document.addEventListener("keyup", (e) => {
   // Holographic Document Dispersion (Alt+X)
   if (e.key === "x" || e.key === "X" || e.key === "Alt") {
     document.body.classList.remove("dispersion-active");
+  }
+
+  // Holographic Curtain Pull (Alt+P)
+  if (e.key === "p" || e.key === "P" || e.key === "Alt") {
+    document.body.classList.remove("curtain-pull-active");
+  }
+});
+
+// Calculate normalized mouse X for Curtain Pull
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("curtain-pull-active")) {
+    // Normalize mouse X from -1 to 1 based on screen width
+    const normX = (e.clientX / window.innerWidth) * 2 - 1;
+    document.body.style.setProperty("--mouse-x-norm", normX.toFixed(3));
   }
 });

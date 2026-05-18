@@ -9,6 +9,7 @@ This document contains project-specific context for AI coding agents. If you are
 **rain-2** is a single-page frontend application that combines a Monaco code editor with immersive WebGL rain effects, holographic UI overlays, and a 3D file cabinet browser. It is a vanilla-JavaScript ES-module project built with Vite. The visual metaphor is "code editing inside a storm": documents exist at different z-depths (behind rain, between rain layers, or in front), and inactive files are rendered as blurred "echo" documents in the background.
 
 Key product features:
+
 - Monaco editor with transparent cyberpunk theme.
 - Dual WebGL rain layers (front and back) driven by a dynamic water-map simulation.
 - Reference layer: floating markdown note cards with lantern, spotlight, frost, and rain-shield effects.
@@ -25,16 +26,16 @@ Key product features:
 
 ## Tech Stack
 
-| Layer | Choice |
-|-------|--------|
-| Build tool | Vite 5 |
-| Language | Vanilla ES modules (JavaScript), no TypeScript |
-| Editor | `monaco-editor` v0.43.0 (workers imported explicitly in `main.js`) |
-| 3D graphics | `three` v0.183.2 (used only in `Cabinet3D.js`) |
-| Shaders | Custom WebGL in `RainLayer.js`; GLSL source files compiled via a custom `glslify` Vite plugin |
-| Styling | Single large `src/styles.css` (~5,620 lines), heavy use of CSS variables |
-| Backend client | `StorageAPI.js` talks to a FastAPI backend at `https://storage.noahcohn.com` |
-| Dev server | Vite (port 5173); configured to allow FS access to parent directory (`'..'`) |
+| Layer          | Choice                                                                                        |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| Build tool     | Vite 5                                                                                        |
+| Language       | Vanilla ES modules (JavaScript), no TypeScript                                                |
+| Editor         | `monaco-editor` v0.43.0 (workers imported explicitly in `main.js`)                            |
+| 3D graphics    | `three` v0.183.2 (used only in `Cabinet3D.js`)                                                |
+| Shaders        | Custom WebGL in `RainLayer.js`; GLSL source files compiled via a custom `glslify` Vite plugin |
+| Styling        | Single large `src/styles.css` (~5,620 lines), heavy use of CSS variables                      |
+| Backend client | `StorageAPI.js` talks to a FastAPI backend at `https://storage.noahcohn.com`                  |
+| Dev server     | Vite (port 5173); configured to allow FS access to parent directory (`'..'`)                  |
 
 ---
 
@@ -75,6 +76,7 @@ root/
 ```
 
 ### Module relationships
+
 - `main.js` is the orchestrator. It imports all other managers and wires them together. It also hosts the main animation loop, mouse/keyboard interaction handlers (parallax, flashlight, wormhole, magnifier, peel, proximity wake), and the matrix rain / dust particle systems.
 - `TabManager` owns the list of open files, switches active models in Monaco, manages per-file depth (0/1/2), and renders background echoes in `#echo-layer`. It implements 25+ CSS-driven 3D view modes.
 - `ReferenceManager` owns `#reference-layer` and `#reference-overlay`. It parses markdown into floating cards and handles lantern/spotlight/frost interactions, drag-and-drop, and rain-shield clearing.
@@ -133,11 +135,13 @@ There is **no test framework** and **no tests** in this project. `.github/copilo
 ## Deployment
 
 There is **no deployment script** in the repository. The only automation helper is `git.sh`, which runs:
+
 ```bash
 git add .
 git commit -m 'codespace'
 git push
 ```
+
 Production builds are emitted to `dist/` via `npm run build`. Deployment to the remote server is handled outside this repo (previously referenced as `deploy.py`, which no longer exists).
 
 ---
@@ -153,35 +157,46 @@ Production builds are emitted to `dist/` via `npm run build`. Deployment to the 
 ## Key Integration Points
 
 ### Adding a new file tab
+
 ```js
-const id = tabManager.addFile('name.js', '// code', 'javascript');
+const id = tabManager.addFile("name.js", "// code", "javascript");
 tabManager.setActive(id);
 ```
 
 ### Fetching remote content
+
 ```js
-import { StorageAPI } from './src/StorageAPI.js';
+import { StorageAPI } from "./src/StorageAPI.js";
 const api = new StorageAPI(); // uses default base URL
 const { content, language } = await api.getFileContent(id, type);
 ```
 
 ### Dispatching a file-open from the 3D cabinet
+
 `Cabinet3D` fires:
+
 ```js
-window.dispatchEvent(new CustomEvent('fileCubeClicked', {
-  detail: { id, type: 'shaders', name: 'foo.wgsl', fileData, catIndex }
-}));
+window.dispatchEvent(
+  new CustomEvent("fileCubeClicked", {
+    detail: { id, type: "shaders", name: "foo.wgsl", fileData, catIndex },
+  }),
+);
 ```
+
 `main.js` listens and handles depth focus logic.
 
 ### Shader imports
+
 ```js
-import fragSrc from './shaders/my.frag?glslify';
+import fragSrc from "./shaders/my.frag?glslify";
 ```
+
 The custom glslify plugin will compile the shader at build time and export it as a string.
 
 ### Depth system
+
 Files/tabs exist at three depth levels:
+
 - **0 (Deep)** — behind all rain layers (`z-index: 0`)
 - **1 (Middle)** — between rain layers (`z-index: 5`)
 - **2 (Front)** — above all rain (`z-index: 15`)

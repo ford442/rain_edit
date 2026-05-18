@@ -53,7 +53,7 @@ export class ConnectionManager {
 
         // Depth from tz CSS variable
         const tzVal = parseFloat(echo.style.getPropertyValue("--tz")) || 0;
-        const depthNorm = Math.max(0, Math.min(1, (-tzVal) / 1000)); // 0 = front, 1 = deep back
+        const depthNorm = Math.max(0, Math.min(1, -tzVal / 1000)); // 0 = front, 1 = deep back
 
         // Deep = dimmer, smaller, cooler (bluer)
         // Shallow = brighter, larger, warmer (cyan/white)
