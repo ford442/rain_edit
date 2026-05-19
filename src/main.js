@@ -2734,6 +2734,26 @@ document.addEventListener("mousemove", () => {
 // Initial scan
 scanPortals();
 
+// X-Ray Mode (Alt + Shift + X)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.shiftKey && e.code === "KeyX" && !e.ctrlKey && !e.metaKey) {
+    document.body.classList.add("x-ray-active");
+  }
+});
+
+// Singularity / Black Hole Collapse (Alt + Shift + Backspace)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.shiftKey && e.key === "Backspace") {
+    e.preventDefault();
+    document.body.classList.toggle("singularity-active");
+  }
+});
+document.addEventListener("keyup", (e) => {
+  if (e.key.toLowerCase() === "x" || e.key === "Shift" || e.key === "Alt") {
+    document.body.classList.remove("x-ray-active");
+  }
+});
+
 // Ctrl+Shift+S — Save current document to VPS
 document.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "S") {
