@@ -126,6 +126,7 @@ export class TabManager {
     this.isCyberCortexView = false;
     this.isQuantumSuperpositionView = false;
     this.isOutlineView = false;
+    this.isCycloneView = false;
   }
 
   _deactivateAllViews() {
@@ -163,6 +164,7 @@ export class TabManager {
     this.isOutlineView = false;
     this.isInfinityMirrorView = false;
     this.isCarouselView = false;
+    this.isCycloneView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -198,6 +200,7 @@ export class TabManager {
       "outline-active",
       "infinity-mirror-active",
       "carousel-active",
+      "cyclone-active",
     );
 
     this.isOrigamiView = false;
@@ -287,6 +290,16 @@ export class TabManager {
     if (!wasActive) {
       this.isOutlineView = true;
       document.body.classList.add("outline-active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleCycloneView() {
+    const wasActive = this.isCycloneView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCycloneView = true;
+      document.body.classList.add("cyclone-active");
     }
     this._renderEchoes();
   }
@@ -1948,6 +1961,31 @@ Drag to change depth`;
         el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", "0deg");
         el.style.setProperty("--rot-z", "0deg");
+      } else if (this.isCycloneView) {
+        // Cyclone View: Funnel-like spiral with decreasing radius based on depth index
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const angleStep = 45; // Degrees per document
+
+        const angleDeg = index * angleStep;
+        const angleRad = (angleDeg * Math.PI) / 180;
+
+        // Base radius is wide at top (index 0), narrow at bottom
+        const radius = 600 - (index * (400 / totalEchoes));
+
+        const tx = Math.sin(angleRad) * radius;
+        const tz = Math.cos(angleRad) * radius - 400; // Push back slightly
+        const ty = index * 80 - (totalEchoes * 40); // Spiral vertically
+
+        // Tilt elements slightly upwards to face the viewer from the funnel
+        const rotX = 15;
+        const rotY = angleDeg; // Face inward
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `0deg`);
       } else if (this.isGalaxyView) {
         // Galaxy Spiral View: Logarithmic spiral arrangement on X-Z plane
         const totalEchoes = Math.max(1, inactiveFiles.length);
@@ -2454,6 +2492,15 @@ Drag to change depth`;
             const totalEchoes = Math.max(1, inactiveFiles.length);
             const index = parseInt(el.dataset.index || 0);
             const tz = Math.abs(index - totalEchoes / 2) * -150 - 200;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isCycloneView) {
+            const inactiveFiles = this.files.filter((f) => f.id !== this.activeId);
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const index = parseInt(el.dataset.index || 0);
+            const angleDeg = index * 45;
+            const angleRad = (angleDeg * Math.PI) / 180;
+            const radius = 600 - (index * (400 / totalEchoes));
+            const tz = Math.cos(angleRad) * radius - 400;
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isGalaxyView) {
             const inactiveFiles = this.files.filter(

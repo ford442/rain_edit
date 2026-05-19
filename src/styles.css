@@ -1823,20 +1823,19 @@ body.theme-blueprint #rain-front {
 
   /* Sleeker Glassmorphism pill style */
   background: linear-gradient(
-    145deg,
-    rgba(25, 30, 45, 0.85),
-    rgba(10, 15, 25, 0.75)
+    135deg,
+    rgba(20, 25, 35, 0.65),
+    rgba(10, 12, 18, 0.8)
   );
-  backdrop-filter: blur(140px) saturate(500%);
-  -webkit-backdrop-filter: blur(140px) saturate(500%);
-  border: 1px solid rgba(0, 229, 255, 0.6);
-  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
-  border-radius: 36px;
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(0, 255, 255, 0.5);
   box-shadow:
-    0 45px 90px rgba(0, 0, 0, 1),
-    inset 0 2px 4px rgba(255, 255, 255, 0.5),
-    inset 0 0 100px rgba(0, 229, 255, 0.3),
-    0 0 70px rgba(0, 229, 255, 0.6);
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 0 25px rgba(0, 229, 255, 0.3),
+    inset 0 0 20px rgba(0, 229, 255, 0.15),
+    inset 0 2px 2px rgba(255, 255, 255, 0.1);
+  border-radius: 36px;
   user-select: none;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -6172,22 +6171,23 @@ body.solar-system-active #echo-layer::before {
 /* --- Glassmorphic UI Enhancements --- */
 #tabs-container,
 #dock {
-  /* Stronger blur and translucent background */
+  /* Refined, premium gradient background */
   background: linear-gradient(
     135deg,
-    rgba(15, 15, 25, 0.5),
-    rgba(10, 10, 15, 0.3)
+    rgba(20, 25, 35, 0.65),
+    rgba(10, 12, 18, 0.8)
   );
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
 
-  /* Neon border styling */
-  border: 1px solid rgba(0, 229, 255, 0.4);
+  /* Enhanced Neon border styling */
+  border: 1px solid rgba(0, 255, 255, 0.5);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 15px rgba(0, 229, 255, 0.2),
-    inset 0 0 20px rgba(0, 229, 255, 0.1);
-  border-radius: 12px;
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 0 25px rgba(0, 229, 255, 0.3),
+    inset 0 0 20px rgba(0, 229, 255, 0.15),
+    inset 0 2px 2px rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   position: relative;
   overflow: hidden;
 }
@@ -7050,5 +7050,88 @@ body.veil-excavator-active #echo-layer .echo-document {
   }
   100% {
     filter: brightness(1) saturate(1);
+  }
+}
+
+/* =========================================================
+   HOLOGRAPHIC CURTAIN PULL (Alt + P)
+   ========================================================= */
+body.curtain-pull-active #echo-layer .echo-document {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, filter 0.4s ease;
+  /* Push even indices to the left (-1), odd to the right (+1), multiplied by mouse-x-norm */
+  --pull-dir: calc( (var(--index, 0) % 2) * 2 - 1 );
+  /* We use the base depth to scale the push so that front layers move more */
+  --pull-magnitude: calc(800px - (var(--index, 0) * 100px));
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + (var(--pull-dir) * var(--pull-magnitude) * var(--mouse-x-norm, 0))),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + (var(--index, 0) * 50px)) /* slightly pull forward to see them peeling */
+    )
+    rotateY(calc(var(--pull-dir) * 45deg * var(--mouse-x-norm, 0)))
+    scale(1.05) !important;
+  opacity: 0.9 !important;
+  filter: blur(1px) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5)) !important;
+  z-index: 900 !important;
+}
+
+/* =========================================================
+   CYCLONE VIEW (Tornado Spiral)
+   ========================================================= */
+body.cyclone-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+}
+
+body.cyclone-active .echo-document {
+  transition:
+    transform 1s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 1s ease,
+    filter 1s ease;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  /* Base animation to continuously spin the entire funnel isn't trivial here since each document has its own rotateY based on index.
+     Instead, we can use a parent layer spin, or just let it be static and let the user scroll.
+     We will make the documents glow and have a wind-like distortion. */
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(0, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+body.cyclone-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) !important;
+  border-color: rgba(0, 255, 255, 0.8);
+  box-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.9),
+    0 0 50px rgba(0, 255, 255, 0.6);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg)
+    scale(1.1) !important;
+  z-index: 1000 !important;
+}
+
+/* Let's spin the echo-layer to simulate the cyclone */
+body.cyclone-active #echo-layer {
+  animation: cyclone-spin 60s linear infinite;
+  transform-origin: center center -400px;
+}
+
+@keyframes cyclone-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
   }
 }

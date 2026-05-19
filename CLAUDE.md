@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Quick Start
 
 **Install & run dev server:**
+
 ```bash
 npm install
 npm run dev
@@ -12,12 +13,14 @@ npm run dev
 ```
 
 **Build for production:**
+
 ```bash
 npm run build
 # Output in dist/
 ```
 
 **Preview production build locally:**
+
 ```bash
 npm run preview
 ```
@@ -30,11 +33,11 @@ npm run preview
 
 ## Key Dev Commands
 
-| Command | Purpose |
-|---------|---------|
-| `npm run dev` | Start Vite dev server with hot reload (port 5173) |
-| `npm run build` | Production build to `dist/` with code splitting |
-| `npm run preview` | Serve the built `dist/` locally to test production build |
+| Command            | Purpose                                                     |
+| ------------------ | ----------------------------------------------------------- |
+| `npm run dev`      | Start Vite dev server with hot reload (port 5173)           |
+| `npm run build`    | Production build to `dist/` with code splitting             |
+| `npm run preview`  | Serve the built `dist/` locally to test production build    |
 | `python deploy.py` | SFTP upload `dist/` to remote server (requires built dist/) |
 
 ## Architecture Highlights
@@ -49,7 +52,7 @@ npm run preview
 Shaders are in `src/shaders/` (GLSL). Import them with a `?glslify` suffix:
 
 ```js
-import fragSrc from './shaders/water.frag?glslify';
+import fragSrc from "./shaders/water.frag?glslify";
 ```
 
 The custom Vite plugin in `vite.config.js` processes them with the `glslify` library (macro system, imports, etc.). Changes to shader files trigger hot reload.
@@ -57,29 +60,37 @@ The custom Vite plugin in `vite.config.js` processes them with the `glslify` lib
 ## Adding Features
 
 ### Adding a new manager
+
 Create a new class in `src/ManagerName.js`. Wire it in `main.js`:
+
 ```js
 import { ManagerName } from './src/ManagerName.js';
 const manager = new ManagerName(domElement, ...);
 ```
 
 ### Adding a new DOM element
+
 Use `document.createElement()` and explicit class/style setting. No templates:
+
 ```js
-const el = document.createElement('div');
-el.className = 'my-element';
-el.style.color = '#fff';
+const el = document.createElement("div");
+el.className = "my-element";
+el.style.color = "#fff";
 parent.appendChild(el);
 ```
 
 ### Communicating between modules
+
 Prefer custom events over direct imports to avoid circular dependencies:
+
 ```js
 // Dispatch
-window.dispatchEvent(new CustomEvent('myEvent', { detail: { data } }));
+window.dispatchEvent(new CustomEvent("myEvent", { detail: { data } }));
 
 // Listen
-window.addEventListener('myEvent', (e) => { console.log(e.detail); });
+window.addEventListener("myEvent", (e) => {
+  console.log(e.detail);
+});
 ```
 
 ## Monaco Editor
