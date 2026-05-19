@@ -1970,11 +1970,11 @@ Drag to change depth`;
         const angleRad = (angleDeg * Math.PI) / 180;
 
         // Base radius is wide at top (index 0), narrow at bottom
-        const radius = 600 - (index * (400 / totalEchoes));
+        const radius = 600 - index * (400 / totalEchoes);
 
         const tx = Math.sin(angleRad) * radius;
         const tz = Math.cos(angleRad) * radius - 400; // Push back slightly
-        const ty = index * 80 - (totalEchoes * 40); // Spiral vertically
+        const ty = index * 80 - totalEchoes * 40; // Spiral vertically
 
         // Tilt elements slightly upwards to face the viewer from the funnel
         const rotX = 15;
@@ -2494,12 +2494,14 @@ Drag to change depth`;
             const tz = Math.abs(index - totalEchoes / 2) * -150 - 200;
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isCycloneView) {
-            const inactiveFiles = this.files.filter((f) => f.id !== this.activeId);
+            const inactiveFiles = this.files.filter(
+              (f) => f.id !== this.activeId,
+            );
             const totalEchoes = Math.max(1, inactiveFiles.length);
             const index = parseInt(el.dataset.index || 0);
             const angleDeg = index * 45;
             const angleRad = (angleDeg * Math.PI) / 180;
-            const radius = 600 - (index * (400 / totalEchoes));
+            const radius = 600 - index * (400 / totalEchoes);
             const tz = Math.cos(angleRad) * radius - 400;
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isGalaxyView) {

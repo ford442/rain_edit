@@ -6232,9 +6232,14 @@ body.solar-system-active #echo-layer::before {
   background: linear-gradient(
     90deg,
     rgba(0, 229, 255, 0.15) 0%,
+    rgba(10, 15, 25, 0.6) 50%,
     transparent 100%
   );
-  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   color: #00e5ff;
   font-size: 12px;
   display: flex;
@@ -7057,18 +7062,24 @@ body.veil-excavator-active #echo-layer .echo-document {
    HOLOGRAPHIC CURTAIN PULL (Alt + P)
    ========================================================= */
 body.curtain-pull-active #echo-layer .echo-document {
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, filter 0.4s ease;
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.4s ease,
+    filter 0.4s ease;
   /* Push even indices to the left (-1), odd to the right (+1), multiplied by mouse-x-norm */
-  --pull-dir: calc( (var(--index, 0) % 2) * 2 - 1 );
+  --pull-dir: calc((var(--index, 0) % 2) * 2 - 1);
   /* We use the base depth to scale the push so that front layers move more */
   --pull-magnitude: calc(800px - (var(--index, 0) * 100px));
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + (var(--pull-dir) * var(--pull-magnitude) * var(--mouse-x-norm, 0))),
+      calc(
+        var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) +
+          (var(--pull-dir) * var(--pull-magnitude) * var(--mouse-x-norm, 0))
+      ),
       calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
-      calc(var(--tz, 0px) + (var(--index, 0) * 50px)) /* slightly pull forward to see them peeling */
+      calc(var(--tz, 0px) + (var(--index, 0) * 50px))
+        /* slightly pull forward to see them peeling */
     )
-    rotateY(calc(var(--pull-dir) * 45deg * var(--mouse-x-norm, 0)))
-    scale(1.05) !important;
+    rotateY(calc(var(--pull-dir) * 45deg * var(--mouse-x-norm, 0))) scale(1.05) !important;
   opacity: 0.9 !important;
   filter: blur(1px) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5)) !important;
   z-index: 900 !important;
@@ -7116,8 +7127,7 @@ body.cyclone-active .echo-document:hover {
       calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
       calc(var(--tz, 0px) + 200px)
     )
-    rotateX(0deg) rotateY(0deg) rotateZ(0deg)
-    scale(1.1) !important;
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
   z-index: 1000 !important;
 }
 
@@ -7133,5 +7143,50 @@ body.cyclone-active #echo-layer {
   }
   to {
     transform: rotateY(360deg);
+  }
+}
+
+/* =========================================================
+   X-RAY MODE (Shift + X)
+   ========================================================= */
+body.x-ray-active #editor {
+  opacity: 0.1 !important;
+  backdrop-filter: none !important;
+  transition: opacity 0.2s ease;
+}
+
+body.x-ray-active .echo-document {
+  filter: none !important;
+  opacity: 1 !important;
+  z-index: 1000 !important;
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease,
+    z-index 0s;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+}
+
+/* =========================================================
+   BLACK HOLE COLLAPSE / SINGULARITY (Alt + Backspace)
+   ========================================================= */
+body.singularity-active .echo-document {
+  animation: singularity-collapse 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards !important;
+  pointer-events: none !important;
+}
+
+@keyframes singularity-collapse {
+  0% {
+    filter: blur(0px);
+    opacity: 1;
+  }
+  50% {
+    filter: blur(10px) brightness(2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), -2000px) rotateZ(720deg)
+      scale(0) !important;
+    filter: blur(20px) brightness(0);
+    opacity: 0;
   }
 }
