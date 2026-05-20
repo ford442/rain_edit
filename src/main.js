@@ -604,6 +604,10 @@ async function initLayers() {
       if (typeof connectionManager.drawRadar === "function") {
         connectionManager.drawRadar(time);
       }
+
+      if (document.body.classList.contains("constellation-active") && typeof connectionManager.drawConstellationLines === "function") {
+        connectionManager.drawConstellationLines(time);
+      }
     }
 
     if (referenceManager) {
@@ -3078,5 +3082,40 @@ document.addEventListener("mousemove", (e) => {
     // Normalize mouse X from -1 to 1 based on screen width
     const normX = (e.clientX / window.innerWidth) * 2 - 1;
     document.body.style.setProperty("--mouse-x-norm", normX.toFixed(3));
+  }
+});
+
+
+// --- Quantum Depth Filtering (Shift + Hover Z-Plane Isolation) ---
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Shift" && !document.body.classList.contains("x-ray-active")) {
+    document.body.classList.add("quantum-depth-active");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "Shift") {
+    document.body.classList.remove("quantum-depth-active");
+    document.body.removeAttribute("data-active-depth");
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("quantum-depth-active")) {
+    const echoLayer = document.getElementById("echo-layer");
+    if (!echoLayer) return;
+
+    // Find echo document under cursor
+    let target = document.elementFromPoint(e.clientX, e.clientY);
+    let echoDoc = target ? target.closest(".echo-document") : null;
+
+    if (echoDoc) {
+      const depthIndex = echoDoc.getAttribute("data-index");
+      if (depthIndex) {
+        document.body.setAttribute("data-active-depth", depthIndex);
+      }
+    } else {
+      document.body.removeAttribute("data-active-depth");
+    }
   }
 });
