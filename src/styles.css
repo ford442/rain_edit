@@ -7190,3 +7190,45 @@ body.singularity-active .echo-document {
     opacity: 0;
   }
 }
+
+
+/* =========================================================
+   QUANTUM DEPTH FILTERING (Shift + Hover Z-Plane Isolation)
+   ========================================================= */
+body[data-active-depth] .echo-document {
+  /* Dim and blur documents not in the active Z-plane */
+  filter: blur(15px) saturate(20%) brightness(40%) !important;
+  opacity: 0.3 !important;
+  transition: filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body[data-active-depth="0"] .echo-document[data-index="0"],
+body[data-active-depth="1"] .echo-document[data-index="1"],
+body[data-active-depth="2"] .echo-document[data-index="2"],
+body[data-active-depth="3"] .echo-document[data-index="3"],
+body[data-active-depth="4"] .echo-document[data-index="4"],
+body[data-active-depth="5"] .echo-document[data-index="5"],
+body[data-active-depth="6"] .echo-document[data-index="6"],
+body[data-active-depth="7"] .echo-document[data-index="7"],
+body[data-active-depth="8"] .echo-document[data-index="8"],
+body[data-active-depth="9"] .echo-document[data-index="9"],
+body[data-active-depth="10"] .echo-document[data-index="10"] {
+  /* Sharpen, brighten, and slightly lift the active Z-plane */
+  filter: blur(0px) saturate(120%) brightness(110%) drop-shadow(0 0 30px rgba(0, 229, 255, 0.8)) !important;
+  opacity: 1 !important;
+  border-color: rgba(0, 229, 255, 0.9);
+  z-index: 1000; /* Bring the whole plane to front visually if possible, though preserve-3d handles z */
+}
+
+/* Also bring the active plane forward slightly in 3D space */
+body[data-active-depth="0"] .echo-document[data-index="0"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="1"] .echo-document[data-index="1"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="2"] .echo-document[data-index="2"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="3"] .echo-document[data-index="3"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="4"] .echo-document[data-index="4"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="5"] .echo-document[data-index="5"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="6"] .echo-document[data-index="6"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="7"] .echo-document[data-index="7"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="8"] .echo-document[data-index="8"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="9"] .echo-document[data-index="9"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="10"] .echo-document[data-index="10"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
