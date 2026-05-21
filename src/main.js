@@ -605,7 +605,10 @@ async function initLayers() {
         connectionManager.drawRadar(time);
       }
 
-      if (document.body.classList.contains("constellation-active") && typeof connectionManager.drawConstellationLines === "function") {
+      if (
+        document.body.classList.contains("constellation-active") &&
+        typeof connectionManager.drawConstellationLines === "function"
+      ) {
         connectionManager.drawConstellationLines(time);
       }
     }
@@ -1451,6 +1454,7 @@ if (viewModeSelect) {
     else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
     else if (view === "outline") tabManager.toggleOutlineView();
     else if (view === "cyclone") tabManager.toggleCycloneView();
+    else if (view === "mobius") tabManager.toggleMobiusView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }
@@ -2819,7 +2823,68 @@ initKineticTypingPulse(editor);
 let isPeelActive = false;
 let isFanningActive = false;
 
+let isExplodeViewActive = false;
+
+function triggerExplodeView() {
+  const echoLayerEl = document.getElementById("echo-layer");
+  if (!echoLayerEl) return;
+
+  isExplodeViewActive = !isExplodeViewActive;
+
+  if (isExplodeViewActive) {
+    document.body.classList.add("explode-view-active");
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    const total = echoes.length;
+
+    echoes.forEach((echo, index) => {
+      // Calculate spherical coordinates for explosion
+      const phi = Math.acos(1 - (2 * (index + 0.5)) / total);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+
+      const radius = 800 + Math.random() * 400; // Explode outwards
+
+      const tx = radius * Math.sin(phi) * Math.cos(theta);
+      const ty = radius * Math.sin(phi) * Math.sin(theta);
+      const tz = radius * Math.cos(phi) - 200;
+
+      const rotX = (Math.random() - 0.5) * 180;
+      const rotY = (Math.random() - 0.5) * 180;
+      const rotZ = (Math.random() - 0.5) * 180;
+
+      echo.style.setProperty("--exp-tx", `${tx}px`);
+      echo.style.setProperty("--exp-ty", `${ty}px`);
+      echo.style.setProperty("--exp-tz", `${tz}px`);
+      echo.style.setProperty("--exp-rot-x", `${rotX}deg`);
+      echo.style.setProperty("--exp-rot-y", `${rotY}deg`);
+      echo.style.setProperty("--exp-rot-z", `${rotZ}deg`);
+    });
+  } else {
+    document.body.classList.remove("explode-view-active");
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach((echo) => {
+      echo.style.removeProperty("--exp-tx");
+      echo.style.removeProperty("--exp-ty");
+      echo.style.removeProperty("--exp-tz");
+      echo.style.removeProperty("--exp-rot-x");
+      echo.style.removeProperty("--exp-rot-y");
+      echo.style.removeProperty("--exp-rot-z");
+    });
+  }
+}
+
+const btnExplode = document.getElementById("btn-explode-view");
+if (btnExplode) {
+  btnExplode.addEventListener("click", triggerExplodeView);
+}
+
 document.addEventListener("keydown", (e) => {
+  // Explode View (Ctrl + Alt + E)
+  if ((e.ctrlKey || e.metaKey) && e.altKey && e.code === "KeyE") {
+    e.preventDefault();
+    triggerExplodeView();
+    return;
+  }
+
   // Document Fanning (Alt + C)
   if (e.altKey && e.code === "KeyC") {
     if (!isFanningActive) {
@@ -3084,7 +3149,6 @@ document.addEventListener("mousemove", (e) => {
     document.body.style.setProperty("--mouse-x-norm", normX.toFixed(3));
   }
 });
-
 
 // --- Quantum Depth Filtering (Shift + Hover Z-Plane Isolation) ---
 document.addEventListener("keydown", (e) => {

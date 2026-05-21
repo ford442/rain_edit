@@ -1824,17 +1824,17 @@ body.theme-blueprint #rain-front {
   /* Sleeker Glassmorphism pill style */
   background: linear-gradient(
     135deg,
-    rgba(20, 25, 35, 0.65),
-    rgba(10, 12, 18, 0.8)
+    rgba(10, 17, 40, 0.75),
+    rgba(2, 4, 10, 0.9)
   );
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(0, 255, 255, 0.5);
+  border: 1px solid rgba(0, 255, 255, 0.4);
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.6),
-    0 0 25px rgba(0, 229, 255, 0.3),
-    inset 0 0 20px rgba(0, 229, 255, 0.15),
-    inset 0 2px 2px rgba(255, 255, 255, 0.1);
+    0 24px 64px rgba(0, 0, 0, 0.8),
+    0 0 35px rgba(0, 229, 255, 0.2),
+    inset 0 0 25px rgba(0, 229, 255, 0.1),
+    inset 0 2px 2px rgba(255, 255, 255, 0.05);
   border-radius: 36px;
   user-select: none;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1939,17 +1939,18 @@ body.theme-blueprint #rain-front {
 }
 
 .tab-item.active {
-  background: rgba(40, 45, 55, 0.85);
-  border-color: rgba(255, 255, 255, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(30, 35, 45, 0.85);
+  border-color: rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.5);
   color: #ffffff;
   box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.9),
-    inset 0 1px 3px rgba(255, 255, 255, 0.3);
-  transform: translateY(-3px) scale(1.06);
+    0 20px 50px rgba(0, 0, 0, 0.95),
+    inset 0 1px 5px rgba(255, 255, 255, 0.4),
+    0 0 20px rgba(0, 229, 255, 0.4);
+  transform: translateY(-4px) scale(1.08);
   text-shadow:
     0 0 15px #fff,
-    0 0 30px rgba(0, 229, 255, 1);
+    0 0 40px rgba(0, 229, 255, 1);
   position: relative;
   overflow: hidden;
   animation: text-pulse 2s infinite alternate;
@@ -6228,26 +6229,28 @@ body.solar-system-active #echo-layer::before {
   top: 0;
   left: 0;
   right: 0;
-  height: 25px;
+  height: 30px;
   background: linear-gradient(
     90deg,
-    rgba(0, 229, 255, 0.15) 0%,
-    rgba(10, 15, 25, 0.6) 50%,
+    rgba(0, 229, 255, 0.2) 0%,
+    rgba(10, 17, 40, 0.8) 50%,
     transparent 100%
   );
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.5);
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 8px 24px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   color: #00e5ff;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: bold;
   display: flex;
   align-items: center;
-  padding-left: 15px;
-  font-family: monospace;
+  padding-left: 20px;
+  font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
   z-index: 10; /* above editor content but below modals */
 }
 
@@ -7086,6 +7089,51 @@ body.curtain-pull-active #echo-layer .echo-document {
 }
 
 /* =========================================================
+   HOLOGRAPHIC EXPLODE VIEW (Ctrl + Alt + E)
+   ========================================================= */
+body.explode-view-active #editor,
+body.explode-view-active #image-viewer {
+  opacity: 0.1 !important;
+  filter: blur(15px) !important;
+  transform: scale(0.5) translateZ(-500px) !important;
+  transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.explode-view-active .echo-document {
+  opacity: 0.9 !important;
+  filter: blur(0px) drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) !important;
+  transform: translate3d(
+      calc(var(--exp-tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--exp-ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--exp-tz, 0px)
+    )
+    rotateX(var(--exp-rot-x, 0deg)) rotateY(var(--exp-rot-y, 0deg))
+    rotateZ(var(--exp-rot-z, 0deg)) !important;
+  transition: all 1s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  z-index: 500 !important;
+  box-shadow:
+    0 0 50px rgba(0, 229, 255, 0.6),
+    inset 0 0 25px rgba(0, 229, 255, 0.3) !important;
+  border-color: rgba(0, 229, 255, 0.8) !important;
+}
+
+body.explode-view-active .echo-document:hover {
+  transform: translate3d(
+      calc(var(--exp-tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--exp-ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--exp-tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
+  z-index: 1000 !important;
+  box-shadow:
+    0 0 80px rgba(0, 229, 255, 1),
+    inset 0 0 40px rgba(0, 229, 255, 0.6) !important;
+  border-color: rgba(0, 229, 255, 1) !important;
+}
+
+
+/* =========================================================
    CYCLONE VIEW (Tornado Spiral)
    ========================================================= */
 body.cyclone-active #echo-layer {
@@ -7191,7 +7239,6 @@ body.singularity-active .echo-document {
   }
 }
 
-
 /* =========================================================
    QUANTUM DEPTH FILTERING (Shift + Hover Z-Plane Isolation)
    ========================================================= */
@@ -7199,7 +7246,10 @@ body[data-active-depth] .echo-document {
   /* Dim and blur documents not in the active Z-plane */
   filter: blur(15px) saturate(20%) brightness(40%) !important;
   opacity: 0.3 !important;
-  transition: filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 body[data-active-depth="0"] .echo-document[data-index="0"],
@@ -7214,21 +7264,55 @@ body[data-active-depth="8"] .echo-document[data-index="8"],
 body[data-active-depth="9"] .echo-document[data-index="9"],
 body[data-active-depth="10"] .echo-document[data-index="10"] {
   /* Sharpen, brighten, and slightly lift the active Z-plane */
-  filter: blur(0px) saturate(120%) brightness(110%) drop-shadow(0 0 30px rgba(0, 229, 255, 0.8)) !important;
+  filter: blur(0px) saturate(120%) brightness(110%)
+    drop-shadow(0 0 30px rgba(0, 229, 255, 0.8)) !important;
   opacity: 1 !important;
   border-color: rgba(0, 229, 255, 0.9);
   z-index: 1000; /* Bring the whole plane to front visually if possible, though preserve-3d handles z */
 }
 
 /* Also bring the active plane forward slightly in 3D space */
-body[data-active-depth="0"] .echo-document[data-index="0"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="1"] .echo-document[data-index="1"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="2"] .echo-document[data-index="2"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="3"] .echo-document[data-index="3"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="4"] .echo-document[data-index="4"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="5"] .echo-document[data-index="5"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="6"] .echo-document[data-index="6"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="7"] .echo-document[data-index="7"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="8"] .echo-document[data-index="8"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="9"] .echo-document[data-index="9"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
-body[data-active-depth="10"] .echo-document[data-index="10"] { transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) !important; }
+body[data-active-depth="0"] .echo-document[data-index="0"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="1"] .echo-document[data-index="1"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="2"] .echo-document[data-index="2"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="3"] .echo-document[data-index="3"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="4"] .echo-document[data-index="4"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="5"] .echo-document[data-index="5"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="6"] .echo-document[data-index="6"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="7"] .echo-document[data-index="7"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="8"] .echo-document[data-index="8"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="9"] .echo-document[data-index="9"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="10"] .echo-document[data-index="10"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}

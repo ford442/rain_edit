@@ -133,5 +133,4 @@ export class ConnectionManager {
       this.radarCtx.restore();
     });
   }
-
 }
