@@ -127,6 +127,7 @@ export class TabManager {
     this.isQuantumSuperpositionView = false;
     this.isOutlineView = false;
     this.isCycloneView = false;
+    this.isMobiusView = false;
   }
 
   _deactivateAllViews() {
@@ -165,6 +166,7 @@ export class TabManager {
     this.isInfinityMirrorView = false;
     this.isCarouselView = false;
     this.isCycloneView = false;
+    this.isMobiusView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -201,6 +203,7 @@ export class TabManager {
       "infinity-mirror-active",
       "carousel-active",
       "cyclone-active",
+      "mobius-active",
     );
 
     this.isOrigamiView = false;
@@ -300,6 +303,16 @@ export class TabManager {
     if (!wasActive) {
       this.isCycloneView = true;
       document.body.classList.add("cyclone-active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleMobiusView() {
+    const wasActive = this.isMobiusView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isMobiusView = true;
+      document.body.classList.add("mobius-active");
     }
     this._renderEchoes();
   }
@@ -1576,6 +1589,32 @@ Drag to change depth`;
         el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", `${rotZ}deg`);
+      } else if (this.isMobiusView) {
+        // Mobius Strip View positions
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const t = index / totalEchoes; // 0 to 1
+        const R = 600; // Radius of the strip
+        const w = 200; // Width parameter of the strip
+
+        // Parametric equations for a Möbius strip
+        const u = t * Math.PI * 2; // Angle around the strip
+        const v = (index % 2 === 0 ? 1 : -1) * 0.5 * w; // Width variation
+
+        const tx = (R + v * Math.cos(u / 2)) * Math.cos(u);
+        const ty = v * Math.sin(u / 2);
+        const tz = (R + v * Math.cos(u / 2)) * Math.sin(u) - 400; // Push back
+
+        // Rotate to be tangential to the strip
+        const rotY = -(u * 180 / Math.PI) + 90;
+        const rotZ = (u / 2 * 180 / Math.PI);
+        const rotX = 0;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
       } else if (this.isMatrixRainView) {
         // Arrange items randomly on X and Z, falling down from Y
         const maxCols = 10;
@@ -2577,6 +2616,16 @@ Drag to change depth`;
             const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
             const radius = 500;
             const tz = radius * Math.cos(phi) - 200;
+            el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isMobiusView) {
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const index = parseInt(el.dataset.index || 0);
+            const t = index / totalEchoes;
+            const R = 600;
+            const w = 200;
+            const u = t * Math.PI * 2;
+            const v = (index % 2 === 0 ? 1 : -1) * 0.5 * w;
+            const tz = (R + v * Math.cos(u / 2)) * Math.sin(u) - 400;
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isWaveView) {
             el.style.setProperty("--tz", `-150px`);
