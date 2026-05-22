@@ -1455,6 +1455,8 @@ if (viewModeSelect) {
     else if (view === "outline") tabManager.toggleOutlineView();
     else if (view === "cyclone") tabManager.toggleCycloneView();
     else if (view === "mobius") tabManager.toggleMobiusView();
+    else if (view === "astrolabe") tabManager.toggleAstrolabeView();
+    else if (view === "dominoes") tabManager.toggleDominoesView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }
@@ -2333,6 +2335,48 @@ editor.onDidChangeModelContent((e) => {
       }, 500);
     });
   }
+
+  // Innovated Feature: Semantic Explode on Edit
+  e.changes.forEach((change) => {
+    if (change.text.match(/[\s\n]$/)) {
+      const position = editor.getPosition();
+      if (!position) return;
+
+      const model = editor.getModel();
+      const wordInfo = model.getWordUntilPosition({
+        lineNumber: position.lineNumber,
+        column: position.column - 1
+      });
+
+      if (wordInfo && wordInfo.word && wordInfo.word.length > 3) {
+        const lowerWord = wordInfo.word.toLowerCase();
+
+        tabManager.files.forEach((file) => {
+          if (file.id !== tabManager.activeId) {
+            let content = "";
+            if (file.model) {
+              content = file.model.getValue().toLowerCase();
+            } else if (file.isImage) {
+              content = file.name.toLowerCase();
+            }
+
+            if (content.includes(lowerWord)) {
+              const echoEl = document.querySelector(`.echo-document[data-id="${file.id}"]`);
+              if (echoEl) {
+                echoEl.classList.remove("shatter-active");
+                void echoEl.offsetWidth; // Force reflow
+                echoEl.classList.add("shatter-active");
+
+                setTimeout(() => {
+                  echoEl.classList.remove("shatter-active");
+                }, 600);
+              }
+            }
+          }
+        });
+      }
+    }
+  });
 });
 
 setInterval(() => {
@@ -3106,8 +3150,14 @@ function initKineticTypingPulse(editor) {
   });
 }
 
-// --- Depth Spotlight (Alt+Shift+S) & Hologram Preview (Alt+Shift+H) ---
+// --- Fabric Tear Interaction (Alt + T) ---
 document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    if (!document.body.classList.contains("fabric-tear-active")) {
+      document.body.classList.add("fabric-tear-active");
+    }
+  }
+
   if (e.altKey && e.shiftKey && e.code === "KeyS") {
     e.preventDefault();
     document.body.classList.toggle("depth-spotlight-active");
@@ -3139,14 +3189,29 @@ document.addEventListener("keyup", (e) => {
   if (e.key === "p" || e.key === "P" || e.key === "Alt") {
     document.body.classList.remove("curtain-pull-active");
   }
+
+  if (e.key === "t" || e.key === "T" || e.key === "Alt") {
+    document.body.classList.remove("fabric-tear-active");
+    if (editorEl) {
+      editorEl.style.removeProperty("--tear-mask");
+    }
+  }
 });
 
-// Calculate normalized mouse X for Curtain Pull
+// Calculate normalized mouse X for Curtain Pull and Fabric Tear
 document.addEventListener("mousemove", (e) => {
   if (document.body.classList.contains("curtain-pull-active")) {
     // Normalize mouse X from -1 to 1 based on screen width
     const normX = (e.clientX / window.innerWidth) * 2 - 1;
     document.body.style.setProperty("--mouse-x-norm", normX.toFixed(3));
+  }
+
+  if (document.body.classList.contains("fabric-tear-active")) {
+    if (editorEl) {
+      const mouseX = e.clientX;
+      const gradient = `linear-gradient(to right, black 0%, black calc(${mouseX}px - 50px), transparent calc(${mouseX}px - 20px), transparent calc(${mouseX}px + 20px), black calc(${mouseX}px + 50px), black 100%)`;
+      editorEl.style.setProperty("--tear-mask", gradient);
+    }
   }
 });
 
