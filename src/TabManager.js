@@ -209,7 +209,7 @@ export class TabManager {
       "cyclone-active",
       "mobius-active",
       "astrolabe-active",
-      "dominoes-active"
+      "dominoes-active",
     );
 
     this.isOrigamiView = false;
@@ -1631,8 +1631,8 @@ Drag to change depth`;
         const tz = (R + v * Math.cos(u / 2)) * Math.sin(u) - 400; // Push back
 
         // Rotate to be tangential to the strip
-        const rotY = -(u * 180 / Math.PI) + 90;
-        const rotZ = (u / 2 * 180 / Math.PI);
+        const rotY = -((u * 180) / Math.PI) + 90;
+        const rotZ = ((u / 2) * 180) / Math.PI;
         const rotX = 0;
 
         el.style.setProperty("--tx", `${tx}px`);
@@ -1643,8 +1643,8 @@ Drag to change depth`;
         el.style.setProperty("--rot-z", `${rotZ}deg`);
       } else if (this.isAstrolabeView) {
         // Astrolabe View positions
-        const tx = Math.cos(index * Math.PI / 4) * 300;
-        const ty = Math.sin(index * Math.PI / 4) * 300;
+        const tx = Math.cos((index * Math.PI) / 4) * 300;
+        const ty = Math.sin((index * Math.PI) / 4) * 300;
         const tz = -200;
         const rotZ = index * 45;
 
@@ -2322,6 +2322,15 @@ Drag to change depth`;
       // preventing the active document from switching when the user is trying to double click.
       el.addEventListener("click", (e) => {
         if (e.detail === 1) {
+          // If in Tesseract view, exit view and switch immediately
+          if (document.body.classList.contains("tesseract-active")) {
+            const viewSelect = document.getElementById("view-mode-select");
+            if (viewSelect) viewSelect.value = "";
+            this._deactivateAllViews();
+            this.setActive(file.id);
+            return;
+          }
+
           // Add Kaleidoscope Effect
           el.classList.add("kaleidoscope-fx");
 
