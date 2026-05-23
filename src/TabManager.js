@@ -128,6 +128,8 @@ export class TabManager {
     this.isOutlineView = false;
     this.isCycloneView = false;
     this.isMobiusView = false;
+    this.isAstrolabeView = false;
+    this.isDominoesView = false;
   }
 
   _deactivateAllViews() {
@@ -167,6 +169,8 @@ export class TabManager {
     this.isCarouselView = false;
     this.isCycloneView = false;
     this.isMobiusView = false;
+    this.isAstrolabeView = false;
+    this.isDominoesView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -204,6 +208,8 @@ export class TabManager {
       "carousel-active",
       "cyclone-active",
       "mobius-active",
+      "astrolabe-active",
+      "dominoes-active"
     );
 
     this.isOrigamiView = false;
@@ -250,6 +256,26 @@ export class TabManager {
       document.body.classList.add("neon-synth-active");
       const btn = document.getElementById("btn-neon-synth-view");
       if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleAstrolabeView() {
+    const wasActive = this.isAstrolabeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isAstrolabeView = true;
+      document.body.classList.add("astrolabe-active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleDominoesView() {
+    const wasActive = this.isDominoesView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDominoesView = true;
+      document.body.classList.add("dominoes-active");
     }
     this._renderEchoes();
   }
@@ -1615,6 +1641,32 @@ Drag to change depth`;
         el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", `${rotZ}deg`);
+      } else if (this.isAstrolabeView) {
+        // Astrolabe View positions
+        const tx = Math.cos(index * Math.PI / 4) * 300;
+        const ty = Math.sin(index * Math.PI / 4) * 300;
+        const tz = -200;
+        const rotZ = index * 45;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `0deg`);
+        el.style.setProperty("--rot-y", `0deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+      } else if (this.isDominoesView) {
+        // Dominoes View positions
+        const tx = index * 20;
+        const ty = 0;
+        const tz = index * -50;
+        const rotX = 10;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `0deg`);
+        el.style.setProperty("--rot-z", `0deg`);
       } else if (this.isMatrixRainView) {
         // Arrange items randomly on X and Z, falling down from Y
         const maxCols = 10;
