@@ -130,6 +130,7 @@ export class TabManager {
     this.isMobiusView = false;
     this.isAstrolabeView = false;
     this.isDominoesView = false;
+    this.isHexagonMatrixView = false;
   }
 
   _deactivateAllViews() {
@@ -171,6 +172,7 @@ export class TabManager {
     this.isMobiusView = false;
     this.isAstrolabeView = false;
     this.isDominoesView = false;
+    this.isHexagonMatrixView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -242,10 +244,23 @@ export class TabManager {
       "btn-tesseract-view",
       "btn-blueprint-3d-view",
       "btn-cyber-cortex-view",
+      "btn-hexagon-matrix-view",
     ].forEach((id) => {
       const btn = document.getElementById(id);
       if (btn) btn.classList.remove("active");
     });
+  }
+
+  toggleHexagonMatrixView() {
+    const wasActive = this.isHexagonMatrixView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHexagonMatrixView = true;
+      document.body.classList.add("hexagon-matrix-active");
+      const btn = document.getElementById("btn-hexagon-matrix-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
   }
 
   toggleNeonSynthView() {
@@ -1470,7 +1485,32 @@ Drag to change depth`;
         el.style.setProperty("--expose-ty", `${exposeY}px`);
       }
 
-      if (this.isTunnelView) {
+      if (this.isHexagonMatrixView) {
+        // Hexagon Matrix View positions
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const hexWidth = 400;
+        const hexHeight = Math.sqrt(3) * hexWidth / 2; // Hexagon row height
+
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        // Offset every other row
+        const rowOffset = (row % 2 === 1) ? hexWidth / 2 : 0;
+
+        const offsetX = -((cols - 1) * hexWidth) / 2;
+        const offsetY = -((Math.ceil(totalEchoes / cols) - 1) * hexHeight) / 2;
+
+        const tx = offsetX + col * hexWidth + rowOffset;
+        const ty = offsetY + row * hexHeight;
+        const tz = -300 - (row * 50); // Push back slightly and slope
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+      } else if (this.isTunnelView) {
         // Tunnel View: arrange into a 3D cylindrical tunnel leading backward
         const angle = (index / totalEchoes) * Math.PI * 2 * 3; // Spiral
         const radius = 400;
