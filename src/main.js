@@ -1457,6 +1457,7 @@ if (viewModeSelect) {
     else if (view === "mobius") tabManager.toggleMobiusView();
     else if (view === "astrolabe") tabManager.toggleAstrolabeView();
     else if (view === "dominoes") tabManager.toggleDominoesView();
+    else if (view === "hexagon-matrix") tabManager.toggleHexagonMatrixView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }
