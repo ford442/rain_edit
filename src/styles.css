@@ -4926,24 +4926,48 @@ body.cylinder-active #echo-layer {
 body.tesseract-active #echo-layer {
   perspective: 2000px;
   transform-style: preserve-3d;
-  animation: tesseract-spin 20s linear infinite;
-}
-
-@keyframes tesseract-spin {
-  from {
-    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
-  }
-  to {
-    transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
-  }
+  /* Replaced constant spinning with mouse-driven rotation + isometric default */
+  transform: rotateX(calc(30deg + var(--tesseract-rot-x, 0deg)))
+    rotateY(calc(-45deg + var(--tesseract-rot-y, 0deg)));
+  transition: transform 0.1s ease-out; /* Smooth drag */
 }
 
 body.tesseract-active .echo-document {
-  opacity: 0.8;
-  filter: blur(1px);
-  transition: all 1s;
+  opacity: 0.85;
+  filter: blur(0.5px);
+  transition:
+    all 1s,
+    opacity 0.3s,
+    filter 0.3s,
+    transform 1s;
   box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
   border: 1px solid rgba(0, 229, 255, 0.8);
+  cursor: pointer; /* Indicate interactivity */
+}
+
+body.tesseract-active .echo-document:hover {
+  opacity: 1;
+  filter: blur(0px);
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.8);
+  border-color: #00e5ff;
+}
+
+body.tesseract-active #editor {
+  opacity: 0.2;
+  filter: blur(2px) grayscale(50%);
+  transition:
+    opacity 0.5s,
+    filter 0.5s;
+  pointer-events: none; /* Let clicks pass through to echo layer if needed */
+}
+
+/* Base editor transition for smooth fade out/in */
+#editor {
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* Neon Synth View */
@@ -7132,7 +7156,6 @@ body.explode-view-active .echo-document:hover {
   border-color: rgba(0, 229, 255, 1) !important;
 }
 
-
 /* =========================================================
    CYCLONE VIEW (Tornado Spiral)
    ========================================================= */
@@ -7256,8 +7279,12 @@ body.astrolabe-active #echo-layer {
 }
 
 @keyframes astrolabe-spin {
-  from { transform: rotateX(15deg) rotateY(0deg) rotateZ(0deg); }
-  to { transform: rotateX(15deg) rotateY(360deg) rotateZ(360deg); }
+  from {
+    transform: rotateX(15deg) rotateY(0deg) rotateZ(0deg);
+  }
+  to {
+    transform: rotateX(15deg) rotateY(360deg) rotateZ(360deg);
+  }
 }
 
 body.astrolabe-active .echo-document {

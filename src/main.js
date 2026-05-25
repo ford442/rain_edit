@@ -705,6 +705,14 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  if (e.key === "Escape") {
+    if (document.body.classList.contains("tesseract-active")) {
+      const viewSelect = document.getElementById("view-mode-select");
+      if (viewSelect) viewSelect.value = "";
+      tabManager._deactivateAllViews();
+    }
+  }
+
   if (e.key === "Control" || e.key === "Alt") {
     if (!e.ctrlKey || !e.altKey) {
       isWormholeActive = false;
@@ -729,7 +737,48 @@ window.addEventListener("resize", () => {
   if (tabsEl) tabsEl._origRect = null;
 });
 
+let isTesseractDragging = false;
+let tesseractLastX = 0;
+let tesseractLastY = 0;
+let tesseractRotX = 0;
+let tesseractRotY = 0;
+
+document.addEventListener("mousedown", (e) => {
+  if (document.body.classList.contains("tesseract-active")) {
+    isTesseractDragging = true;
+    tesseractLastX = e.clientX;
+    tesseractLastY = e.clientY;
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  isTesseractDragging = false;
+});
+
 document.addEventListener("mousemove", (e) => {
+  if (
+    isTesseractDragging &&
+    document.body.classList.contains("tesseract-active")
+  ) {
+    const deltaX = e.clientX - tesseractLastX;
+    const deltaY = e.clientY - tesseractLastY;
+
+    tesseractRotY += deltaX * 0.5;
+    tesseractRotX -= deltaY * 0.5;
+
+    document.documentElement.style.setProperty(
+      "--tesseract-rot-x",
+      `${tesseractRotX}deg`,
+    );
+    document.documentElement.style.setProperty(
+      "--tesseract-rot-y",
+      `${tesseractRotY}deg`,
+    );
+
+    tesseractLastX = e.clientX;
+    tesseractLastY = e.clientY;
+  }
+
   // Gravitational Cursor Tracking for UI Elements (Dock & Tabs)
   const mx = e.clientX;
   const my = e.clientY;
@@ -1453,6 +1502,7 @@ if (viewModeSelect) {
     else if (view === "cyber-cortex") tabManager.toggleCyberCortexView();
     else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
     else if (view === "outline") tabManager.toggleOutlineView();
+    else if (view === "tesseract") tabManager.toggleTesseractView();
     else if (view === "cyclone") tabManager.toggleCycloneView();
     else if (view === "mobius") tabManager.toggleMobiusView();
     else if (view === "astrolabe") tabManager.toggleAstrolabeView();
@@ -2346,7 +2396,7 @@ editor.onDidChangeModelContent((e) => {
       const model = editor.getModel();
       const wordInfo = model.getWordUntilPosition({
         lineNumber: position.lineNumber,
-        column: position.column - 1
+        column: position.column - 1,
       });
 
       if (wordInfo && wordInfo.word && wordInfo.word.length > 3) {
@@ -2362,7 +2412,9 @@ editor.onDidChangeModelContent((e) => {
             }
 
             if (content.includes(lowerWord)) {
-              const echoEl = document.querySelector(`.echo-document[data-id="${file.id}"]`);
+              const echoEl = document.querySelector(
+                `.echo-document[data-id="${file.id}"]`,
+              );
               if (echoEl) {
                 echoEl.classList.remove("shatter-active");
                 void echoEl.offsetWidth; // Force reflow
@@ -3153,7 +3205,13 @@ function initKineticTypingPulse(editor) {
 
 // --- Fabric Tear Interaction (Alt + T) ---
 document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+  if (
+    e.altKey &&
+    e.code === "KeyT" &&
+    !e.shiftKey &&
+    !e.ctrlKey &&
+    !e.metaKey
+  ) {
     if (!document.body.classList.contains("fabric-tear-active")) {
       document.body.classList.add("fabric-tear-active");
     }
