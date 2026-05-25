@@ -1489,20 +1489,20 @@ Drag to change depth`;
         // Hexagon Matrix View positions
         const cols = Math.ceil(Math.sqrt(totalEchoes));
         const hexWidth = 400;
-        const hexHeight = Math.sqrt(3) * hexWidth / 2; // Hexagon row height
+        const hexHeight = (Math.sqrt(3) * hexWidth) / 2; // Hexagon row height
 
         const col = index % cols;
         const row = Math.floor(index / cols);
 
         // Offset every other row
-        const rowOffset = (row % 2 === 1) ? hexWidth / 2 : 0;
+        const rowOffset = row % 2 === 1 ? hexWidth / 2 : 0;
 
         const offsetX = -((cols - 1) * hexWidth) / 2;
         const offsetY = -((Math.ceil(totalEchoes / cols) - 1) * hexHeight) / 2;
 
         const tx = offsetX + col * hexWidth + rowOffset;
         const ty = offsetY + row * hexHeight;
-        const tz = -300 - (row * 50); // Push back slightly and slope
+        const tz = -300 - row * 50; // Push back slightly and slope
 
         el.style.setProperty("--tx", `${tx}px`);
         el.style.setProperty("--ty", `${ty}px`);

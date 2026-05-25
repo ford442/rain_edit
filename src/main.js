@@ -793,6 +793,16 @@ document.addEventListener("mousemove", (e) => {
   document.body.style.setProperty("--mouse-nx", nx);
   document.body.style.setProperty("--mouse-ny", ny);
 
+  // Apply localized 3D tilt to UI elements based on normalized cursor position
+  const uiDockEl = document.getElementById("dock");
+  const uiTabsEl = document.getElementById("tabs-container");
+  if (uiDockEl) {
+    uiDockEl.style.transform = `perspective(1000px) rotateX(${ny * -10}deg) rotateY(${nx * 10}deg) translateZ(10px)`;
+  }
+  if (uiTabsEl) {
+    uiTabsEl.style.transform = `perspective(1000px) rotateX(${ny * -10}deg) rotateY(${nx * 10}deg) translateZ(10px)`;
+  }
+
   // Update targets for Depth Spotlight and Hologram Preview
   if (
     document.body.classList.contains("depth-spotlight-active") ||
@@ -2208,6 +2218,14 @@ window.addEventListener(
   { passive: false },
 );
 
+// --- Flashlight Mode Toggle ---
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.key.toLowerCase() === "f") {
+    e.preventDefault();
+    document.body.classList.toggle("flashlight-active");
+  }
+});
+
 document.addEventListener("keyup", (e) => {
   if (e.key === "Alt") {
     zCameraOffset = 0;
@@ -2884,13 +2902,20 @@ document.addEventListener("keydown", (e) => {
 // Ctrl+S — Save current tab to backend
 document.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "s") {
+    e.preventDefault();
+
+    // Trigger Sonic Boom animation
+    document.body.classList.add("sonic-boom-active");
+    setTimeout(() => {
+      document.body.classList.remove("sonic-boom-active");
+    }, 400);
+
     const activeFile = tabManager.files.find(
       (f) => f.id === tabManager.activeId,
     );
     if (!activeFile || activeFile.isImage) return;
 
     if (activeFile.cabinetType === "notes" || activeFile.noteName) {
-      e.preventDefault();
       const noteName =
         activeFile.noteName || activeFile.cabinetId || activeFile.name;
       const content = activeFile.model ? activeFile.model.getValue() : "";
