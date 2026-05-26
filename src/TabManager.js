@@ -832,12 +832,43 @@ export class TabManager {
    * @param {number} delta  — typically +1 or -1
    */
   adjustDepth(delta) {
-    const file = this.files.find((f) => f.id === this.activeId);
+    this._changeDepth(this.activeId, delta, { wrap: false });
+  }
+
+  /**
+   * Cycle a document's depth with wrap-around.
+   * @param {number} delta
+   * @param {number} [id]
+   */
+  cycleDepth(delta, id = this.activeId) {
+    this._changeDepth(id, delta, { wrap: true });
+  }
+
+  /**
+   * Internal depth update helper.
+   * @param {number} id
+   * @param {number} delta
+   * @param {{ wrap?: boolean }} [options]
+   */
+  _changeDepth(id, delta, options = {}) {
+    const { wrap = false } = options;
+    const file = this.files.find((f) => f.id === id);
     if (!file) return;
+
     const oldDepth = file.depth;
-    file.depth = Math.max(0, Math.min(2, file.depth + delta));
-    this.applyDepth(file.depth, oldDepth);
+    let nextDepth = oldDepth + delta;
+    if (wrap) {
+      nextDepth = ((nextDepth % 3) + 3) % 3;
+    } else {
+      nextDepth = Math.max(0, Math.min(2, nextDepth));
+    }
+    file.depth = nextDepth;
+
+    if (file.id === this.activeId) {
+      this.applyDepth(file.depth, oldDepth);
+    }
     this._renderTabs();
+    this._renderEchoes();
 
     // Add snap animation and shatter effect if depth changed
     if (oldDepth !== file.depth && this.echoLayerEl) {
@@ -879,8 +910,37 @@ Drag to change depth`;
       nameEl.className = "tab-name";
       nameEl.textContent = file.name;
 
+      const layerControls = document.createElement("span");
+      layerControls.className = "tab-layer-controls";
+
+      const depthBackBtn = document.createElement("button");
+      depthBackBtn.type = "button";
+      depthBackBtn.className = "tab-depth-btn tab-depth-btn-back";
+      depthBackBtn.title = "Move this document deeper";
+      depthBackBtn.textContent = "↓";
+      depthBackBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.cycleDepth(-1, file.id);
+      });
+
+      const depthForwardBtn = document.createElement("button");
+      depthForwardBtn.type = "button";
+      depthForwardBtn.className = "tab-depth-btn tab-depth-btn-forward";
+      depthForwardBtn.title = "Move this document forward";
+      depthForwardBtn.textContent = "↑";
+      depthForwardBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.cycleDepth(1, file.id);
+      });
+
+      layerControls.appendChild(depthBackBtn);
+      layerControls.appendChild(depthForwardBtn);
+
       const closeBtn = document.createElement("button");
       closeBtn.className = "tab-close-btn";
+      closeBtn.type = "button";
       closeBtn.textContent = "×";
       closeBtn.title = "Close tab";
       closeBtn.addEventListener("click", (e) => {
@@ -890,6 +950,7 @@ Drag to change depth`;
 
       tab.appendChild(badge);
       tab.appendChild(nameEl);
+      tab.appendChild(layerControls);
       tab.appendChild(closeBtn);
 
       tab.addEventListener("click", () => this.setActive(file.id));

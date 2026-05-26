@@ -1439,39 +1439,28 @@ const btnDepthBack = document.getElementById("btn-depth-back");
 
 if (btnDepthForward) {
   btnDepthForward.addEventListener("click", () => {
-    const activeFile = tabManager.files.find(
-      (f) => f.id === tabManager.activeId,
-    );
-    if (!activeFile) return;
-
-    // Cycle depth forward: 0 -> 1 -> 2 -> 0
-    activeFile.depth = (activeFile.depth + 1) % 3;
-    tabManager.applyDepth(activeFile.depth);
-    tabManager._renderTabs();
-
-    console.log(
-      `[Depth] ${activeFile.name} moved to depth ${activeFile.depth} (${["Deep", "Middle", "Front"][activeFile.depth]})`,
-    );
+    tabManager.cycleDepth(1);
   });
 }
 
 if (btnDepthBack) {
   btnDepthBack.addEventListener("click", () => {
-    const activeFile = tabManager.files.find(
-      (f) => f.id === tabManager.activeId,
-    );
-    if (!activeFile) return;
-
-    // Cycle depth backward: 0 -> 2 -> 1 -> 0
-    activeFile.depth = activeFile.depth <= 0 ? 2 : activeFile.depth - 1;
-    tabManager.applyDepth(activeFile.depth);
-    tabManager._renderTabs();
-
-    console.log(
-      `[Depth] ${activeFile.name} moved to depth ${activeFile.depth} (${["Deep", "Middle", "Front"][activeFile.depth]})`,
-    );
+    tabManager.cycleDepth(-1);
   });
 }
+
+// Ctrl/Cmd + ArrowUp/ArrowDown - cycle active document layer
+document.addEventListener("keydown", (e) => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+
+  if (e.key === "ArrowUp") {
+    e.preventDefault();
+    tabManager.cycleDepth(1);
+  } else if (e.key === "ArrowDown") {
+    e.preventDefault();
+    tabManager.cycleDepth(-1);
+  }
+});
 
 const viewModeSelect = document.getElementById("view-mode-select");
 if (viewModeSelect) {
