@@ -858,6 +858,7 @@ export class TabManager {
     const oldDepth = file.depth;
     let nextDepth = oldDepth + delta;
     if (wrap) {
+      // Normalize modulo so negative deltas wrap correctly (e.g. -1 -> 2).
       nextDepth = ((nextDepth % 3) + 3) % 3;
     } else {
       nextDepth = Math.max(0, Math.min(2, nextDepth));
