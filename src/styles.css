@@ -6408,6 +6408,73 @@ body.solar-system-active #echo-layer::before {
   }
 }
 
+/* Kaleidoscope View Styling */
+body.kaleidoscope-active {
+  --bio-glow-color: rgba(255, 0, 255, 0.6);
+  --bio-glow-strong: rgba(255, 0, 255, 0.9);
+}
+
+body.kaleidoscope-active #editor,
+body.kaleidoscope-active #image-viewer {
+  transform: scale(0.6) translateZ(-100px);
+  filter: blur(2px) grayscale(30%);
+  opacity: 0.7;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.kaleidoscope-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+  animation: kaleidoscope-spin 120s linear infinite;
+}
+
+body.kaleidoscope-active #echo-layer:hover {
+  animation-play-state: paused;
+}
+
+@keyframes kaleidoscope-spin {
+  from {
+    transform: rotateZ(0deg);
+  }
+  to {
+    transform: rotateZ(360deg);
+  }
+}
+
+body.kaleidoscope-active .echo-document {
+  opacity: 0.6;
+  filter: blur(1.5px) saturate(150%) hue-rotate(var(--echo-tint, 0deg));
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg)) scale(0.85);
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 40px rgba(255, 0, 255, 0.3),
+    inset 0 0 20px rgba(255, 0, 255, 0.2);
+  border-color: rgba(255, 0, 255, 0.5);
+}
+
+body.kaleidoscope-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) saturate(200%) hue-rotate(var(--echo-tint, 0deg)) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 100 !important;
+  box-shadow:
+    0 0 60px rgba(255, 0, 255, 0.8),
+    inset 0 0 30px rgba(255, 0, 255, 0.4);
+}
+
 /* Infinity Mirror View Styling */
 body.infinity-mirror-active {
   --bio-glow-color: rgba(0, 229, 255, 0.6);

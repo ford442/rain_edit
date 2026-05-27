@@ -756,19 +756,6 @@ document.addEventListener("mouseup", () => {
 });
 
 document.addEventListener("mousemove", (e) => {
-  if (isAutofocusActive) {
-    const target = document.elementFromPoint(e.clientX, e.clientY);
-    const echoDoc = target?.closest(".echo-document");
-    if (echoDoc) {
-      const depth = parseInt(echoDoc.dataset.depth || "0", 10);
-      if (depth === 0) autofocusTargetZ = -400;
-      else if (depth === 1) autofocusTargetZ = 0;
-      else if (depth === 2) autofocusTargetZ = 400;
-    } else {
-      autofocusTargetZ = 0; // Default to active plane if hovering nothing
-    }
-  }
-
   if (
     isTesseractDragging &&
     document.body.classList.contains("tesseract-active")
@@ -1493,7 +1480,6 @@ if (viewModeSelect) {
     else if (view === "carousel") tabManager.toggleCarouselView();
     // UI binding for Infinity Mirror view mode (added in previous iteration)
     else if (view === "infinity-mirror") tabManager.toggleInfinityMirrorView();
-    else if (view === "kaleidoscope") tabManager.toggleKaleidoscopeView();
     else if (view === "vortex") tabManager.toggleVortexView();
     else if (view === "constellation") tabManager.toggleConstellationView();
     else if (view === "prism") tabManager.togglePrismView();
@@ -1535,78 +1521,6 @@ if (theaterToggle) {
       document.body.classList.remove("theater-active");
     }
   });
-}
-
-// Cinematic Autofocus Logic
-const autofocusToggle = document.getElementById("cinematic-autofocus-mode");
-let isAutofocusActive = false;
-if (autofocusToggle) {
-  autofocusToggle.addEventListener("change", (e) => {
-    isAutofocusActive = e.target.checked;
-    if (isAutofocusActive) {
-      document.body.classList.add("cinematic-autofocus-active");
-      _startAutofocusLoop();
-    } else {
-      document.body.classList.remove("cinematic-autofocus-active");
-      _stopAutofocusLoop();
-    }
-  });
-}
-
-let autofocusTargetZ = 0;
-let autofocusCurrentZ = 0;
-let autofocusRafId = null;
-
-function _startAutofocusLoop() {
-  if (!autofocusRafId) {
-    _autofocusStep();
-  }
-}
-
-function _stopAutofocusLoop() {
-  if (autofocusRafId) {
-    cancelAnimationFrame(autofocusRafId);
-    autofocusRafId = null;
-  }
-  // Reset echoes
-  if (echoLayerEl) {
-    echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
-      doc.style.removeProperty("--af-blur");
-      doc.style.removeProperty("--af-brightness");
-    });
-  }
-}
-
-function _autofocusStep() {
-  if (!isAutofocusActive) {
-    _stopAutofocusLoop();
-    return;
-  }
-
-  // Lerp current Z to target Z for smooth focal transition
-  autofocusCurrentZ += (autofocusTargetZ - autofocusCurrentZ) * 0.1;
-
-  if (echoLayerEl) {
-    echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
-      // Calculate local Z depth (derived from its data-depth or var(--tz))
-      // It's hard to get computed --tz reliably if it's animated, so we use an approximation based on depth
-      let docZ = 0;
-      const depth = parseInt(doc.dataset.depth || "0", 10);
-      if (depth === 0) docZ = -400;
-      else if (depth === 1) docZ = 0;
-      else if (depth === 2) docZ = 400;
-
-      const distance = Math.abs(docZ - autofocusCurrentZ);
-      // Max distance is roughly 800, let's map this to blur 0px -> 15px
-      const blurAmount = Math.min(15, (distance / 800) * 15);
-      const brightnessAmount = 1 - Math.min(0.6, (distance / 800) * 0.6);
-
-      doc.style.setProperty("--af-blur", `${blurAmount}px`);
-      doc.style.setProperty("--af-brightness", `${brightnessAmount}`);
-    });
-  }
-
-  autofocusRafId = requestAnimationFrame(_autofocusStep);
 }
 
 const opacitySlider = document.getElementById("editor-opacity");
