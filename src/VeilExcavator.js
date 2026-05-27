@@ -51,8 +51,14 @@ export class VeilExcavator {
   resize() {
     this.screenWidth = window.innerWidth;
     this.screenHeight = window.innerHeight;
-    this.maskCanvas.width = Math.max(1, Math.floor(this.screenWidth * this.scaleFactor));
-    this.maskCanvas.height = Math.max(1, Math.floor(this.screenHeight * this.scaleFactor));
+    this.maskCanvas.width = Math.max(
+      1,
+      Math.floor(this.screenWidth * this.scaleFactor),
+    );
+    this.maskCanvas.height = Math.max(
+      1,
+      Math.floor(this.screenHeight * this.scaleFactor),
+    );
     this.clearMask();
   }
 
@@ -98,10 +104,18 @@ export class VeilExcavator {
   handleKeyDown(e) {
     if (e.key.toLowerCase() === "v") {
       // Toggle
-      if (e.ctrlKey || e.metaKey || document.activeElement.tagName !== "TEXTAREA") {
-         // only toggle if not typing in editor
-         if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
-         this.toggle();
+      if (
+        e.ctrlKey ||
+        e.metaKey ||
+        document.activeElement.tagName !== "TEXTAREA"
+      ) {
+        // only toggle if not typing in editor
+        if (
+          document.activeElement.tagName === "INPUT" ||
+          document.activeElement.tagName === "TEXTAREA"
+        )
+          return;
+        this.toggle();
       }
     }
   }
@@ -138,7 +152,14 @@ export class VeilExcavator {
     const scaledRadius = this.brushSize * this.scaleFactor;
 
     // Draw an opaque soft radial gradient to "reveal" the document (make alpha = 1)
-    const gradient = this.maskCtx.createRadialGradient(scaledX, scaledY, 0, scaledX, scaledY, scaledRadius);
+    const gradient = this.maskCtx.createRadialGradient(
+      scaledX,
+      scaledY,
+      0,
+      scaledX,
+      scaledY,
+      scaledRadius,
+    );
     gradient.addColorStop(0, "rgba(0,0,0,1)");
     gradient.addColorStop(1, "rgba(0,0,0,0)");
 
@@ -173,7 +194,10 @@ export class VeilExcavator {
 
     // Fast generation
     const dataUrl = this.maskCanvas.toDataURL("image/webp", 0.5);
-    document.documentElement.style.setProperty("--veil-mask-url", `url(${dataUrl})`);
+    document.documentElement.style.setProperty(
+      "--veil-mask-url",
+      `url(${dataUrl})`,
+    );
   }
 
   emitParticles(x, y) {
@@ -224,16 +248,16 @@ export class VeilExcavator {
           // Trigger jump
           const index = parseInt(el.dataset.index, 10);
           if (!isNaN(index)) {
-             // Let's create an effect then focus
-             el.classList.add("excavator-flash");
-             setTimeout(() => {
-                el.classList.remove("excavator-flash");
-                if (this.tabManager) {
-                  this.tabManager.setActive(el.dataset.id);
-                  // Optional: turn off excavator
-                  this.toggle();
-                }
-             }, 300);
+            // Let's create an effect then focus
+            el.classList.add("excavator-flash");
+            setTimeout(() => {
+              el.classList.remove("excavator-flash");
+              if (this.tabManager) {
+                this.tabManager.setActive(el.dataset.id);
+                // Optional: turn off excavator
+                this.toggle();
+              }
+            }, 300);
           }
           break;
         }

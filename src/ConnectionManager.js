@@ -53,7 +53,7 @@ export class ConnectionManager {
 
         // Depth from tz CSS variable
         const tzVal = parseFloat(echo.style.getPropertyValue("--tz")) || 0;
-        const depthNorm = Math.max(0, Math.min(1, (-tzVal) / 1000)); // 0 = front, 1 = deep back
+        const depthNorm = Math.max(0, Math.min(1, -tzVal / 1000)); // 0 = front, 1 = deep back
 
         // Deep = dimmer, smaller, cooler (bluer)
         // Shallow = brighter, larger, warmer (cyan/white)
@@ -70,5 +70,67 @@ export class ConnectionManager {
         this.radarCtx.fill();
       });
     }
+  }
+
+  drawConstellationLines(time) {
+    if (!this.radarCtx || !this.radarCanvas) return;
+
+    const w = this.radarCanvas.width;
+    const h = this.radarCanvas.height;
+
+    // We don't clearRect here because drawRadar might have just run.
+    // However, if we run this independently, we might need to.
+    // Assuming main.js handles clearRect or we just draw over the radar.
+
+    const activeEditor = document.getElementById("editor");
+    if (!activeEditor) return;
+
+    const canvasRect = this.radarCanvas.getBoundingClientRect();
+    const editorRect = activeEditor.getBoundingClientRect();
+
+    const startX = editorRect.left + editorRect.width / 2 - canvasRect.left;
+    const startY = editorRect.top + editorRect.height / 2 - canvasRect.top;
+
+    const echoes = document.querySelectorAll(".echo-document");
+    if (echoes.length === 0) return;
+
+    echoes.forEach((echo) => {
+      const sharedSymbolsStr = echo.style.getPropertyValue("--shared-symbols");
+      const sharedSymbols = parseInt(sharedSymbolsStr);
+
+      if (!sharedSymbols || sharedSymbols <= 0) return;
+
+      const docRect = echo.getBoundingClientRect();
+      const endX = docRect.left + docRect.width / 2 - canvasRect.left;
+      const endY = docRect.top + docRect.height / 2 - canvasRect.top;
+
+      // Holographic Visuals
+      const intensity = Math.min(1, sharedSymbols / 10);
+      const dashOffset = -time * 0.05;
+
+      this.radarCtx.save();
+
+      // Outer Glow
+      this.radarCtx.beginPath();
+      this.radarCtx.moveTo(startX, startY);
+      this.radarCtx.lineTo(endX, endY);
+      this.radarCtx.strokeStyle = `rgba(0, 229, 255, ${0.2 + intensity * 0.3})`;
+      this.radarCtx.lineWidth = 2 + intensity * 4;
+      this.radarCtx.shadowColor = "#00e5ff";
+      this.radarCtx.shadowBlur = 10;
+      this.radarCtx.stroke();
+
+      // Inner Core
+      this.radarCtx.beginPath();
+      this.radarCtx.moveTo(startX, startY);
+      this.radarCtx.lineTo(endX, endY);
+      this.radarCtx.strokeStyle = `rgba(255, 255, 255, ${0.5 + intensity * 0.5})`;
+      this.radarCtx.lineWidth = 1 + intensity;
+      this.radarCtx.setLineDash([5, 10]);
+      this.radarCtx.lineDashOffset = dashOffset;
+      this.radarCtx.stroke();
+
+      this.radarCtx.restore();
+    });
   }
 }

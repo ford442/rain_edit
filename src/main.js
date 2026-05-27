@@ -43,6 +43,7 @@ import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
 import DataSiphon from "./DataSiphon.js";
 import { VeilExcavator } from "./VeilExcavator.js";
+import { HolographicMinimap } from "./HolographicMinimap.js";
 import backFrag from "./shaders/water-back.frag?glslify";
 import frontFrag from "./shaders/water.frag?glslify";
 import vertSrc from "./shaders/simple.vert?glslify";
@@ -174,10 +175,14 @@ const tabManager = new TabManager(
       ' console.log("hello world");',
       "}",
       "",
-      "// @portal"
+      "// @portal",
     ].join("\n");
 
-    const initialFileId = tabManager.addFile("main.js", INITIAL_CODE, "javascript");
+    const initialFileId = tabManager.addFile(
+      "main.js",
+      INITIAL_CODE,
+      "javascript",
+    );
     tabManager.setActive(initialFileId);
   }
 })();
@@ -256,59 +261,64 @@ async function _triggerVpsSave() {
 }
 
 // Listen for 3D Cabinet file cube clicks with depth focus logic
-window.addEventListener('fileCubeClicked', async (e) => {
+window.addEventListener("fileCubeClicked", async (e) => {
   const { id, type, name, fileData: eventFileData } = e.detail;
 
   console.log(`Fetching ${type}: ${name}...`);
   // Show loading cursor
   document.body.style.cursor = "wait";
-try {
-  // 1. Fetch the code/json from the backend (handle both VPS remote files and cabinet files)
-  let fileData;
+  try {
+    // 1. Fetch the code/json from the backend (handle both VPS remote files and cabinet files)
+    let fileData;
 
-  if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
-    // Remote VPS file
-    const content = await storageAPI.getVPSFile(eventFileData.vpsPath);
-    const ext = name.split('.').pop().toLowerCase();
-    const languageMap = {
-      js: 'javascript', jsx: 'javascript',
-      ts: 'typescript', tsx: 'typescript',
-      json: 'json',
-      html: 'html', css: 'css',
-      md: 'markdown',
-      py: 'python',
-      glsl: 'glsl', wgsl: 'wgsl',
-      frag: 'glsl', vert: 'glsl'
-    };
-    const language = languageMap[ext] || 'plaintext';
-
-    fileData = { content, language };
-  } else {
-    // Local / Cabinet file (notes, etc.)
-    fileData = await storageAPI.getFileContent(id, type);
-  }
-
-  // 2. Add it to the Tab Manager
-  const newFileId = tabManager.addFile(
-    name,
-    fileData.content,
-    fileData.language
-  );
-
-  // 3. Tag the file so save/open logic knows where it came from
-  const newFile = tabManager.files.find(f => f.id === newFileId);
-  if (newFile) {
     if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
-      newFile.vpsPath = eventFileData.vpsPath;
+      // Remote VPS file
+      const content = await storageAPI.getVPSFile(eventFileData.vpsPath);
+      const ext = name.split(".").pop().toLowerCase();
+      const languageMap = {
+        js: "javascript",
+        jsx: "javascript",
+        ts: "typescript",
+        tsx: "typescript",
+        json: "json",
+        html: "html",
+        css: "css",
+        md: "markdown",
+        py: "python",
+        glsl: "glsl",
+        wgsl: "wgsl",
+        frag: "glsl",
+        vert: "glsl",
+      };
+      const language = languageMap[ext] || "plaintext";
+
+      fileData = { content, language };
     } else {
-      // Cabinet origin (new system)
-      newFile.cabinetType = type;
-      newFile.cabinetId = id;
-      if (type === "notes") {
-        newFile.noteName = id;   // for notes, id is the note name
+      // Local / Cabinet file (notes, etc.)
+      fileData = await storageAPI.getFileContent(id, type);
+    }
+
+    // 2. Add it to the Tab Manager
+    const newFileId = tabManager.addFile(
+      name,
+      fileData.content,
+      fileData.language,
+    );
+
+    // 3. Tag the file so save/open logic knows where it came from
+    const newFile = tabManager.files.find((f) => f.id === newFileId);
+    if (newFile) {
+      if (eventFileData && eventFileData.isRemote && eventFileData.vpsPath) {
+        newFile.vpsPath = eventFileData.vpsPath;
+      } else {
+        // Cabinet origin (new system)
+        newFile.cabinetType = type;
+        newFile.cabinetId = id;
+        if (type === "notes") {
+          newFile.noteName = id; // for notes, id is the note name
+        }
       }
     }
-  }
     // 3. DEPTH FOCUS LOGIC (The Immersive Step)
     // Push all current tabs backward into the rain (Depth 1)
     tabManager.files.forEach((file) => {
@@ -590,10 +600,17 @@ async function initLayers() {
     if (fgLayer) fgLayer.bindTexture("u_waterMap", raindrops.canvas);
 
     const time = performance.now() / 1000;
-    if (connectionManager && typeof connectionManager.draw === 'function') {
+    if (connectionManager && typeof connectionManager.draw === "function") {
       connectionManager.draw(time);
-      if (typeof connectionManager.drawRadar === 'function') {
+      if (typeof connectionManager.drawRadar === "function") {
         connectionManager.drawRadar(time);
+      }
+
+      if (
+        document.body.classList.contains("constellation-active") &&
+        typeof connectionManager.drawConstellationLines === "function"
+      ) {
+        connectionManager.drawConstellationLines(time);
       }
     }
 
@@ -640,11 +657,11 @@ let currentSceneRotY = 0;
 
 document.addEventListener("mousedown", (e) => {
   // Clear any active holo projection if clicking outside
-  if (!e.target.closest('.echo-document')) {
+  if (!e.target.closest(".echo-document")) {
     const echoLayerEl = document.getElementById("echo-layer");
     if (echoLayerEl) {
-      echoLayerEl.querySelectorAll('.holo-projected').forEach(doc => {
-        doc.classList.remove('holo-projected');
+      echoLayerEl.querySelectorAll(".holo-projected").forEach((doc) => {
+        doc.classList.remove("holo-projected");
       });
     }
   }
@@ -689,6 +706,14 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  if (e.key === "Escape") {
+    if (document.body.classList.contains("tesseract-active")) {
+      const viewSelect = document.getElementById("view-mode-select");
+      if (viewSelect) viewSelect.value = "";
+      tabManager._deactivateAllViews();
+    }
+  }
+
   if (e.key === "Control" || e.key === "Alt") {
     if (!e.ctrlKey || !e.altKey) {
       isWormholeActive = false;
@@ -706,6 +731,13 @@ document.addEventListener("keyup", (e) => {
 });
 
 // Clear gravitational cache on resize
+let holographicMinimap = null;
+
+// Initialize minimap if canvas exists
+if (document.getElementById("radar-canvas")) {
+  holographicMinimap = new HolographicMinimap("radar-canvas");
+}
+
 window.addEventListener("resize", () => {
   const dockEl = document.getElementById("dock");
   const tabsEl = document.getElementById("tabs-container");
@@ -713,23 +745,90 @@ window.addEventListener("resize", () => {
   if (tabsEl) tabsEl._origRect = null;
 });
 
+let isTesseractDragging = false;
+let tesseractLastX = 0;
+let tesseractLastY = 0;
+let tesseractRotX = 0;
+let tesseractRotY = 0;
+
+document.addEventListener("mousedown", (e) => {
+  if (document.body.classList.contains("tesseract-active")) {
+    isTesseractDragging = true;
+    tesseractLastX = e.clientX;
+    tesseractLastY = e.clientY;
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  isTesseractDragging = false;
+});
+
 document.addEventListener("mousemove", (e) => {
+  if (isAutofocusActive) {
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const echoDoc = target?.closest(".echo-document");
+    if (echoDoc) {
+      const depth = parseInt(echoDoc.dataset.depth || "0", 10);
+      if (depth === 0) autofocusTargetZ = -400;
+      else if (depth === 1) autofocusTargetZ = 0;
+      else if (depth === 2) autofocusTargetZ = 400;
+    } else {
+      autofocusTargetZ = 0; // Default to active plane if hovering nothing
+    }
+  }
+
+  if (
+    isTesseractDragging &&
+    document.body.classList.contains("tesseract-active")
+  ) {
+    const deltaX = e.clientX - tesseractLastX;
+    const deltaY = e.clientY - tesseractLastY;
+
+    tesseractRotY += deltaX * 0.5;
+    tesseractRotX -= deltaY * 0.5;
+
+    document.documentElement.style.setProperty(
+      "--tesseract-rot-x",
+      `${tesseractRotX}deg`,
+    );
+    document.documentElement.style.setProperty(
+      "--tesseract-rot-y",
+      `${tesseractRotY}deg`,
+    );
+
+    tesseractLastX = e.clientX;
+    tesseractLastY = e.clientY;
+  }
+
   // Gravitational Cursor Tracking for UI Elements (Dock & Tabs)
   const mx = e.clientX;
   const my = e.clientY;
 
-// Track cursor position globally for CSS effects
+  // Track cursor position globally for CSS effects
   document.body.style.setProperty("--mouse-x", `${mx}px`);
   document.body.style.setProperty("--mouse-y", `${my}px`);
 
   // Normalized mouse coordinates from -1 to 1 for advanced 3D tilting
   const nx = (mx / window.innerWidth) * 2 - 1;
   const ny = (my / window.innerHeight) * 2 - 1;
-  document.body.style.setProperty('--mouse-nx', nx);
-  document.body.style.setProperty('--mouse-ny', ny);
+  document.body.style.setProperty("--mouse-nx", nx);
+  document.body.style.setProperty("--mouse-ny", ny);
+
+  // Apply localized 3D tilt to UI elements based on normalized cursor position
+  const uiDockEl = document.getElementById("dock");
+  const uiTabsEl = document.getElementById("tabs-container");
+  if (uiDockEl) {
+    uiDockEl.style.transform = `perspective(1000px) rotateX(${ny * -10}deg) rotateY(${nx * 10}deg) translateZ(10px)`;
+  }
+  if (uiTabsEl) {
+    uiTabsEl.style.transform = `perspective(1000px) rotateX(${ny * -10}deg) rotateY(${nx * 10}deg) translateZ(10px)`;
+  }
 
   // Update targets for Depth Spotlight and Hologram Preview
-  if (document.body.classList.contains("depth-spotlight-active") || document.body.classList.contains("hologram-preview-active")) {
+  if (
+    document.body.classList.contains("depth-spotlight-active") ||
+    document.body.classList.contains("hologram-preview-active")
+  ) {
     const echoes = Array.from(document.querySelectorAll(".echo-document"));
     let closestEcho = null;
     let minDistance = Infinity;
@@ -759,7 +858,6 @@ document.addEventListener("mousemove", (e) => {
       }
     }
   }
-
 
   // 3D Magnifying Glass Effect (Shift Key)
   if (e.shiftKey && tabManager && tabManager.files) {
@@ -794,14 +892,14 @@ document.addEventListener("mousemove", (e) => {
   // --- NEW: Calculate local coordinates for echo-documents (for magnetic-edge and holographic glares) ---
   if (echoLayerEl) {
     const echoes = echoLayerEl.querySelectorAll(".echo-document");
-    echoes.forEach(echo => {
+    echoes.forEach((echo) => {
       const rect = echo.getBoundingClientRect();
       // Only calculate if document is reasonably visible or nearby to save performance
       const localX = mx - rect.left;
       const localY = my - rect.top;
 
-      echo.style.setProperty('--mouse-local-x', `${localX}px`);
-      echo.style.setProperty('--mouse-local-y', `${localY}px`);
+      echo.style.setProperty("--mouse-local-x", `${localX}px`);
+      echo.style.setProperty("--mouse-local-y", `${localY}px`);
 
       // Calculate normalized local coords for 3D tilt
       const centerX = rect.width / 2;
@@ -809,8 +907,8 @@ document.addEventListener("mousemove", (e) => {
       const hoverRotY = ((localX - centerX) / centerX) * 5; // max 5deg tilt
       const hoverRotX = -((localY - centerY) / centerY) * 5;
 
-      echo.style.setProperty('--hover-rot-x', `${hoverRotX}deg`);
-      echo.style.setProperty('--hover-rot-y', `${hoverRotY}deg`);
+      echo.style.setProperty("--hover-rot-x", `${hoverRotX}deg`);
+      echo.style.setProperty("--hover-rot-y", `${hoverRotY}deg`);
     });
   }
   // --- END NEW ---
@@ -1127,8 +1225,14 @@ document.addEventListener("mousemove", (e) => {
         const normalizedDx = dx / (dist || 1);
         const normalizedDy = dy / (dist || 1);
         const maxRepel = 80; // pixels to repel
-        echo.style.setProperty("--repel-tx", `${normalizedDx * maxRepel * repelFactor}px`);
-        echo.style.setProperty("--repel-ty", `${normalizedDy * maxRepel * repelFactor}px`);
+        echo.style.setProperty(
+          "--repel-tx",
+          `${normalizedDx * maxRepel * repelFactor}px`,
+        );
+        echo.style.setProperty(
+          "--repel-ty",
+          `${normalizedDy * maxRepel * repelFactor}px`,
+        );
       } else {
         echo.style.setProperty("--repel-tx", `0px`);
         echo.style.setProperty("--repel-ty", `0px`);
@@ -1356,39 +1460,28 @@ const btnDepthBack = document.getElementById("btn-depth-back");
 
 if (btnDepthForward) {
   btnDepthForward.addEventListener("click", () => {
-    const activeFile = tabManager.files.find(
-      (f) => f.id === tabManager.activeId,
-    );
-    if (!activeFile) return;
-
-    // Cycle depth forward: 0 -> 1 -> 2 -> 0
-    activeFile.depth = (activeFile.depth + 1) % 3;
-    tabManager.applyDepth(activeFile.depth);
-    tabManager._renderTabs();
-
-    console.log(
-      `[Depth] ${activeFile.name} moved to depth ${activeFile.depth} (${["Deep", "Middle", "Front"][activeFile.depth]})`,
-    );
+    tabManager.cycleDepth(1);
   });
 }
 
 if (btnDepthBack) {
   btnDepthBack.addEventListener("click", () => {
-    const activeFile = tabManager.files.find(
-      (f) => f.id === tabManager.activeId,
-    );
-    if (!activeFile) return;
-
-    // Cycle depth backward: 0 -> 2 -> 1 -> 0
-    activeFile.depth = activeFile.depth <= 0 ? 2 : activeFile.depth - 1;
-    tabManager.applyDepth(activeFile.depth);
-    tabManager._renderTabs();
-
-    console.log(
-      `[Depth] ${activeFile.name} moved to depth ${activeFile.depth} (${["Deep", "Middle", "Front"][activeFile.depth]})`,
-    );
+    tabManager.cycleDepth(-1);
   });
 }
+
+// Ctrl/Cmd + ArrowUp/ArrowDown - cycle active document layer
+document.addEventListener("keydown", (e) => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+
+  if (e.key === "ArrowUp") {
+    e.preventDefault();
+    tabManager.cycleDepth(1);
+  } else if (e.key === "ArrowDown") {
+    e.preventDefault();
+    tabManager.cycleDepth(-1);
+  }
+});
 
 const viewModeSelect = document.getElementById("view-mode-select");
 if (viewModeSelect) {
@@ -1408,6 +1501,7 @@ if (viewModeSelect) {
     else if (view === "carousel") tabManager.toggleCarouselView();
     // UI binding for Infinity Mirror view mode (added in previous iteration)
     else if (view === "infinity-mirror") tabManager.toggleInfinityMirrorView();
+    else if (view === "kaleidoscope") tabManager.toggleKaleidoscopeView();
     else if (view === "vortex") tabManager.toggleVortexView();
     else if (view === "constellation") tabManager.toggleConstellationView();
     else if (view === "prism") tabManager.togglePrismView();
@@ -1420,7 +1514,7 @@ if (viewModeSelect) {
     else if (view === "galaxy") tabManager.toggleGalaxyView();
     else if (view === "origami") tabManager.toggleOrigamiView();
     else if (view === "matrix-rain") tabManager.toggleMatrixRainView();
-            else if (view === 'data-hive') tabManager.toggleDataHiveView();
+    else if (view === "data-hive") tabManager.toggleDataHiveView();
     else if (view === "crystal") tabManager.toggleCrystalView();
     else if (view === "fractal") tabManager.toggleFractalView();
     else if (view === "solar-system") tabManager.toggleSolarSystemView();
@@ -1429,7 +1523,12 @@ if (viewModeSelect) {
     else if (view === "cyber-cortex") tabManager.toggleCyberCortexView();
     else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
     else if (view === "outline") tabManager.toggleOutlineView();
-
+    else if (view === "tesseract") tabManager.toggleTesseractView();
+    else if (view === "cyclone") tabManager.toggleCycloneView();
+    else if (view === "mobius") tabManager.toggleMobiusView();
+    else if (view === "astrolabe") tabManager.toggleAstrolabeView();
+    else if (view === "dominoes") tabManager.toggleDominoesView();
+    else if (view === "hexagon-matrix") tabManager.toggleHexagonMatrixView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }
@@ -1444,6 +1543,78 @@ if (theaterToggle) {
       document.body.classList.remove("theater-active");
     }
   });
+}
+
+// Cinematic Autofocus Logic
+const autofocusToggle = document.getElementById("cinematic-autofocus-mode");
+let isAutofocusActive = false;
+if (autofocusToggle) {
+  autofocusToggle.addEventListener("change", (e) => {
+    isAutofocusActive = e.target.checked;
+    if (isAutofocusActive) {
+      document.body.classList.add("cinematic-autofocus-active");
+      _startAutofocusLoop();
+    } else {
+      document.body.classList.remove("cinematic-autofocus-active");
+      _stopAutofocusLoop();
+    }
+  });
+}
+
+let autofocusTargetZ = 0;
+let autofocusCurrentZ = 0;
+let autofocusRafId = null;
+
+function _startAutofocusLoop() {
+  if (!autofocusRafId) {
+    _autofocusStep();
+  }
+}
+
+function _stopAutofocusLoop() {
+  if (autofocusRafId) {
+    cancelAnimationFrame(autofocusRafId);
+    autofocusRafId = null;
+  }
+  // Reset echoes
+  if (echoLayerEl) {
+    echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+      doc.style.removeProperty("--af-blur");
+      doc.style.removeProperty("--af-brightness");
+    });
+  }
+}
+
+function _autofocusStep() {
+  if (!isAutofocusActive) {
+    _stopAutofocusLoop();
+    return;
+  }
+
+  // Lerp current Z to target Z for smooth focal transition
+  autofocusCurrentZ += (autofocusTargetZ - autofocusCurrentZ) * 0.1;
+
+  if (echoLayerEl) {
+    echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+      // Calculate local Z depth (derived from its data-depth or var(--tz))
+      // It's hard to get computed --tz reliably if it's animated, so we use an approximation based on depth
+      let docZ = 0;
+      const depth = parseInt(doc.dataset.depth || "0", 10);
+      if (depth === 0) docZ = -400;
+      else if (depth === 1) docZ = 0;
+      else if (depth === 2) docZ = 400;
+
+      const distance = Math.abs(docZ - autofocusCurrentZ);
+      // Max distance is roughly 800, let's map this to blur 0px -> 15px
+      const blurAmount = Math.min(15, (distance / 800) * 15);
+      const brightnessAmount = 1 - Math.min(0.6, (distance / 800) * 0.6);
+
+      doc.style.setProperty("--af-blur", `${blurAmount}px`);
+      doc.style.setProperty("--af-brightness", `${brightnessAmount}`);
+    });
+  }
+
+  autofocusRafId = requestAnimationFrame(_autofocusStep);
 }
 
 const opacitySlider = document.getElementById("editor-opacity");
@@ -1633,6 +1804,116 @@ if (ghostToggle) {
     if (editorEl && focusDepth < 0.1) editorEl.style.filter = "none";
   });
 });
+
+// Cinematic Autofocus Mode
+let isCinematicAutofocusActive = false;
+let currentCinematicZ = 0;
+let targetCinematicZ = 0;
+let cinematicAnimationId = null;
+
+const cinematicToggle = document.getElementById("cinematic-autofocus-mode");
+if (cinematicToggle) {
+  cinematicToggle.addEventListener("change", (e) => {
+    isCinematicAutofocusActive = e.target.checked;
+
+    if (isCinematicAutofocusActive) {
+      document.body.classList.add("cinematic-autofocus-active");
+      if (!cinematicAnimationId) {
+        animateCinematicFocus();
+      }
+    } else {
+      document.body.classList.remove("cinematic-autofocus-active");
+      if (cinematicAnimationId) {
+        cancelAnimationFrame(cinematicAnimationId);
+        cinematicAnimationId = null;
+      }
+      resetCinematicFocus();
+    }
+  });
+}
+
+function updateCinematicTarget(e) {
+  if (!isCinematicAutofocusActive) return;
+
+  // Find element under cursor
+  const target = document.elementFromPoint(e.clientX, e.clientY);
+  const echoDoc = target ? target.closest(".echo-document") : null;
+  const isEditor = target ? target.closest("#editor") : null;
+
+  if (echoDoc) {
+    // Determine depth based on index
+    const indexStr = echoDoc.style.getPropertyValue("--depth-index") || "0";
+    targetCinematicZ = parseInt(indexStr, 10);
+  } else if (isEditor) {
+    targetCinematicZ = -1; // Editor is foreground
+  } else {
+    // If not hovering anything, subtly drift focus back to the front
+    targetCinematicZ = -0.5;
+  }
+}
+
+document.addEventListener("mousemove", updateCinematicTarget);
+
+function animateCinematicFocus() {
+  if (!isCinematicAutofocusActive) return;
+
+  // Lerp towards target
+  currentCinematicZ += (targetCinematicZ - currentCinematicZ) * 0.08;
+
+  // Apply to styles
+  applyCinematicStyles();
+
+  cinematicAnimationId = requestAnimationFrame(animateCinematicFocus);
+}
+
+function applyCinematicStyles() {
+  if (!echoLayerEl) return;
+
+  const echoes = echoLayerEl.querySelectorAll(".echo-document");
+
+  // Apply to editor (foreground)
+  const editorDist = Math.abs(currentCinematicZ - -1);
+  const editorBlur = editorDist * 2.5; // blur amount
+  const editorOpacity = Math.max(0.3, 1 - editorDist * 0.15);
+
+  if (editorEl) {
+    editorEl.style.filter = `blur(${editorBlur}px)`;
+    editorEl.style.opacity = editorOpacity;
+  }
+
+  // Apply to echoes
+  echoes.forEach((echo) => {
+    const indexStr = echo.style.getPropertyValue("--depth-index") || "0";
+    const zIndex = parseInt(indexStr, 10);
+
+    // Distance from focal plane
+    const dist = Math.abs(currentCinematicZ - zIndex);
+
+    // Calculate blur and brightness based on distance from focal plane
+    const blurAmount = dist * 2.5;
+    const brightness = Math.max(0.4, 1 - dist * 0.1);
+    const opacity = Math.max(0.2, 0.8 - dist * 0.08);
+
+    echo.style.filter = `blur(${blurAmount}px) brightness(${brightness})`;
+    echo.style.opacity = opacity;
+  });
+}
+
+function resetCinematicFocus() {
+  if (editorEl) {
+    editorEl.style.filter = "";
+    // Opacity is handled by sliders, avoid clobbering completely, but clear inline
+    editorEl.style.opacity = opacitySlider ? opacitySlider.value : "";
+  }
+
+  if (echoLayerEl) {
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach((echo) => {
+      echo.style.filter = "";
+      echo.style.opacity = "";
+    });
+  }
+}
 
 // Blueprint Mode
 document.getElementById("blueprint-mode").addEventListener("change", (e) => {
@@ -2102,14 +2383,19 @@ window.addEventListener(
       zCameraOffset = Math.max(-200, Math.min(maxDepth, zCameraOffset));
 
       // Apply the global camera offset to the body so all layers get it
-      document.body.style.setProperty("--z-camera-offset", `${zCameraOffset}px`);
+      document.body.style.setProperty(
+        "--z-camera-offset",
+        `${zCameraOffset}px`,
+      );
 
       if (echoLayerEl) {
         // Highlight intersecting documents (Layered Depth Explorer visual feedback)
         const echoes = echoLayerEl.querySelectorAll(".echo-document");
         echoes.forEach((echo) => {
           // Original Z position (from TabManager: mostly derived from index, though varies by view mode. Using a general approach here)
-          const docZ = (parseInt(echo.dataset.index || 0) * 50) + parseInt(echo.style.getPropertyValue('--tz') || 0);
+          const docZ =
+            parseInt(echo.dataset.index || 0) * 50 +
+            parseInt(echo.style.getPropertyValue("--tz") || 0);
 
           // If zCameraOffset is near docZ, it's intersecting the viewing plane and we can apply visual feedback
           const distance = Math.abs(docZ - zCameraOffset);
@@ -2124,6 +2410,14 @@ window.addEventListener(
   },
   { passive: false },
 );
+
+// --- Flashlight Mode Toggle ---
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.key.toLowerCase() === "f") {
+    e.preventDefault();
+    document.body.classList.toggle("flashlight-active");
+  }
+});
 
 document.addEventListener("keyup", (e) => {
   if (e.key === "Alt") {
@@ -2303,6 +2597,50 @@ editor.onDidChangeModelContent((e) => {
       }, 500);
     });
   }
+
+  // Innovated Feature: Semantic Explode on Edit
+  e.changes.forEach((change) => {
+    if (change.text.match(/[\s\n]$/)) {
+      const position = editor.getPosition();
+      if (!position) return;
+
+      const model = editor.getModel();
+      const wordInfo = model.getWordUntilPosition({
+        lineNumber: position.lineNumber,
+        column: position.column - 1,
+      });
+
+      if (wordInfo && wordInfo.word && wordInfo.word.length > 3) {
+        const lowerWord = wordInfo.word.toLowerCase();
+
+        tabManager.files.forEach((file) => {
+          if (file.id !== tabManager.activeId) {
+            let content = "";
+            if (file.model) {
+              content = file.model.getValue().toLowerCase();
+            } else if (file.isImage) {
+              content = file.name.toLowerCase();
+            }
+
+            if (content.includes(lowerWord)) {
+              const echoEl = document.querySelector(
+                `.echo-document[data-id="${file.id}"]`,
+              );
+              if (echoEl) {
+                echoEl.classList.remove("shatter-active");
+                void echoEl.offsetWidth; // Force reflow
+                echoEl.classList.add("shatter-active");
+
+                setTimeout(() => {
+                  echoEl.classList.remove("shatter-active");
+                }, 600);
+              }
+            }
+          }
+        });
+      }
+    }
+  });
 });
 
 setInterval(() => {
@@ -2712,6 +3050,26 @@ document.addEventListener("mousemove", () => {
 // Initial scan
 scanPortals();
 
+// X-Ray Mode (Alt + Shift + X)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.shiftKey && e.code === "KeyX" && !e.ctrlKey && !e.metaKey) {
+    document.body.classList.add("x-ray-active");
+  }
+});
+
+// Singularity / Black Hole Collapse (Alt + Shift + Backspace)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.shiftKey && e.key === "Backspace") {
+    e.preventDefault();
+    document.body.classList.toggle("singularity-active");
+  }
+});
+document.addEventListener("keyup", (e) => {
+  if (e.key.toLowerCase() === "x" || e.key === "Shift" || e.key === "Alt") {
+    document.body.classList.remove("x-ray-active");
+  }
+});
+
 // Ctrl+Shift+S — Save current document to VPS
 document.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "S") {
@@ -2727,7 +3085,9 @@ document.addEventListener("keydown", (e) => {
     tabManager.toggleOutlineView();
     const sel = document.getElementById("view-mode-select");
     if (sel) {
-      sel.value = document.body.classList.contains("outline-active") ? "outline" : "";
+      sel.value = document.body.classList.contains("outline-active")
+        ? "outline"
+        : "";
     }
   }
 });
@@ -2735,13 +3095,20 @@ document.addEventListener("keydown", (e) => {
 // Ctrl+S — Save current tab to backend
 document.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "s") {
+    e.preventDefault();
+
+    // Trigger Sonic Boom animation
+    document.body.classList.add("sonic-boom-active");
+    setTimeout(() => {
+      document.body.classList.remove("sonic-boom-active");
+    }, 400);
+
     const activeFile = tabManager.files.find(
       (f) => f.id === tabManager.activeId,
     );
     if (!activeFile || activeFile.isImage) return;
 
     if (activeFile.cabinetType === "notes" || activeFile.noteName) {
-      e.preventDefault();
       const noteName =
         activeFile.noteName || activeFile.cabinetId || activeFile.name;
       const content = activeFile.model ? activeFile.model.getValue() : "";
@@ -2764,13 +3131,114 @@ document.addEventListener("keydown", (e) => {
 
 // Expose tabManager for testing
 window.tabManager = tabManager;
-  initSemanticResonance(editor, tabManager);
-  initKineticTypingPulse(editor);
+initSemanticResonance(editor, tabManager);
+initKineticTypingPulse(editor);
 
-// Hyper-Jump & Magnetic Peel
+// Document Fanning (Card Hand View) & Hyper-Jump & Magnetic Peel
 let isPeelActive = false;
+let isFanningActive = false;
+
+let isExplodeViewActive = false;
+
+function triggerExplodeView() {
+  const echoLayerEl = document.getElementById("echo-layer");
+  if (!echoLayerEl) return;
+
+  isExplodeViewActive = !isExplodeViewActive;
+
+  if (isExplodeViewActive) {
+    document.body.classList.add("explode-view-active");
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    const total = echoes.length;
+
+    echoes.forEach((echo, index) => {
+      // Calculate spherical coordinates for explosion
+      const phi = Math.acos(1 - (2 * (index + 0.5)) / total);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+
+      const radius = 800 + Math.random() * 400; // Explode outwards
+
+      const tx = radius * Math.sin(phi) * Math.cos(theta);
+      const ty = radius * Math.sin(phi) * Math.sin(theta);
+      const tz = radius * Math.cos(phi) - 200;
+
+      const rotX = (Math.random() - 0.5) * 180;
+      const rotY = (Math.random() - 0.5) * 180;
+      const rotZ = (Math.random() - 0.5) * 180;
+
+      echo.style.setProperty("--exp-tx", `${tx}px`);
+      echo.style.setProperty("--exp-ty", `${ty}px`);
+      echo.style.setProperty("--exp-tz", `${tz}px`);
+      echo.style.setProperty("--exp-rot-x", `${rotX}deg`);
+      echo.style.setProperty("--exp-rot-y", `${rotY}deg`);
+      echo.style.setProperty("--exp-rot-z", `${rotZ}deg`);
+    });
+  } else {
+    document.body.classList.remove("explode-view-active");
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach((echo) => {
+      echo.style.removeProperty("--exp-tx");
+      echo.style.removeProperty("--exp-ty");
+      echo.style.removeProperty("--exp-tz");
+      echo.style.removeProperty("--exp-rot-x");
+      echo.style.removeProperty("--exp-rot-y");
+      echo.style.removeProperty("--exp-rot-z");
+    });
+  }
+}
+
+const btnExplode = document.getElementById("btn-explode-view");
+if (btnExplode) {
+  btnExplode.addEventListener("click", triggerExplodeView);
+}
 
 document.addEventListener("keydown", (e) => {
+  // Explode View (Ctrl + Alt + E)
+  if ((e.ctrlKey || e.metaKey) && e.altKey && e.code === "KeyE") {
+    e.preventDefault();
+    triggerExplodeView();
+    return;
+  }
+
+  // Document Fanning (Alt + C)
+  if (e.altKey && e.code === "KeyC") {
+    if (!isFanningActive) {
+      isFanningActive = true;
+      document.body.classList.add("fanning-active");
+
+      if (echoLayerEl) {
+        const echoes = echoLayerEl.querySelectorAll(
+          ".echo-document:not(.peek)",
+        );
+        const total = echoes.length;
+        if (total > 0) {
+          const maxAngle = Math.min(120, total * 15); // max spread 120deg
+          const startAngle = -maxAngle / 2;
+          const angleStep = total > 1 ? maxAngle / (total - 1) : 0;
+          const radius = 600; // Radius of the fanning arc
+
+          echoes.forEach((echo, index) => {
+            const angleDeg = startAngle + index * angleStep;
+            const angleRad = (angleDeg * Math.PI) / 180;
+            const tx = Math.sin(angleRad) * radius;
+            // Negative ty to push them slightly upwards forming an arch
+            const ty = -Math.cos(angleRad) * radius + radius * 0.8;
+
+            // Optional: push them a bit forward to pop them
+            const tz = 100 + index * 5;
+
+            echo.style.setProperty("--fan-tx", `${tx}px`);
+            echo.style.setProperty("--fan-ty", `${ty}px`);
+            echo.style.setProperty("--fan-tz", `${tz}px`);
+            echo.style.setProperty("--fan-rot-z", `${angleDeg}deg`);
+          });
+        }
+      }
+    }
+    e.preventDefault();
+    return;
+  }
+
   // Hyper-Jump
   if (e.altKey && e.shiftKey && e.key === "J") {
     if (!document.body.classList.contains("hyper-jump-active")) {
@@ -2793,6 +3261,22 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  if (e.key === "c" || e.key === "C" || e.key === "Alt") {
+    if (isFanningActive && (!e.altKey || (e.code === "KeyC" && !e.altKey))) {
+      isFanningActive = false;
+      document.body.classList.remove("fanning-active");
+      if (echoLayerEl) {
+        const echoes = echoLayerEl.querySelectorAll(".echo-document");
+        echoes.forEach((echo) => {
+          echo.style.removeProperty("--fan-tx");
+          echo.style.removeProperty("--fan-ty");
+          echo.style.removeProperty("--fan-tz");
+          echo.style.removeProperty("--fan-rot-z");
+        });
+      }
+    }
+  }
+
   if (e.key === "Shift") {
     if (echoLayerEl && window.__lensActive) {
       const echoes = echoLayerEl.querySelectorAll(".echo-document");
@@ -2814,7 +3298,7 @@ document.addEventListener("keyup", (e) => {
         typeof tabManager !== "undefined" &&
         !tabManager.isCascadeView &&
         !tabManager.isOrbitView &&
-    !tabManager.isSolarSystemView &&
+        !tabManager.isSolarSystemView &&
         !tabManager.isScatteredView &&
         !tabManager.isIsometricView &&
         !tabManager.isStackView &&
@@ -2827,8 +3311,8 @@ document.addEventListener("keyup", (e) => {
         !tabManager.isPrismView &&
         !tabManager.isCoverflowView &&
         !tabManager.isWaveView &&
-    !tabManager.isSphereView &&
-    !tabManager.isMatrixRainView
+        !tabManager.isSphereView &&
+        !tabManager.isMatrixRainView
       ) {
         const echoes = echoLayerEl.querySelectorAll(".echo-document");
         echoes.forEach((echo) => {
@@ -2887,28 +3371,30 @@ function initSemanticResonance(editor, tabManager) {
       }
 
       // 4. Check background files for the text
-      tabManager.files.forEach(file => {
+      tabManager.files.forEach((file) => {
         // Skip the currently active file
         if (file.id === tabManager.activeId) return;
 
         // Find the DOM element for this file's echo document
-        const echoNode = document.querySelector(`.echo-document[data-id="${file.id}"]`);
+        const echoNode = document.querySelector(
+          `.echo-document[data-id="${file.id}"]`,
+        );
         if (!echoNode) return;
 
         // Check if the background model contains the selected text
         const fileContent = file.model.getValue();
         if (fileContent.includes(selectedText)) {
-          echoNode.classList.add('semantic-resonance');
+          echoNode.classList.add("semantic-resonance");
         } else {
-          echoNode.classList.remove('semantic-resonance');
+          echoNode.classList.remove("semantic-resonance");
         }
       });
     }, 150); // 150ms debounce
   });
 
   function clearAllResonances() {
-    document.querySelectorAll('.semantic-resonance').forEach(node => {
-      node.classList.remove('semantic-resonance');
+    document.querySelectorAll(".semantic-resonance").forEach((node) => {
+      node.classList.remove("semantic-resonance");
     });
   }
 }
@@ -2922,21 +3408,33 @@ function initKineticTypingPulse(editor) {
     if (!echoLayerEl) return;
 
     const echoes = echoLayerEl.querySelectorAll(".echo-document");
-    echoes.forEach(echo => {
+    echoes.forEach((echo) => {
       echo.classList.add("typing-pulse");
     });
 
     clearTimeout(pulseTimeout);
     pulseTimeout = setTimeout(() => {
-      echoes.forEach(echo => {
+      echoes.forEach((echo) => {
         echo.classList.remove("typing-pulse");
       });
     }, 150);
   });
 }
 
-// --- Depth Spotlight (Alt+Shift+S) & Hologram Preview (Alt+Shift+H) ---
+// --- Fabric Tear Interaction (Alt + T) ---
 document.addEventListener("keydown", (e) => {
+  if (
+    e.altKey &&
+    e.code === "KeyT" &&
+    !e.shiftKey &&
+    !e.ctrlKey &&
+    !e.metaKey
+  ) {
+    if (!document.body.classList.contains("fabric-tear-active")) {
+      document.body.classList.add("fabric-tear-active");
+    }
+  }
+
   if (e.altKey && e.shiftKey && e.code === "KeyS") {
     e.preventDefault();
     document.body.classList.toggle("depth-spotlight-active");
@@ -2944,5 +3442,86 @@ document.addEventListener("keydown", (e) => {
   if (e.altKey && e.shiftKey && e.code === "KeyH") {
     e.preventDefault();
     document.body.classList.toggle("hologram-preview-active");
+  }
+  // Holographic Document Dispersion (Alt+X)
+  if (e.altKey && e.code === "KeyX" && !e.shiftKey) {
+    e.preventDefault();
+    document.body.classList.add("dispersion-active");
+  }
+
+  // Holographic Curtain Pull (Alt+P)
+  if (e.altKey && e.code === "KeyP" && !e.shiftKey) {
+    e.preventDefault();
+    document.body.classList.add("curtain-pull-active");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  // Holographic Document Dispersion (Alt+X)
+  if (e.key === "x" || e.key === "X" || e.key === "Alt") {
+    document.body.classList.remove("dispersion-active");
+  }
+
+  // Holographic Curtain Pull (Alt+P)
+  if (e.key === "p" || e.key === "P" || e.key === "Alt") {
+    document.body.classList.remove("curtain-pull-active");
+  }
+
+  if (e.key === "t" || e.key === "T" || e.key === "Alt") {
+    document.body.classList.remove("fabric-tear-active");
+    if (editorEl) {
+      editorEl.style.removeProperty("--tear-mask");
+    }
+  }
+});
+
+// Calculate normalized mouse X for Curtain Pull and Fabric Tear
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("curtain-pull-active")) {
+    // Normalize mouse X from -1 to 1 based on screen width
+    const normX = (e.clientX / window.innerWidth) * 2 - 1;
+    document.body.style.setProperty("--mouse-x-norm", normX.toFixed(3));
+  }
+
+  if (document.body.classList.contains("fabric-tear-active")) {
+    if (editorEl) {
+      const mouseX = e.clientX;
+      const gradient = `linear-gradient(to right, black 0%, black calc(${mouseX}px - 50px), transparent calc(${mouseX}px - 20px), transparent calc(${mouseX}px + 20px), black calc(${mouseX}px + 50px), black 100%)`;
+      editorEl.style.setProperty("--tear-mask", gradient);
+    }
+  }
+});
+
+// --- Quantum Depth Filtering (Shift + Hover Z-Plane Isolation) ---
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Shift" && !document.body.classList.contains("x-ray-active")) {
+    document.body.classList.add("quantum-depth-active");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "Shift") {
+    document.body.classList.remove("quantum-depth-active");
+    document.body.removeAttribute("data-active-depth");
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("quantum-depth-active")) {
+    const echoLayer = document.getElementById("echo-layer");
+    if (!echoLayer) return;
+
+    // Find echo document under cursor
+    let target = document.elementFromPoint(e.clientX, e.clientY);
+    let echoDoc = target ? target.closest(".echo-document") : null;
+
+    if (echoDoc) {
+      const depthIndex = echoDoc.getAttribute("data-index");
+      if (depthIndex) {
+        document.body.setAttribute("data-active-depth", depthIndex);
+      }
+    } else {
+      document.body.removeAttribute("data-active-depth");
+    }
   }
 });

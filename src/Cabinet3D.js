@@ -299,23 +299,23 @@ export class Cabinet3D {
   _addRemoteFileBadge(fileMesh) {
     try {
       // Create a small canvas for the badge
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = 64;
       canvas.height = 64;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
 
       // Draw badge background (semi-transparent white circle)
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
       ctx.beginPath();
       ctx.arc(32, 32, 28, 0, Math.PI * 2);
       ctx.fill();
 
       // Draw cloud icon (☁️ representation)
-      ctx.fillStyle = '#0066ff';
-      ctx.font = 'bold 40px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('☁', 32, 32);
+      ctx.fillStyle = "#0066ff";
+      ctx.font = "bold 40px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("☁", 32, 32);
 
       // Create texture from canvas
       const texture = new THREE.CanvasTexture(canvas);
@@ -326,11 +326,15 @@ export class Cabinet3D {
       const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
       const sprite = new THREE.Sprite(spriteMaterial);
       sprite.scale.set(0.4, 0.4, 1);
-      sprite.position.set(FILE_CUBE_SIZE * 0.4, FILE_CUBE_SIZE * 0.4, FILE_CUBE_SIZE * 0.4);
+      sprite.position.set(
+        FILE_CUBE_SIZE * 0.4,
+        FILE_CUBE_SIZE * 0.4,
+        FILE_CUBE_SIZE * 0.4,
+      );
 
       fileMesh.add(sprite);
     } catch (err) {
-      console.warn('Failed to add remote file badge:', err);
+      console.warn("Failed to add remote file badge:", err);
     }
   }
 
@@ -346,9 +350,11 @@ export class Cabinet3D {
       let localFiles = [];
       try {
         const localData = await this.storageAPI.getCategoryFiles(catName);
-        localFiles = Array.isArray(localData) ? localData : (localData.items || localData.data || []);
+        localFiles = Array.isArray(localData)
+          ? localData
+          : localData.items || localData.data || [];
         // Mark local files
-        localFiles = localFiles.map(f => ({ ...f, isRemote: false }));
+        localFiles = localFiles.map((f) => ({ ...f, isRemote: false }));
       } catch (err) {
         console.warn(`Could not fetch local files for ${catName}:`, err);
       }
@@ -357,21 +363,21 @@ export class Cabinet3D {
       let remoteFiles = [];
       try {
         // Try to browse a category-specific path first, then fall back to root
-        const paths = [`/${catName}`, '/'];
+        const paths = [`/${catName}`, "/"];
         for (const path of paths) {
           try {
             const items = await this.storageAPI.browseVPS(path);
             if (items && items.length > 0) {
               // Filter for files only (not directories), limit to 32
               remoteFiles = items
-                .filter(item => item.type === 'file')
+                .filter((item) => item.type === "file")
                 .slice(0, 32)
-                .map(item => ({
+                .map((item) => ({
                   ...item,
                   id: `vps_${item.path}`, // Use path as unique ID for VPS files
-                  name: item.name || item.path.split('/').pop(),
+                  name: item.name || item.path.split("/").pop(),
                   isRemote: true,
-                  vpsPath: item.path
+                  vpsPath: item.path,
                 }));
               break; // Successfully loaded, don't try other paths
             }
@@ -450,11 +456,11 @@ export class Cabinet3D {
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(x, y, z);
       mesh.userData = {
-        type: 'file',
+        type: "file",
         catIndex,
         fileData,
         catName,
-        isRemote: fileData.isRemote || false
+        isRemote: fileData.isRemote || false,
       };
       catMesh.add(mesh); // parented to the category cube
       this._fileMeshes.push(mesh);
@@ -532,24 +538,24 @@ export class Cabinet3D {
     const camPos = target.clone().add(new THREE.Vector3(0, 0, 4));
     this._animateCamera(camPos, target);
     this._hint.textContent = `Loading ${catName}…`;
-// Lazy-load files for this category
-if (!this._loadedCats.has(catIndex)) {
-  this.storageAPI
-    .getCategoryFiles(catName)
-    .then((files) => {
-      const list = Array.isArray(files)
-        ? files
-        : files.items || files.data || [];
-      
-      this._buildFileCubes(catIndex, list);
-      this._hint.textContent = `${catName}: ${list.length} file(s) · Click a file cube to open`;
-    })
-    .catch(() => {
-      this._hint.textContent = `${catName}: could not load files (check backend)`;
-    });
-} else {
-  this._hint.textContent = `${catName} · Click a file cube to open it`;
-}
+    // Lazy-load files for this category
+    if (!this._loadedCats.has(catIndex)) {
+      this.storageAPI
+        .getCategoryFiles(catName)
+        .then((files) => {
+          const list = Array.isArray(files)
+            ? files
+            : files.items || files.data || [];
+
+          this._buildFileCubes(catIndex, list);
+          this._hint.textContent = `${catName}: ${list.length} file(s) · Click a file cube to open`;
+        })
+        .catch(() => {
+          this._hint.textContent = `${catName}: could not load files (check backend)`;
+        });
+    } else {
+      this._hint.textContent = `${catName} · Click a file cube to open it`;
+    }
   }
 
   /**
