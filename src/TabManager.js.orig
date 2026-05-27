@@ -167,7 +167,6 @@ export class TabManager {
     this.isQuantumSuperpositionView = false;
     this.isOutlineView = false;
     this.isInfinityMirrorView = false;
-    this.isKaleidoscopeView = false;
     this.isCarouselView = false;
     this.isCycloneView = false;
     this.isMobiusView = false;
@@ -208,7 +207,6 @@ export class TabManager {
       "cyber-cortex-active",
       "outline-active",
       "infinity-mirror-active",
-      "kaleidoscope-active",
       "carousel-active",
       "cyclone-active",
       "mobius-active",
@@ -407,13 +405,6 @@ export class TabManager {
     this._deactivateAllViews();
     this.isInfinityMirrorView = true;
     document.body.classList.add("infinity-mirror-active");
-    this._renderEchoes();
-  }
-
-  toggleKaleidoscopeView() {
-    this._deactivateAllViews();
-    this.isKaleidoscopeView = true;
-    document.body.classList.add("kaleidoscope-active");
     this._renderEchoes();
   }
 
@@ -1934,21 +1925,6 @@ Drag to change depth`;
         el.style.setProperty("--tz", `${tz}px`);
         el.style.setProperty("--tx", `${tx}px`);
         el.style.setProperty("--rot-y", `${rotY}deg`);
-      } else if (this.isKaleidoscopeView) {
-        // Kaleidoscope View: radially symmetric pattern with rotation and translation
-        const totalEchoes = Math.max(1, inactiveFiles.length);
-        const angle = (index / totalEchoes) * Math.PI * 2;
-        const radius = 500;
-
-        const tx = Math.sin(angle) * radius;
-        const ty = Math.cos(angle) * radius;
-        const tz = -400; // Push back into Z
-        const rotZ = (-angle * 180) / Math.PI; // Face the center tangentially
-
-        el.style.setProperty("--tx", `${tx}px`);
-        el.style.setProperty("--ty", `${ty}px`);
-        el.style.setProperty("--tz", `${tz}px`);
-        el.style.setProperty("--rot-z", `${rotZ}deg`);
       } else if (this.isCylinderView) {
         // Cylinder View: vertical carousel
         const totalEchoes = Math.max(1, inactiveFiles.length);

@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/src/styles.css" />
@@ -93,7 +93,6 @@
             <option value="astrolabe">⚙️ Astrolabe View</option>
             <option value="dominoes">🁣 Dominoes View</option>
             <option value="hexagon-matrix">⬡ Hexagon Matrix</option>
-            <option value="kaleidoscope">👁️ Kaleidoscope View</option>
           </select>
         </div>
       </div>
@@ -218,10 +217,6 @@
           <label title="Ghost Mode"
             ><input id="ghost-mode" type="checkbox" /> Ghost Mode</label
           >
-          <label title="Cinematic Autofocus"
-            ><input id="cinematic-autofocus-mode" type="checkbox" /> Cinematic
-            Autofocus</label
-          >
           <label title="Wiper Mode"
             ><input id="wiper-mode" type="checkbox" /> Wiper Mode</label
           >
@@ -230,9 +225,6 @@
           >
           <label title="Theater Mode"
             ><input id="theater-mode" type="checkbox" /> Theater Mode</label
-          >
-          <label title="Cinematic Autofocus"
-            ><input id="cinematic-autofocus-mode" type="checkbox" /> Cinematic Autofocus</label
           >
           <div>
             <button
