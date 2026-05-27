@@ -43,6 +43,7 @@ import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
 import DataSiphon from "./DataSiphon.js";
 import { VeilExcavator } from "./VeilExcavator.js";
+import { HolographicMinimap } from "./HolographicMinimap.js";
 import backFrag from "./shaders/water-back.frag?glslify";
 import frontFrag from "./shaders/water.frag?glslify";
 import vertSrc from "./shaders/simple.vert?glslify";
@@ -730,6 +731,13 @@ document.addEventListener("keyup", (e) => {
 });
 
 // Clear gravitational cache on resize
+let holographicMinimap = null;
+
+// Initialize minimap if canvas exists
+if (document.getElementById("radar-canvas")) {
+  holographicMinimap = new HolographicMinimap("radar-canvas");
+}
+
 window.addEventListener("resize", () => {
   const dockEl = document.getElementById("dock");
   const tabsEl = document.getElementById("tabs-container");
@@ -1710,6 +1718,116 @@ if (ghostToggle) {
     if (editorEl && focusDepth < 0.1) editorEl.style.filter = "none";
   });
 });
+
+// Cinematic Autofocus Mode
+let isCinematicAutofocusActive = false;
+let currentCinematicZ = 0;
+let targetCinematicZ = 0;
+let cinematicAnimationId = null;
+
+const cinematicToggle = document.getElementById("cinematic-autofocus-mode");
+if (cinematicToggle) {
+  cinematicToggle.addEventListener("change", (e) => {
+    isCinematicAutofocusActive = e.target.checked;
+
+    if (isCinematicAutofocusActive) {
+      document.body.classList.add("cinematic-autofocus-active");
+      if (!cinematicAnimationId) {
+        animateCinematicFocus();
+      }
+    } else {
+      document.body.classList.remove("cinematic-autofocus-active");
+      if (cinematicAnimationId) {
+        cancelAnimationFrame(cinematicAnimationId);
+        cinematicAnimationId = null;
+      }
+      resetCinematicFocus();
+    }
+  });
+}
+
+function updateCinematicTarget(e) {
+  if (!isCinematicAutofocusActive) return;
+
+  // Find element under cursor
+  const target = document.elementFromPoint(e.clientX, e.clientY);
+  const echoDoc = target ? target.closest(".echo-document") : null;
+  const isEditor = target ? target.closest("#editor") : null;
+
+  if (echoDoc) {
+    // Determine depth based on index
+    const indexStr = echoDoc.style.getPropertyValue("--depth-index") || "0";
+    targetCinematicZ = parseInt(indexStr, 10);
+  } else if (isEditor) {
+    targetCinematicZ = -1; // Editor is foreground
+  } else {
+    // If not hovering anything, subtly drift focus back to the front
+    targetCinematicZ = -0.5;
+  }
+}
+
+document.addEventListener("mousemove", updateCinematicTarget);
+
+function animateCinematicFocus() {
+  if (!isCinematicAutofocusActive) return;
+
+  // Lerp towards target
+  currentCinematicZ += (targetCinematicZ - currentCinematicZ) * 0.08;
+
+  // Apply to styles
+  applyCinematicStyles();
+
+  cinematicAnimationId = requestAnimationFrame(animateCinematicFocus);
+}
+
+function applyCinematicStyles() {
+  if (!echoLayerEl) return;
+
+  const echoes = echoLayerEl.querySelectorAll(".echo-document");
+
+  // Apply to editor (foreground)
+  const editorDist = Math.abs(currentCinematicZ - -1);
+  const editorBlur = editorDist * 2.5; // blur amount
+  const editorOpacity = Math.max(0.3, 1 - editorDist * 0.15);
+
+  if (editorEl) {
+    editorEl.style.filter = `blur(${editorBlur}px)`;
+    editorEl.style.opacity = editorOpacity;
+  }
+
+  // Apply to echoes
+  echoes.forEach((echo) => {
+    const indexStr = echo.style.getPropertyValue("--depth-index") || "0";
+    const zIndex = parseInt(indexStr, 10);
+
+    // Distance from focal plane
+    const dist = Math.abs(currentCinematicZ - zIndex);
+
+    // Calculate blur and brightness based on distance from focal plane
+    const blurAmount = dist * 2.5;
+    const brightness = Math.max(0.4, 1 - dist * 0.1);
+    const opacity = Math.max(0.2, 0.8 - dist * 0.08);
+
+    echo.style.filter = `blur(${blurAmount}px) brightness(${brightness})`;
+    echo.style.opacity = opacity;
+  });
+}
+
+function resetCinematicFocus() {
+  if (editorEl) {
+    editorEl.style.filter = "";
+    // Opacity is handled by sliders, avoid clobbering completely, but clear inline
+    editorEl.style.opacity = opacitySlider ? opacitySlider.value : "";
+  }
+
+  if (echoLayerEl) {
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach((echo) => {
+      echo.style.filter = "";
+      echo.style.opacity = "";
+    });
+  }
+}
 
 // Blueprint Mode
 document.getElementById("blueprint-mode").addEventListener("change", (e) => {
