@@ -1483,6 +1483,23 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// Ctrl+Shift+Scroll - cycle active tab (Scroll-to-Excavate)
+window.addEventListener(
+  "wheel",
+  (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+      e.preventDefault();
+      // Only cycle once per wheel event based on direction
+      if (e.deltaY > 0) {
+        tabManager.cycleActiveTab(-1);
+      } else if (e.deltaY < 0) {
+        tabManager.cycleActiveTab(1);
+      }
+    }
+  },
+  { passive: false },
+);
+
 const viewModeSelect = document.getElementById("view-mode-select");
 if (viewModeSelect) {
   viewModeSelect.addEventListener("change", (e) => {
@@ -1578,7 +1595,7 @@ function _stopAutofocusLoop() {
   }
   // Reset echoes
   if (echoLayerEl) {
-    echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+    echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
       doc.style.removeProperty("--af-blur");
       doc.style.removeProperty("--af-brightness");
     });
@@ -1595,7 +1612,7 @@ function _autofocusStep() {
   autofocusCurrentZ += (autofocusTargetZ - autofocusCurrentZ) * 0.1;
 
   if (echoLayerEl) {
-    echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+    echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
       // Calculate local Z depth (derived from its data-depth or var(--tz))
       // It's hard to get computed --tz reliably if it's animated, so we use an approximation based on depth
       let docZ = 0;

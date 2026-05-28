@@ -845,6 +845,22 @@ export class TabManager {
   }
 
   /**
+   * Cycle the active tab linearly to the next/previous open file.
+   * @param {number} direction
+   */
+  cycleActiveTab(direction) {
+    if (this.files.length <= 1) return;
+    const currentIndex = this.files.findIndex((f) => f.id === this.activeId);
+    if (currentIndex === -1) return;
+
+    // Calculate next index wrapping around bounds
+    let nextIndex = (currentIndex + direction) % this.files.length;
+    if (nextIndex < 0) nextIndex += this.files.length;
+
+    this.setActive(this.files[nextIndex].id);
+  }
+
+  /**
    * Cycle a document's depth with wrap-around.
    * @param {number} delta
    * @param {number} [id]
@@ -1160,6 +1176,17 @@ Drag to change depth`;
         .toUpperCase();
       headerStatus.innerHTML = `<span class="echo-status-dot"></span>0x${randomHex}`;
 
+      const overlayBtn = document.createElement("button");
+      overlayBtn.className = "echo-peek-btn";
+      overlayBtn.title = "Holographic Overlay (Ghost Diff)";
+      overlayBtn.style.marginRight = "8px";
+      overlayBtn.innerHTML = `⧉`;
+
+      overlayBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        el.classList.toggle("hologram-overlay-active");
+      });
+
       const peekBtn = document.createElement("button");
       peekBtn.className = "echo-peek-btn";
       peekBtn.title = "Expanded Peek";
@@ -1171,6 +1198,7 @@ Drag to change depth`;
 
       echoHeader.appendChild(headerTitle);
       echoHeader.appendChild(headerStatus);
+      echoHeader.appendChild(overlayBtn);
       echoHeader.appendChild(peekBtn);
 
       // Focus Outline button — highlights matching content in active editor
