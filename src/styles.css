@@ -565,8 +565,8 @@ textarea:focus {
   background-color: rgba(15, 15, 20, 0.7);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E");
   background-blend-mode: overlay;
-  backdrop-filter: blur(80px) saturate(200%);
-  -webkit-backdrop-filter: blur(80px) saturate(200%);
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
   border: 1px solid rgba(0, 229, 255, 0.4);
   border-top: 1px solid rgba(0, 229, 255, 0.4);
   box-shadow:
@@ -1773,7 +1773,7 @@ body.theme-blueprint #rain-front {
   color: #4da6ff;
   margin-bottom: 4px;
   font-size: 11px;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .callout.warn {
@@ -1788,7 +1788,7 @@ body.theme-blueprint #rain-front {
   color: #ffaa00;
   margin-bottom: 4px;
   font-size: 11px;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 .callout.info {
@@ -1803,7 +1803,7 @@ body.theme-blueprint #rain-front {
   color: #00e5ff;
   margin-bottom: 4px;
   font-size: 11px;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 
 /* ─── Tabs Container ─────────────────────────────────────────────────────── */
@@ -1890,7 +1890,7 @@ body.theme-blueprint #rain-front {
   border-radius: 14px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   font-family: var(--font-mono);
   color: rgba(230, 240, 255, 0.85);
   background: rgba(20, 20, 25, 0.65);
@@ -1905,7 +1905,7 @@ body.theme-blueprint #rain-front {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
 .tab-item:hover {
   background: rgba(30, 30, 35, 0.8);
@@ -2012,7 +2012,7 @@ body.theme-blueprint #rain-front {
 .depth-controls button {
   padding: 8px 14px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   font-family: var(--font-primary);
   background: linear-gradient(
     135deg,
@@ -2061,7 +2061,7 @@ body.theme-blueprint #rain-front {
   background: rgba(0, 0, 0, 0.35);
   color: #e6f6ff;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1;
   cursor: pointer;
   transition:
@@ -2678,7 +2678,7 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
 .echo-header {
   font-family: var(--font-mono);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
   color: #cceeff;
   border-bottom: 2px solid hsla(var(--echo-tint, 0deg), 100%, 50%, 0.5);
   padding: 12px 24px;
@@ -2741,7 +2741,7 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
 
 .echo-file-name {
   color: #fff;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.5px;
 }
 
@@ -5595,7 +5595,7 @@ body.peel-active #editor {
   font-family: var(--font-primary);
   font-size: 9px;
   color: #00e5ff;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   writing-mode: vertical-rl;
   text-orientation: mixed;
   margin-bottom: 20px;
@@ -6220,19 +6220,19 @@ body.solar-system-active #echo-layer::before {
   transform: translate3d(
       calc(var(--tx, 0px) * 0.2),
       calc(var(--ty, 0px) * 0.2),
-      150px
+      300px
     )
-    scale(1.1) !important;
+    scale(1.2) !important;
 
   /* Golden/Warning glow to indicate a search match */
   border: 1px solid rgba(0, 255, 204, 1) !important;
   box-shadow:
     0 20px 50px rgba(0, 255, 204, 0.6),
-    0 0 30px rgba(0, 255, 204, 0.8),
-    inset 0 0 30px rgba(0, 255, 204, 0.2) !important;
+    0 0 60px rgba(0, 255, 204, 0.8),
+    inset 0 0 40px rgba(0, 255, 204, 0.4) !important;
 
   opacity: 0.95 !important;
-  filter: blur(0px) drop-shadow(0 0 20px #00ffcc) !important;
+  filter: blur(0px) drop-shadow(0 0 40px #00ffcc) brightness(1.5) !important;
   z-index: 900 !important;
 }
 
@@ -6968,7 +6968,7 @@ body.outline-active .echo-header::before {
   cursor: pointer;
   font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 1.5px;
   padding: 6px 12px;
   text-align: left;
@@ -7641,4 +7641,29 @@ body.sonic-boom-active #echo-layer .echo-document {
 }
 body.sonic-boom-active #editor {
   animation: sonic-boom-shake 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Hologram Overlay Feature */
+.hologram-overlay-active {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 9999 !important;
+  mix-blend-mode: screen !important;
+  filter: brightness(1.2) hue-rotate(180deg) !important;
+  border-radius: 0 !important;
+  opacity: 0.9 !important;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.hologram-overlay-active .echo-header {
+  transform: none !important;
+}
+
+.hologram-overlay-active pre {
+  max-height: 100% !important;
 }
