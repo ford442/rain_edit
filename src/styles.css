@@ -7667,3 +7667,110 @@ body.sonic-boom-active #editor {
 .hologram-overlay-active pre {
   max-height: 100% !important;
 }
+
+/* =========================================================
+   LUMINESCENCE VIEW
+   ========================================================= */
+body.luminescence-active {
+  --bio-glow-color: rgba(255, 255, 255, 0.4);
+  --bio-glow-strong: rgba(255, 255, 255, 0.8);
+}
+
+body.luminescence-active #editor,
+body.luminescence-active #image-viewer {
+  transform: scale(0.6) translateY(10%) translateZ(-100px);
+  filter: blur(4px);
+  opacity: 0.6;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.luminescence-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: luminescence-spin 120s linear infinite;
+}
+
+@keyframes luminescence-spin {
+  from {
+    transform: rotateY(0deg) rotateX(15deg) rotateZ(-10deg);
+  }
+  to {
+    transform: rotateY(360deg) rotateX(15deg) rotateZ(-10deg);
+  }
+}
+
+body.luminescence-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1.5px) drop-shadow(0 0 20px var(--glow-color, rgba(255, 255, 255, 0.6)));
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 40px var(--glow-color, rgba(255, 255, 255, 0.4)),
+    inset 0 0 20px var(--glow-color, rgba(255, 255, 255, 0.2));
+  border-color: var(--glow-color, rgba(255, 255, 255, 0.5));
+  border-radius: 50%; /* Give them a more nebulous shape */
+  background: radial-gradient(
+    circle at center,
+    rgba(10, 15, 25, 0.9) 0%,
+    rgba(5, 8, 15, 0.8) 100%
+  );
+  padding: 30px;
+}
+
+body.luminescence-active .echo-document pre {
+  mask-image: radial-gradient(circle, black 50%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle, black 50%, transparent 90%);
+}
+
+
+body.luminescence-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) drop-shadow(0 0 40px var(--glow-color, rgba(255, 255, 255, 0.9))) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
+  z-index: 50 !important;
+  border-radius: 12px; /* Return to readable shape on hover */
+  box-shadow:
+    0 0 60px var(--glow-color, rgba(255, 255, 255, 0.8)),
+    inset 0 0 30px var(--glow-color, rgba(255, 255, 255, 0.4)) !important;
+}
+
+/* =========================================================
+   MAGNETIC PULSE INTERACTION
+   ========================================================= */
+body.magnetic-pulse-active .echo-document {
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  /* Pull documents forward and towards the mouse center slightly */
+  transform: translate3d(
+      calc(var(--tx, 0px) * 0.5 + var(--part-tx, 0px) + var(--repel-tx, 0px) + ((var(--mouse-x) - 50vw) * 0.2)),
+      calc(var(--ty, 0px) * 0.5 + var(--part-ty, 0px) + var(--repel-ty, 0px) + ((var(--mouse-y) - 50vh) * 0.2)),
+      calc(var(--tz, 0px) + 250px)
+    )
+    scale(1.15) !important;
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) saturate(1.5) !important;
+  z-index: 999 !important;
+  box-shadow:
+    0 0 50px rgba(0, 229, 255, 0.8),
+    inset 0 0 30px rgba(0, 229, 255, 0.4) !important;
+  border-color: rgba(0, 229, 255, 1) !important;
+}
+
+body.magnetic-pulse-active #editor {
+  opacity: 0.3 !important;
+  filter: blur(6px) !important;
+  transform: scale(0.95) translateZ(-50px) !important;
+  transition: all 0.4s ease !important;
+}
