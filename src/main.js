@@ -1546,6 +1546,7 @@ if (viewModeSelect) {
     else if (view === "astrolabe") tabManager.toggleAstrolabeView();
     else if (view === "dominoes") tabManager.toggleDominoesView();
     else if (view === "hexagon-matrix") tabManager.toggleHexagonMatrixView();
+    else if (view === "luminescence") tabManager.toggleLuminescenceView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }
@@ -3513,6 +3514,19 @@ document.addEventListener("mousemove", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Shift" && !document.body.classList.contains("x-ray-active")) {
     document.body.classList.add("quantum-depth-active");
+  }
+});
+
+// Magnetic Pulse Interaction (Alt + M)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.key.toLowerCase() === "m") {
+    e.preventDefault();
+    document.body.classList.add("magnetic-pulse-active");
+
+    // Play a ripple effect or sound if available, otherwise just remove class after animation
+    setTimeout(() => {
+      document.body.classList.remove("magnetic-pulse-active");
+    }, 600); // 600ms matching CSS transition/animation
   }
 });
 

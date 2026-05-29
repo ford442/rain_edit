@@ -131,6 +131,7 @@ export class TabManager {
     this.isAstrolabeView = false;
     this.isDominoesView = false;
     this.isHexagonMatrixView = false;
+    this.isLuminescenceView = false;
   }
 
   _deactivateAllViews() {
@@ -174,6 +175,7 @@ export class TabManager {
     this.isAstrolabeView = false;
     this.isDominoesView = false;
     this.isHexagonMatrixView = false;
+    this.isLuminescenceView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -214,6 +216,7 @@ export class TabManager {
       "mobius-active",
       "astrolabe-active",
       "dominoes-active",
+      "luminescence-active",
     );
 
     this.isOrigamiView = false;
@@ -671,6 +674,16 @@ export class TabManager {
       document.body.classList.add("scattered-active");
       const btn = document.getElementById("btn-scattered-view");
       if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleLuminescenceView() {
+    const wasActive = this.isLuminescenceView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isLuminescenceView = true;
+      document.body.classList.add("luminescence-active");
     }
     this._renderEchoes();
   }
@@ -1805,6 +1818,45 @@ Drag to change depth`;
         el.style.setProperty("--tz", `${tz}px`);
         el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", `0deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+      } else if (this.isLuminescenceView) {
+        // Luminescence View: Floating sphere with glowing colors based on extension
+        // Using golden ratio spiral for even distribution on a sphere
+        const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+        const radius = 600;
+
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 300; // Center the sphere
+
+        // Calculate rotation so documents face outward
+        const rotX = (phi * 180 / Math.PI) - 90;
+        const rotY = theta * 180 / Math.PI;
+
+        let glowColor = "rgba(255, 255, 255, 0.6)"; // Default white
+        if (tab.name.endsWith(".js")) {
+          glowColor = "rgba(255, 215, 0, 0.8)"; // Yellow for JS
+        } else if (tab.name.endsWith(".css")) {
+          glowColor = "rgba(0, 191, 255, 0.8)"; // Deep Sky Blue for CSS
+        } else if (tab.name.endsWith(".html")) {
+          glowColor = "rgba(255, 69, 0, 0.8)"; // Red-Orange for HTML
+        } else if (tab.name.endsWith(".md")) {
+          glowColor = "rgba(147, 112, 219, 0.8)"; // Medium Purple for MD
+        } else if (tab.name.endsWith(".py")) {
+           glowColor = "rgba(50, 205, 50, 0.8)"; // Lime Green for Python
+        } else {
+           // Provide a pseudo-random color for other files based on their ID
+           const hue = (parseInt(tab.id.replace('tab-', '')) * 137.5) % 360;
+           glowColor = `hsla(${hue}, 100%, 60%, 0.8)`;
+        }
+
+        el.style.setProperty("--glow-color", glowColor);
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", `0deg`);
       } else if (this.isMatrixRainView) {
         // Arrange items randomly on X and Z, falling down from Y
