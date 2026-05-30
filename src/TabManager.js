@@ -2527,6 +2527,13 @@ Drag to change depth`;
       // We use a small timeout to distinguish single click from double click,
       // preventing the active document from switching when the user is trying to double click.
       el.addEventListener("click", (e) => {
+        // Magnetic Align: Shift + Click
+        if (e.shiftKey) {
+          e.stopPropagation();
+          el.classList.toggle("magnetic-align-active");
+          return;
+        }
+
         if (e.detail === 1) {
           // If in Tesseract view, exit view and switch immediately
           if (document.body.classList.contains("tesseract-active")) {
