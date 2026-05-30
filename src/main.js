@@ -3556,3 +3556,52 @@ document.addEventListener("mousemove", (e) => {
     }
   }
 });
+
+// --- Depth Slicer Beam Logic ---
+document.addEventListener("keydown", (e) => {
+  if (e.key.toLowerCase() === "b" && !e.ctrlKey && !e.metaKey && !e.altKey && document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT") {
+    document.body.classList.add("depth-beam-active");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key.toLowerCase() === "b") {
+    document.body.classList.remove("depth-beam-active");
+    if (echoLayerEl) {
+      echoLayerEl.querySelectorAll(".echo-document").forEach(echo => {
+        echo.classList.remove("depth-beam-intersect");
+      });
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("depth-beam-active")) {
+    const beam = document.getElementById("depth-beam");
+    if (beam) {
+      const mx = e.clientX;
+      const my = e.clientY;
+      beam.style.left = `${mx - 150}px`; // Center the 300x300 radial gradient
+      beam.style.top = `${my - 150}px`;
+      beam.style.width = "300px";
+      beam.style.height = "300px";
+      beam.style.transform = `translateZ(500px)`; // visually floating
+    }
+
+    if (echoLayerEl) {
+      const echoes = echoLayerEl.querySelectorAll(".echo-document");
+      echoes.forEach(echo => {
+        const rect = echo.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dist = Math.sqrt(Math.pow(e.clientX - cx, 2) + Math.pow(e.clientY - cy, 2));
+
+        if (dist < 150) {
+          echo.classList.add("depth-beam-intersect");
+        } else {
+          echo.classList.remove("depth-beam-intersect");
+        }
+      });
+    }
+  }
+});
