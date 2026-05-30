@@ -260,6 +260,30 @@ async function _triggerVpsSave() {
   }
 }
 
+/**
+ * Animate an expanding ring of cleared droplets over the editor — a "glass
+ * wipe" that reveals a document pulled to the front of the rain. Reuses the
+ * existing raindrops.clearDroplets primitive (screen-space CSS coords).
+ */
+function triggerGlassWipe() {
+  if (!raindrops) return;
+  const rect = editorEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const maxR = Math.max(rect.width, rect.height) / 1.6;
+  const DURATION = 700;
+  const start = performance.now();
+
+  function step(now) {
+    const t = Math.min(1, (now - start) / DURATION);
+    // Ease-out radius growth; clear a band so the wipe reads as a ring sweep
+    const r = maxR * (1 - Math.pow(1 - t, 3));
+    raindrops.clearDroplets(cx, cy, Math.max(20, r));
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
 // Listen for 3D Cabinet file cube clicks with depth focus logic
 window.addEventListener("fileCubeClicked", async (e) => {
   const { id, type, name, fileData: eventFileData } = e.detail;
@@ -341,6 +365,10 @@ window.addEventListener("fileCubeClicked", async (e) => {
 
     // 5. Hide the 3D Cabinet so the user can see the editor
     cabinet3D.hide();
+
+    // 6. Thematic "glass wipe" — clear an expanding patch of rain over the
+    //    editor so the freshly-focused document emerges from behind the storm.
+    triggerGlassWipe();
   } catch (error) {
     console.error("Failed to load file:", error);
     alert(`Failed to load ${name}. Check console for details.`);

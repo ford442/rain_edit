@@ -36,6 +36,19 @@ const FILE_ORBIT_R = 1.0; // radius of the file-cube shell around its parent
 // Camera animation duration in ms
 const CAM_ANIM_MS = 800;
 
+// Max characters shown on a file-cube label before truncating with an ellipsis
+const LABEL_MAX_CHARS = 16;
+
+// Number of characters fetched for the content snippet in the preview panel
+const PREVIEW_SNIPPET_CHARS = 300;
+
+/** File extensions we treat as binary/non-text for preview purposes. */
+const BINARY_EXTS = new Set([
+  "png", "jpg", "jpeg", "gif", "webp", "bmp", "ico", "svg",
+  "mp3", "wav", "flac", "ogg", "m4a", "aac",
+  "mp4", "webm", "mov", "zip", "gz", "tar", "wasm", "bin",
+]);
+
 // ─── Utility helpers ─────────────────────────────────────────────────────────
 
 /** Linear interpolation */
@@ -83,6 +96,14 @@ export class Cabinet3D {
     // Track which categories have had files loaded
     this._loadedCats = new Set();
 
+    // Hover / selection state
+    this._hoveredMesh = null; // file mesh currently under the cursor
+    this._selectedMesh = null; // file mesh chosen via keyboard navigation
+    this._hoverNeedsUpdate = false; // throttle raycasting to one test per frame
+    this._previewFetchToken = 0; // guards against out-of-order snippet fetches
+    this._snippetCache = new Map(); // fileData → snippet string (or null sentinel)
+    this._searchTerm = ""; // active filter string (lowercased)
+
     this._rafId = null;
 
     this._build();
@@ -104,6 +125,9 @@ export class Cabinet3D {
     if (!this.visible) return;
     this.visible = false;
     this._overlay.style.display = "none";
+    this._hidePreview();
+    this._hoveredMesh = null;
+    this._selectedMesh = null;
     this._stopLoop();
   }
 
@@ -118,6 +142,8 @@ export class Cabinet3D {
     this._buildOverlay();
     this._buildScene();
     this._buildCategoryCubes();
+    this._buildPreviewPanel();
+    this._buildSearchBox();
     this._bindEvents();
   }
 
@@ -132,8 +158,10 @@ export class Cabinet3D {
       "align-items: center",
       "justify-content: center",
       "z-index: 50",
-      "background: rgba(0,0,0,0.75)",
-      "backdrop-filter: blur(4px)",
+      // Slightly translucent so the rain layers stay faintly visible behind
+      // the 3D cabinet — the storm never fully disappears.
+      "background: rgba(4,8,14,0.62)",
+      "backdrop-filter: blur(3px)",
     ].join(";");
 
     // Close button
@@ -170,13 +198,136 @@ export class Cabinet3D {
       "pointer-events: none",
     ].join(";");
     hint.textContent =
-      "Click a category cube to explore · Click a file cube to open it";
+      "Hover a cube to preview · Click to open · Arrow keys to navigate · Enter to open";
     overlay.appendChild(hint);
 
     this._hint = hint;
 
     document.body.appendChild(overlay);
     this._overlay = overlay;
+  }
+
+  /** Build the floating HTML preview panel (metadata + content snippet). */
+  _buildPreviewPanel() {
+    const panel = document.createElement("div");
+    panel.id = "cabinet-preview";
+    panel.style.cssText = [
+      "position: absolute",
+      "top: 64px",
+      "left: 20px",
+      "width: 300px",
+      "max-height: 60vh",
+      "display: none",
+      "flex-direction: column",
+      "gap: 8px",
+      "padding: 14px 16px",
+      "background: rgba(10,16,24,0.82)",
+      "border: 1px solid rgba(0,229,255,0.35)",
+      "border-radius: 10px",
+      "box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 24px rgba(0,229,255,0.12)",
+      "backdrop-filter: blur(6px)",
+      "color: #c0d0e0",
+      "font-family: 'JetBrains Mono', monospace",
+      "font-size: 12px",
+      "z-index: 52",
+      "pointer-events: auto",
+    ].join(";");
+
+    const title = document.createElement("div");
+    title.className = "cabinet-preview-title";
+    title.style.cssText =
+      "font-size:14px;font-weight:700;color:#e6f4ff;word-break:break-all;";
+    panel.appendChild(title);
+
+    const meta = document.createElement("div");
+    meta.className = "cabinet-preview-meta";
+    meta.style.cssText =
+      "font-size:11px;color:rgba(160,190,220,0.8);display:flex;flex-wrap:wrap;gap:6px;";
+    panel.appendChild(meta);
+
+    const snippet = document.createElement("pre");
+    snippet.className = "cabinet-preview-snippet";
+    snippet.style.cssText = [
+      "margin: 0",
+      "padding: 8px",
+      "background: rgba(0,0,0,0.35)",
+      "border-radius: 6px",
+      "max-height: 220px",
+      "overflow: auto",
+      "white-space: pre-wrap",
+      "word-break: break-word",
+      "font-size: 11px",
+      "line-height: 1.4",
+      "color: #9fd8e0",
+    ].join(";");
+    panel.appendChild(snippet);
+
+    const openBtn = document.createElement("button");
+    openBtn.textContent = "⏎  Open in editor";
+    openBtn.style.cssText = [
+      "align-self: flex-start",
+      "margin-top: 2px",
+      "background: rgba(0,229,255,0.14)",
+      "border: 1px solid rgba(0,229,255,0.5)",
+      "color: #e6f4ff",
+      "font-family: inherit",
+      "font-size: 12px",
+      "padding: 6px 14px",
+      "border-radius: 6px",
+      "cursor: pointer",
+    ].join(";");
+    openBtn.addEventListener("click", () => {
+      if (this._previewTarget) {
+        this._onFileClick(
+          this._previewTarget.catIndex,
+          this._previewTarget.fileData,
+        );
+      }
+    });
+    panel.appendChild(openBtn);
+
+    this._overlay.appendChild(panel);
+    this._previewPanel = panel;
+    this._previewEls = { title, meta, snippet, openBtn };
+    this._previewTarget = null;
+  }
+
+  /** Build the search/filter input that highlights matching file cubes. */
+  _buildSearchBox() {
+    const input = document.createElement("input");
+    input.id = "cabinet-search";
+    input.type = "search";
+    input.placeholder = "🔍 Filter files…";
+    input.style.cssText = [
+      "position: absolute",
+      "top: 16px",
+      "left: 20px",
+      "width: 240px",
+      "background: rgba(10,16,24,0.8)",
+      "border: 1px solid rgba(255,255,255,0.18)",
+      "color: #c0d0e0",
+      "font-family: 'JetBrains Mono', monospace",
+      "font-size: 13px",
+      "padding: 7px 12px",
+      "border-radius: 6px",
+      "z-index: 52",
+      "outline: none",
+    ].join(";");
+    input.addEventListener("input", () => {
+      this._searchTerm = input.value.trim().toLowerCase();
+      this._applySearchHighlight();
+    });
+    // Keep keyboard navigation working without the input swallowing arrow keys
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        input.value = "";
+        this._searchTerm = "";
+        this._applySearchHighlight();
+        input.blur();
+      }
+    });
+    this._overlay.appendChild(input);
+    this._searchInput = input;
   }
 
   /** Initialise the Three.js renderer, scene and camera. */
@@ -288,6 +439,60 @@ export class Cabinet3D {
     });
     const spr = new THREE.Sprite(mat);
     spr.scale.set(1.2, 0.3, 1);
+    return spr;
+  }
+
+  /**
+   * Build a compact camera-facing label sprite for a file cube.
+   * Rendered onto a pill background so small text stays legible over cubes.
+   * Starts hidden (opacity 0) — shown on hover/selection/category focus.
+   * @param {string} text
+   * @returns {THREE.Sprite}
+   */
+  _makeFileLabelSprite(text) {
+    const label =
+      text.length > LABEL_MAX_CHARS
+        ? text.slice(0, LABEL_MAX_CHARS - 1) + "…"
+        : text;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 48;
+    const ctx = canvas.getContext("2d");
+
+    ctx.font = "bold 22px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Rounded pill background sized to the text
+    const tw = Math.min(248, ctx.measureText(label).width + 24);
+    const x0 = (256 - tw) / 2;
+    const r = 12;
+    ctx.fillStyle = "rgba(8,14,22,0.78)";
+    ctx.beginPath();
+    ctx.moveTo(x0 + r, 6);
+    ctx.arcTo(x0 + tw, 6, x0 + tw, 42, r);
+    ctx.arcTo(x0 + tw, 42, x0, 42, r);
+    ctx.arcTo(x0, 42, x0, 6, r);
+    ctx.arcTo(x0, 6, x0 + tw, 6, r);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "#e6f4ff";
+    ctx.fillText(label, 128, 25);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.minFilter = THREE.LinearFilter;
+    const mat = new THREE.SpriteMaterial({
+      map: tex,
+      transparent: true,
+      opacity: 0,
+      depthTest: false, // labels float above the geometry, never z-clipped
+      depthWrite: false,
+    });
+    const spr = new THREE.Sprite(mat);
+    spr.scale.set(0.9, 0.17, 1);
+    spr.renderOrder = 999;
     return spr;
   }
 
@@ -455,12 +660,27 @@ export class Cabinet3D {
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(x, y, z);
+
+      const filename =
+        fileData.filename || fileData.name || `${catName}-${i}`;
+      const label = this._makeFileLabelSprite(filename);
+      // Float the label just above the cube
+      label.position.set(0, FILE_CUBE_SIZE * 1.4, 0);
+      mesh.add(label);
+
       mesh.userData = {
         type: "file",
         catIndex,
         fileData,
         catName,
+        filename,
         isRemote: fileData.isRemote || false,
+        label,
+        baseScale: 1, // animated toward on hover/selection
+        targetScale: 1,
+        baseEmissive: 0.2, // emissiveIntensity at rest
+        targetEmissive: 0.2,
+        dimmed: false, // set by search filtering
       };
       catMesh.add(mesh); // parented to the category cube
       this._fileMeshes.push(mesh);
@@ -470,12 +690,86 @@ export class Cabinet3D {
         this._addRemoteFileBadge(mesh);
       }
     }
+
+    // A freshly populated category should immediately reflect any active filter
+    if (this._searchTerm) this._applySearchHighlight();
   }
 
   /** Bind window events. */
   _bindEvents() {
     window.addEventListener("resize", () => this._onResize());
     this._overlay.addEventListener("click", (e) => this._onClick(e));
+
+    // Hover: record pointer position, defer the raycast to the render loop
+    this._renderer.domElement.addEventListener("mousemove", (e) => {
+      const rect = this._renderer.domElement.getBoundingClientRect();
+      this._mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      this._mouse.y = ((e.clientY - rect.top) / rect.height) * -2 + 1;
+      this._hoverNeedsUpdate = true;
+    });
+
+    // Keyboard navigation — only while the overlay is visible
+    window.addEventListener("keydown", (e) => {
+      if (!this.visible) return;
+      this._onKeyDown(e);
+    });
+  }
+
+  /** Keyboard navigation: arrows to move selection, Enter to open, Esc to close. */
+  _onKeyDown(e) {
+    // Don't hijack typing in the search box (except Enter to open top match)
+    const typing = document.activeElement === this._searchInput;
+
+    if (e.key === "Escape") {
+      if (this._previewPanel.style.display !== "none") {
+        this._hidePreview();
+        this._setSelected(null);
+      } else {
+        this.hide();
+      }
+      return;
+    }
+
+    if (e.key === "Enter") {
+      const sel = this._selectedMesh || this._hoveredMesh;
+      if (sel) {
+        e.preventDefault();
+        const ud = sel.userData;
+        this._onFileClick(ud.catIndex, ud.fileData);
+      }
+      return;
+    }
+
+    if (typing) return;
+
+    const navKeys = ["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"];
+    if (!navKeys.includes(e.key)) return;
+    e.preventDefault();
+
+    const candidates = this._navigableMeshes();
+    if (candidates.length === 0) return;
+
+    let idx = candidates.indexOf(this._selectedMesh);
+    const step =
+      e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : -1;
+    idx = idx === -1 ? 0 : (idx + step + candidates.length) % candidates.length;
+
+    const next = candidates[idx];
+    this._setSelected(next);
+    this._showPreviewFor(next);
+  }
+
+  /** File meshes eligible for keyboard navigation (focused category, else all). */
+  _navigableMeshes() {
+    const pool =
+      this._focusedCat >= 0
+        ? this._fileMeshes.filter(
+            (m) => m.userData.catIndex === this._focusedCat,
+          )
+        : this._fileMeshes;
+    return this._searchTerm
+      ? pool.filter((m) => !m.userData.dimmed)
+      : pool;
   }
 
   /** Handle window resize. */
@@ -584,6 +878,158 @@ export class Cabinet3D {
     this._hint.textContent = `Opening ${filename}…`;
   }
 
+  // ─── Hover / selection / preview ───────────────────────────────────────────
+
+  /** Raycast under the cursor and update hover state. Called once per frame. */
+  _updateHover() {
+    if (!this._hoverNeedsUpdate) return;
+    this._hoverNeedsUpdate = false;
+
+    this._raycaster.setFromCamera(this._mouse, this._camera);
+    const intersects = this._raycaster.intersectObjects(
+      this._fileMeshes,
+      false,
+    );
+    const hit = intersects.length ? intersects[0].object : null;
+
+    if (hit !== this._hoveredMesh) {
+      this._hoveredMesh = hit;
+      this._renderer.domElement.style.cursor = hit ? "pointer" : "default";
+      if (hit) this._showPreviewFor(hit);
+    }
+  }
+
+  /** Mark a mesh as the keyboard-selected cube (drives scale/emissive too). */
+  _setSelected(mesh) {
+    this._selectedMesh = mesh;
+  }
+
+  /**
+   * Populate and show the preview panel for a file mesh, then lazily fetch a
+   * content snippet. Metadata renders instantly; the snippet streams in.
+   * @param {THREE.Mesh} mesh
+   */
+  _showPreviewFor(mesh) {
+    const ud = mesh.userData;
+    const { fileData, catName, filename, isRemote } = ud;
+    this._previewTarget = { catIndex: ud.catIndex, fileData };
+
+    const { title, meta, snippet } = this._previewEls;
+    title.textContent = filename;
+
+    // Build metadata chips: origin, type, size, date when available
+    const chips = [];
+    chips.push(isRemote ? "☁ remote" : "💾 local");
+    chips.push(catName);
+    const size = fileData.size ?? fileData.bytes;
+    if (typeof size === "number") chips.push(this._formatSize(size));
+    const date =
+      fileData.date || fileData.modified || fileData.updated_at;
+    if (date) chips.push(this._formatDate(date));
+    meta.innerHTML = "";
+    chips.forEach((c) => {
+      const span = document.createElement("span");
+      span.textContent = c;
+      span.style.cssText =
+        "padding:2px 7px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.25);border-radius:10px;";
+      meta.appendChild(span);
+    });
+
+    this._previewPanel.style.display = "flex";
+
+    // Content snippet — fetched lazily, cached, and guarded against races
+    const ext = (filename.split(".").pop() || "").toLowerCase();
+    if (catName === "images" || BINARY_EXTS.has(ext)) {
+      snippet.textContent = "⛔ Binary file — preview not available.";
+      return;
+    }
+    if (this._snippetCache.has(fileData)) {
+      snippet.textContent =
+        this._snippetCache.get(fileData) || "(empty file)";
+      return;
+    }
+
+    snippet.textContent = "Loading preview…";
+    const token = ++this._previewFetchToken;
+    this._fetchSnippet(ud)
+      .then((text) => {
+        this._snippetCache.set(fileData, text);
+        // Ignore if the user has since hovered something else
+        if (token === this._previewFetchToken) {
+          snippet.textContent = text || "(empty file)";
+        }
+      })
+      .catch(() => {
+        if (token === this._previewFetchToken) {
+          snippet.textContent = "⚠ Could not load preview.";
+        }
+      });
+  }
+
+  /**
+   * Fetch a short content snippet for a file via the StorageAPI.
+   * @param {object} ud - file mesh userData
+   * @returns {Promise<string>}
+   */
+  async _fetchSnippet(ud) {
+    const { fileData, catName } = ud;
+    let content = "";
+    if (fileData.isRemote && fileData.vpsPath) {
+      content = (await this.storageAPI.getVPSFile(fileData.vpsPath)) || "";
+    } else {
+      const id =
+        fileData.id || fileData._id || fileData.name || fileData.filename;
+      const data = await this.storageAPI.getFileContent(id, catName);
+      content = data && data.content ? data.content : "";
+    }
+    const trimmed = content.slice(0, PREVIEW_SNIPPET_CHARS);
+    return content.length > PREVIEW_SNIPPET_CHARS ? trimmed + "…" : trimmed;
+  }
+
+  /** Hide the preview panel and clear its target. */
+  _hidePreview() {
+    this._previewPanel.style.display = "none";
+    this._previewTarget = null;
+    this._previewFetchToken++; // cancel any in-flight snippet
+  }
+
+  /** Format a byte count as a human-readable size. */
+  _formatSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  /** Format an ISO/epoch date loosely; falls back to the raw value. */
+  _formatDate(date) {
+    try {
+      const d = new Date(date);
+      if (!isNaN(d.getTime())) return d.toLocaleDateString();
+    } catch (e) {
+      /* fall through */
+    }
+    return String(date);
+  }
+
+  // ─── Search highlighting ───────────────────────────────────────────────────
+
+  /** Dim file cubes that don't match the current search term. */
+  _applySearchHighlight() {
+    const term = this._searchTerm;
+    let matches = 0;
+    this._fileMeshes.forEach((mesh) => {
+      const ud = mesh.userData;
+      const isMatch =
+        !term || ud.filename.toLowerCase().includes(term);
+      ud.dimmed = !!term && !isMatch;
+      if (isMatch && term) matches++;
+      mesh.material.opacity = ud.dimmed ? 0.12 : 0.9;
+    });
+    if (term) {
+      this._hint.textContent = `Filter "${term}": ${matches} match(es)`;
+    }
+  }
+
   /**
    * Infer a Monaco language identifier from the category or file data.
    * @param {string} catName
@@ -668,11 +1114,48 @@ export class Cabinet3D {
     });
   }
 
+  /**
+   * Per-frame animation of file-cube labels, hover/selection scale and
+   * emissive glow. Labels appear for the focused category, the hovered cube
+   * and the keyboard-selected cube; everything eases for smoothness.
+   */
+  _updateFileVisuals() {
+    const hovered = this._hoveredMesh;
+    const selected = this._selectedMesh;
+
+    this._fileMeshes.forEach((mesh) => {
+      const ud = mesh.userData;
+      const isHot = mesh === hovered || mesh === selected;
+      const inFocusedCat =
+        this._focusedCat >= 0 && ud.catIndex === this._focusedCat;
+
+      // Label visibility: full when hot, faint when its category is focused
+      let labelTarget = 0;
+      if (ud.dimmed) labelTarget = 0;
+      else if (isHot) labelTarget = 1;
+      else if (inFocusedCat) labelTarget = 0.55;
+      const lm = ud.label.material;
+      lm.opacity += (labelTarget - lm.opacity) * 0.2;
+
+      // Scale + emissive pop on hover/selection
+      const scaleTarget = isHot ? 1.6 : 1;
+      const cur = mesh.scale.x;
+      const next = cur + (scaleTarget - cur) * 0.25;
+      mesh.scale.setScalar(next);
+
+      const emTarget = isHot ? 0.85 : 0.2;
+      mesh.material.emissiveIntensity +=
+        (emTarget - mesh.material.emissiveIntensity) * 0.2;
+    });
+  }
+
   /** Main render loop. */
   _loop() {
     this._rafId = requestAnimationFrame(() => this._loop());
+    this._updateHover();
     this._updateCameraAnim();
     this._updateIdleRotation();
+    this._updateFileVisuals();
     this._controls.update();
     this._renderer.render(this._scene, this._camera);
   }
