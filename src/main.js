@@ -814,6 +814,21 @@ document.addEventListener("mousemove", (e) => {
   document.body.style.setProperty("--mouse-nx", nx);
   document.body.style.setProperty("--mouse-ny", ny);
 
+  // "Parallax Edge Fanning" - pushing documents outwards when mouse nears edges
+  const edgeFanMagnitude = 50; // pixels to push
+  const edgeFanX = Math.abs(nx) > 0.6 ? nx * edgeFanMagnitude : 0;
+  const edgeFanY = Math.abs(ny) > 0.6 ? ny * edgeFanMagnitude : 0;
+
+  if (echoLayerEl) {
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach((echo, index) => {
+        // Multiply effect by depth index to increase fanning on deeper elements
+        const depthMultiplier = (index + 1) * 0.5;
+        echo.style.setProperty("--edge-fan-tx", `${edgeFanX * depthMultiplier}px`);
+        echo.style.setProperty("--edge-fan-ty", `${edgeFanY * depthMultiplier}px`);
+    });
+  }
+
   // Apply localized 3D tilt to UI elements based on normalized cursor position
   const uiDockEl = document.getElementById("dock");
   const uiTabsEl = document.getElementById("tabs-container");
@@ -3461,6 +3476,10 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     document.body.classList.toggle("hologram-preview-active");
   }
+  if (e.altKey && e.shiftKey && e.code === "KeyF") {
+    e.preventDefault();
+    document.body.classList.add("focus-torch-active");
+  }
   // Holographic Document Dispersion (Alt+X)
   if (e.altKey && e.code === "KeyX" && !e.shiftKey) {
     e.preventDefault();
@@ -3490,6 +3509,10 @@ document.addEventListener("keyup", (e) => {
     if (editorEl) {
       editorEl.style.removeProperty("--tear-mask");
     }
+  }
+
+  if (e.key === "f" || e.key === "F" || e.key === "Alt" || e.key === "Shift") {
+    document.body.classList.remove("focus-torch-active");
   }
 });
 
