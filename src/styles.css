@@ -71,8 +71,8 @@ body,
   right: 0;
   bottom: 0;
   z-index: 5; /* default: depth 1 — middle between rain layers; JS will update dynamically */
-  box-shadow: 0 0 30px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(0, 229, 255, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
 
   /* Cyber Grid Background */
@@ -565,13 +565,12 @@ textarea:focus {
   overflow: hidden;
 
   /* Enhanced Modern Glassmorphism */
-  background-color: rgba(15, 15, 20, 0.85);
+  background: linear-gradient(135deg, rgba(15, 20, 30, 0.7), rgba(5, 10, 15, 0.8));
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E");
   background-blend-mode: overlay;
-  backdrop-filter: blur(60px) saturate(200%);
-  -webkit-backdrop-filter: blur(60px) saturate(200%);
-  border: 1px solid rgba(0, 229, 255, 0.4);
-  border-top: 1px solid rgba(0, 229, 255, 0.4);
+  backdrop-filter: blur(50px) saturate(150%);
+  -webkit-backdrop-filter: blur(50px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
     0 40px 80px rgba(0, 0, 0, 0.9),
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
@@ -1825,14 +1824,10 @@ body.theme-blueprint #rain-front {
   padding: 12px 36px;
 
   /* Sleeker Glassmorphism pill style */
-  background: linear-gradient(
-    135deg,
-    rgba(10, 17, 40, 0.85),
-    rgba(2, 4, 10, 0.95)
-  );
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(0, 255, 255, 0.4);
+  background: linear-gradient(135deg, rgba(15, 20, 30, 0.7), rgba(5, 10, 15, 0.8));
+  backdrop-filter: blur(50px) saturate(150%);
+  -webkit-backdrop-filter: blur(50px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
     0 30px 80px rgba(0, 0, 0, 0.9),
     0 0 45px rgba(0, 229, 255, 0.25),
@@ -2161,9 +2156,9 @@ body.x-ray-active #echo-layer {
     0 0 10px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.4);
 
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--edge-fan-tx, 0px)),
       calc(
-        var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) +
+        var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--edge-fan-ty, 0px) +
           (var(--scroll-vel, 0) * 0.5px)
       ),
       calc(
@@ -2461,13 +2456,13 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
       calc(
         calc(var(--tx, 0px) + var(--part-tx, 0px)) +
           var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px) +
-          var(--repel-tx, 0px)
+          var(--repel-tx, 0px) + var(--edge-fan-tx, 0px)
       ),
       calc(
         calc(var(--ty, 0px) + var(--part-ty, 0px)) -
           (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) +
           var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px) +
-          var(--repel-ty, 0px)
+          var(--repel-ty, 0px) + var(--edge-fan-ty, 0px)
       ),
       calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px))
     )
@@ -6313,12 +6308,11 @@ body.solar-system-active #echo-layer::before {
   height: 30px;
   background: linear-gradient(
     90deg,
-    rgba(0, 229, 255, 0.3) 0%,
-    rgba(10, 17, 40, 0.9) 50%,
-    transparent 100%
+    rgba(15, 20, 30, 0.9) 0%,
+    rgba(5, 10, 15, 0.8) 100%
   );
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(0, 229, 255, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
     0 12px 36px rgba(0, 0, 0, 0.8),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -6737,6 +6731,43 @@ body.quantum-superposition-active .echo-document:hover {
     transition: opacity 0.3s ease;
     transform: none !important;
   }
+}
+
+/* =========================================================
+   FOCUS TORCH (Alt + Shift + F)
+   ========================================================= */
+body.focus-torch-active #echo-layer .echo-document {
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.focus-torch-active #echo-layer .echo-document:not(:hover) {
+  opacity: 0.1 !important;
+  filter: blur(8px) grayscale(50%) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      -200px
+    ) scale(0.8) !important;
+  z-index: 10 !important;
+}
+
+body.focus-torch-active #echo-layer .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) saturate(200%) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      200px
+    ) scale(1.1) !important;
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  z-index: 1000 !important;
+}
+
+body.focus-torch-active #editor {
+  opacity: 0.2;
+  filter: blur(6px);
+  transition: all 0.4s ease;
 }
 
 /* =========================================================
