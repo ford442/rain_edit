@@ -36,6 +36,16 @@ const FILE_ORBIT_R = 1.0; // radius of the file-cube shell around its parent
 // Camera animation duration in ms
 const CAM_ANIM_MS = 800;
 
+// Preview panel config
+const LABEL_TRUNCATE_LEN = 16;
+const PREVIEW_DEBOUNCE_MS = 500;
+const PREVIEW_MAX_CHARS = 400;
+const PREVIEW_HIDE_GRACE_MS = 220; // ms to wait before hiding (lets mouse reach panel)
+
+// Label LOD fade distances (world units)
+const LOD_NEAR = 2.5; // full opacity at this distance or closer
+const LOD_FAR  = 8.0; // invisible at this distance or farther
+
 // ─── Utility helpers ─────────────────────────────────────────────────────────
 
 /** Linear interpolation */
@@ -48,6 +58,38 @@ function easeOut(t) {
   return 1 - Math.pow(1 - t, 3);
 }
 
+/** Pick an icon character for a file based on its name and category. */
+function _fileTypeIcon(name, catName) {
+  if (catName === "images") return "🖼";
+  if (catName === "notes") return "📝";
+  if (catName === "shaders") return "✨";
+  if (catName === "songs" || catName === "music") return "🎵";
+  if (catName === "patterns" || catName === "banks" || catName === "samples")
+    return "🎛";
+  const n = (name || "").toLowerCase();
+  if (n.match(/\.(js|ts|jsx|tsx)$/)) return "⚡";
+  if (n.endsWith(".json")) return "{}";
+  if (n.endsWith(".py")) return "🐍";
+  if (n.match(/\.(glsl|frag|vert|wgsl)$/)) return "🔮";
+  if (n.match(/\.(md|txt)$/)) return "📝";
+  if (n.match(/\.(html|css)$/)) return "🌐";
+  return "📄";
+}
+
+/** True when the file should render as a thumbnail image rather than a text snippet. */
+function _isImageFile(name, catName) {
+  if (catName === "images") return true;
+  return /\.(png|jpe?g|gif|webp|svg|bmp|avif)$/i.test(name || "");
+}
+
+/** Human-readable file size string. */
+function _formatSize(bytes) {
+  if (!bytes) return "";
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
 // ─── Main class ──────────────────────────────────────────────────────────────
 
 export class Cabinet3D {
@@ -55,9 +97,10 @@ export class Cabinet3D {
    * @param {import('./StorageAPI.js').StorageAPI} storageAPI
    * @param {import('./TabManager.js').TabManager}  tabManager
    */
-  constructor(storageAPI, tabManager) {
+  constructor(storageAPI, tabManager, monacoApi = null) {
     this.storageAPI = storageAPI;
     this.tabManager = tabManager;
+    this._monacoApi = monacoApi;
     this.visible = false;
 
     // Overlay DOM element
@@ -69,6 +112,22 @@ export class Cabinet3D {
     this._controls = null;
     this._raycaster = new THREE.Raycaster();
     this._mouse = new THREE.Vector2();
+    // Reusable vector for hover raycasting (separate from click raycaster)
+    this._hoverMouse = new THREE.Vector2();
+    this._hoveredMesh = null;
+
+    // File hover + preview state
+    this._hoveredFileMesh = null;
+    this._prevHoveredFileMesh = null;
+    this._previewFetchTimer = null;
+    this._previewHideTimer = null;
+    this._previewCache = new Map();     // cacheKey → text snippet
+    this._previewCacheHtml = new Map(); // cacheKey → syntax-highlighted HTML
+    this._previewPanel = null;
+    this._previewTargetMesh = null;
+    this._pinnedFileMesh = null;
+    this._isPinned = false;
+    this._lodFrameCounter = 0;
 
     // Scene objects
     this._catMeshes = []; // { mesh, catIndex, catName }
@@ -95,6 +154,7 @@ export class Cabinet3D {
     if (this.visible) return;
     this.visible = true;
     this._overlay.style.display = "flex";
+    this._renderer.domElement.style.display = "block";
     this._onResize();
     this._startLoop();
   }
@@ -104,7 +164,30 @@ export class Cabinet3D {
     if (!this.visible) return;
     this.visible = false;
     this._overlay.style.display = "none";
+    this._renderer.domElement.style.display = "none";
     this._stopLoop();
+    this._hidePreview();
+  }
+
+  /** Expose the Three.js renderer canvas so the rain shader can read it as a texture. */
+  getRendererCanvas() {
+    return this._renderer.domElement;
+  }
+
+  /**
+   * Return the screen-space position (CSS px) of the currently hovered or pinned file
+   * cube, or null when nothing is active.  Used by the main animate loop for continuous
+   * frame-driven rain clearing — mousemove events alone stop firing when the cursor is
+   * stationary, so this lets the clearing persist.
+   * @returns {{ x: number, y: number, r: number } | null}
+   */
+  getHoverScreenPos() {
+    const mesh = this._hoveredFileMesh || this._pinnedFileMesh;
+    if (!mesh || !this.visible) return null;
+    const wp = new THREE.Vector3();
+    mesh.getWorldPosition(wp);
+    const s = this._worldToScreen(wp);
+    return { x: s.x, y: s.y, r: 58 };
   }
 
   /** Toggle visibility. */
@@ -118,10 +201,11 @@ export class Cabinet3D {
     this._buildOverlay();
     this._buildScene();
     this._buildCategoryCubes();
+    this._buildPreviewPanel();
     this._bindEvents();
   }
 
-  /** Create the full-screen transparent HTML overlay. */
+  /** Create the full-screen transparent HTML overlay (controls only, no background). */
   _buildOverlay() {
     const overlay = document.createElement("div");
     overlay.id = "cabinet-overlay";
@@ -132,8 +216,7 @@ export class Cabinet3D {
       "align-items: center",
       "justify-content: center",
       "z-index: 50",
-      "background: rgba(0,0,0,0.75)",
-      "backdrop-filter: blur(4px)",
+      "pointer-events: none",
     ].join(";");
 
     // Close button
@@ -152,6 +235,7 @@ export class Cabinet3D {
       "border-radius: 6px",
       "cursor: pointer",
       "z-index: 51",
+      "pointer-events: auto",
     ].join(";");
     closeBtn.addEventListener("click", () => this.hide());
     overlay.appendChild(closeBtn);
@@ -181,12 +265,19 @@ export class Cabinet3D {
 
   /** Initialise the Three.js renderer, scene and camera. */
   _buildScene() {
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // preserveDrawingBuffer lets the rain shader read pixels cross-context each frame
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+    });
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setClearColor(0x000000, 0);
+    // Dark background so rain has something opaque to refract
+    renderer.setClearColor(0x020a14, 0.92);
+    // Canvas sits between editor (z=5) and rain-front (z=10) so rain renders over it
     renderer.domElement.style.cssText =
-      "position:absolute;inset:0;width:100%;height:100%;";
-    this._overlay.appendChild(renderer.domElement);
+      "position:fixed;inset:0;width:100%;height:100%;z-index:8;display:none;";
+    document.body.appendChild(renderer.domElement);
     this._renderer = renderer;
 
     const scene = new THREE.Scene();
@@ -289,6 +380,473 @@ export class Cabinet3D {
     const spr = new THREE.Sprite(mat);
     spr.scale.set(1.2, 0.3, 1);
     return spr;
+  }
+
+  /**
+   * Build a small canvas-texture sprite label for a file cube.
+   * Shown at reduced opacity by default; boosts to full on hover.
+   * @param {string} filename
+   * @returns {THREE.Sprite}
+   */
+  _makeFileLabelSprite(filename) {
+    const label =
+      filename.length > LABEL_TRUNCATE_LEN
+        ? filename.slice(0, LABEL_TRUNCATE_LEN - 1) + "…"
+        : filename;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 48;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, 256, 48);
+    ctx.fillStyle = "#90b8d0";
+    ctx.font = "bold 15px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, 128, 24);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.SpriteMaterial({
+      map: tex,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+    });
+    const spr = new THREE.Sprite(mat);
+    spr.scale.set(0.62, 0.115, 1);
+    spr.position.set(0, FILE_CUBE_SIZE / 2 + 0.1, 0);
+    return spr;
+  }
+
+  /** Build the HTML file-preview panel and attach it to the document body. */
+  _buildPreviewPanel() {
+    const panel = document.createElement("div");
+    panel.id = "cabinet-file-preview";
+    panel.style.cssText = [
+      "position: fixed",
+      "z-index: 60",
+      "display: none",
+      "width: 288px",
+      "max-height: 380px",
+      "background: rgba(2,10,22,0.93)",
+      "border: 1px solid rgba(0,229,255,0.22)",
+      "border-radius: 8px",
+      "overflow: hidden",
+      "font-family: 'JetBrains Mono', monospace",
+      "font-size: 12px",
+      "color: #c0d0e0",
+      "pointer-events: auto",
+      "box-shadow: 0 4px 32px rgba(0,0,0,0.7), 0 0 20px rgba(0,229,255,0.07)",
+      "backdrop-filter: blur(10px)",
+    ].join(";");
+
+    // Cancel pending hide when mouse enters panel
+    panel.addEventListener("mouseenter", () =>
+      clearTimeout(this._previewHideTimer),
+    );
+    // Restart hide grace period when mouse leaves panel to canvas
+    panel.addEventListener("mouseleave", () => {
+      if (!this._isPinned) {
+        clearTimeout(this._previewHideTimer);
+        this._previewHideTimer = setTimeout(
+          () => this._hidePreview(),
+          PREVIEW_HIDE_GRACE_MS,
+        );
+      }
+    });
+
+    // ── Header ──────────────────────────────────────────────────────────────
+    const header = document.createElement("div");
+    header.style.cssText =
+      "display:flex;align-items:center;gap:6px;padding:9px 10px 7px;" +
+      "border-bottom:1px solid rgba(0,229,255,0.1);";
+
+    const icon = document.createElement("span");
+    icon.id = "pfp-icon";
+    icon.style.cssText = "font-size:15px;flex-shrink:0;";
+
+    const name = document.createElement("span");
+    name.id = "pfp-name";
+    name.style.cssText =
+      "font-weight:bold;color:#dff0ff;overflow:hidden;" +
+      "text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:11px;";
+
+    const badge = document.createElement("span");
+    badge.id = "pfp-badge";
+    badge.style.cssText =
+      "font-size:9px;color:#00aaff;flex-shrink:0;display:none;" +
+      "border:1px solid rgba(0,170,255,0.4);border-radius:3px;padding:1px 4px;";
+
+    // 📌 Pin button — keeps preview open while orbiting
+    const pinBtn = document.createElement("button");
+    pinBtn.id = "pfp-pin";
+    pinBtn.title = "Pin preview";
+    pinBtn.textContent = "📍";
+    pinBtn.style.cssText =
+      "background:none;border:none;cursor:pointer;font-size:13px;" +
+      "padding:0 2px;opacity:0.45;flex-shrink:0;line-height:1;";
+    pinBtn.addEventListener("click", () => {
+      this._isPinned = !this._isPinned;
+      if (this._isPinned) {
+        this._pinnedFileMesh = this._previewTargetMesh;
+      } else {
+        this._pinnedFileMesh = null;
+      }
+      this._updatePinButton();
+    });
+
+    // ✕ Close button
+    const closeBtn = document.createElement("button");
+    closeBtn.title = "Close preview";
+    closeBtn.textContent = "✕";
+    closeBtn.style.cssText =
+      "background:none;border:none;cursor:pointer;font-size:13px;" +
+      "color:rgba(192,208,224,0.5);padding:0 2px;flex-shrink:0;line-height:1;";
+    closeBtn.addEventListener("click", () => this._hidePreview());
+
+    header.append(icon, name, badge, pinBtn, closeBtn);
+
+    // ── Meta ────────────────────────────────────────────────────────────────
+    const meta = document.createElement("div");
+    meta.id = "pfp-meta";
+    meta.style.cssText =
+      "padding:4px 12px 5px;color:rgba(192,208,224,0.55);font-size:9px;";
+
+    // ── Image thumbnail (images category) ───────────────────────────────────
+    const thumb = document.createElement("img");
+    thumb.id = "pfp-thumb";
+    thumb.style.cssText =
+      "width:100%;max-height:150px;object-fit:cover;display:none;" +
+      "border-top:1px solid rgba(0,229,255,0.07);background:#000;";
+
+    // ── Content / code snippet ───────────────────────────────────────────────
+    const content = document.createElement("pre");
+    content.id = "pfp-content";
+    content.style.cssText = [
+      "margin:0",
+      "padding:8px 12px",
+      "max-height:155px",
+      "overflow:hidden",
+      "color:rgba(180,220,240,0.82)",
+      "font-size:9px",
+      "line-height:1.45",
+      "background:rgba(0,0,0,0.28)",
+      "border-top:1px solid rgba(0,229,255,0.07)",
+      "white-space:pre-wrap",
+      "word-break:break-all",
+      "tab-size:2",
+    ].join(";");
+
+    // ── Actions ─────────────────────────────────────────────────────────────
+    const actions = document.createElement("div");
+    actions.style.cssText =
+      "display:flex;gap:6px;padding:7px 12px;" +
+      "border-top:1px solid rgba(0,229,255,0.08);";
+
+    const btnStyle = (accent) =>
+      `background:rgba(${accent},0.1);border:1px solid rgba(${accent},0.3);` +
+      `color:rgb(${accent});font-family:inherit;font-size:9px;` +
+      `padding:4px 10px;border-radius:4px;cursor:pointer;flex:1;`;
+
+    const openBtn = document.createElement("button");
+    openBtn.id = "pfp-open";
+    openBtn.textContent = "Open in Editor";
+    openBtn.style.cssText = btnStyle("0,229,255");
+    openBtn.addEventListener("click", () => {
+      if (this._previewTargetMesh) {
+        const ud = this._previewTargetMesh.userData;
+        this._onFileClick(ud.catIndex, ud.fileData);
+        this._hidePreview();
+      }
+    });
+
+    const copyBtn = document.createElement("button");
+    copyBtn.id = "pfp-copy";
+    copyBtn.textContent = "Copy Path";
+    copyBtn.style.cssText = btnStyle("192,208,224");
+    copyBtn.addEventListener("click", () => {
+      if (!this._previewTargetMesh) return;
+      const { fileData } = this._previewTargetMesh.userData;
+      const path = fileData.vpsPath || fileData.id || fileData.name || "";
+      navigator.clipboard.writeText(path).catch(() => {});
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => { copyBtn.textContent = "Copy Path"; }, 1500);
+    });
+
+    actions.append(openBtn, copyBtn);
+    panel.append(header, meta, thumb, content, actions);
+    document.body.appendChild(panel);
+    this._previewPanel = panel;
+  }
+
+  /** Populate and show the preview panel for a file mesh (metadata only; content lazy). */
+  _showPreview(mesh) {
+    clearTimeout(this._previewHideTimer);
+    this._previewTargetMesh = mesh;
+    const { fileData, catName } = mesh.userData;
+    const filename = fileData.filename || fileData.name || "unknown";
+
+    this._previewPanel.querySelector("#pfp-icon").textContent = _fileTypeIcon(filename, catName);
+    this._previewPanel.querySelector("#pfp-name").textContent = filename;
+
+    const badge = this._previewPanel.querySelector("#pfp-badge");
+    if (fileData.isRemote) {
+      badge.textContent = "☁ Remote";
+      badge.style.display = "inline";
+    } else {
+      badge.style.display = "none";
+    }
+
+    const parts = [catName];
+    if (fileData.date) parts.push(new Date(fileData.date).toLocaleDateString());
+    if (fileData.size) parts.push(_formatSize(fileData.size));
+    this._previewPanel.querySelector("#pfp-meta").textContent = parts.join(" · ");
+
+    const cacheKey = fileData.vpsPath || fileData.id || filename;
+    const thumb = this._previewPanel.querySelector("#pfp-thumb");
+    const contentEl = this._previewPanel.querySelector("#pfp-content");
+
+    if (_isImageFile(filename, catName)) {
+      // Show thumbnail; skip text content area
+      contentEl.style.display = "none";
+      thumb.style.display = "block";
+      thumb.src = fileData.vpsPath
+        ? this.storageAPI.getVPSFileURL(fileData.vpsPath)
+        : "";
+      thumb.alt = filename;
+    } else {
+      thumb.style.display = "none";
+      contentEl.style.display = "block";
+      const cachedHtml = this._previewCacheHtml.get(cacheKey);
+      const cached = this._previewCache.get(cacheKey);
+      if (cachedHtml) {
+        contentEl.innerHTML = cachedHtml;
+      } else if (cached && cached !== "Loading…") {
+        contentEl.textContent = cached;
+      } else {
+        contentEl.textContent = cached ?? "…";
+      }
+    }
+
+    this._updatePinButton();
+    this._previewPanel.style.display = "block";
+    this._updatePreviewPanelPosition();
+  }
+
+  /** Hide and reset the preview panel, cancelling any pending fetch or hide timer. */
+  _hidePreview() {
+    clearTimeout(this._previewFetchTimer);
+    this._previewFetchTimer = null;
+    clearTimeout(this._previewHideTimer);
+    this._previewHideTimer = null;
+    if (this._previewPanel) this._previewPanel.style.display = "none";
+    this._previewTargetMesh = null;
+    this._pinnedFileMesh = null;
+    this._isPinned = false;
+    this._updatePinButton();
+  }
+
+  /** Sync the 📌 pin button visual to `_isPinned` state. */
+  _updatePinButton() {
+    const btn = this._previewPanel?.querySelector("#pfp-pin");
+    if (!btn) return;
+    btn.textContent = this._isPinned ? "📌" : "📍";
+    btn.style.opacity = this._isPinned ? "1" : "0.45";
+    btn.title = this._isPinned ? "Unpin preview" : "Pin preview";
+  }
+
+  /**
+   * Fetch a content snippet for a file cube (called after debounce).
+   * Text and highlighted HTML are cached independently; repeated hovers are instant.
+   */
+  async _fetchPreviewContent(mesh) {
+    const { fileData, catName } = mesh.userData;
+    const filename = fileData.filename || fileData.name || "unknown";
+    const cacheKey = fileData.vpsPath || fileData.id || filename;
+
+    // Images are handled with a thumbnail — no text to fetch
+    if (_isImageFile(filename, catName)) {
+      this._previewCache.set(cacheKey, "«image»");
+      return;
+    }
+
+    const existing = this._previewCache.get(cacheKey);
+    if (existing && existing !== "Loading…") return;
+
+    // Sentinel to prevent duplicate in-flight fetches
+    this._previewCache.set(cacheKey, "Loading…");
+    this._updateContentEl(mesh, "Loading…", false);
+
+    try {
+      let text;
+      if (fileData.isRemote && fileData.vpsPath) {
+        text = await this.storageAPI.getVPSFile(fileData.vpsPath);
+      } else {
+        const id = fileData.id || fileData._id || fileData.name;
+        const result = await this.storageAPI.getFileContent(id, catName);
+        text = result?.content ?? null;
+      }
+
+      const snippet =
+        text == null
+          ? "(preview unavailable)"
+          : text.length > PREVIEW_MAX_CHARS
+            ? text.slice(0, PREVIEW_MAX_CHARS) + "…"
+            : text;
+
+      this._previewCache.set(cacheKey, snippet);
+
+      // Syntax highlight via Monaco if available
+      if (this._monacoApi && snippet !== "(preview unavailable)") {
+        const rawLang = this._detectLanguage(catName, fileData);
+        // Map langs Monaco doesn't know to plaintext
+        const lang = ["wgsl", "image", "brainfuck"].includes(rawLang)
+          ? "plaintext"
+          : rawLang;
+        try {
+          const html = await this._monacoApi.editor.colorize(snippet, lang, {
+            tabSize: 2,
+          });
+          this._previewCacheHtml.set(cacheKey, html);
+        } catch { /* fall through to plain text */ }
+      }
+    } catch {
+      this._previewCache.set(cacheKey, "(preview unavailable)");
+    }
+
+    // Push result to panel if still the active target
+    if (
+      this._previewTargetMesh === mesh &&
+      this._previewPanel?.style.display !== "none"
+    ) {
+      const html = this._previewCacheHtml.get(cacheKey);
+      const text = this._previewCache.get(cacheKey);
+      this._updateContentEl(mesh, text, false, html);
+    }
+  }
+
+  /** Write text or HTML into the content <pre> element. */
+  _updateContentEl(mesh, text, _unused, html = null) {
+    if (this._previewTargetMesh !== mesh) return;
+    const el = this._previewPanel?.querySelector("#pfp-content");
+    if (!el) return;
+    if (html) {
+      el.innerHTML = html;
+    } else {
+      el.textContent = text ?? "";
+    }
+  }
+
+  /** Reposition the preview panel to follow the hovered file cube each frame. */
+  _updatePreviewPanelPosition() {
+    if (
+      !this._hoveredFileMesh ||
+      !this._previewPanel ||
+      this._previewPanel.style.display === "none"
+    )
+      return;
+
+    const worldPos = new THREE.Vector3();
+    this._hoveredFileMesh.getWorldPosition(worldPos);
+    const s = this._worldToScreen(worldPos);
+    const pw = 280;
+    const ph = this._previewPanel.offsetHeight || 190;
+    let left = s.x + 26;
+    let top = s.y - ph / 2;
+    if (left + pw > window.innerWidth - 12) left = s.x - pw - 26;
+    top = Math.max(12, Math.min(window.innerHeight - ph - 12, top));
+    this._previewPanel.style.left = left + "px";
+    this._previewPanel.style.top = top + "px";
+  }
+
+  /**
+   * Fade label sprite opacity based on camera-to-cube world distance (LOD).
+   * Throttled to every 8 frames; hover-animated meshes are skipped.
+   */
+  _updateLabelLOD() {
+    this._lodFrameCounter = (this._lodFrameCounter + 1) % 8;
+    if (this._lodFrameCounter !== 0) return;
+
+    const camPos = this._camera.position;
+    const wp = new THREE.Vector3();
+    const range = LOD_FAR - LOD_NEAR;
+
+    for (const mesh of this._fileMeshes) {
+      const sprite = mesh.userData.labelSprite;
+      if (!sprite) continue;
+      // Hover animation owns these — don't fight it
+      if (mesh === this._hoveredFileMesh || mesh === this._prevHoveredFileMesh)
+        continue;
+
+      mesh.getWorldPosition(wp);
+      const dist = camPos.distanceTo(wp);
+      let target;
+      if (dist <= LOD_NEAR) {
+        target = 0.55;
+      } else if (dist >= LOD_FAR) {
+        target = 0;
+      } else {
+        target = 0.55 * (1 - (dist - LOD_NEAR) / range);
+      }
+      sprite.material.opacity = lerp(sprite.material.opacity, target, 0.2);
+    }
+  }
+
+  /**
+   * Lerp file cube scale and emissive intensity toward hover/rest targets.
+   * Only touches the actively hovered cube and the previously hovered one.
+   */
+  _updateHoverAnimation() {
+    const T = 0.14;
+    const HOVER_SCALE = 1.5;
+    const REST_SCALE = 1.0;
+    const HOVER_EMISSIVE = 0.82;
+    const REST_EMISSIVE = 0.2;
+    const HOVER_LABEL_A = 1.0;
+    const REST_LABEL_A = 0.55;
+
+    if (this._hoveredFileMesh) {
+      const m = this._hoveredFileMesh;
+      m.scale.x = lerp(m.scale.x, HOVER_SCALE, T);
+      m.scale.y = lerp(m.scale.y, HOVER_SCALE, T);
+      m.scale.z = lerp(m.scale.z, HOVER_SCALE, T);
+      if (m.material)
+        m.material.emissiveIntensity = lerp(
+          m.material.emissiveIntensity,
+          HOVER_EMISSIVE,
+          T,
+        );
+      if (m.userData.labelSprite)
+        m.userData.labelSprite.material.opacity = lerp(
+          m.userData.labelSprite.material.opacity,
+          HOVER_LABEL_A,
+          T,
+        );
+    }
+
+    if (
+      this._prevHoveredFileMesh &&
+      this._prevHoveredFileMesh !== this._hoveredFileMesh
+    ) {
+      const m = this._prevHoveredFileMesh;
+      m.scale.x = lerp(m.scale.x, REST_SCALE, T);
+      m.scale.y = lerp(m.scale.y, REST_SCALE, T);
+      m.scale.z = lerp(m.scale.z, REST_SCALE, T);
+      if (m.material)
+        m.material.emissiveIntensity = lerp(
+          m.material.emissiveIntensity,
+          REST_EMISSIVE,
+          T,
+        );
+      if (m.userData.labelSprite)
+        m.userData.labelSprite.material.opacity = lerp(
+          m.userData.labelSprite.material.opacity,
+          REST_LABEL_A,
+          T,
+        );
+      if (Math.abs(m.scale.x - REST_SCALE) < 0.005)
+        this._prevHoveredFileMesh = null;
+    }
   }
 
   /**
@@ -455,15 +1013,22 @@ export class Cabinet3D {
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(x, y, z);
+      const filename = fileData.filename || fileData.name || `${catName}-${i}`;
       mesh.userData = {
         type: "file",
         catIndex,
         fileData,
         catName,
         isRemote: fileData.isRemote || false,
+        filename,
       };
       catMesh.add(mesh); // parented to the category cube
       this._fileMeshes.push(mesh);
+
+      // Filename label billboard — always visible, boosts opacity on hover
+      const labelSprite = this._makeFileLabelSprite(filename);
+      mesh.userData.labelSprite = labelSprite;
+      mesh.add(labelSprite);
 
       // Add visual badge for remote files
       if (fileData.isRemote) {
@@ -475,7 +1040,118 @@ export class Cabinet3D {
   /** Bind window events. */
   _bindEvents() {
     window.addEventListener("resize", () => this._onResize());
-    this._overlay.addEventListener("click", (e) => this._onClick(e));
+    // Canvas is the click target now (overlay has pointer-events:none)
+    this._renderer.domElement.addEventListener("click", (e) =>
+      this._onClick(e),
+    );
+    this._renderer.domElement.addEventListener("mousemove", (e) =>
+      this._onMouseMove(e),
+    );
+    // External cache invalidation (e.g. after a VPS file save)
+    window.addEventListener("cabinet-cache-invalidate", (e) => {
+      const path = e.detail?.path;
+      if (path) {
+        this._previewCache.delete(path);
+        this._previewCacheHtml.delete(path);
+      }
+    });
+  }
+
+  /**
+   * Project a Three.js world position to CSS pixel coordinates on screen.
+   * @param {THREE.Vector3} worldPos
+   * @returns {{ x: number, y: number }}
+   */
+  _worldToScreen(worldPos) {
+    const v = worldPos.clone().project(this._camera);
+    const el = this._renderer.domElement;
+    return {
+      x: ((v.x + 1) / 2) * el.clientWidth,
+      y: ((1 - v.y) / 2) * el.clientHeight,
+    };
+  }
+
+  /**
+   * Handle mousemove: raycast to find hovered cube and dispatch rain-clear event
+   * so the main loop can wipe droplets off the glass in front of the hovered item.
+   */
+  _onMouseMove(e) {
+    const rect = this._renderer.domElement.getBoundingClientRect();
+    this._hoverMouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    this._hoverMouse.y = ((e.clientY - rect.top) / rect.height) * -2 + 1;
+
+    this._raycaster.setFromCamera(this._hoverMouse, this._camera);
+    const hits = this._raycaster.intersectObjects(this._scene.children, true);
+
+    let hitMesh = null;
+    for (const h of hits) {
+      const ud = h.object.userData;
+      if (ud.type === "category" || ud.type === "file") {
+        hitMesh = h.object;
+        break;
+      }
+    }
+
+    if (hitMesh !== this._hoveredMesh) {
+      this._hoveredMesh = hitMesh;
+    }
+
+    // Track file hover separately for preview + animation
+    const hitFileMesh =
+      hitMesh?.userData.type === "file" ? hitMesh : null;
+    if (hitFileMesh !== this._hoveredFileMesh) {
+      this._prevHoveredFileMesh = this._hoveredFileMesh;
+      this._hoveredFileMesh = hitFileMesh;
+
+      if (hitFileMesh) {
+        // Moving to a different file overrides any pin
+        if (this._isPinned && this._pinnedFileMesh !== hitFileMesh) {
+          this._isPinned = false;
+          this._pinnedFileMesh = null;
+        }
+        clearTimeout(this._previewHideTimer);
+        this._showPreview(hitFileMesh);
+        // Debounce the network fetch so fast mouse sweeps don't trigger requests
+        clearTimeout(this._previewFetchTimer);
+        const key =
+          hitFileMesh.userData.fileData.vpsPath ||
+          hitFileMesh.userData.fileData.id ||
+          hitFileMesh.userData.filename;
+        const cached = this._previewCache.get(key);
+        if (!cached || cached === "Loading…") {
+          this._previewFetchTimer = setTimeout(
+            () => this._fetchPreviewContent(hitFileMesh),
+            PREVIEW_DEBOUNCE_MS,
+          );
+        }
+      } else if (!this._isPinned) {
+        // Grace period: allow mouse to slide from cube to panel without hiding
+        clearTimeout(this._previewHideTimer);
+        this._previewHideTimer = setTimeout(
+          () => this._hidePreview(),
+          PREVIEW_HIDE_GRACE_MS,
+        );
+      }
+    }
+
+    if (hitMesh) {
+      // Get the world-space center of the hit object (accounting for parent transforms)
+      const worldPos = new THREE.Vector3();
+      hitMesh.getWorldPosition(worldPos);
+      const screen = this._worldToScreen(worldPos);
+      const isCategory = hitMesh.userData.type === "category";
+
+      window.dispatchEvent(
+        new CustomEvent("cabinet-rain-clear", {
+          detail: {
+            x: screen.x,
+            y: screen.y,
+            r: isCategory ? 110 : 60,
+            type: hitMesh.userData.type,
+          },
+        }),
+      );
+    }
   }
 
   /** Handle window resize. */
@@ -489,9 +1165,6 @@ export class Cabinet3D {
 
   /** Handle click on the Three.js canvas. */
   _onClick(e) {
-    // Ignore clicks on the close button
-    if (e.target !== this._renderer.domElement) return;
-
     const rect = this._renderer.domElement.getBoundingClientRect();
     this._mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     this._mouse.y = ((e.clientY - rect.top) / rect.height) * -2 + 1;
@@ -505,10 +1178,28 @@ export class Cabinet3D {
     for (const hit of intersects) {
       const ud = hit.object.userData;
       if (ud.type === "category") {
+        // Dispatch a large rain splash at the clicked cube's screen position
+        const worldPos = new THREE.Vector3();
+        hit.object.getWorldPosition(worldPos);
+        const screen = this._worldToScreen(worldPos);
+        window.dispatchEvent(
+          new CustomEvent("cabinet-rain-splash", {
+            detail: { x: screen.x, y: screen.y, r: 160 },
+          }),
+        );
         this._onCategoryClick(ud.catIndex, ud.catName);
         return;
       }
       if (ud.type === "file") {
+        // Dispatch a medium rain splash at the clicked file cube's screen position
+        const worldPos = new THREE.Vector3();
+        hit.object.getWorldPosition(worldPos);
+        const screen = this._worldToScreen(worldPos);
+        window.dispatchEvent(
+          new CustomEvent("cabinet-rain-splash", {
+            detail: { x: screen.x, y: screen.y, r: 90 },
+          }),
+        );
         this._onFileClick(ud.catIndex, ud.fileData);
         return;
       }
@@ -565,9 +1256,14 @@ export class Cabinet3D {
    * @param {object} fileData - Metadata object from the API.
    */
   _onFileClick(catIndex, fileData) {
+    // Invalidate cached preview so next hover reflects any edits
+    const filename = fileData.filename || fileData.name || "";
+    const cacheKey = fileData.vpsPath || fileData.id || filename;
+    this._previewCache.delete(cacheKey);
+    this._previewCacheHtml.delete(cacheKey);
+
     const catName = STORAGE_CATEGORIES[catIndex];
     const id = fileData.id || fileData._id || fileData.name || "unknown";
-    const filename = fileData.filename || fileData.name || `${catName}-${id}`;
 
     // Dispatch custom event for main.js to handle with depth focus
     const event = new CustomEvent("fileCubeClicked", {
@@ -673,6 +1369,9 @@ export class Cabinet3D {
     this._rafId = requestAnimationFrame(() => this._loop());
     this._updateCameraAnim();
     this._updateIdleRotation();
+    this._updateHoverAnimation();
+    this._updateLabelLOD();
+    this._updatePreviewPanelPosition();
     this._controls.update();
     this._renderer.render(this._scene, this._camera);
   }

@@ -197,7 +197,7 @@ const holoManager = new HoloManager(editor, holoLayerEl);
 
 // Initialize 3D File Cabinet
 const storageAPI = new StorageAPI();
-const cabinet3D = new Cabinet3D(storageAPI, tabManager);
+const cabinet3D = new Cabinet3D(storageAPI, tabManager, monaco);
 const veilExcavator = new VeilExcavator(tabManager);
 window.veilExcavator = veilExcavator; // Expose globally for testing
 const cabinetBtn = document.getElementById("btn-cabinet");
@@ -233,6 +233,12 @@ async function _triggerVpsSave() {
     try {
       const result = await storageAPI.saveVPSFile(activeFile.vpsPath, content);
       if (result) {
+        // Invalidate Cabinet3D preview cache for this file so next hover is fresh
+        window.dispatchEvent(
+          new CustomEvent("cabinet-cache-invalidate", {
+            detail: { path: activeFile.vpsPath },
+          }),
+        );
         // Brief visual confirmation on the save button
         if (vpsSaveBtn) {
           const orig = vpsSaveBtn.textContent;
@@ -452,6 +458,10 @@ function drawMatrix() {
 let bgLayer = null;
 let fgLayer = null;
 let raindrops = null;
+// Static background images — kept for restoring after cabinet closes
+let _staticBgImg = null;
+let _staticFgImg = null;
+let _usingCabinetBg = false;
 
 // helper to load image (tries to reuse parent repo assets)
 function awaitImage(src) {
@@ -538,6 +548,8 @@ async function initLayers() {
   const fgImg =
     (await awaitImage("./img/texture-rain-fg.png")) ||
     (await awaitImage("/ra1n/img/weather/texture-rain-fg.png"));
+  _staticBgImg = bgImg;
+  _staticFgImg = fgImg;
   const dropAlpha =
     (await awaitImage("./img/drop-alpha.png")) ||
     (await awaitImage("/ra1n/img/drop-alpha.png"));
@@ -593,7 +605,23 @@ async function initLayers() {
   }
 
   // simple animation loop
+  // Rain intensity: calm near focused 3D content, default otherwise
+  const RAIN_CHANCE_DEFAULT = 0.3;
+  const RAIN_CHANCE_CABINET = 0.12;
+  let _cabinetWasVisible = false;
+
   function animate() {
+    // Modulate rain density when cabinet opens/closes
+    if (cabinet3D) {
+      if (cabinet3D.visible && !_cabinetWasVisible) {
+        raindrops.options.rainChance = RAIN_CHANCE_CABINET;
+        _cabinetWasVisible = true;
+      } else if (!cabinet3D.visible && _cabinetWasVisible) {
+        raindrops.options.rainChance = RAIN_CHANCE_DEFAULT;
+        _cabinetWasVisible = false;
+      }
+    }
+
     raindrops.update(); // updates raindrops.canvas internally
     // update texture bindings from the raindrops canvas
     if (bgLayer) bgLayer.bindTexture("u_waterMap", raindrops.canvas);
@@ -630,6 +658,70 @@ async function initLayers() {
       }
     }
 
+    // Tick rain effects: cabinet hover clears, splash decays, wipe animations
+    rainEffects.tick(raindrops);
+
+    // ── Continuous hover clearing ───────────────────────────────────────────
+    // cabinet-rain-clear events only fire during mousemove; this keeps the clear
+    // alive while the cursor is stationary over a cube, and adds an orbital flow
+    // pattern that looks like rain water parting around the 3D object.
+    if (cabinet3D?.visible && raindrops) {
+      const hPos = cabinet3D.getHoverScreenPos();
+      if (hPos) {
+        raindrops.clearDroplets(hPos.x, hPos.y, hPos.r);
+        // 4 small clears rotating around the cube — evokes water flowing around glass
+        const ft = performance.now() * 0.0015;
+        const orbitR = hPos.r * 0.6;
+        for (let i = 0; i < 4; i++) {
+          const angle = ft + i * (Math.PI * 0.5);
+          raindrops.clearDroplets(
+            hPos.x + Math.cos(angle) * orbitR,
+            hPos.y + Math.sin(angle) * orbitR,
+            hPos.r * 0.22,
+          );
+        }
+      }
+    }
+
+    // ── Local storm calming near the focused document ───────────────────────
+    // At depth 1 (editor between rain layers), stochastically clear small patches
+    // across the editor area ~30×/sec, biased toward centre.  This statistically
+    // reduces droplet density where the user is editing without a hard wipe.
+    if (raindrops) {
+      const _af = tabManager?.files?.find((f) => f.id === tabManager.activeId);
+      if (_af && (_af.depth ?? 1) === 1) {
+        const rect = editorEl.getBoundingClientRect();
+        // ~50 % chance per frame ≈ 30 clears / sec; two uniform samples averaged
+        // approximate a centred Gaussian without trig
+        if (Math.random() < 0.5) {
+          const gx = (Math.random() + Math.random() - 1) * 0.42;
+          const gy = (Math.random() + Math.random() - 1) * 0.42;
+          raindrops.clearDroplets(
+            rect.left + rect.width  * (0.5 + gx),
+            rect.top  + rect.height * (0.5 + gy),
+            14 + Math.random() * 12,
+          );
+        }
+      }
+    }
+
+    // When Cabinet3D is open, feed its live canvas as the rain background texture
+    // so droplets refract the 3D scene. Restore static images when it closes.
+    if (cabinet3D && cabinet3D.visible) {
+      const cabCanvas = cabinet3D.getRendererCanvas();
+      if (bgLayer) bgLayer.bindTexture("u_textureBg", cabCanvas);
+      if (fgLayer) {
+        fgLayer.bindTexture("u_textureBg", cabCanvas);
+        fgLayer.bindTexture("u_textureFg", cabCanvas);
+      }
+      _usingCabinetBg = true;
+    } else if (_usingCabinetBg) {
+      if (bgLayer && _staticBgImg) bgLayer.bindTexture("u_textureBg", _staticBgImg);
+      if (fgLayer && _staticBgImg) fgLayer.bindTexture("u_textureBg", _staticBgImg);
+      if (fgLayer && _staticFgImg) fgLayer.bindTexture("u_textureFg", _staticFgImg);
+      _usingCabinetBg = false;
+    }
+
     if (bgLayer) bgLayer.render();
     if (fgLayer) fgLayer.render();
 
@@ -643,6 +735,90 @@ async function initLayers() {
 }
 
 initLayers();
+
+// ── Rain Effects Manager ────────────────────────────────────────────────────
+// Tracks active screen-space clear regions and wipe animations.
+// All coordinates are in CSS pixels; clearDroplets handles DPR scaling.
+const rainEffects = {
+  // Each entry: { x, y, r, life } — life counts down in frames
+  clears: [],
+  // Each entry: { x0, y0, x1, y1, r, frame, totalFrames }
+  wipes: [],
+
+  addClear(x, y, r, life = 4) {
+    // If we already have a clear near this position, refresh it instead of stacking
+    for (const c of this.clears) {
+      if (Math.abs(c.x - x) < r * 0.5 && Math.abs(c.y - y) < r * 0.5) {
+        c.x = x;
+        c.y = y;
+        c.r = r;
+        c.life = life;
+        return;
+      }
+    }
+    this.clears.push({ x, y, r, life });
+  },
+
+  // Sweep a horizontal wipe across a rect (used on tab open / file open)
+  addWipe(rect, totalFrames = 45) {
+    this.wipes.push({
+      x0: rect.left,
+      y0: rect.top,
+      x1: rect.right,
+      y1: rect.bottom,
+      r: (rect.bottom - rect.top) * 0.55,
+      frame: 0,
+      totalFrames,
+    });
+  },
+
+  tick(drops) {
+    if (!drops) return;
+
+    // Process persistent clear spots
+    this.clears = this.clears.filter((c) => c.life > 0);
+    for (const c of this.clears) {
+      drops.clearDroplets(c.x, c.y, c.r);
+      c.life--;
+    }
+
+    // Process wipe animations
+    this.wipes = this.wipes.filter((w) => w.frame < w.totalFrames);
+    for (const w of this.wipes) {
+      const t = w.frame / w.totalFrames;
+      const cx = w.x0 + (w.x1 - w.x0) * t;
+      const cy = (w.y0 + w.y1) / 2;
+      drops.clearDroplets(cx, cy, w.r);
+      w.frame++;
+    }
+  },
+};
+
+// Cabinet hover → clear rain over hovered cube
+window.addEventListener("cabinet-rain-clear", (e) => {
+  rainEffects.addClear(e.detail.x, e.detail.y, e.detail.r, 3);
+});
+
+// Cabinet click → splash clear + raindrop burst + expanding ripple rings
+window.addEventListener("cabinet-rain-splash", (e) => {
+  const { x, y, r } = e.detail;
+  // Long-lived main clear at impact radius
+  rainEffects.addClear(x, y, r, 40);
+  if (raindrops) {
+    raindrops.splash(x, y, 14);
+    // Concentric ripple rings: pushed directly to bypass position-dedup.
+    // Each ring has a shorter life so the set decays outward like a real splash.
+    rainEffects.clears.push({ x, y, r: r * 0.28, life: 12 });
+    rainEffects.clears.push({ x, y, r: r * 0.52, life:  8 });
+    rainEffects.clears.push({ x, y, r: r * 0.76, life:  5 });
+  }
+});
+
+// Tab activated → wipe rain off the editor area
+editor.onDidChangeModel(() => {
+  const rect = editorEl.getBoundingClientRect();
+  if (rect.width > 0) rainEffects.addWipe(rect, 50);
+});
 
 // parallax from mouse
 let isFlashlightActive = false;
