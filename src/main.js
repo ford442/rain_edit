@@ -1709,6 +1709,7 @@ if (viewModeSelect) {
     else if (view === "carousel") tabManager.toggleCarouselView();
     // UI binding for Infinity Mirror view mode (added in previous iteration)
     else if (view === "infinity-mirror") tabManager.toggleInfinityMirrorView();
+    else if (view === "archway") tabManager.toggleArchwayView();
     else if (view === "kaleidoscope") tabManager.toggleKaleidoscopeView();
     else if (view === "vortex") tabManager.toggleVortexView();
     else if (view === "constellation") tabManager.toggleConstellationView();
@@ -3804,3 +3805,15 @@ document.addEventListener("mousemove", (e) => {
     }
   }
 });
+
+window.archScrollOffset = 0;
+document.addEventListener("wheel", (e) => {
+  if (document.body.classList.contains("archway-active") && e.altKey) {
+    e.preventDefault();
+    const delta = e.deltaY;
+    window.archScrollOffset += delta * 0.005; // Base scroll speed
+    if (window.tabManager && window.tabManager.isArchwayView) {
+        window.tabManager._renderEchoes();
+    }
+  }
+}, { passive: false });

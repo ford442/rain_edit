@@ -7839,3 +7839,56 @@ body.depth-beam-active #depth-beam {
   border-color: #00e5ff !important;
   filter: brightness(1.5) !important;
 }
+
+/* --- Archway View Mode (Alt + A) --- */
+.archway-active {
+  perspective: 1800px;
+  perspective-origin: 50% 40%;
+  overflow: hidden;
+}
+
+.archway-active .echo-layer {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.archway-active .echo-document {
+  position: absolute;
+  transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+  backdrop-filter: blur(16px);
+
+  /* Neon glassmorphism base */
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 12px;
+
+  /* Neon glow */
+  box-shadow:
+    0 0 15px rgba(0, 229, 255, 0.6),
+    0 0 35px rgba(0, 229, 255, 0.4),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
+
+  /* Layout variables set by JS */
+  transform:
+    translate3d(var(--arch-tx, 0px), var(--arch-ty, 0px), var(--arch-tz, 0px))
+    rotateY(var(--arch-rot-y, 0deg))
+    scale(var(--arch-scale, 1));
+}
+
+.archway-active .echo-document:hover {
+  box-shadow:
+    0 0 25px rgba(0, 229, 255, 0.9),
+    0 0 50px rgba(0, 229, 255, 0.6),
+    inset 0 0 30px rgba(255, 255, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.6);
+  z-index: 10;
+}
+
+.archway-active #editor {
+  transform: translateY(200px) scale(0.9);
+  opacity: 0.8;
+  filter: blur(2px);
+  transition: all 0.5s ease;
+}
