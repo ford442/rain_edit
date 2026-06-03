@@ -168,6 +168,8 @@ export class TabManager {
     this.isQuantumSuperpositionView = false;
     this.isOutlineView = false;
     this.isInfinityMirrorView = false;
+    this.isArchwayView = false;
+    this.isArchwayView = false;
     this.isKaleidoscopeView = false;
     this.isCarouselView = false;
     this.isCycloneView = false;
@@ -406,7 +408,14 @@ export class TabManager {
     this._renderEchoes();
   }
 
-  toggleInfinityMirrorView() {
+
+  toggleArchwayView() {
+    this._deactivateAllViews();
+    this.isArchwayView = true;
+    document.body.classList.add("archway-active");
+    this._renderEchoes();
+  }
+toggleInfinityMirrorView() {
     this._deactivateAllViews();
     this.isInfinityMirrorView = true;
     document.body.classList.add("infinity-mirror-active");
@@ -1160,7 +1169,8 @@ Drag to change depth`;
         !this.isFractalView &&
         !this.isNeonSynthView &&
         !this.isBlueprint3dView &&
-        !this.isCyberCortexView
+        !this.isCyberCortexView &&
+        !this.isArchwayView
       ) {
         el.classList.add("semantic-gravity-pull");
       }
@@ -1767,7 +1777,36 @@ Drag to change depth`;
         el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", `${rotZ}deg`);
-      } else if (this.isMobiusView) {
+      } else if (this.isArchwayView) {
+            const allEchoes = Array.from(document.querySelectorAll(".echo-document"));
+            const totalEchoes = Math.max(1, allEchoes.length);
+            const index = parseInt(el.dataset.index || 0);
+
+            // Allow continuous cycling using scrollRotation added via main.js
+            const scrollOffset = window.archScrollOffset || 0;
+
+            const ARCH_ANGLE_SPAN = Math.PI * 1.1;
+            const ANGLE_STEP = ARCH_ANGLE_SPAN / Math.min(15, totalEchoes);
+            const angle = (index * ANGLE_STEP) + scrollOffset;
+
+            const radius = 1200;
+            const tx = Math.sin(angle) * radius;
+            const tz = Math.cos(angle) * radius * 0.6 - 400;
+            const ty = 400 + Math.sin(angle) * -200;
+
+            const rotY = angle * -30;
+
+            const depthFactor = (Math.cos(angle) + 1) / 2;
+            const scale = 0.6 + depthFactor * 0.4;
+            const opacity = 0.3 + depthFactor * 0.7;
+
+            el.style.setProperty("--arch-tx", `${tx}px`);
+            el.style.setProperty("--arch-ty", `${ty}px`);
+            el.style.setProperty("--arch-tz", `${tz}px`);
+            el.style.setProperty("--arch-rot-y", `${rotY}deg`);
+            el.style.setProperty("--arch-scale", scale);
+            el.style.opacity = opacity;
+          } else if (this.isMobiusView) {
         // Mobius Strip View positions
         const totalEchoes = Math.max(1, inactiveFiles.length);
         const t = index / totalEchoes; // 0 to 1
@@ -2647,7 +2686,8 @@ Drag to change depth`;
             this.isFractalView ||
             this.isNeonSynthView ||
             this.isBlueprint3dView ||
-            this.isCyberCortexView
+            this.isCyberCortexView ||
+            this.isArchwayView
           ) {
             // Pop out for pinboard/helix/vortex/prism/wave/rolodex/cylinder/fractal/neon-synth
             const tz = parseFloat(el.style.getPropertyValue("--tz")) || 0;
