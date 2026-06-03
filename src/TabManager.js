@@ -1822,7 +1822,7 @@ Drag to change depth`;
       } else if (this.isLuminescenceView) {
         // Luminescence View: Floating sphere with glowing colors based on extension
         // Using golden ratio spiral for even distribution on a sphere
-        const phi = Math.acos(1 - 2 * (index + 0.5) / totalEchoes);
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
         const theta = Math.PI * (1 + Math.sqrt(5)) * index;
         const radius = 600;
 
@@ -1831,8 +1831,8 @@ Drag to change depth`;
         const tz = radius * Math.cos(phi) - 300; // Center the sphere
 
         // Calculate rotation so documents face outward
-        const rotX = (phi * 180 / Math.PI) - 90;
-        const rotY = theta * 180 / Math.PI;
+        const rotX = (phi * 180) / Math.PI - 90;
+        const rotY = (theta * 180) / Math.PI;
 
         let glowColor = "rgba(255, 255, 255, 0.6)"; // Default white
         if (tab.name.endsWith(".js")) {
@@ -1844,11 +1844,11 @@ Drag to change depth`;
         } else if (tab.name.endsWith(".md")) {
           glowColor = "rgba(147, 112, 219, 0.8)"; // Medium Purple for MD
         } else if (tab.name.endsWith(".py")) {
-           glowColor = "rgba(50, 205, 50, 0.8)"; // Lime Green for Python
+          glowColor = "rgba(50, 205, 50, 0.8)"; // Lime Green for Python
         } else {
-           // Provide a pseudo-random color for other files based on their ID
-           const hue = (parseInt(tab.id.replace('tab-', '')) * 137.5) % 360;
-           glowColor = `hsla(${hue}, 100%, 60%, 0.8)`;
+          // Provide a pseudo-random color for other files based on their ID
+          const hue = (parseInt(tab.id.replace("tab-", "")) * 137.5) % 360;
+          glowColor = `hsla(${hue}, 100%, 60%, 0.8)`;
         }
 
         el.style.setProperty("--glow-color", glowColor);
