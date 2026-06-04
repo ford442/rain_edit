@@ -71,7 +71,9 @@ body,
   right: 0;
   bottom: 0;
   z-index: 5; /* default: depth 1 — middle between rain layers; JS will update dynamically */
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
 
@@ -565,7 +567,11 @@ textarea:focus {
   overflow: hidden;
 
   /* Enhanced Modern Glassmorphism */
-  background: linear-gradient(135deg, rgba(15, 20, 30, 0.7), rgba(5, 10, 15, 0.8));
+  background: linear-gradient(
+    135deg,
+    rgba(15, 20, 30, 0.7),
+    rgba(5, 10, 15, 0.8)
+  );
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E");
   background-blend-mode: overlay;
   backdrop-filter: blur(50px) saturate(150%);
@@ -1824,7 +1830,11 @@ body.theme-blueprint #rain-front {
   padding: 12px 36px;
 
   /* Sleeker Glassmorphism pill style */
-  background: linear-gradient(135deg, rgba(15, 20, 30, 0.7), rgba(5, 10, 15, 0.8));
+  background: linear-gradient(
+    135deg,
+    rgba(15, 20, 30, 0.7),
+    rgba(5, 10, 15, 0.8)
+  );
   backdrop-filter: blur(50px) saturate(150%);
   -webkit-backdrop-filter: blur(50px) saturate(150%);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2156,10 +2166,13 @@ body.x-ray-active #echo-layer {
     0 0 10px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.4);
 
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--edge-fan-tx, 0px)),
       calc(
-        var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--edge-fan-ty, 0px) +
-          (var(--scroll-vel, 0) * 0.5px)
+        var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) +
+          var(--edge-fan-tx, 0px)
+      ),
+      calc(
+        var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) +
+          var(--edge-fan-ty, 0px) + (var(--scroll-vel, 0) * 0.5px)
       ),
       calc(
         var(--tz, 0px) + var(--z-camera-offset, 0px) +
@@ -6747,7 +6760,8 @@ body.focus-torch-active #echo-layer .echo-document:not(:hover) {
       calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
       calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
       -200px
-    ) scale(0.8) !important;
+    )
+    scale(0.8) !important;
   z-index: 10 !important;
 }
 
@@ -6758,8 +6772,11 @@ body.focus-torch-active #echo-layer .echo-document:hover {
       calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
       calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
       200px
-    ) scale(1.1) !important;
-  box-shadow: 0 0 60px rgba(255, 255, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.4) !important;
+    )
+    scale(1.1) !important;
+  box-shadow:
+    0 0 60px rgba(255, 255, 255, 0.8),
+    inset 0 0 20px rgba(255, 255, 255, 0.4) !important;
   border-color: rgba(255, 255, 255, 1) !important;
   z-index: 1000 !important;
 }
@@ -7736,7 +7753,8 @@ body.luminescence-active #echo-layer {
 
 body.luminescence-active .echo-document {
   opacity: 0.8;
-  filter: blur(1.5px) drop-shadow(0 0 20px var(--glow-color, rgba(255, 255, 255, 0.6)));
+  filter: blur(1.5px)
+    drop-shadow(0 0 20px var(--glow-color, rgba(255, 255, 255, 0.6)));
   cursor: pointer;
   transform: translate3d(
       calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
@@ -7764,10 +7782,10 @@ body.luminescence-active .echo-document pre {
   -webkit-mask-image: radial-gradient(circle, black 50%, transparent 90%);
 }
 
-
 body.luminescence-active .echo-document:hover {
   opacity: 1 !important;
-  filter: blur(0px) drop-shadow(0 0 40px var(--glow-color, rgba(255, 255, 255, 0.9))) !important;
+  filter: blur(0px)
+    drop-shadow(0 0 40px var(--glow-color, rgba(255, 255, 255, 0.9))) !important;
   transform: translate3d(
       calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
       calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
@@ -7788,8 +7806,14 @@ body.magnetic-pulse-active .echo-document {
   transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
   /* Pull documents forward and towards the mouse center slightly */
   transform: translate3d(
-      calc(var(--tx, 0px) * 0.5 + var(--part-tx, 0px) + var(--repel-tx, 0px) + ((var(--mouse-x) - 50vw) * 0.2)),
-      calc(var(--ty, 0px) * 0.5 + var(--part-ty, 0px) + var(--repel-ty, 0px) + ((var(--mouse-y) - 50vh) * 0.2)),
+      calc(
+        var(--tx, 0px) * 0.5 + var(--part-tx, 0px) + var(--repel-tx, 0px) +
+          ((var(--mouse-x) - 50vw) * 0.2)
+      ),
+      calc(
+        var(--ty, 0px) * 0.5 + var(--part-ty, 0px) + var(--repel-ty, 0px) +
+          ((var(--mouse-y) - 50vh) * 0.2)
+      ),
       calc(var(--tz, 0px) + 250px)
     )
     scale(1.15) !important;
@@ -7825,7 +7849,11 @@ body.magnetic-pulse-active #editor {
 #depth-beam {
   position: fixed;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.8) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 229, 255, 0.8) 0%,
+    transparent 70%
+  );
   mix-blend-mode: screen;
   transition: opacity 0.2s;
   opacity: 0;
@@ -7835,7 +7863,9 @@ body.depth-beam-active #depth-beam {
   opacity: 1;
 }
 .echo-document.depth-beam-intersect {
-  box-shadow: 0 0 60px rgba(0, 229, 255, 0.8), inset 0 0 30px rgba(0, 229, 255, 0.4) !important;
+  box-shadow:
+    0 0 60px rgba(0, 229, 255, 0.8),
+    inset 0 0 30px rgba(0, 229, 255, 0.4) !important;
   border-color: #00e5ff !important;
   filter: brightness(1.5) !important;
 }

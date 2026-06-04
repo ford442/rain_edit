@@ -697,8 +697,8 @@ async function initLayers() {
           const gx = (Math.random() + Math.random() - 1) * 0.42;
           const gy = (Math.random() + Math.random() - 1) * 0.42;
           raindrops.clearDroplets(
-            rect.left + rect.width  * (0.5 + gx),
-            rect.top  + rect.height * (0.5 + gy),
+            rect.left + rect.width * (0.5 + gx),
+            rect.top + rect.height * (0.5 + gy),
             14 + Math.random() * 12,
           );
         }
@@ -716,9 +716,12 @@ async function initLayers() {
       }
       _usingCabinetBg = true;
     } else if (_usingCabinetBg) {
-      if (bgLayer && _staticBgImg) bgLayer.bindTexture("u_textureBg", _staticBgImg);
-      if (fgLayer && _staticBgImg) fgLayer.bindTexture("u_textureBg", _staticBgImg);
-      if (fgLayer && _staticFgImg) fgLayer.bindTexture("u_textureFg", _staticFgImg);
+      if (bgLayer && _staticBgImg)
+        bgLayer.bindTexture("u_textureBg", _staticBgImg);
+      if (fgLayer && _staticBgImg)
+        fgLayer.bindTexture("u_textureBg", _staticBgImg);
+      if (fgLayer && _staticFgImg)
+        fgLayer.bindTexture("u_textureFg", _staticFgImg);
       _usingCabinetBg = false;
     }
 
@@ -809,8 +812,8 @@ window.addEventListener("cabinet-rain-splash", (e) => {
     // Concentric ripple rings: pushed directly to bypass position-dedup.
     // Each ring has a shorter life so the set decays outward like a real splash.
     rainEffects.clears.push({ x, y, r: r * 0.28, life: 12 });
-    rainEffects.clears.push({ x, y, r: r * 0.52, life:  8 });
-    rainEffects.clears.push({ x, y, r: r * 0.76, life:  5 });
+    rainEffects.clears.push({ x, y, r: r * 0.52, life: 8 });
+    rainEffects.clears.push({ x, y, r: r * 0.76, life: 5 });
   }
 });
 
@@ -998,10 +1001,16 @@ document.addEventListener("mousemove", (e) => {
   if (echoLayerEl) {
     const echoes = echoLayerEl.querySelectorAll(".echo-document");
     echoes.forEach((echo, index) => {
-        // Multiply effect by depth index to increase fanning on deeper elements
-        const depthMultiplier = (index + 1) * 0.5;
-        echo.style.setProperty("--edge-fan-tx", `${edgeFanX * depthMultiplier}px`);
-        echo.style.setProperty("--edge-fan-ty", `${edgeFanY * depthMultiplier}px`);
+      // Multiply effect by depth index to increase fanning on deeper elements
+      const depthMultiplier = (index + 1) * 0.5;
+      echo.style.setProperty(
+        "--edge-fan-tx",
+        `${edgeFanX * depthMultiplier}px`,
+      );
+      echo.style.setProperty(
+        "--edge-fan-ty",
+        `${edgeFanY * depthMultiplier}px`,
+      );
     });
   }
 
@@ -3759,7 +3768,14 @@ document.addEventListener("mousemove", (e) => {
 
 // --- Depth Slicer Beam Logic ---
 document.addEventListener("keydown", (e) => {
-  if (e.key.toLowerCase() === "b" && !e.ctrlKey && !e.metaKey && !e.altKey && document.activeElement.tagName !== "TEXTAREA" && document.activeElement.tagName !== "INPUT") {
+  if (
+    e.key.toLowerCase() === "b" &&
+    !e.ctrlKey &&
+    !e.metaKey &&
+    !e.altKey &&
+    document.activeElement.tagName !== "TEXTAREA" &&
+    document.activeElement.tagName !== "INPUT"
+  ) {
     document.body.classList.add("depth-beam-active");
   }
 });
@@ -3768,7 +3784,7 @@ document.addEventListener("keyup", (e) => {
   if (e.key.toLowerCase() === "b") {
     document.body.classList.remove("depth-beam-active");
     if (echoLayerEl) {
-      echoLayerEl.querySelectorAll(".echo-document").forEach(echo => {
+      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
         echo.classList.remove("depth-beam-intersect");
       });
     }
@@ -3790,11 +3806,13 @@ document.addEventListener("mousemove", (e) => {
 
     if (echoLayerEl) {
       const echoes = echoLayerEl.querySelectorAll(".echo-document");
-      echoes.forEach(echo => {
+      echoes.forEach((echo) => {
         const rect = echo.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
-        const dist = Math.sqrt(Math.pow(e.clientX - cx, 2) + Math.pow(e.clientY - cy, 2));
+        const dist = Math.sqrt(
+          Math.pow(e.clientX - cx, 2) + Math.pow(e.clientY - cy, 2),
+        );
 
         if (dist < 150) {
           echo.classList.add("depth-beam-intersect");
