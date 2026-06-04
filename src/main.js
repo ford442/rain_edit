@@ -1748,6 +1748,7 @@ if (viewModeSelect) {
     else if (view === "dominoes") tabManager.toggleDominoesView();
     else if (view === "hexagon-matrix") tabManager.toggleHexagonMatrixView();
     else if (view === "luminescence") tabManager.toggleLuminescenceView();
+    else if (view === "geode") tabManager.toggleGeodeView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }
@@ -3269,6 +3270,14 @@ document.addEventListener("mousemove", () => {
 // Initial scan
 scanPortals();
 
+// Holographic Slice Mode (Alt + Shift + S)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.shiftKey && e.code === "KeyS" && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    document.body.classList.toggle("holographic-slice-active");
+  }
+});
+
 // X-Ray Mode (Alt + Shift + X)
 document.addEventListener("keydown", (e) => {
   if (e.altKey && e.shiftKey && e.code === "KeyX" && !e.ctrlKey && !e.metaKey) {
@@ -3700,10 +3709,18 @@ document.addEventListener("keyup", (e) => {
   if (e.key === "f" || e.key === "F" || e.key === "Alt" || e.key === "Shift") {
     document.body.classList.remove("focus-torch-active");
   }
+
+  if (e.key === "s" || e.key === "S" || e.key === "Alt" || e.key === "Shift") {
+    document.body.classList.remove("holographic-slice-active");
+  }
 });
 
 // Calculate normalized mouse X for Curtain Pull and Fabric Tear
 document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("holographic-slice-active")) {
+    document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
+    document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
+  }
   if (document.body.classList.contains("curtain-pull-active")) {
     // Normalize mouse X from -1 to 1 based on screen width
     const normX = (e.clientX / window.innerWidth) * 2 - 1;
