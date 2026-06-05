@@ -44,7 +44,7 @@ const PREVIEW_HIDE_GRACE_MS = 220; // ms to wait before hiding (lets mouse reach
 
 // Label LOD fade distances (world units)
 const LOD_NEAR = 2.5; // full opacity at this distance or closer
-const LOD_FAR  = 8.0; // invisible at this distance or farther
+const LOD_FAR = 8.0; // invisible at this distance or farther
 
 // ─── Utility helpers ─────────────────────────────────────────────────────────
 
@@ -121,7 +121,7 @@ export class Cabinet3D {
     this._prevHoveredFileMesh = null;
     this._previewFetchTimer = null;
     this._previewHideTimer = null;
-    this._previewCache = new Map();     // cacheKey → text snippet
+    this._previewCache = new Map(); // cacheKey → text snippet
     this._previewCacheHtml = new Map(); // cacheKey → syntax-highlighted HTML
     this._previewPanel = null;
     this._previewTargetMesh = null;
@@ -570,7 +570,9 @@ export class Cabinet3D {
       const path = fileData.vpsPath || fileData.id || fileData.name || "";
       navigator.clipboard.writeText(path).catch(() => {});
       copyBtn.textContent = "Copied!";
-      setTimeout(() => { copyBtn.textContent = "Copy Path"; }, 1500);
+      setTimeout(() => {
+        copyBtn.textContent = "Copy Path";
+      }, 1500);
     });
 
     actions.append(openBtn, copyBtn);
@@ -586,7 +588,10 @@ export class Cabinet3D {
     const { fileData, catName } = mesh.userData;
     const filename = fileData.filename || fileData.name || "unknown";
 
-    this._previewPanel.querySelector("#pfp-icon").textContent = _fileTypeIcon(filename, catName);
+    this._previewPanel.querySelector("#pfp-icon").textContent = _fileTypeIcon(
+      filename,
+      catName,
+    );
     this._previewPanel.querySelector("#pfp-name").textContent = filename;
 
     const badge = this._previewPanel.querySelector("#pfp-badge");
@@ -600,7 +605,8 @@ export class Cabinet3D {
     const parts = [catName];
     if (fileData.date) parts.push(new Date(fileData.date).toLocaleDateString());
     if (fileData.size) parts.push(_formatSize(fileData.size));
-    this._previewPanel.querySelector("#pfp-meta").textContent = parts.join(" · ");
+    this._previewPanel.querySelector("#pfp-meta").textContent =
+      parts.join(" · ");
 
     const cacheKey = fileData.vpsPath || fileData.id || filename;
     const thumb = this._previewPanel.querySelector("#pfp-thumb");
@@ -708,7 +714,9 @@ export class Cabinet3D {
             tabSize: 2,
           });
           this._previewCacheHtml.set(cacheKey, html);
-        } catch { /* fall through to plain text */ }
+        } catch {
+          /* fall through to plain text */
+        }
       }
     } catch {
       this._previewCache.set(cacheKey, "(preview unavailable)");
@@ -1097,8 +1105,7 @@ export class Cabinet3D {
     }
 
     // Track file hover separately for preview + animation
-    const hitFileMesh =
-      hitMesh?.userData.type === "file" ? hitMesh : null;
+    const hitFileMesh = hitMesh?.userData.type === "file" ? hitMesh : null;
     if (hitFileMesh !== this._hoveredFileMesh) {
       this._prevHoveredFileMesh = this._hoveredFileMesh;
       this._hoveredFileMesh = hitFileMesh;
