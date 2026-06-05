@@ -132,6 +132,7 @@ export class TabManager {
     this.isDominoesView = false;
     this.isHexagonMatrixView = false;
     this.isLuminescenceView = false;
+    this.isGeodeView = false;
   }
 
   _deactivateAllViews() {
@@ -178,6 +179,7 @@ export class TabManager {
     this.isDominoesView = false;
     this.isHexagonMatrixView = false;
     this.isLuminescenceView = false;
+    this.isGeodeView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -219,6 +221,7 @@ export class TabManager {
       "astrolabe-active",
       "dominoes-active",
       "luminescence-active",
+      "geode-active"
     );
 
     this.isOrigamiView = false;
@@ -266,6 +269,16 @@ export class TabManager {
       document.body.classList.add("hexagon-matrix-active");
       const btn = document.getElementById("btn-hexagon-matrix-view");
       if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  }
+
+  toggleGeodeView() {
+    const wasActive = this.isGeodeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isGeodeView = true;
+      document.body.classList.add("geode-active");
     }
     this._renderEchoes();
   }
@@ -1858,6 +1871,33 @@ Drag to change depth`;
         el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", `0deg`);
         el.style.setProperty("--rot-z", `0deg`);
+      } else if (this.isGeodeView) {
+        // Geode View: Arranged inside a hollow sphere, facing inward
+        // with crystalline angular variations
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+        const radius = 500;
+
+        // Random angular jitter for crystalline look
+        const jitterRotX = (Math.random() - 0.5) * 45;
+        const jitterRotY = (Math.random() - 0.5) * 45;
+        const jitterRotZ = (Math.random() - 0.5) * 45;
+
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 300;
+
+        // Face inward, opposite of Luminescence view
+        const rotX = -((phi * 180) / Math.PI - 90) + jitterRotX;
+        const rotY = -((theta * 180) / Math.PI) + jitterRotY;
+        const rotZ = jitterRotZ;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
       } else if (this.isLuminescenceView) {
         // Luminescence View: Floating sphere with glowing colors based on extension
         // Using golden ratio spiral for even distribution on a sphere
