@@ -1,0 +1,601 @@
+
+body.fractal-active .echo-document:hover {
+  opacity: 1;
+  filter: hue-rotate(90deg) brightness(1.5)
+    drop-shadow(0 0 20px rgba(100, 255, 100, 0.8));
+  z-index: 100 !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    scale(1.1) !important;
+}
+
+body.fractal-active #echo-layer {
+  perspective: 2500px;
+}
+
+/* --- Solar System View --- */
+body.solar-system-active #echo-layer {
+  transform: rotateX(var(--solar-global-rot-x, 60deg))
+    rotateY(var(--solar-global-rot-y, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+body.solar-system-active .echo-document {
+  /* Positioning set by TabManager via --orbit-radius, --orbit-start-angle */
+  transform: translateZ(var(--tz, -200px))
+    rotateZ(var(--orbit-start-angle, 0rad))
+    translateX(var(--orbit-radius, 300px))
+    rotateZ(calc(-1 * var(--orbit-start-angle, 0rad))) rotateX(-90deg);
+  animation: solar-orbit calc(30s * var(--orbit-index, 1)) linear infinite;
+  transform-origin: 50% 50%;
+  /* Optional visual styling for documents in orbit */
+  border: 1px solid rgba(255, 200, 0, 0.2);
+  box-shadow: 0 0 30px rgba(255, 200, 0, 0.1);
+}
+
+@keyframes solar-orbit {
+  from {
+    transform: translateZ(var(--tz, -200px))
+      rotateZ(var(--orbit-start-angle, 0rad))
+      translateX(var(--orbit-radius, 300px))
+      rotateZ(calc(-1 * var(--orbit-start-angle, 0rad))) rotateX(-90deg);
+  }
+  to {
+    /* We add 360deg to the start angle to make a full orbit */
+    transform: translateZ(var(--tz, -200px))
+      rotateZ(calc(var(--orbit-start-angle, 0rad) + 360deg))
+      translateX(var(--orbit-radius, 300px))
+      rotateZ(calc(-1 * (var(--orbit-start-angle, 0rad) + 360deg)))
+      rotateX(-90deg);
+  }
+}
+
+body.solar-system-active #editor {
+  box-shadow:
+    0 0 150px rgba(255, 200, 0, 0.4),
+    inset 0 0 50px rgba(255, 200, 0, 0.2) !important;
+  border: 1px solid rgba(255, 200, 0, 0.5) !important;
+  transform: scale(0.9) translateZ(50px) !important;
+  transition: all 0.5s ease-out;
+}
+
+body.solar-system-active #echo-layer::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200vw;
+  height: 200vw;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    transparent 20%,
+    rgba(255, 200, 0, 0.05) 50%,
+    transparent 80%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* ─── Semantic Selection Resonance ────────────────────────────────────────────────────── */
+.echo-document {
+  transition:
+    transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
+}
+
+.echo-document.semantic-resonance {
+  /* Pull forward aggressively into 3D space */
+  transform: translate3d(
+      calc(var(--tx, 0px) * 0.2),
+      calc(var(--ty, 0px) * 0.2),
+      300px
+    )
+    scale(1.2) !important;
+
+  /* Golden/Warning glow to indicate a search match */
+  border: 1px solid rgba(0, 255, 204, 1) !important;
+  box-shadow:
+    0 20px 50px rgba(0, 255, 204, 0.6),
+    0 0 60px rgba(0, 255, 204, 0.8),
+    inset 0 0 40px rgba(0, 255, 204, 0.4) !important;
+
+  opacity: 0.95 !important;
+  filter: blur(0px) drop-shadow(0 0 40px #00ffcc) brightness(1.5) !important;
+  z-index: 900 !important;
+}
+
+/* ─── Kinetic Typing Pulse ──────────────────────────────────────────────────────────── */
+.echo-document.typing-pulse {
+  transition:
+    transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.1s ease-out,
+    filter 0.1s ease-out !important;
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.5),
+    inset 0 0 15px rgba(0, 229, 255, 0.2);
+  filter: brightness(1.2) saturate(1.2);
+}
+/* --- Glassmorphic UI Enhancements --- */
+#tabs-container,
+#dock {
+  /* Refined, premium gradient background */
+  background: linear-gradient(
+    135deg,
+    rgba(20, 25, 35, 0.65),
+    rgba(10, 12, 18, 0.8)
+  );
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+
+  /* Enhanced Neon border styling */
+  border: 1px solid rgba(0, 255, 255, 0.5);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 0 25px rgba(0, 229, 255, 0.3),
+    inset 0 0 20px rgba(0, 229, 255, 0.15),
+    inset 0 2px 2px rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-sheen {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 0, 0, 0.15),
+    rgba(0, 255, 0, 0.15),
+    rgba(0, 0, 255, 0.15),
+    transparent
+  );
+  background-size: 200% 100%;
+  transform: skewX(-20deg);
+  animation: sheen 5s infinite, prismatic-pan 8s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes prismatic-pan {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes sheen {
+  0% {
+    left: -100%;
+  }
+  20% {
+    left: 200%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
+/* Optional: A sleek title bar for the active editor */
+.editor-title-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 20, 30, 0.9) 0%,
+    rgba(5, 10, 15, 0.8) 100%
+  );
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  color: #00e5ff;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+  z-index: 10; /* above editor content but below modals */
+}
+
+/* --- Echo Hover Lift (Innovation) --- */
+.echo-document {
+  transition:
+    transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    box-shadow 0.4s ease;
+  transform-style: preserve-3d; /* Ensure 3D rendering context */
+}
+
+.echo-document:hover {
+  /* Lift forward and scale up slightly */
+  transform: translateY(-5px) scale(1.05) translateZ(30px) !important;
+
+  /* Apply our dynamic Bioluminescent glow from earlier */
+  box-shadow:
+    0 10px 30px var(--bio-glow-color, rgba(0, 229, 255, 0.6)),
+    0 0 15px var(--bio-glow-strong, rgba(0, 229, 255, 0.9)),
+    inset 0 0 10px rgba(255, 255, 255, 0.2);
+
+  z-index: 1000 !important; /* Force to top of its local stacking context */
+  cursor: pointer;
+}
+
+/* --- Data Siphon Particle Base --- */
+.data-particle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: #00e5ff;
+  border-radius: 50%;
+  box-shadow:
+    0 0 8px #00e5ff,
+    0 0 12px #fff;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Kaleidoscope Click Effect */
+.kaleidoscope-fx {
+  animation: kaleidoscope 600ms ease-out forwards;
+}
+
+@keyframes kaleidoscope {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  25% {
+    transform: rotateX(45deg) rotateY(45deg) rotateZ(90deg) scale(1.2);
+    box-shadow:
+      0 0 40px rgba(0, 255, 255, 0.8),
+      inset 0 0 40px rgba(255, 0, 255, 0.8);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+  50% {
+    transform: rotateX(90deg) rotateY(90deg) rotateZ(180deg) scale(1.4);
+    box-shadow:
+      0 0 80px rgba(255, 0, 255, 1),
+      inset 0 0 80px rgba(0, 255, 255, 1);
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  }
+  75% {
+    transform: rotateX(135deg) rotateY(135deg) rotateZ(270deg) scale(1.2);
+    box-shadow:
+      0 0 40px rgba(0, 255, 255, 0.8),
+      inset 0 0 40px rgba(255, 0, 255, 0.8);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+  100% {
+    transform: rotateX(180deg) rotateY(180deg) rotateZ(360deg) scale(1);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    opacity: 0;
+  }
+}
+
+/* Kaleidoscope View Styling */
+body.kaleidoscope-active {
+  --bio-glow-color: rgba(255, 0, 255, 0.6);
+  --bio-glow-strong: rgba(255, 0, 255, 0.9);
+}
+
+body.kaleidoscope-active #editor,
+body.kaleidoscope-active #image-viewer {
+  transform: scale(0.6) translateZ(-100px);
+  filter: blur(2px) grayscale(30%);
+  opacity: 0.7;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.kaleidoscope-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+  animation: kaleidoscope-spin 120s linear infinite;
+}
+
+body.kaleidoscope-active #echo-layer:hover {
+  animation-play-state: paused;
+}
+
+@keyframes kaleidoscope-spin {
+  from {
+    transform: rotateZ(0deg);
+  }
+  to {
+    transform: rotateZ(360deg);
+  }
+}
+
+body.kaleidoscope-active .echo-document {
+  opacity: 0.6;
+  filter: blur(1.5px) saturate(150%) hue-rotate(var(--echo-tint, 0deg));
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg)) scale(0.85);
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 40px rgba(255, 0, 255, 0.3),
+    inset 0 0 20px rgba(255, 0, 255, 0.2);
+  border-color: rgba(255, 0, 255, 0.5);
+}
+
+body.kaleidoscope-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) saturate(200%) hue-rotate(var(--echo-tint, 0deg)) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 100 !important;
+  box-shadow:
+    0 0 60px rgba(255, 0, 255, 0.8),
+    inset 0 0 30px rgba(255, 0, 255, 0.4);
+}
+
+/* Infinity Mirror View Styling */
+body.infinity-mirror-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.9);
+}
+
+body.infinity-mirror-active #editor,
+body.infinity-mirror-active #image-viewer {
+  transform: scale(0.65) translateY(10%) translateZ(-50px);
+  filter: blur(2px);
+  opacity: 0.8;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.infinity-mirror-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+}
+
+body.infinity-mirror-active .echo-document {
+  opacity: 0.7;
+  filter: blur(1.5px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.2),
+    inset 0 0 20px rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.4);
+}
+
+body.infinity-mirror-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 100 !important;
+  box-shadow:
+    0 0 60px rgba(0, 229, 255, 0.8),
+    inset 0 0 30px rgba(0, 229, 255, 0.4);
+}
+
+/* Carousel View Styling */
+.carousel-active #echo-layer {
+  perspective: 1500px;
+}
+.carousel-active .echo-document {
+  transition:
+    transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.8s ease-out,
+    filter 0.8s;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(0, 255, 255, 0.2);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+.carousel-active .echo-document:hover {
+  box-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(0, 255, 255, 0.5);
+  border-color: rgba(0, 255, 255, 0.6);
+}
+
+/* Blueprint 3D View */
+body.blueprint-3d-active {
+  --bio-glow-color: rgba(0, 150, 255, 0.6);
+  --bio-glow-strong: rgba(0, 150, 255, 0.9);
+}
+
+body.blueprint-3d-active #editor {
+  transform: scale(0.6) translateY(20%) translateZ(-100px);
+  filter: blur(2px);
+  opacity: 0.8;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.blueprint-3d-active #echo-layer {
+  perspective: 2000px;
+  transform: rotateX(20deg) rotateY(-15deg);
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.blueprint-3d-active .echo-document {
+  background: rgba(0, 150, 255, 0.1);
+  border: 2px dashed rgba(0, 150, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 150, 255, 0.5);
+  color: #aaddff;
+  opacity: 0.8;
+  filter: blur(1px);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.blueprint-3d-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    scale(1.1) !important;
+  z-index: 50 !important;
+}
+
+/* Cyber Cortex View */
+body.cyber-cortex-active {
+  --bio-glow-color: rgba(255, 0, 255, 0.6);
+  --bio-glow-strong: rgba(255, 0, 255, 0.9);
+}
+
+body.cyber-cortex-active #editor {
+  transform: scale(0.5) translateY(10%) translateZ(-200px);
+  filter: blur(4px);
+  opacity: 0.6;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.cyber-cortex-active #echo-layer {
+  perspective: 2500px;
+  animation: cyber-cortex-spin 60s linear infinite;
+}
+
+@keyframes cyber-cortex-spin {
+  from {
+    transform: rotateY(0deg) rotateX(10deg);
+  }
+  to {
+    transform: rotateY(360deg) rotateX(10deg);
+  }
+}
+
+body.cyber-cortex-active .echo-document {
+  border-radius: 50%;
+  width: 400px;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(
+    circle,
+    rgba(20, 0, 30, 0.9) 0%,
+    rgba(10, 0, 20, 0.8) 100%
+  );
+  border: 2px solid rgba(255, 0, 255, 0.6);
+  box-shadow:
+    0 0 30px rgba(255, 0, 255, 0.4),
+    inset 0 0 20px rgba(255, 0, 255, 0.3);
+  opacity: 0.85;
+  filter: blur(1px);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.cyber-cortex-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  border-radius: 12px; /* Morph back to a readable rectangle */
+  width: 600px;
+  height: 800px;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 300px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
+  z-index: 100 !important;
+}
+
+body.cyber-cortex-active .echo-document pre {
+  max-height: 100%;
+  width: 100%;
+}
+
+/* =========================================================
+   QUANTUM SUPERPOSITION VIEW
+   ========================================================= */
+body.quantum-superposition-active {
+  --bio-glow-color: rgba(100, 200, 255, 0.6);
+  --bio-glow-strong: rgba(100, 200, 255, 0.9);
+}
+
+body.quantum-superposition-active #editor {
+  transform: scale(0.6) translateY(15%) translateZ(-300px);
+  filter: blur(5px);
+  opacity: 0.5;
+  transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.quantum-superposition-active #echo-layer {
+  perspective: 2500px;
+  transform: rotateX(15deg) rotateY(-10deg);
+  transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.quantum-superposition-active .echo-document {
+  background: rgba(10, 20, 30, 0.6);
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(100, 200, 255, 0.4);
+  box-shadow: 0 0 20px rgba(100, 200, 255, 0.2);
+  opacity: 0.7;
+  filter: blur(2px);
+  /* The layout will be driven by random inline --tx, --ty, --tz, --rot-x, --rot-y, --rot-z variables */
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+}

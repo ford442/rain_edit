@@ -1,0 +1,601 @@
+
+.cascade-active .echo-document:hover {
+  opacity: 1;
+  filter: none;
+  transform: translate3d(
+      calc(var(--tx) - 20px),
+      var(--ty),
+      calc(var(--tz) + 50px)
+    )
+    rotateY(0deg) scale(1.05) !important;
+  z-index: 50;
+  border-left: 2px solid var(--bio-glow-strong);
+}
+
+/* Scattered View */
+body.scattered-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.scattered-active #editor,
+body.scattered-active #image-viewer {
+  transform: scale(0.7) translateY(10%) translateZ(-50px);
+  filter: blur(3px);
+  opacity: 0.6;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.scattered-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1px);
+  transform: translate3d(
+      var(--scatter-x, 0px),
+      var(--scatter-y, 0px),
+      var(--scatter-z, 0px)
+    )
+    rotateZ(var(--scatter-rot, 0deg));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+  z-index: 20;
+}
+
+body.scattered-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      var(--scatter-x, 0px),
+      var(--scatter-y, 0px),
+      calc(var(--scatter-z, 0px) + 100px)
+    )
+    rotateZ(var(--scatter-rot, 0deg)) rotateX(var(--hover-rot-x, 0deg))
+    rotateY(var(--hover-rot-y, 0deg)) scale(1.15) !important;
+  z-index: 30 !important;
+}
+
+/* Constellation View */
+body.constellation-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.constellation-active #editor,
+body.constellation-active #image-viewer {
+  transform: scale(0.6) translateY(20%) translateZ(-150px);
+  filter: blur(5px);
+  opacity: 0.4;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.constellation-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+}
+
+body.constellation-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1.5px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 30px rgba(255, 255, 255, 0.1),
+    inset 0 0 10px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.constellation-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 50 !important;
+}
+
+/* Helix View */
+body.helix-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.helix-active #editor,
+body.helix-active #image-viewer {
+  transform: scale(0.65) translateZ(-100px) translateY(10%);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.helix-active #echo-layer {
+  perspective: 1500px;
+  transform-style: preserve-3d;
+  transform: rotateY(var(--helix-global-rot, 0deg));
+  transition: transform 0.1s linear;
+}
+
+body.helix-active .echo-document {
+  opacity: 0.7;
+  filter: blur(2px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateY(var(--rot-y, 0deg));
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.helix-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateY(0deg) scale(1.15) !important;
+  z-index: 30 !important;
+}
+
+/* Vortex View */
+body.vortex-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.vortex-active #editor,
+body.vortex-active #image-viewer {
+  transform: scale(0.6) translateY(10%) translateZ(-50px);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.vortex-active #echo-layer {
+  perspective: 1800px;
+  transform-style: preserve-3d;
+  animation: vortex-spin 60s linear infinite;
+}
+
+@keyframes vortex-spin {
+  from {
+    transform: rotateZ(0deg);
+  }
+  to {
+    transform: rotateZ(360deg);
+  }
+}
+
+body.vortex-active .echo-document {
+  opacity: 0.7;
+  filter: blur(2px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.vortex-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateZ(0deg) scale(1.1) !important;
+  z-index: 30 !important;
+}
+
+/* Prism View */
+body.prism-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.8);
+  --bio-glow-strong: rgba(0, 229, 255, 1);
+}
+body.prism-active #editor,
+body.prism-active #image-viewer {
+  transform: scale(0.6) translateY(20%) translateZ(-150px);
+  filter: blur(5px);
+  opacity: 0.4;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.prism-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+  animation: prism-spin 40s linear infinite;
+}
+
+@keyframes prism-spin {
+  from {
+    transform: rotateY(0deg) rotateX(10deg);
+  }
+  to {
+    transform: rotateY(360deg) rotateX(10deg);
+  }
+}
+
+body.prism-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.2),
+    inset 0 0 10px rgba(0, 229, 255, 0.2);
+  border-color: rgba(0, 229, 255, 0.4);
+}
+
+body.prism-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg)
+    scale(1.1) !important;
+  z-index: 50 !important;
+}
+
+/* Pinboard View */
+body.pinboard-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.pinboard-active #editor,
+body.pinboard-active #image-viewer {
+  transform: scale(0.7) translateY(10%) translateZ(-50px);
+  filter: blur(3px);
+  opacity: 0.6;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.pinboard-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.pinboard-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 100px)
+    )
+    rotateZ(0deg) scale(1.1) !important;
+  z-index: 30 !important;
+}
+
+/* Orbit View */
+body.orbit-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.4);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+.orbit-active #editor,
+.orbit-active #image-viewer {
+  transform: scale(0.65) translateY(-20%);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.orbit-active #echo-layer {
+  perspective: 1500px;
+  transform-style: preserve-3d;
+  /* Rotate the entire layer based on mouse X */
+  transform: rotateY(var(--orbit-global-rot, 0deg));
+  transition: transform 0.1s linear;
+}
+
+.orbit-active .echo-document {
+  opacity: 0.6;
+  filter: blur(2px);
+  cursor: pointer;
+  /* Apply the orbit rotation and translate outwards */
+  transform: rotateY(var(--orbit-rot-y, 0deg))
+    translateZ(var(--orbit-tz, 500px)) rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg));
+  transition:
+    all 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.orbit-active .echo-document:hover {
+  opacity: 1;
+  filter: none;
+  z-index: 50;
+  transform: rotateY(var(--orbit-rot-y, 0deg))
+    translateZ(var(--orbit-tz, 600px)) scale(1.1) !important;
+}
+
+@keyframes resonance-pulse {
+  0% {
+    box-shadow:
+      0 0 30px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.6),
+      inset 0 0 15px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.3);
+    border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.9);
+    transform: translate3d(
+        calc(var(--tx) - 10px),
+        var(--ty),
+        calc(var(--tz) + 40px)
+      )
+      scale(1.02);
+  }
+  50% {
+    box-shadow:
+      0 0 50px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.8),
+      inset 0 0 25px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.5);
+    border-color: #fff;
+    transform: translate3d(
+        calc(var(--tx) - 10px),
+        var(--ty),
+        calc(var(--tz) + 60px)
+      )
+      scale(1.05);
+  }
+  100% {
+    box-shadow:
+      0 0 30px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.6),
+      inset 0 0 15px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.3);
+    border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.9);
+    transform: translate3d(
+        calc(var(--tx) - 10px),
+        var(--ty),
+        calc(var(--tz) + 40px)
+      )
+      scale(1.02);
+  }
+}
+
+.resonance-hit {
+  animation: resonance-pulse 2s infinite ease-in-out !important;
+  opacity: 1 !important;
+  filter: none !important;
+  z-index: 40 !important;
+  transition:
+    opacity 0.3s ease-out,
+    filter 0.3s ease-out;
+}
+
+@keyframes keystroke-ripple {
+  0% {
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    filter: blur(4px) brightness(1);
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        var(--tz, 0px)
+      )
+      rotateX(0deg) rotateY(0deg) scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(0, 229, 255, 0.5),
+      inset 0 0 15px rgba(0, 229, 255, 0.2);
+    filter: blur(3px) brightness(1.2);
+    border-color: rgba(0, 229, 255, 0.4);
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tz, 0px) + 20px)
+      )
+      rotateX(2deg) rotateY(-2deg) scale(1.02);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+    filter: blur(4px) brightness(1);
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        var(--tz, 0px)
+      )
+      rotateX(0deg) rotateY(0deg) scale(1);
+  }
+}
+
+.ripple-active {
+  animation: keystroke-ripple 0.5s ease-out;
+}
+
+/* --- Tunnel View --- */
+body.tunnel-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.tunnel-active #editor,
+body.tunnel-active #image-viewer {
+  transform: scale(0.6) translateY(20%) translateZ(-100px);
+  filter: blur(5px);
+  opacity: 0.4;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+
+body.tunnel-active #echo-layer {
+  perspective: 2000px;
+}
+
+body.tunnel-active .echo-document {
+  opacity: 0.6;
+  filter: blur(2px);
+  cursor: pointer;
+  /* Positions will be calculated by TabManager.js */
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.tunnel-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateZ(0deg) scale(1.1) !important;
+  z-index: 30 !important;
+}
+
+/* --- Grid View --- */
+body.grid-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.grid-active #editor,
+body.grid-active #image-viewer {
+  transform: scale(0.7) translateY(-20%) translateZ(-50px);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.grid-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    var(--tz, 0px)
+  );
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.grid-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    scale(1.15) !important;
+  z-index: 30 !important;
+}
+
+/* --- Isometric Layer View --- */
+body.isometric-active #app {
+  perspective: 3000px;
+  background: #05050a;
+}
+body.isometric-active #container {
+  transform: scale(0.5) rotateX(60deg) rotateZ(-45deg) translateZ(-200px);
+  transform-style: preserve-3d;
+  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: transparent;
+}
+body.isometric-active #container::before {
+  display: none;
+}
+body.isometric-active #container > * {
+  transition:
+    transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border 1.2s,
+    background 1.2s,
+    opacity 1.2s;
+  border: 2px solid rgba(0, 229, 255, 0.4) !important;
+  background-color: rgba(10, 15, 25, 0.4) !important;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 30px rgba(0, 229, 255, 0.1) !important;
+  backdrop-filter: blur(4px);
+  overflow: visible !important;
+}
+
+body.isometric-active #rain-back {
+  transform: translateZ(-600px);
+  opacity: 0.8;
+}
+body.isometric-active #connections-layer {
+  transform: translateZ(-500px);
+  opacity: 0.8;
+}
+body.isometric-active #matrix-layer {
+  transform: translateZ(-400px);
+  opacity: 0.8;
+}
+body.isometric-active #reference-layer {
+  transform: translateZ(-300px);
+  opacity: 0.8;
+}
+body.isometric-active #reference-overlay {
+  transform: translateZ(-200px);
+  opacity: 0.2;
+}
+body.isometric-active #holo-layer {
+  transform: translateZ(-100px);
+  opacity: 0.8;
+}
+body.isometric-active #aurora-layer {
+  transform: translateZ(0px);
+  opacity: 0.6;
+}
+body.isometric-active #echo-layer {
+  transform: translateZ(100px);
+  opacity: 1;
+}
+body.isometric-active #editor {
+  transform: translateZ(300px);
+  opacity: 0.9;
+}
+body.isometric-active #neon-scatter-layer {
+  transform: translateZ(400px);
+  opacity: 0.4;
+}
+body.isometric-active #scanline-overlay {
+  transform: translateZ(500px);
+  opacity: 0.4;
+}
+body.isometric-active #rain-front {
+  transform: translateZ(600px);
+  opacity: 0.8;
+}
+body.isometric-active #fog-layer {
+  transform: translateZ(700px);
+  opacity: 0.3;
+}
+body.isometric-active #lightning-layer {
+  transform: translateZ(800px);
+  opacity: 0;
+}

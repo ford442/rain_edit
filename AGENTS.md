@@ -48,18 +48,19 @@ root/
   vite.config.js          # Vite config + custom glslify plugin
   git.sh                  # Simple helper: git add/commit/push
   src/
-    main.js               # Entry point: bootstrap Monaco, init all managers, animation loop
-    TabManager.js         # File tabs, depth switching, echo rendering, 25+ view modes
+    main.js               # Entry point: bootstrap Monaco, init all managers (split into main_0.js - main_6.js)
+    main_0.js - main_6.js # Modularized chunks of main.js sequentially imported.
+    TabManager.js         # File tabs, depth switching, echo rendering (split into TabManager_0.js - TabManager_5.js mixins)
     ConnectionManager.js  # Radar/minimap canvas drawing (echo blips + reference cards)
     ReferenceManager.js   # Markdown note cards + visual effects (lantern, spotlight, frost, drag)
     FogManager.js         # Canvas fog that regenerates and is cleared by mouse
     HoloManager.js        # Scans editor for // TODO/FIXME/etc. and renders badges
     RainLayer.js          # WebGL helper: compiles shaders, binds textures, draws fullscreen quad
     StorageAPI.js         # HTTP client for categories, notes, and VPS file operations
-    Cabinet3D.js          # Three.js modal file browser (category cubes -> file cubes)
+    Cabinet3D.js          # Three.js modal file browser (split into Cabinet3D_0.js - Cabinet3D_1.js mixins)
     VPSFileBrowser.js     # Slide-in panel to browse/open/save VPS remote files
     UploadProgressUI.js   # Small toast UI for drag-and-drop uploads
-    styles.css            # All application styles, themes, animations
+    styles_1.css - styles_14.css # Split CSS files imported in index.html (~600 lines each)
     shaders/
       simple.vert         # Basic fullscreen vertex shader
       water.frag          # Front rain fragment shader

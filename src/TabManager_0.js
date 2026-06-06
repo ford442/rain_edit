@@ -1,0 +1,592 @@
+import StorageAPI from "./StorageAPI.js";
+import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
+export const TabManagerMixin0 = {
+  _deactivateAllViews() {
+    this.isCrystalView = false;
+    this.isWaterfallView = false;
+    this.isCascadeView = false;
+    this.isOrbitView = false;
+    this.isScatteredView = false;
+    this.isIsometricView = false;
+    this.isStackView = false;
+    this.isTimelineView = false;
+    this.isTunnelView = false;
+    this.isGridView = false;
+    this.isHelixView = false;
+    this.isPinboardView = false;
+    this.isVortexView = false;
+    this.isConstellationView = false;
+    this.isPrismView = false;
+    this.isCoverflowView = false;
+    this.isWaveView = false;
+    this.isSphereView = false;
+    this.isBlackHoleView = false;
+    this.isRolodexView = false;
+    this.isCylinderView = false;
+    this.isGalaxyView = false;
+    this.isOrigamiView = false;
+    this.isDataHiveView = false;
+    this.isFractalView = false;
+    this.isSolarSystemView = false;
+    this.isNeonSynthView = false;
+    this.isTesseractView = false;
+    this.isBlueprint3dView = false;
+    this.isCyberCortexView = false;
+    this.isQuantumSuperpositionView = false;
+    this.isOutlineView = false;
+    this.isInfinityMirrorView = false;
+    this.isArchwayView = false;
+    this.isArchwayView = false;
+    this.isKaleidoscopeView = false;
+    this.isCarouselView = false;
+    this.isCycloneView = false;
+    this.isMobiusView = false;
+    this.isAstrolabeView = false;
+    this.isDominoesView = false;
+    this.isHexagonMatrixView = false;
+    this.isLuminescenceView = false;
+    this.isGeodeView = false;
+
+    document.body.classList.remove(
+      "waterfall-active",
+      "cascade-active",
+      "orbit-active",
+      "scattered-active",
+      "isometric-active",
+      "stack-active",
+      "timeline-active",
+      "tunnel-active",
+      "grid-active",
+      "helix-active",
+      "pinboard-active",
+      "vortex-active",
+      "constellation-active",
+      "prism-active",
+      "coverflow-active",
+      "wave-active",
+      "sphere-active",
+      "black-hole-active",
+      "rolodex-active",
+      "cylinder-active",
+      "galaxy-active",
+      "origami-active",
+      "data-hive-active",
+      "matrix-rain-active",
+      "fractal-active",
+      "solar-system-active",
+      "neon-synth-active",
+      "tesseract-active",
+      "blueprint-3d-active",
+      "cyber-cortex-active",
+      "outline-active",
+      "infinity-mirror-active",
+      "kaleidoscope-active",
+      "carousel-active",
+      "cyclone-active",
+      "mobius-active",
+      "astrolabe-active",
+      "dominoes-active",
+      "luminescence-active",
+      "geode-active"
+    );
+
+    this.isOrigamiView = false;
+    this.isDataHiveView = false;
+
+    [
+      "btn-waterfall-view",
+      "btn-cascade-view",
+      "btn-orbit-view",
+      "btn-scattered-view",
+      "btn-isometric-view",
+      "btn-stack-view",
+      "btn-timeline-view",
+      "btn-tunnel-view",
+      "btn-grid-view",
+      "btn-helix-view",
+      "btn-pinboard-view",
+      "btn-vortex-view",
+      "btn-constellation-view",
+      "btn-prism-view",
+      "btn-coverflow-view",
+      "btn-wave-view",
+      "btn-sphere-view",
+      "btn-rolodex-view",
+      "btn-data-hive-view",
+      "btn-matrix-rain-view",
+      "btn-fractal-view",
+      "btn-solar-system-view",
+      "btn-neon-synth-view",
+      "btn-tesseract-view",
+      "btn-blueprint-3d-view",
+      "btn-cyber-cortex-view",
+      "btn-hexagon-matrix-view",
+    ].forEach((id) => {
+      const btn = document.getElementById(id);
+      if (btn) btn.classList.remove("active");
+    });
+  },
+  toggleHexagonMatrixView() {
+    const wasActive = this.isHexagonMatrixView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHexagonMatrixView = true;
+      document.body.classList.add("hexagon-matrix-active");
+      const btn = document.getElementById("btn-hexagon-matrix-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleGeodeView() {
+    const wasActive = this.isGeodeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isGeodeView = true;
+      document.body.classList.add("geode-active");
+    }
+    this._renderEchoes();
+  },
+  toggleNeonSynthView() {
+    const wasActive = this.isNeonSynthView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isNeonSynthView = true;
+      document.body.classList.add("neon-synth-active");
+      const btn = document.getElementById("btn-neon-synth-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleAstrolabeView() {
+    const wasActive = this.isAstrolabeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isAstrolabeView = true;
+      document.body.classList.add("astrolabe-active");
+    }
+    this._renderEchoes();
+  },
+  toggleDominoesView() {
+    const wasActive = this.isDominoesView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDominoesView = true;
+      document.body.classList.add("dominoes-active");
+    }
+    this._renderEchoes();
+  },
+  toggleBlueprint3dView() {
+    const wasActive = this.isBlueprint3dView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isBlueprint3dView = true;
+      document.body.classList.add("blueprint-3d-active");
+      const btn = document.getElementById("btn-blueprint-3d-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCyberCortexView() {
+    const wasActive = this.isCyberCortexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCyberCortexView = true;
+      document.body.classList.add("cyber-cortex-active");
+      const btn = document.getElementById("btn-cyber-cortex-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleQuantumSuperpositionView() {
+    this._deactivateAllViews();
+    if (!document.body.classList.contains("quantum-superposition-active")) {
+      this.isQuantumSuperpositionView = true;
+      document.body.classList.add("quantum-superposition-active");
+    }
+    this._renderEchoes();
+  },
+  toggleOutlineView() {
+    const wasActive = this.isOutlineView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isOutlineView = true;
+      document.body.classList.add("outline-active");
+    }
+    this._renderEchoes();
+  },
+  toggleCycloneView() {
+    const wasActive = this.isCycloneView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCycloneView = true;
+      document.body.classList.add("cyclone-active");
+    }
+    this._renderEchoes();
+  },
+  toggleMobiusView() {
+    const wasActive = this.isMobiusView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isMobiusView = true;
+      document.body.classList.add("mobius-active");
+    }
+    this._renderEchoes();
+  },
+  toggleTesseractView() {
+    const wasActive = this.isTesseractView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTesseractView = true;
+      document.body.classList.add("tesseract-active");
+      const btn = document.getElementById("btn-tesseract-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCoverflowView() {
+    const wasActive = this.isCoverflowView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCoverflowView = true;
+      document.body.classList.add("coverflow-active");
+      const btn = document.getElementById("btn-coverflow-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleSolarSystemView() {
+    const wasActive = this.isSolarSystemView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isSolarSystemView = true;
+      document.body.classList.add("solar-system-active");
+      const btn = document.getElementById("btn-solar-system-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCarouselView() {
+    this._deactivateAllViews();
+    this.isCarouselView = true;
+    document.body.classList.add("carousel-active");
+    this._renderEchoes();
+  },
+  toggleArchwayView() {
+    this._deactivateAllViews();
+    this.isArchwayView = true;
+    document.body.classList.add("archway-active");
+    this._renderEchoes();
+  },
+  toggleInfinityMirrorView() {
+    this._deactivateAllViews();
+    this.isInfinityMirrorView = true;
+    document.body.classList.add("infinity-mirror-active");
+    this._renderEchoes();
+  },
+  toggleKaleidoscopeView() {
+    this._deactivateAllViews();
+    this.isKaleidoscopeView = true;
+    document.body.classList.add("kaleidoscope-active");
+    this._renderEchoes();
+  },
+  toggleFractalView() {
+    const wasActive = this.isFractalView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isFractalView = true;
+      document.body.classList.add("fractal-active");
+      const btn = document.getElementById("btn-fractal-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCrystalView() {
+    const wasActive = this.isCrystalView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCrystalView = true;
+      document.body.classList.add("crystal-active");
+      const btn = document.getElementById("btn-crystal-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleMatrixRainView() {
+    const wasActive = this.isMatrixRainView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isMatrixRainView = true;
+      document.body.classList.add("matrix-rain-active");
+      const btn = document.getElementById("btn-matrix-rain-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleOrigamiView() {
+    const wasActive = this.isOrigamiView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isOrigamiView = true;
+      document.body.classList.add("origami-active");
+    }
+    this._renderEchoes();
+  },
+  toggleDataHiveView() {
+    const wasActive = this.isDataHiveView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDataHiveView = true;
+      document.body.classList.add("data-hive-active");
+    }
+    this._renderEchoes();
+  },
+  toggleGalaxyView() {
+    const wasActive = this.isGalaxyView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isGalaxyView = true;
+      document.body.classList.add("galaxy-active");
+    }
+    this._renderEchoes();
+  },
+  toggleBlackHoleView() {
+    const wasActive = this.isBlackHoleView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isBlackHoleView = true;
+      document.body.classList.add("black-hole-active");
+      const btn = document.getElementById("btn-black-hole-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleRolodexView() {
+    const wasActive = this.isRolodexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isRolodexView = true;
+      document.body.classList.add("rolodex-active");
+      const btn = document.getElementById("btn-rolodex-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCylinderView() {
+    const wasActive = this.isCylinderView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCylinderView = true;
+      document.body.classList.add("cylinder-active");
+      const btn = document.getElementById("btn-cylinder-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleSphereView() {
+    const wasActive = this.isSphereView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isSphereView = true;
+      document.body.classList.add("sphere-active");
+      const btn = document.getElementById("btn-sphere-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleWaveView() {
+    const wasActive = this.isWaveView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isWaveView = true;
+      document.body.classList.add("wave-active");
+      const btn = document.getElementById("btn-wave-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  togglePrismView() {
+    const wasActive = this.isPrismView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isPrismView = true;
+      document.body.classList.add("prism-active");
+      const btn = document.getElementById("btn-prism-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleHelixView() {
+    const wasActive = this.isHelixView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHelixView = true;
+      document.body.classList.add("helix-active");
+      const btn = document.getElementById("btn-helix-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleConstellationView() {
+    const wasActive = this.isConstellationView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isConstellationView = true;
+      document.body.classList.add("constellation-active");
+      const btn = document.getElementById("btn-constellation-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  togglePinboardView() {
+    const wasActive = this.isPinboardView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isPinboardView = true;
+      document.body.classList.add("pinboard-active");
+      const btn = document.getElementById("btn-pinboard-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleVortexView() {
+    const wasActive = this.isVortexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isVortexView = true;
+      document.body.classList.add("vortex-active");
+      const btn = document.getElementById("btn-vortex-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleStackView() {
+    const wasActive = this.isStackView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isStackView = true;
+      document.body.classList.add("stack-active");
+      const btn = document.getElementById("btn-stack-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleTimelineView() {
+    const wasActive = this.isTimelineView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTimelineView = true;
+      document.body.classList.add("timeline-active");
+      const btn = document.getElementById("btn-timeline-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleTunnelView() {
+    const wasActive = this.isTunnelView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTunnelView = true;
+      document.body.classList.add("tunnel-active");
+      const btn = document.getElementById("btn-tunnel-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleGridView() {
+    const wasActive = this.isGridView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isGridView = true;
+      document.body.classList.add("grid-active");
+      const btn = document.getElementById("btn-grid-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleIsometricView() {
+    const wasActive = this.isIsometricView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isIsometricView = true;
+      document.body.classList.add("isometric-active");
+      const btn = document.getElementById("btn-isometric-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleScatteredView() {
+    const wasActive = this.isScatteredView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isScatteredView = true;
+      document.body.classList.add("scattered-active");
+      const btn = document.getElementById("btn-scattered-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleLuminescenceView() {
+    const wasActive = this.isLuminescenceView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isLuminescenceView = true;
+      document.body.classList.add("luminescence-active");
+    }
+    this._renderEchoes();
+  },
+  toggleWaterfallView() {
+    const wasActive = this.isWaterfallView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isWaterfallView = true;
+      document.body.classList.add("waterfall-active");
+      const btn = document.getElementById("btn-waterfall-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCascadeView() {
+    const wasActive = this.isCascadeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCascadeView = true;
+      document.body.classList.add("cascade-active");
+      const btn = document.getElementById("btn-cascade-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleOrbitView() {
+    const wasActive = this.isOrbitView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isOrbitView = true;
+      document.body.classList.add("orbit-active");
+      const btn = document.getElementById("btn-orbit-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  addFile(name, content = "", language = "javascript") {
+    const id = this._nextId++;
+    const isImage = language === "image";
+
+    let model = null;
+    if (!isImage) {
+      model = this.monaco.editor.createModel(content, language);
+    }
+
+    this.files.push({
+      id,
+      name,
+      model,
+      depth: 1,
+      isImage,
+      language,
+      url: isImage ? content : null,
+    });
+    this._renderTabs();
+    this._saveTabsToStorage();
+    return id;
+  },
+};
