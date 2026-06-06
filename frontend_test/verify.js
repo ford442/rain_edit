@@ -5,9 +5,8 @@ const path = require('path');
   const browser = await chromium.launch();
   const page = await browser.newPage();
 
-  // File path to the project index.html
-  const filePath = `file://${path.resolve(__dirname, '../index.html')}`;
-  await page.goto(filePath);
+  // Navigate to the local dev server
+  await page.goto('http://localhost:5173/');
 
   // Wait for the app to initialize
   await page.waitForTimeout(2000);

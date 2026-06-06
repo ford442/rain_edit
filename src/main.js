@@ -3686,6 +3686,12 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     document.body.classList.add("curtain-pull-active");
   }
+
+  // Repulsor Field (Alt+R)
+  if (e.altKey && e.code === "KeyR" && !e.shiftKey) {
+    e.preventDefault();
+    document.body.classList.add("repulsor-active");
+  }
 });
 
 document.addEventListener("keyup", (e) => {
@@ -3697,6 +3703,18 @@ document.addEventListener("keyup", (e) => {
   // Holographic Curtain Pull (Alt+P)
   if (e.key === "p" || e.key === "P" || e.key === "Alt") {
     document.body.classList.remove("curtain-pull-active");
+  }
+
+  // Repulsor Field (Alt+R)
+  if (e.key === "r" || e.key === "R" || e.key === "Alt") {
+    document.body.classList.remove("repulsor-active");
+    if (echoLayerEl) {
+      const echoes = echoLayerEl.querySelectorAll(".echo-document");
+      echoes.forEach((echo) => {
+        echo.style.removeProperty("--repulse-tx");
+        echo.style.removeProperty("--repulse-ty");
+      });
+    }
   }
 
   if (e.key === "t" || e.key === "T" || e.key === "Alt") {
@@ -3733,6 +3751,44 @@ document.addEventListener("mousemove", (e) => {
       const gradient = `linear-gradient(to right, black 0%, black calc(${mouseX}px - 50px), transparent calc(${mouseX}px - 20px), transparent calc(${mouseX}px + 20px), black calc(${mouseX}px + 50px), black 100%)`;
       editorEl.style.setProperty("--tear-mask", gradient);
     }
+  }
+
+  // Repulsor Field calculation
+  if (document.body.classList.contains("repulsor-active") && echoLayerEl) {
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    const maxDist = 300; // Repulsion radius
+
+    echoes.forEach((echo) => {
+      const rect = echo.getBoundingClientRect();
+      // Calculate center of the echo
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      const dx = cx - mouseX;
+      const dy = cy - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < maxDist) {
+        // Calculate repulsion strength (closer = stronger)
+        const strength = Math.pow((maxDist - dist) / maxDist, 2);
+        // Normalize direction vector
+        const dirX = dx / (dist || 1);
+        const dirY = dy / (dist || 1);
+
+        // Max push distance
+        const maxPush = 200;
+        const pushX = dirX * strength * maxPush;
+        const pushY = dirY * strength * maxPush;
+
+        echo.style.setProperty("--repulse-tx", `${pushX}px`);
+        echo.style.setProperty("--repulse-ty", `${pushY}px`);
+      } else {
+        echo.style.setProperty("--repulse-tx", `0px`);
+        echo.style.setProperty("--repulse-ty", `0px`);
+      }
+    });
   }
 });
 
