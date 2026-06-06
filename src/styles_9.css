@@ -1,0 +1,602 @@
+
+@keyframes rolodex-spin {
+  from {
+    transform: rotateY(0deg) rotateX(-15deg);
+  }
+  to {
+    transform: rotateY(360deg) rotateX(-15deg);
+  }
+}
+
+body.rolodex-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.15),
+    inset 0 0 10px rgba(0, 229, 255, 0.1);
+}
+
+body.rolodex-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg)
+    scale(1.15) !important;
+  z-index: 100 !important;
+}
+
+/* Cylinder View */
+body.cylinder-active {
+  --bio-glow-color: rgba(200, 50, 255, 0.6);
+  --bio-glow-strong: rgba(200, 50, 255, 0.8);
+}
+body.cylinder-active #editor,
+body.cylinder-active #image-viewer {
+  transform: scale(0.65) translateY(10%) translateZ(-50px);
+  filter: blur(2px);
+  opacity: 0.7;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.cylinder-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: cylinder-spin 40s linear infinite;
+}
+
+@keyframes cylinder-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+/* Tesseract View */
+body.tesseract-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+  /* Replaced constant spinning with mouse-driven rotation + isometric default */
+  transform: rotateX(calc(30deg + var(--tesseract-rot-x, 0deg)))
+    rotateY(calc(-45deg + var(--tesseract-rot-y, 0deg)));
+  transition: transform 0.1s ease-out; /* Smooth drag */
+}
+
+body.tesseract-active .echo-document {
+  opacity: 0.85;
+  filter: blur(0.5px);
+  transition:
+    all 1s,
+    opacity 0.3s,
+    filter 0.3s,
+    transform 1s;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+  border: 1px solid rgba(0, 229, 255, 0.8);
+  cursor: pointer; /* Indicate interactivity */
+}
+
+body.tesseract-active .echo-document:hover {
+  opacity: 1;
+  filter: blur(0px);
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.8);
+  border-color: #00e5ff;
+}
+
+body.tesseract-active #editor {
+  opacity: 0.2;
+  filter: blur(2px) grayscale(50%);
+  transition:
+    opacity 0.5s,
+    filter 0.5s;
+  pointer-events: none; /* Let clicks pass through to echo layer if needed */
+}
+
+/* Base editor transition for smooth fade out/in */
+#editor {
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* Neon Synth View */
+body.neon-synth-active {
+  --bio-glow-color: rgba(255, 0, 255, 0.6);
+  --bio-glow-strong: rgba(255, 0, 255, 0.9);
+}
+body.neon-synth-active #editor,
+body.neon-synth-active #image-viewer {
+  transform: scale(0.6) translateY(-20%) translateZ(-100px);
+  filter: blur(2px);
+  opacity: 0.8;
+  transition: all 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.neon-synth-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+  /* Animate moving forward through the grid */
+  animation: neon-drive 4s linear infinite;
+}
+
+@keyframes neon-drive {
+  from {
+    transform: translateZ(0px);
+  }
+  to {
+    transform: translateZ(300px); /* Matches zSpacing in TabManager */
+  }
+}
+
+body.neon-synth-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1px) drop-shadow(0 0 15px rgba(0, 255, 255, 0.6));
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.1, 0.7, 0.1, 1);
+  box-shadow:
+    0 0 40px rgba(255, 0, 255, 0.4),
+    inset 0 0 20px rgba(0, 255, 255, 0.3);
+  border: 2px solid rgba(255, 0, 255, 0.8);
+  background: rgba(10, 0, 20, 0.8);
+}
+
+/* Create the neon grid floor effect on the document */
+body.neon-synth-active .echo-document::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 255, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0.5;
+  z-index: -1;
+  border-radius: inherit;
+  /* Animate grid panning backwards to enhance speed effect */
+  animation: neon-grid-pan 1s linear infinite;
+}
+
+@keyframes neon-grid-pan {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 20px;
+  }
+}
+
+body.neon-synth-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) drop-shadow(0 0 30px rgba(255, 255, 255, 0.8)) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) - 150px),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 100 !important;
+}
+
+/* Galaxy Spiral View */
+body.galaxy-active {
+  --bio-glow-color: rgba(255, 100, 255, 0.6);
+  --bio-glow-strong: rgba(255, 100, 255, 0.9);
+}
+body.galaxy-active #editor,
+body.galaxy-active #image-viewer {
+  transform: scale(0.6) translateY(-5%) translateZ(-100px);
+  filter: blur(1.5px);
+  opacity: 0.8;
+  transition: all 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.galaxy-active #echo-layer {
+  perspective: 3000px;
+  transform-style: preserve-3d;
+  animation: galaxy-spin 120s linear infinite;
+}
+
+body.galaxy-active .echo-document {
+  opacity: 0.7;
+  filter: blur(2px) drop-shadow(0 0 15px rgba(255, 100, 255, 0.4));
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg)) scale(var(--scale, 1));
+  transition: all 1.2s cubic-bezier(0.1, 0.7, 0.1, 1);
+  box-shadow:
+    0 0 40px rgba(255, 100, 255, 0.2),
+    inset 0 0 15px rgba(255, 100, 255, 0.2);
+  border-radius: 50%; /* Make them look more like celestial bodies or softly glowing orbs */
+  padding: 10px; /* Compress the code slightly */
+}
+
+body.galaxy-active .echo-document pre {
+  mask-image: radial-gradient(circle, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle, black 40%, transparent 80%);
+}
+
+body.galaxy-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) drop-shadow(0 0 30px rgba(255, 255, 255, 0.8)) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 300px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.5) !important;
+  z-index: 100 !important;
+  border-radius: 8px; /* Return to document shape on hover */
+}
+
+@keyframes galaxy-spin {
+  from {
+    transform: rotateY(0deg) rotateX(20deg);
+  }
+  to {
+    transform: rotateY(360deg) rotateX(20deg);
+  }
+}
+
+body.cylinder-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 30px rgba(200, 50, 255, 0.15),
+    inset 0 0 10px rgba(200, 50, 255, 0.1);
+}
+
+body.cylinder-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(var(--rot-y, 0deg)) rotateZ(0deg) scale(1.15) !important;
+  z-index: 100 !important;
+}
+
+/* Black Hole View */
+body.black-hole-active {
+  --bio-glow-color: rgba(255, 0, 0, 0.6);
+  --bio-glow-strong: rgba(255, 0, 0, 1);
+}
+body.black-hole-active #editor,
+body.black-hole-active #image-viewer {
+  transform: scale(0.3) translateZ(-500px);
+  filter: blur(10px) brightness(0.2);
+  opacity: 0.1;
+  transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.black-hole-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: black-hole-spin 10s linear infinite;
+}
+
+@keyframes black-hole-spin {
+  from {
+    transform: rotateZ(0deg) scale(1);
+  }
+  to {
+    transform: rotateZ(360deg) scale(0.8);
+  }
+}
+
+body.black-hole-active .echo-document {
+  opacity: calc(1 - (var(--index, 0) * 0.15)); /* Fade out deeper layers */
+  filter: blur(calc(2px + var(--index, 0) * 1px));
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg)) scale(calc(0.9 - (var(--index, 0) * 0.1)));
+  transition: all 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 20px rgba(0, 0, 0, 0.8),
+    inset 0 0 10px rgba(0, 0, 0, 0.5);
+  border-color: rgba(50, 50, 50, 0.5);
+}
+
+body.black-hole-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
+  z-index: 50 !important;
+}
+
+/* Theater Mode */
+body.theater-active #editor {
+  z-index: 1000 !important;
+  transform: scale(1.05) translateZ(50px) !important;
+  box-shadow:
+    0 50px 150px rgba(0, 0, 0, 0.9),
+    0 0 50px rgba(0, 229, 255, 0.3) !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.theater-active #echo-layer,
+body.theater-active #reference-layer,
+body.theater-active #tabs-container,
+body.theater-active #dock {
+  opacity: 0.05 !important;
+  filter: blur(10px) grayscale(100%) !important;
+  pointer-events: none !important;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.theater-active #container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 900;
+  pointer-events: none;
+  animation: fade-in 0.5s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Hyper-Jump Effect */
+.hyper-jump-active {
+  animation: hyper-jump 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards !important;
+}
+
+@keyframes hyper-jump {
+  0% {
+    transform: scale(1) translateZ(0);
+    filter: blur(0px) brightness(1) contrast(1);
+  }
+  20% {
+    transform: scale(0.9) translateZ(-500px);
+    filter: blur(5px) brightness(0.5) contrast(1.5) hue-rotate(90deg);
+  }
+  80% {
+    transform: scale(3) translateZ(1000px);
+    filter: blur(20px) brightness(3) contrast(2) hue-rotate(-90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateZ(0);
+    filter: blur(0px) brightness(1) contrast(1);
+    opacity: 1;
+  }
+}
+
+/* Holographic Document Dispersion Animation */
+body.dispersion-active .echo-document {
+  transform: translate3d(
+      calc(var(--tx, 0px) * 5 + var(--part-tx, 0px) * 10),
+      calc(var(--ty, 0px) * 5 + var(--part-ty, 0px) * 10),
+      calc(var(--tz, 0px) - 2000px)
+    )
+    rotateX(calc(var(--rot-x, 0) * 5)) rotateY(calc(var(--rot-y, 0) * 5)) !important;
+  opacity: 0 !important;
+  filter: blur(20px) !important;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Magnetic Peel Animation */
+body.peel-active .echo-document {
+  transform: translate3d(
+      calc(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)) +
+          var(--wormhole-tx, 0px)
+      ),
+      calc(
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) +
+          var(--peel-ty, 0px) + var(--wormhole-ty, 0px)
+      ),
+      calc(var(--peel-tz, 0px) + var(--wormhole-tz, 0px))
+    )
+    rotateX(var(--peel-rot-x, 0deg)) rotateY(var(--ry, 0deg))
+    scale(calc((1 + (var(--wake) * 0.08)) * var(--wormhole-scale, 1))) !important;
+  transition:
+    transform 0.1s linear,
+    filter 0.3s ease,
+    opacity 0.3s ease;
+  opacity: 0.8 !important;
+  filter: blur(2px) !important;
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.9),
+    inset 0 1px 3px rgba(255, 255, 255, 0.5),
+    0 0 40px rgba(0, 229, 255, 0.4);
+  border-color: rgba(0, 229, 255, 0.7);
+  z-index: calc(50 - var(--index, 0));
+}
+
+body.peel-active .echo-document:hover {
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) +
+          var(--peel-ty, 0px)
+      ),
+      calc(var(--peel-tz, 0px) + 150px)
+    )
+    rotateX(0deg) rotateY(0deg) scale(1.1) !important;
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  z-index: 100 !important;
+  box-shadow:
+    0 0 60px rgba(0, 229, 255, 0.8),
+    inset 0 0 30px rgba(0, 229, 255, 0.4);
+}
+
+body.peel-active #editor {
+  opacity: 0.2 !important;
+  filter: blur(8px) !important;
+  transform: scale(0.9) translateZ(-100px) !important;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+/* Echo Wave Distortion */
+@keyframes echo-wave {
+  0% {
+    transform: scale(1) translateZ(var(--tz, 0px));
+    filter: blur(var(--base-blur, 4px)) brightness(1);
+  }
+  50% {
+    transform: scale(1.05) translateZ(calc(var(--tz, 0px) + 20px)) skewX(2deg)
+      skewY(-2deg);
+    filter: blur(calc(var(--base-blur, 4px) - 2px)) brightness(1.5)
+      hue-rotate(15deg);
+    box-shadow:
+      0 0 30px rgba(0, 229, 255, 0.6),
+      inset 0 0 15px rgba(0, 229, 255, 0.3);
+    border-color: rgba(0, 229, 255, 0.8);
+  }
+  100% {
+    transform: scale(1) translateZ(var(--tz, 0px));
+    filter: blur(var(--base-blur, 4px)) brightness(1);
+    box-shadow: none;
+    border-color: rgba(0, 229, 255, 0.2);
+  }
+}
+
+.echo-wave-distortion {
+  animation: echo-wave 0.5s ease-out forwards !important;
+  z-index: 55 !important;
+}
+
+/* Neon Tracing Border */
+@keyframes neon-spin {
+  0% {
+    --neon-angle: 0deg;
+  }
+  100% {
+    --neon-angle: 360deg;
+  }
+}
+
+@property --neon-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.echo-document.neon-tracing::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 26px;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--neon-angle),
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 229, 255, 1) 80%,
+    rgba(255, 0, 128, 1) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: neon-spin 3s linear infinite;
+  pointer-events: none;
+  z-index: 20;
+  opacity: 0.8;
+}
+
+/* ─── Code Skeletonization ────────────────────────────────────────────────── */
+/* Base dimming for distant standard text, scales with z-index */
+.echo-document pre,
+.echo-document pre .mtk1,
+.echo-document pre .mtk2,
+.echo-document pre .mtk3,
+.echo-document pre .mtk4,
+.echo-document pre .mtk5,
+.echo-document pre .mtk6,
+.echo-document pre .mtk7,
+.echo-document pre .mtk8,
+.echo-document pre .mtk9 {
+  color: rgba(255, 255, 255, calc(0.3 - (var(--index, 0) * 0.05))) !important;
+
+  /* Depth-Aware Chromatic Aberration */
+  --ca-offset: calc(var(--index, 0) * 0.5px);
+  text-shadow:
+    var(--ca-offset) 0 0 rgba(255, 0, 0, 0.5),
+    calc(-1 * var(--ca-offset)) 0 0 rgba(0, 255, 255, 0.5) !important;
+
+  transition:
+    color 0.3s ease,
+    text-shadow 0.3s ease;
+}
+
+/* Brighten and glow structural keywords (functions, classes, etc.) in background documents */
+.echo-document pre .mtk5, /* keywords like return, function */
+.echo-document pre .mtk8, /* some themes use mtk8 for control flow */
+.echo-document pre .mtk22 {
+  color: #00e5ff !important;
+  text-shadow:
+    0 0 8px rgba(0, 229, 255, 0.8),
+    0 0 15px rgba(0, 229, 255, 0.4) !important;
+  font-weight: bold !important;
+}
+
+/* Distinct glowing neon pink for strings/literals in the background */
+.echo-document pre .mtk6, /* strings */
+.echo-document pre .mtk4 {
+  /* numbers */
+  color: #ff0080 !important;
+  text-shadow:
+    0 0 8px rgba(255, 0, 128, 0.8),
+    0 0 15px rgba(255, 0, 128, 0.4) !important;
+}

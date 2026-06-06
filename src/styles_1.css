@@ -1,0 +1,615 @@
+:root {
+  --bg-color-glass: rgba(16, 20, 30, 0.6);
+  --accent-color: hsl(var(--dynamic-hue), 80%, 60%);
+  --text-primary: #c0d0e0;
+  --text-heading: #ffffff;
+  --font-primary:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --dynamic-hue: 180; /* Default Cyan hue */
+  /* Base Bioluminescent Green */
+  --bio-glow-color: rgba(57, 255, 20, 0.6);
+  --bio-glow-strong: rgba(57, 255, 20, 0.9);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body,
+#app {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: var(--font-primary);
+}
+
+#container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: radial-gradient(circle at 50% 30%, #101520 0%, #050505 80%);
+}
+
+#container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  z-index: 9999;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+#editor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5; /* default: depth 1 — middle between rain layers; JS will update dynamically */
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+
+  /* Cyber Grid Background */
+  background-image:
+    radial-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+  background-size:
+    20px 20px,
+    40px 40px,
+    40px 40px;
+
+  /* X-Ray Mode variables */
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --sonar-x: 50%;
+  --sonar-y: 50%;
+  --sonar-radius: 0px;
+}
+
+::selection {
+  background: rgba(0, 229, 255, 0.4);
+  color: #fff;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+}
+
+#editor.x-ray-active {
+  mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 100px,
+    black 250px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 100px,
+    black 250px
+  );
+}
+
+#editor.x-ray-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 95px,
+    rgba(0, 229, 255, 0.4) 100px,
+    transparent 105px
+  );
+  z-index: 100;
+  mix-blend-mode: screen;
+}
+
+#editor.sonar-active {
+  mask-image:
+    radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y),
+      transparent 100px,
+      black 250px
+    ),
+    radial-gradient(
+      circle at var(--sonar-x) var(--sonar-y),
+      black calc(var(--sonar-radius) - 150px),
+      transparent var(--sonar-radius),
+      black calc(var(--sonar-radius) + 150px)
+    );
+  -webkit-mask-image:
+    radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y),
+      transparent 100px,
+      black 250px
+    ),
+    radial-gradient(
+      circle at var(--sonar-x) var(--sonar-y),
+      black calc(var(--sonar-radius) - 150px),
+      transparent var(--sonar-radius),
+      black calc(var(--sonar-radius) + 150px)
+    );
+
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+#editor.sonar-active::before {
+  content: "";
+  position: absolute;
+  top: var(--sonar-y, 50%);
+  left: var(--sonar-x, 50%);
+  width: calc(var(--sonar-radius, 0px) * 2);
+  height: calc(var(--sonar-radius, 0px) * 2);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(0, 229, 255, 0.5);
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.4),
+    inset 0 0 20px rgba(0, 229, 255, 0.2);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.sonar-hit {
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) drop-shadow(0 0 15px rgba(0, 229, 255, 0.8)) !important;
+  transform: scale(1.05) translateZ(50px) !important;
+  z-index: 100 !important;
+  border-color: rgba(0, 229, 255, 1) !important;
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.5),
+    inset 0 0 20px rgba(0, 229, 255, 0.3) !important;
+}
+
+.echo-document.sonar-hit pre {
+  color: rgba(0, 229, 255, 1) !important;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+}
+
+.echo-document.sonar-hit .scan-line {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 229, 255, 0.8),
+    transparent
+  );
+  height: 20px;
+  animation-duration: 1s;
+}
+
+#editor.lens-active {
+  mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 160px,
+    black 320px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 160px,
+    black 320px
+  );
+}
+
+#editor.lens-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    rgba(255, 255, 255, 0.05) 150px,
+    rgba(0, 229, 255, 0.3) 160px,
+    transparent 165px
+  );
+  mix-blend-mode: screen;
+  z-index: 100;
+}
+
+#editor .monaco-editor .view-lines {
+  text-shadow:
+    0 0 8px rgba(0, 229, 255, 0.2),
+    0 0 15px rgba(0, 229, 255, 0.1);
+}
+.rain-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+#rain-back {
+  z-index: 1;
+}
+#rain-front {
+  z-index: 10;
+}
+
+#connections-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+  mix-blend-mode: screen;
+}
+
+#matrix-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2; /* Behind the editor, above the deep background */
+  opacity: 0.3;
+}
+
+/* Reference Layer */
+#reference-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none; /* Children have auto */
+  overflow: hidden;
+  color: rgba(180, 200, 220, 0.9);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 40px;
+  white-space: pre-wrap;
+  opacity: 0.95; /* Sharp by default */
+  /* No blur here, handled by overlay */
+  transition:
+    opacity 0.4s ease,
+    filter 0.4s ease,
+    background 0.4s ease;
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 0.2) 0%,
+    transparent 70%
+  );
+}
+
+/* When a card is spotlighted, bring the whole layer to the front so it sits above the editor and overlay */
+#reference-layer.has-spotlight {
+  z-index: 15;
+}
+
+#reference-layer h1 {
+  font-size: 24px;
+  color: #fff;
+  margin-bottom: 10px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+}
+#reference-layer h2 {
+  font-size: 18px;
+  color: #e0e0e0;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+#reference-layer h3 {
+  font-size: 16px;
+  color: #ccc;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+.md-list-item {
+  padding-left: 20px;
+  color: #b4c8dc;
+  margin-bottom: 4px;
+  position: relative;
+}
+.md-list-item::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: rgba(255, 255, 255, 0.3);
+}
+.md-list-item input[type="checkbox"] {
+  margin-right: 8px;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+.md-list-item.checked {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Task Items */
+.md-task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b4c8dc;
+  margin-bottom: 4px;
+}
+.md-task-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+.md-task-item input[type="checkbox"]:checked {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+}
+.md-task-item input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 3px;
+  height: 7px;
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+#reference-layer code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  color: #aaddff;
+}
+#reference-layer b {
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Reference Overlay (Lantern Effect) */
+#reference-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* On top of reference layer (due to DOM order) but below editor */
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.5); /* Dim the background notes */
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  /* Lantern Mask: Transparent hole at mouse, Black elsewhere */
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 120px,
+    black 350px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 120px,
+    black 350px
+  );
+  transition:
+    opacity 0.3s ease,
+    background 0.3s ease;
+}
+
+/* Lantern Beam Effect */
+#reference-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    rgba(200, 220, 255, 0.06) 0%,
+    transparent 350px
+  );
+  mix-blend-mode: screen;
+  z-index: 2;
+  opacity: 0.8;
+}
+
+#reference-overlay.lantern-inactive {
+  mask-image: none;
+  -webkit-mask-image: none;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+}
+
+/* Blueprint Mode */
+#reference-layer.blueprint-mode {
+  background-color: #0d1b2a;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  font-family: "Courier New", Courier, monospace;
+  color: #89cff0;
+  text-shadow: 0 0 2px #89cff0;
+  opacity: 1 !important;
+}
+
+#reference-layer.blueprint-mode h1,
+#reference-layer.blueprint-mode h2,
+#reference-layer.blueprint-mode h3 {
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+  text-transform: uppercase;
+  border-bottom-style: dashed;
+}
+
+textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: #c0c0d0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 10px;
+  margin-top: 8px;
+  resize: vertical;
+  min-height: 60px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+textarea:focus {
+  outline: none;
+  border-color: rgba(0, 229, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+/* Fog Layer */
+#fog-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  backdrop-filter: blur(var(--blur, 0px));
+  -webkit-backdrop-filter: blur(var(--blur, 0px));
+  transition: backdrop-filter 0.5s ease;
+
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 60px,
+    black 200px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 60px,
+    black 200px
+  );
+}
+
+/* Lightning Layer */
+#lightning-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: white;
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition: opacity 0.05s ease-out;
+}
+
+/* Vignette Layer */
+#vignette-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.8) 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* Border Glow Animation */
+@keyframes borderGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Dock UI */
+#dock {
+  position: fixed;
+  top: auto;
+  bottom: 24px;
+  right: 24px;
+  width: auto;
+  min-width: 64px;
+  height: auto;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 24px;
+  overflow: hidden;
+
+  /* Enhanced Modern Glassmorphism */
+  background: linear-gradient(
+    135deg,
+    rgba(15, 20, 30, 0.7),
+    rgba(5, 10, 15, 0.8)
+  );
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+  backdrop-filter: blur(50px) saturate(150%);
+  -webkit-backdrop-filter: blur(50px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 50px rgba(0, 229, 255, 0.15);
+  border-radius: 24px;
+
+  z-index: 20;
+  color: var(--text-primary);
+  font-size: 11px;
+  transform: perspective(1000px) rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg));
+  user-select: none;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: bottom right;
+  opacity: 0.9;
+  max-width: 64px;
+  max-height: 64px;
+}
+
+#dock::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 0, 128, 0.5),
+    rgba(0, 229, 255, 0.8),
+    rgba(255, 0, 128, 0.5)
+  );
+  background-size: 200% 200%;
+  animation: borderGlow 4s linear infinite;
+  z-index: -1;
+  opacity: 0.7;
+  transition: opacity 0.5s ease;
+}
