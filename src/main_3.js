@@ -233,6 +233,8 @@ if (viewModeSelect) {
     else if (view === "hexagon-matrix") tabManager.toggleHexagonMatrixView();
     else if (view === "luminescence") tabManager.toggleLuminescenceView();
     else if (view === "geode") tabManager.toggleGeodeView();
+    else if (view === "lotus") tabManager.toggleLotusView();
+    else if (view === "hypercube") tabManager.toggleHypercubeView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }

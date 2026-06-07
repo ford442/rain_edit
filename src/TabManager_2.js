@@ -2,6 +2,49 @@ import StorageAPI from "./StorageAPI.js";
 import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
 export const TabManagerMixin2 = {
   _applyLayoutChunk0(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isLotusView) {
+        // Lotus View positions
+        const angle = (index / totalEchoes) * Math.PI * 2;
+        const radius = 400 + (index % 2) * 100; // Alternating petal lengths
+
+        const tx = Math.sin(angle) * radius;
+        const ty = Math.cos(angle) * radius;
+        const tz = -200 - index * 20;
+
+        const rotZ = -(angle * 180) / Math.PI;
+        const rotX = 15; // Inward tilt
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        return true;
+      }
+      if (this.isHypercubeView) {
+        // Hypercube View positions
+        const face = index % 6;
+        const layer = Math.floor(index / 6);
+        const distance = 400 + layer * 200;
+
+        let tx = 0, ty = 0, tz = -200, rotX = 0, rotY = 0;
+
+        if (face === 0) { tz -= distance; } // Front
+        else if (face === 1) { tz += distance; } // Back
+        else if (face === 2) { tx = distance; rotY = -90; } // Right
+        else if (face === 3) { tx = -distance; rotY = 90; } // Left
+        else if (face === 4) { ty = -distance; rotX = -90; } // Top
+        else if (face === 5) { ty = distance; rotX = 90; } // Bottom
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+        return true;
+      }
       if (this.isHexagonMatrixView) {
         // Hexagon Matrix View positions
         const cols = Math.ceil(Math.sqrt(totalEchoes));
