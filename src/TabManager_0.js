@@ -46,6 +46,8 @@ export const TabManagerMixin0 = {
     this.isHexagonMatrixView = false;
     this.isLuminescenceView = false;
     this.isGeodeView = false;
+    this.isLotusView = false;
+    this.isHypercubeView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -87,7 +89,9 @@ export const TabManagerMixin0 = {
       "astrolabe-active",
       "dominoes-active",
       "luminescence-active",
-      "geode-active"
+      "geode-active",
+      "lotus-active",
+      "hypercube-active"
     );
 
     this.isOrigamiView = false;
@@ -125,6 +129,24 @@ export const TabManagerMixin0 = {
       const btn = document.getElementById(id);
       if (btn) btn.classList.remove("active");
     });
+  },
+  toggleLotusView() {
+    const wasActive = this.isLotusView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isLotusView = true;
+      document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleHypercubeView() {
+    const wasActive = this.isHypercubeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHypercubeView = true;
+      document.body.classList.add("hypercube-active");
+    }
+    this._renderEchoes();
   },
   toggleHexagonMatrixView() {
     const wasActive = this.isHexagonMatrixView;
