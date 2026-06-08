@@ -45,3 +45,13 @@ body.holographic-slice-active #editor {
   border-top: 2px solid rgba(0, 255, 200, 0.8);
   box-shadow: 0 -5px 25px rgba(0, 255, 200, 0.4);
 }
+
+/* Repulsor Field (Moses Effect) */
+body.repulsor-active .echo-document {
+  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--repulse-tx, 0px)),
+    calc(var(--ty, 0px) + var(--repulse-ty, 0px)),
+    var(--tz, 0px)
+  ) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+}
