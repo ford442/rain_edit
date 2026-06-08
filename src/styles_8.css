@@ -1,0 +1,603 @@
+body.isometric-active #vignette-layer {
+  transform: translateZ(900px);
+  opacity: 0.2;
+}
+
+/* Labels for Isometric View */
+body.isometric-active #container > *::after {
+  content: attr(id);
+  position: absolute;
+  bottom: -30px;
+  right: 0;
+  color: #00e5ff;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+  pointer-events: none;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 229, 255, 0.5);
+  transform: rotateX(-90deg) translateY(30px);
+  transform-origin: bottom right;
+}
+
+/* --- Stack (Time Machine) View --- */
+body.stack-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.stack-active #editor,
+body.stack-active #image-viewer {
+  transform: scale(0.8) translateY(-10%);
+  filter: blur(2px);
+  opacity: 0.6;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.stack-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1px);
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.stack-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 50px)
+    )
+    scale(1.05) !important;
+  z-index: 30 !important;
+}
+
+/* --- Timeline View --- */
+body.timeline-active {
+  --bio-glow-color: rgba(255, 0, 128, 0.6);
+  --bio-glow-strong: rgba(255, 0, 128, 0.8);
+}
+body.timeline-active #editor,
+body.timeline-active #image-viewer {
+  transform: scale(0.6) translateY(-20%) translateZ(-100px);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.timeline-active .echo-document {
+  opacity: calc(1 - (var(--index, 0) * 0.1));
+  filter: blur(calc(var(--index, 0) * 0.5px))
+    grayscale(calc(var(--index, 0) * 15%));
+  cursor: pointer;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    var(--tz, 0px)
+  );
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.timeline-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) grayscale(0%) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    scale(1.1) !important;
+  z-index: 30 !important;
+}
+
+/* --- Shockwave Animation --- */
+@keyframes shockwave {
+  0% {
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        var(--tz, 0px)
+      )
+      rotateZ(var(--rot-z, 0deg)) scale(1);
+    filter: blur(var(--base-blur, 4px)) brightness(1);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+  }
+  20% {
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tz, 0px) - 250px)
+      )
+      rotateZ(var(--rot-z, 0deg)) scale(0.9);
+    filter: blur(calc(var(--base-blur, 4px) + 8px)) brightness(2.5);
+    box-shadow:
+      0 0 80px rgba(0, 229, 255, 1),
+      inset 0 0 60px rgba(0, 229, 255, 0.8);
+    border-color: rgba(255, 255, 255, 1);
+  }
+  100% {
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        var(--tz, 0px)
+      )
+      rotateZ(var(--rot-z, 0deg)) scale(1);
+    filter: blur(var(--base-blur, 4px)) brightness(1);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+  }
+}
+
+.shockwave-hit {
+  animation: shockwave 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+/* --- Magnetic Attraction for X-Ray Peek --- */
+body.x-ray-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.8);
+  --bio-glow-strong: #00e5ff;
+}
+body.x-ray-active .echo-document:hover {
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      250px
+    )
+    scale(1.1) !important;
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  z-index: 100 !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Semantic Gravity Pull */
+.echo-document.semantic-gravity-pull {
+  --tz: calc(-10px + var(--stack-z, 0px)) !important;
+  --base-opacity: 0.4 !important;
+  --base-blur: 2px !important;
+  transform: translate3d(
+      calc(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)) *
+          0.9 + var(--wormhole-tx, 0px)
+      ),
+      calc(
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) -
+          (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) +
+          var(--wormhole-ty, 0px)
+      ),
+      calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px))
+    )
+    rotateX(calc(var(--rot-x, 0deg) + (var(--hover-rot-x, 0deg) * var(--wake))))
+    rotateY(
+      calc(
+        var(--ry, 0deg) + var(--rot-y, 0deg) +
+          (var(--hover-rot-y, 0deg) * var(--wake))
+      )
+    )
+    scale(calc((1.05 + (var(--wake) * 0.08)) * var(--wormhole-scale, 1)));
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.9),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3),
+    inset 0 0 50px rgba(255, 255, 255, 0.1),
+    0 0 35px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.3);
+  border-color: hsla(var(--echo-tint, 0deg), 100%, 60%, 0.5);
+  z-index: 10; /* Put them above other standard echoes */
+}
+
+/* Siphon Mode */
+body.siphon-mode-active #editor {
+  transform: translateZ(-300px) scale(0.8) !important;
+  opacity: 0.5;
+  pointer-events: none;
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.4s;
+  filter: blur(2px) grayscale(50%);
+}
+
+body.siphon-mode-active #echo-layer {
+  z-index: 50; /* Bring above everything to be interactive */
+  pointer-events: auto;
+}
+
+body.siphon-mode-active .echo-document {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: translate3d(
+      calc(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)) * 2
+      ),
+      calc(
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) * 2
+      ),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) !important;
+  pointer-events: auto;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.4),
+    inset 0 0 20px rgba(0, 229, 255, 0.2);
+  cursor: text;
+  user-select: text; /* Allow text selection */
+}
+
+/* Give pre elements explicit text selection */
+body.siphon-mode-active .echo-document pre {
+  user-select: text;
+  pointer-events: auto;
+}
+
+body.siphon-mode-active .echo-document::selection,
+body.siphon-mode-active .echo-document pre::selection,
+body.siphon-mode-active .echo-document *::selection {
+  background: rgba(255, 0, 128, 0.5);
+  color: #fff;
+  text-shadow: 0 0 5px #ff0080;
+}
+
+/* Typing Particle Effect */
+.typing-particle {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+  z-index: 100;
+  animation: particle-fly 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes particle-fly {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--px), var(--py), -300px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Siphon Data Packet Animation */
+.siphon-packet {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  color: #00e5ff;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  white-space: pre;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.8);
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.8);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 1);
+  transform-origin: center;
+  animation: siphon-fly 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes siphon-fly {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(var(--dx), var(--dy)) scale(0.5) rotate(10deg);
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.1) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+/* 3D Z-Axis Scanner */
+#z-scanner-plane {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 45; /* Below siphons, above echoes */
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(255, 0, 128, 0.4) 50%,
+    rgba(255, 255, 255, 0.8) 51%,
+    transparent 52%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: translateZ(0);
+  transition: opacity 0.3s;
+  display: none;
+}
+
+#z-scanner-plane.scanning {
+  display: block;
+  opacity: 1;
+  animation: z-scan-sweep 4s linear forwards;
+}
+
+@keyframes z-scan-sweep {
+  0% {
+    transform: translateZ(200px);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+    transform: translateZ(-2000px);
+  }
+  100% {
+    transform: translateZ(-2200px);
+    opacity: 0;
+  }
+}
+
+/* Z-Scan Hit Reaction */
+.echo-document.z-scan-hit {
+  animation: z-scan-reveal 0.8s ease-out forwards;
+}
+
+@keyframes z-scan-reveal {
+  0% {
+    filter: brightness(3) sepia(1) hue-rotate(-50deg) saturate(5);
+    box-shadow:
+      0 0 50px #ff0080,
+      inset 0 0 30px #ff0080;
+    opacity: 1;
+    transform: translate3d(
+        calc(
+          calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)) *
+            1.05
+        ),
+        calc(
+          calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) *
+            1.05
+        ),
+        calc(var(--tz, 0px) + 50px)
+      )
+      scale(1.05);
+  }
+  100% {
+    /* Return to original calculated styles handled by CSS class removal */
+  }
+}
+
+.echo-document.z-scan-hit .echo-header {
+  animation: header-pop 0.8s ease-out forwards;
+}
+
+@keyframes header-pop {
+  0% {
+    transform: translateZ(150px) scale(1.2);
+    color: #fff;
+    background: rgba(255, 0, 128, 0.5);
+    border-color: #ff0080;
+    text-shadow: 0 0 10px #fff;
+  }
+  100% {
+    transform: translateZ(30px) scale(1);
+  }
+}
+
+/* --- Z-Axis Depth Wave --- */
+@keyframes z-depth-wave {
+  0% {
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        var(--tz, 0px)
+      )
+      scale(1);
+    filter: blur(var(--base-blur, 4px)) brightness(1);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+  }
+  30% {
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tz, 0px) + 150px)
+      )
+      scale(1.15);
+    filter: blur(0px) brightness(2.5) hue-rotate(45deg);
+    box-shadow:
+      0 0 80px rgba(0, 229, 255, 1),
+      inset 0 0 40px rgba(255, 0, 128, 0.8);
+    border-color: rgba(255, 255, 255, 1);
+  }
+  100% {
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        var(--tz, 0px)
+      )
+      scale(1);
+    filter: blur(var(--base-blur, 4px)) brightness(1);
+    box-shadow: none;
+  }
+}
+
+.z-depth-wave-hit {
+  animation: z-depth-wave 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+  z-index: 200 !important;
+}
+
+/* --- Innovated Echo Pulse Animation --- */
+@keyframes echo-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 hsla(var(--echo-tint, 180deg), 100%, 60%, 0.7);
+    border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 1);
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        var(--tz, 0px)
+      )
+      scale(1.05);
+  }
+  70% {
+    box-shadow: 0 0 0 50px hsla(var(--echo-tint, 180deg), 100%, 60%, 0);
+    border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.2);
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        var(--tz, 0px)
+      )
+      scale(1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsla(var(--echo-tint, 180deg), 100%, 60%, 0);
+    border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.5);
+    transform: translate3d(
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        var(--tz, 0px)
+      )
+      scale(1);
+  }
+}
+
+.echo-pulse {
+  animation: echo-pulse-ring 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards !important;
+  z-index: 60 !important;
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) !important;
+}
+
+/* --- Holographic Glitch on Hover --- */
+@keyframes hover-glitch {
+  0% {
+    clip-path: inset(10% 0 80% 0);
+    transform: translateX(-2px);
+  }
+  20% {
+    clip-path: inset(80% 0 5% 0);
+    transform: translateX(2px);
+  }
+  40% {
+    clip-path: inset(30% 0 50% 0);
+    transform: translateX(-2px);
+  }
+  60% {
+    clip-path: inset(60% 0 20% 0);
+    transform: translateX(2px);
+  }
+  80% {
+    clip-path: inset(15% 0 70% 0);
+    transform: translateX(-1px);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    transform: translateX(0);
+  }
+}
+
+.echo-document.glitch-active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  animation: hover-glitch 0.3s steps(2) forwards;
+  z-index: 10;
+}
+
+/* Atmospheric Depth Desaturation */
+.echo-document.depth-desaturate {
+  filter: blur(
+      calc(var(--base-blur, 4px) - (var(--wake) * var(--base-blur, 4px)))
+    )
+    hue-rotate(var(--echo-tint, 0deg))
+    saturate(calc(100% + (var(--tz-val, 0) * 0.1%)))
+    brightness(calc(100% + (var(--tz-val, 0) * 0.05%)));
+}
+
+/* Sphere View */
+body.sphere-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.sphere-active #editor,
+body.sphere-active #image-viewer {
+  transform: scale(0.5) translateY(30%) translateZ(-200px);
+  filter: blur(6px);
+  opacity: 0.3;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.sphere-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: sphere-spin 60s linear infinite;
+}
+
+@keyframes sphere-spin {
+  from {
+    transform: rotateY(0deg) rotateX(15deg);
+  }
+  to {
+    transform: rotateY(360deg) rotateX(15deg);
+  }
+}
+
+body.sphere-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.2),
+    inset 0 0 15px rgba(0, 229, 255, 0.2);
+}
+
+body.sphere-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg)
+    scale(1.15) !important;
+  z-index: 50 !important;
+}
+
+/* Rolodex View */
+body.rolodex-active {
+  --bio-glow-color: rgba(0, 229, 255, 0.6);
+  --bio-glow-strong: rgba(0, 229, 255, 0.8);
+}
+body.rolodex-active #editor,
+body.rolodex-active #image-viewer {
+  transform: scale(0.65) translateY(10%) translateZ(-50px);
+  filter: blur(2px);
+  opacity: 0.7;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.rolodex-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: rolodex-spin 60s linear infinite;
+}

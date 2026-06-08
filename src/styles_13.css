@@ -1,0 +1,615 @@
+
+/* =========================================================
+   CYCLONE VIEW (Tornado Spiral)
+   ========================================================= */
+body.cyclone-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+}
+
+body.cyclone-active .echo-document {
+  transition:
+    transform 1s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 1s ease,
+    filter 1s ease;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  /* Base animation to continuously spin the entire funnel isn't trivial here since each document has its own rotateY based on index.
+     Instead, we can use a parent layer spin, or just let it be static and let the user scroll.
+     We will make the documents glow and have a wind-like distortion. */
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(0, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+body.cyclone-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) !important;
+  border-color: rgba(0, 255, 255, 0.8);
+  box-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.9),
+    0 0 50px rgba(0, 255, 255, 0.6);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 1000 !important;
+}
+
+/* Let's spin the echo-layer to simulate the cyclone */
+body.cyclone-active #echo-layer {
+  animation: cyclone-spin 60s linear infinite;
+  transform-origin: center center -400px;
+}
+
+@keyframes cyclone-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+/* =========================================================
+   X-RAY MODE (Shift + X)
+   ========================================================= */
+body.x-ray-active #editor {
+  opacity: 0.1 !important;
+  backdrop-filter: none !important;
+  transition: opacity 0.2s ease;
+}
+
+body.x-ray-active .echo-document {
+  filter: none !important;
+  opacity: 1 !important;
+  z-index: 1000 !important;
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease,
+    z-index 0s;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+}
+
+/* =========================================================
+   BLACK HOLE COLLAPSE / SINGULARITY (Alt + Backspace)
+   ========================================================= */
+body.singularity-active .echo-document {
+  animation: singularity-collapse 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards !important;
+  pointer-events: none !important;
+}
+
+@keyframes singularity-collapse {
+  0% {
+    filter: blur(0px);
+    opacity: 1;
+  }
+  50% {
+    filter: blur(10px) brightness(2);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), -2000px) rotateZ(720deg)
+      scale(0) !important;
+    filter: blur(20px) brightness(0);
+    opacity: 0;
+  }
+}
+
+/* Astrolabe View */
+body.astrolabe-active #editor,
+body.astrolabe-active #image-viewer {
+  transform: scale(0.6) translateZ(-100px);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.astrolabe-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: astrolabe-spin 60s linear infinite;
+}
+
+@keyframes astrolabe-spin {
+  from {
+    transform: rotateX(15deg) rotateY(0deg) rotateZ(0deg);
+  }
+  to {
+    transform: rotateX(15deg) rotateY(360deg) rotateZ(360deg);
+  }
+}
+
+body.astrolabe-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.2),
+    inset 0 0 15px rgba(0, 229, 255, 0.2);
+}
+
+body.astrolabe-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg)
+    scale(1.15) !important;
+  z-index: 50 !important;
+}
+
+/* Dominoes View */
+body.dominoes-active #editor,
+body.dominoes-active #image-viewer {
+  transform: scale(0.6) translateZ(-100px);
+  filter: blur(4px);
+  opacity: 0.5;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.dominoes-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+}
+
+body.dominoes-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.2),
+    inset 0 0 15px rgba(0, 229, 255, 0.2);
+}
+
+body.dominoes-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg)
+    scale(1.15) !important;
+  z-index: 50 !important;
+}
+
+/* Fabric Tear Interaction */
+body.fabric-tear-active #editor {
+  mask-image: var(--tear-mask);
+  -webkit-mask-image: var(--tear-mask);
+}
+
+body.fabric-tear-active #echo-layer {
+  filter: brightness(2) saturate(2);
+  transition: filter 0.2s ease;
+}
+
+/* =========================================================
+   QUANTUM DEPTH FILTERING (Shift + Hover Z-Plane Isolation)
+   ========================================================= */
+body[data-active-depth] .echo-document {
+  /* Dim and blur documents not in the active Z-plane */
+  filter: blur(15px) saturate(20%) brightness(40%) !important;
+  opacity: 0.3 !important;
+  transition:
+    filter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body[data-active-depth="0"] .echo-document[data-index="0"],
+body[data-active-depth="1"] .echo-document[data-index="1"],
+body[data-active-depth="2"] .echo-document[data-index="2"],
+body[data-active-depth="3"] .echo-document[data-index="3"],
+body[data-active-depth="4"] .echo-document[data-index="4"],
+body[data-active-depth="5"] .echo-document[data-index="5"],
+body[data-active-depth="6"] .echo-document[data-index="6"],
+body[data-active-depth="7"] .echo-document[data-index="7"],
+body[data-active-depth="8"] .echo-document[data-index="8"],
+body[data-active-depth="9"] .echo-document[data-index="9"],
+body[data-active-depth="10"] .echo-document[data-index="10"] {
+  /* Sharpen, brighten, and slightly lift the active Z-plane */
+  filter: blur(0px) saturate(120%) brightness(110%)
+    drop-shadow(0 0 30px rgba(0, 229, 255, 0.8)) !important;
+  opacity: 1 !important;
+  border-color: rgba(0, 229, 255, 0.9);
+  z-index: 1000; /* Bring the whole plane to front visually if possible, though preserve-3d handles z */
+}
+
+/* Also bring the active plane forward slightly in 3D space */
+body[data-active-depth="0"] .echo-document[data-index="0"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="1"] .echo-document[data-index="1"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="2"] .echo-document[data-index="2"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="3"] .echo-document[data-index="3"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="4"] .echo-document[data-index="4"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="5"] .echo-document[data-index="5"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="6"] .echo-document[data-index="6"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="7"] .echo-document[data-index="7"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="8"] .echo-document[data-index="8"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="9"] .echo-document[data-index="9"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+body[data-active-depth="10"] .echo-document[data-index="10"] {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px))
+    scale(1.05) !important;
+}
+
+/* --- Hexagon Matrix View --- */
+body.hexagon-matrix-active {
+  --bio-glow-color: rgba(0, 255, 128, 0.6);
+  --bio-glow-strong: rgba(0, 255, 128, 0.8);
+}
+body.hexagon-matrix-active #editor,
+body.hexagon-matrix-active #image-viewer {
+  transform: scale(0.6) translateY(-10%) translateZ(-100px);
+  filter: blur(3px);
+  opacity: 0.6;
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.hexagon-matrix-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    var(--tz, 0px)
+  );
+  transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 30px rgba(0, 255, 128, 0.2),
+    inset 0 0 15px rgba(0, 255, 128, 0.1);
+  border-color: rgba(0, 255, 128, 0.4);
+  /* Optional: Make them look slightly hexagonal if possible, or just keep them rectangular but arranged in hex pattern */
+}
+
+body.hexagon-matrix-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    scale(1.15) !important;
+  z-index: 50 !important;
+  box-shadow:
+    0 0 50px rgba(0, 255, 128, 0.6),
+    inset 0 0 25px rgba(0, 255, 128, 0.3) !important;
+  border-color: rgba(0, 255, 128, 0.8) !important;
+}
+
+/* Sonic Boom Save Animation */
+@keyframes sonic-boom-shake {
+  0% {
+    transform: scale(1) translateZ(0);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(0.95) translateZ(-50px);
+    filter: brightness(1.5) contrast(1.2);
+    opacity: 0.8;
+    box-shadow: 0 0 100px rgba(0, 229, 255, 0.8);
+  }
+  100% {
+    transform: scale(1) translateZ(0);
+    filter: brightness(1);
+  }
+}
+body.sonic-boom-active #echo-layer .echo-document {
+  animation: sonic-boom-shake 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+body.sonic-boom-active #editor {
+  animation: sonic-boom-shake 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Hologram Overlay Feature */
+.hologram-overlay-active {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 9999 !important;
+  mix-blend-mode: screen !important;
+  filter: brightness(1.2) hue-rotate(180deg) !important;
+  border-radius: 0 !important;
+  opacity: 0.9 !important;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.hologram-overlay-active .echo-header {
+  transform: none !important;
+}
+
+.hologram-overlay-active pre {
+  max-height: 100% !important;
+}
+
+/* =========================================================
+   LUMINESCENCE VIEW
+   ========================================================= */
+body.luminescence-active {
+  --bio-glow-color: rgba(255, 255, 255, 0.4);
+  --bio-glow-strong: rgba(255, 255, 255, 0.8);
+}
+
+body.luminescence-active #editor,
+body.luminescence-active #image-viewer {
+  transform: scale(0.6) translateY(10%) translateZ(-100px);
+  filter: blur(4px);
+  opacity: 0.6;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+body.luminescence-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: luminescence-spin 120s linear infinite;
+}
+
+@keyframes luminescence-spin {
+  from {
+    transform: rotateY(0deg) rotateX(15deg) rotateZ(-10deg);
+  }
+  to {
+    transform: rotateY(360deg) rotateX(15deg) rotateZ(-10deg);
+  }
+}
+
+body.luminescence-active .echo-document {
+  opacity: 0.8;
+  filter: blur(1.5px)
+    drop-shadow(0 0 20px var(--glow-color, rgba(255, 255, 255, 0.6)));
+  cursor: pointer;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow:
+    0 0 40px var(--glow-color, rgba(255, 255, 255, 0.4)),
+    inset 0 0 20px var(--glow-color, rgba(255, 255, 255, 0.2));
+  border-color: var(--glow-color, rgba(255, 255, 255, 0.5));
+  border-radius: 50%; /* Give them a more nebulous shape */
+  background: radial-gradient(
+    circle at center,
+    rgba(10, 15, 25, 0.9) 0%,
+    rgba(5, 8, 15, 0.8) 100%
+  );
+  padding: 30px;
+}
+
+body.luminescence-active .echo-document pre {
+  mask-image: radial-gradient(circle, black 50%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle, black 50%, transparent 90%);
+}
+
+body.luminescence-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px)
+    drop-shadow(0 0 40px var(--glow-color, rgba(255, 255, 255, 0.9))) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
+  z-index: 50 !important;
+  border-radius: 12px; /* Return to readable shape on hover */
+  box-shadow:
+    0 0 60px var(--glow-color, rgba(255, 255, 255, 0.8)),
+    inset 0 0 30px var(--glow-color, rgba(255, 255, 255, 0.4)) !important;
+}
+
+/* =========================================================
+   MAGNETIC PULSE INTERACTION
+   ========================================================= */
+body.magnetic-pulse-active .echo-document {
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  /* Pull documents forward and towards the mouse center slightly */
+  transform: translate3d(
+      calc(
+        var(--tx, 0px) * 0.5 + var(--part-tx, 0px) + var(--repel-tx, 0px) +
+          ((var(--mouse-x) - 50vw) * 0.2)
+      ),
+      calc(
+        var(--ty, 0px) * 0.5 + var(--part-ty, 0px) + var(--repel-ty, 0px) +
+          ((var(--mouse-y) - 50vh) * 0.2)
+      ),
+      calc(var(--tz, 0px) + 250px)
+    )
+    scale(1.15) !important;
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) saturate(1.5) !important;
+  z-index: 999 !important;
+  box-shadow:
+    0 0 50px rgba(0, 229, 255, 0.8),
+    inset 0 0 30px rgba(0, 229, 255, 0.4) !important;
+  border-color: rgba(0, 229, 255, 1) !important;
+}
+
+body.magnetic-pulse-active #editor {
+  opacity: 0.3 !important;
+  filter: blur(6px) !important;
+  transform: scale(0.95) translateZ(-50px) !important;
+  transition: all 0.4s ease !important;
+}
+
+/* =========================================================
+   MAGNETIC ALIGN INTERACTION
+   ========================================================= */
+.magnetic-align-active {
+  transform: translate3d(0, 0, -50px) scale(0.9) !important;
+  opacity: 0.9 !important;
+  filter: none !important;
+  z-index: 4 !important;
+}
+
+/* =========================================================
+   DEPTH SLICER BEAM INTERACTION
+   ========================================================= */
+#depth-beam {
+  position: fixed;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(0, 229, 255, 0.8) 0%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  transition: opacity 0.2s;
+  opacity: 0;
+  z-index: 9999;
+}
+body.depth-beam-active #depth-beam {
+  opacity: 1;
+}
+.echo-document.depth-beam-intersect {
+  box-shadow:
+    0 0 60px rgba(0, 229, 255, 0.8),
+    inset 0 0 30px rgba(0, 229, 255, 0.4) !important;
+  border-color: #00e5ff !important;
+  filter: brightness(1.5) !important;
+}
+
+/* --- Archway View Mode (Alt + A) --- */
+.archway-active {
+  perspective: 1800px;
+  perspective-origin: 50% 40%;
+  overflow: hidden;
+}
+
+.archway-active .echo-layer {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.archway-active .echo-document {
+  position: absolute;
+  transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+  backdrop-filter: blur(16px);
+
+  /* Neon glassmorphism base */
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 12px;
+
+  /* Neon glow */
+  box-shadow:
+    0 0 15px rgba(0, 229, 255, 0.6),
+    0 0 35px rgba(0, 229, 255, 0.4),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
+
+  /* Layout variables set by JS */
+  transform:
+    translate3d(var(--arch-tx, 0px), var(--arch-ty, 0px), var(--arch-tz, 0px))
+    rotateY(var(--arch-rot-y, 0deg))
+    scale(var(--arch-scale, 1));
+}
+
+.archway-active .echo-document:hover {
+  box-shadow:
+    0 0 25px rgba(0, 229, 255, 0.9),
+    0 0 50px rgba(0, 229, 255, 0.6),
+    inset 0 0 30px rgba(255, 255, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.6);
+  z-index: 10;
+}
+
+.archway-active #editor {
+  transform: translateY(200px) scale(0.9);
+  opacity: 0.8;
+  filter: blur(2px);
+  transition: all 0.5s ease;
+}
+
+/* Geode View */
+body.geode-active .echo-document {
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform:
+    translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg))
+    scale(0.8);
+
+  /* Crystalline appearance */
+  background: rgba(20, 15, 30, 0.7);
+  border: 1px solid rgba(180, 100, 255, 0.5);
+  box-shadow:
+    0 0 20px rgba(180, 100, 255, 0.3),
+    inset 0 0 30px rgba(180, 100, 255, 0.2);
+  backdrop-filter: blur(10px);
+  clip-path: polygon(5% 0%, 95% 0%, 100% 5%, 100% 95%, 95% 100%, 5% 100%, 0% 95%, 0% 5%);
+}
