@@ -165,21 +165,24 @@ export const TabManagerMixin5 = {
       });
 
       // Add sci-fi glass pane identifier styling to the existing header
-      echoHeader.style.position = "absolute";
-      echoHeader.style.top = "0";
-      echoHeader.style.left = "0";
-      echoHeader.style.width = "100%";
-      echoHeader.style.padding = "8px 16px";
-      echoHeader.style.background = "rgba(0, 229, 255, 0.1)";
-      echoHeader.style.borderBottom = "1px solid rgba(0, 229, 255, 0.2)";
-      echoHeader.style.fontWeight = "bold";
-      echoHeader.style.letterSpacing = "1px";
-      echoHeader.style.textTransform = "uppercase";
-      echoHeader.style.transform = "translateZ(30px)";
-      echoHeader.style.boxShadow = "0 10px 20px rgba(0,0,0,0.5)";
+      header.style.position = "absolute";
+      header.style.top = "0";
+      header.style.left = "0";
+      header.style.width = "100%";
+      header.style.padding = "8px 16px";
+      header.style.background = "rgba(0, 229, 255, 0.1)";
+      header.style.borderBottom = "1px solid rgba(0, 229, 255, 0.2)";
+      header.style.fontWeight = "bold";
+      header.style.letterSpacing = "1px";
+      header.style.textTransform = "uppercase";
+      header.style.transform = "translateZ(30px)";
+      header.style.boxShadow = "0 10px 20px rgba(0,0,0,0.5)";
 
-      bodyWrapper.style.marginTop = "40px"; // Offset for header
-      bodyWrapper.style.height = "calc(100% - 40px)";
+      const bodyWrapper = el.querySelector(".echo-body-wrapper");
+      if (bodyWrapper) {
+        bodyWrapper.style.marginTop = "40px"; // Offset for header
+        bodyWrapper.style.height = "calc(100% - 40px)";
+      }
 
       // Interactive 3D Card Hover Effect
       el.addEventListener("mousemove", (e) => {

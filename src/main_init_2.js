@@ -150,7 +150,9 @@ window.addEventListener(
 if (viewModeSelect) {
   viewModeSelect.addEventListener("change", (e) => {
     const view = e.target.value;
-    if (view === "waterfall") tabManager.toggleWaterfallView();
+    if (view === "theater") tabManager.toggleTheaterView();
+    else if (view === "tornado") tabManager.toggleTornadoView();
+    else if (view === "waterfall") tabManager.toggleWaterfallView();
     else if (view === "cascade") tabManager.toggleCascadeView();
     else if (view === "orbit") tabManager.toggleOrbitView();
     else if (view === "scattered") tabManager.toggleScatteredView();
