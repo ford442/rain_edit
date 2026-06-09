@@ -48,6 +48,8 @@ export const TabManagerMixin0 = {
     this.isGeodeView = false;
     this.isLotusView = false;
     this.isHypercubeView = false;
+    this.isTheaterView = false;
+    this.isTornadoView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -553,6 +555,28 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isLuminescenceView = true;
       document.body.classList.add("luminescence-active");
+    }
+    this._renderEchoes();
+  },
+  toggleTheaterView() {
+    const wasActive = this.isTheaterView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTheaterView = true;
+      document.body.classList.add("theater-active");
+      const btn = document.getElementById("btn-theater-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleTornadoView() {
+    const wasActive = this.isTornadoView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTornadoView = true;
+      document.body.classList.add("tornado-active");
+      const btn = document.getElementById("btn-tornado-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   },

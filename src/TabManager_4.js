@@ -1,7 +1,7 @@
 import StorageAPI from "./StorageAPI.js";
 import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
 export const TabManagerMixin4 = {
-  _buildEchoElement(file, index, totalEchoes, inactiveFiles, activeFile) {
+  _buildEchoElement(file, index, totalEchoes, inactiveFiles, activeFile, activeExt, activeLang) {
       const el = document.createElement("div");
       el.className = "echo-document";
       el.dataset.id = file.id;
@@ -414,7 +414,7 @@ export const TabManagerMixin4 = {
       });
 
       // Holographic Glitch on Hover
-    this._bindEchoEvents(el, file, index, totalEchoes, inactiveFiles, activeFile, header, content, outlineList, activeExt, activeLang);
+    this._bindEchoEvents(el, file, index, totalEchoes, inactiveFiles, activeFile, echoHeader, pre, null, activeExt, activeLang);
       this.echoLayerEl.appendChild(el);
     return el;
   },

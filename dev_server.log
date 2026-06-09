@@ -4,7 +4,9 @@
 
 [33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
 
-  VITE v5.4.21  ready in 463 ms
+  VITE v5.4.21  ready in 592 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
+2:40:54 AM [vite] page reload index.html
+2:43:32 AM [vite] page reload src/TabManager_5.js

@@ -127,6 +127,36 @@ export const TabManagerMixin2 = {
         el.style.setProperty("--tz", `0px`);
         return true;
       }
+      if (this.isTheaterView) {
+        // Theater / Amphitheater View
+        const total = Math.max(1, totalEchoes);
+        const angle = total <= 1 ? 0 : ((index / (total - 1)) * Math.PI) - (Math.PI / 2);
+        const radius = 600;
+        const tx = Math.sin(angle) * radius;
+        const tz = -Math.cos(angle) * radius;
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `0px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", `${-(angle * 180 / Math.PI)}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+        return true;
+      }
+      if (this.isTornadoView) {
+        // Tornado View
+        const angle = index * 0.8;
+        const height = -200 + index * 50;
+        const radius = 100 + index * 20;
+        const tx = Math.sin(angle) * radius;
+        const tz = -Math.cos(angle) * radius;
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${height}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "15deg");
+        el.style.setProperty("--rot-y", `${-(angle * 180 / Math.PI)}deg`);
+        el.style.setProperty("--rot-z", "5deg");
+        return true;
+      }
       if (this.isWaterfallView) {
         // Waterfall Layout: Cascade downwards and slightly backwards
         const tx = index % 2 === 0 ? 50 : -50; // slight alternating zigzag

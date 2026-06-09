@@ -317,9 +317,9 @@ Drag to change depth`;
     const activeExt = activeFile ? activeFile.name.split(".").pop() : "";
     const activeLang = activeFile ? activeFile.language : "";
 
-    let _totalEchoes = inactiveFiles.length;
+    let totalEchoes = inactiveFiles.length;
     inactiveFiles.forEach((file, index) => {
-      this._buildEchoElement(file, index, totalEchoes, inactiveFiles, activeFile);
+      this._buildEchoElement(file, index, totalEchoes, inactiveFiles, activeFile, activeExt, activeLang);
     });
   },
   _saveTabsToStorage() {
