@@ -18,6 +18,52 @@ export const TabManagerMixin2 = {
         el.style.setProperty("--ty", `${ty}px`);
         el.style.setProperty("--tz", `${tz}px`);
         el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+        return true;
+      }
+      if (this.isTheaterView) {
+        // Theater View positions
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const radius = 600;
+        // Arrange items in a semi-circle based on index
+        const angle = (index / totalEchoes) * Math.PI - Math.PI / 2;
+
+        const tx = Math.sin(angle) * radius;
+        const ty = 0;
+        const tz = -Math.cos(angle) * radius;
+
+        const rotY = -angle * (180 / Math.PI);
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+        return true;
+      }
+      if (this.isTornadoView) {
+        // Tornado View positions
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const angleStep = Math.PI / 3;
+        const angle = index * angleStep;
+
+        // Base radius expands as we go further up the tornado
+        const radius = 200 + index * 40;
+
+        const tx = Math.cos(angle) * radius;
+        // Tornado goes up or down. Let's make it go up.
+        const ty = index * 80 - 300;
+        const tz = Math.sin(angle) * radius - 400;
+
+        const rotY = -angle * (180 / Math.PI) - 90;
+        const rotX = 15;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", "0deg");
         el.style.setProperty("--rot-z", `${rotZ}deg`);
         return true;

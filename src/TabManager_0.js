@@ -48,6 +48,8 @@ export const TabManagerMixin0 = {
     this.isGeodeView = false;
     this.isLotusView = false;
     this.isHypercubeView = false;
+    this.isTheaterView = false;
+    this.isTornadoView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -91,7 +93,9 @@ export const TabManagerMixin0 = {
       "luminescence-active",
       "geode-active",
       "lotus-active",
-      "hypercube-active"
+      "hypercube-active",
+      "theater-active",
+      "tornado-active",
     );
 
     this.isOrigamiView = false;
@@ -145,6 +149,24 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isHypercubeView = true;
       document.body.classList.add("hypercube-active");
+    }
+    this._renderEchoes();
+  },
+  toggleTheaterView() {
+    const wasActive = this.isTheaterView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTheaterView = true;
+      document.body.classList.add("theater-active");
+    }
+    this._renderEchoes();
+  },
+  toggleTornadoView() {
+    const wasActive = this.isTornadoView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTornadoView = true;
+      document.body.classList.add("tornado-active");
     }
     this._renderEchoes();
   },
