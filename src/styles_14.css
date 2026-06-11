@@ -131,3 +131,43 @@ body.repulsor-active .echo-document {
     var(--tz, 0px)
   ) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
 }
+
+/* Theater View Hover */
+body.theater-active .echo-document:hover {
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 100px))
+    rotateY(var(--rot-y, 0deg)) scale(1.1);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(255, 215, 0, 0.4),
+    inset 0 0 20px rgba(255, 215, 0, 0.2);
+  border-color: rgba(255, 215, 0, 0.8);
+  z-index: 100 !important;
+}
+
+/* Tornado View Animation and Hover */
+@keyframes tornado-spin {
+  from {
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+      rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  }
+  to {
+    transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+      rotateX(var(--rot-x, 0deg)) rotateY(calc(var(--rot-y, 0deg) + 360deg)) rotateZ(var(--rot-z, 0deg));
+  }
+}
+
+body.tornado-active .echo-document {
+  animation: tornado-spin 10s linear infinite;
+  transform-style: preserve-3d;
+}
+
+body.tornado-active .echo-document:hover {
+  animation-play-state: paused;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 100px))
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg)) scale(1.2);
+  box-shadow:
+    0 0 50px rgba(0, 229, 255, 0.8),
+    inset 0 0 30px rgba(0, 229, 255, 0.4);
+  border-color: rgba(0, 229, 255, 1);
+  z-index: 100 !important;
+}
