@@ -544,6 +544,28 @@ document.addEventListener("keyup", (e) => {
 
 window.isLensMode = false;
 
+// Focus Ripple Interaction
+window.addEventListener('mousedown', () => {
+  if (echoLayerEl) {
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    echoes.forEach((echo) => {
+      // Calculate delay based on depth (or index)
+      const depth = parseInt(echo.dataset.index || echo.dataset.depth || "0", 10);
+      echo.style.setProperty("--ripple-delay", `${depth * 0.05}s`);
+
+      // Trigger reflow to restart animation
+      echo.classList.remove("ripple-active");
+      void echo.offsetWidth;
+      echo.classList.add("ripple-active");
+
+      // Remove class after animation completes (approx 1s)
+      setTimeout(() => {
+        echo.classList.remove("ripple-active");
+      }, 1000);
+    });
+  }
+});
+
 document.addEventListener("keydown", (e) => {
   // Shift + Alt to toggle Lens Mode
   if (e.altKey && e.shiftKey && !e.repeat) {
@@ -573,7 +595,7 @@ if (themeSelect) {
       "theme-blueprint",
       "theme-cyberpunk",
     );
-    if (theme !== "cyberpunk") {
+    if (theme) {
       document.body.classList.add(`theme-${theme}`);
     }
   });

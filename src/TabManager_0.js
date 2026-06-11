@@ -18,6 +18,7 @@ export const TabManagerMixin0 = {
     this.isConstellationView = false;
     this.isPrismView = false;
     this.isCoverflowView = false;
+    this.isRibbonView = false;
     this.isWaveView = false;
     this.isSphereView = false;
     this.isBlackHoleView = false;
@@ -140,6 +141,17 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isLotusView = true;
       document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleRibbonView() {
+    const wasActive = this.isRibbonView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isRibbonView = true;
+      document.body.classList.add("ribbon-active");
+      const btn = document.getElementById("btn-ribbon-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   },

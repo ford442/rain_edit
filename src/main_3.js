@@ -208,6 +208,7 @@ if (viewModeSelect) {
     else if (view === "constellation") tabManager.toggleConstellationView();
     else if (view === "prism") tabManager.togglePrismView();
     else if (view === "coverflow") tabManager.toggleCoverflowView();
+    else if (view === "ribbon") tabManager.toggleRibbonView();
     else if (view === "sphere") tabManager.toggleSphereView();
     else if (view === "wave") tabManager.toggleWaveView();
     else if (view === "black-hole") tabManager.toggleBlackHoleView();
