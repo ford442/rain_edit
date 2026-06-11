@@ -164,4 +164,83 @@ body.theme-cyberpunk .editor-title-bar {
 .echo-document.ripple-active {
   animation: focus-ripple 0.6s ease-out forwards;
   animation-delay: var(--ripple-delay, 0s);
+}/* Ribbon View Styling */
+body.ribbon-active #echo-layer {
+  perspective: 2000px;
+}
+body.ribbon-active .echo-document {
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: center center;
+  opacity: 0.8;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+body.ribbon-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 100 !important;
+}
+
+/* Quick Polish Overrides */
+#editor {
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 0 10px rgba(0, 229, 255, 0.05),
+    inset 5px 5px 20px rgba(255, 255, 255, 0.02) !important;
+}
+
+body.fabric-tear-active .echo-document {
+  transition: clip-path var(--tear-transition, 0.1s) ease-out;
+}
+
+body.fanning-active .echo-document {
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--fan-tx, 0px)),
+    calc(var(--ty, 0px) + var(--fan-ty, 0px)),
+    calc(var(--tz, 0px) + 100px)
+  ) rotateZ(var(--fan-rot-z, 0deg)) rotateX(calc(var(--fan-rot-z, 0deg) * 0.2)) rotateY(calc(var(--fan-rot-z, 0deg) * 0.1));
+}
+
+body.fanning-active .echo-document:hover {
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--fan-tx, 0px)),
+    calc(var(--ty, 0px) + var(--fan-ty, 0px) - 50px),
+    calc(var(--tz, 0px) + 150px)
+  ) rotateZ(var(--fan-rot-z, 0deg)) rotateX(0deg) rotateY(0deg) scale(1.1) !important;
+}
+
+/* Fix Dark Glass Dynamic Highlights and Grain */
+#editor {
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset calc(cos(var(--highlight-angle, 0deg)) * 10px) calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px rgba(0, 229, 255, 0.05),
+    inset calc(cos(var(--highlight-angle, 0deg)) * 2px) calc(sin(var(--highlight-angle, 0deg)) * 2px) 5px rgba(255, 255, 255, 0.02) !important;
+  background-image:
+    radial-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E") !important;
+}
+
+#dock {
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 -1px 5px rgba(0, 0, 0, 0.5),
+    inset calc(cos(var(--highlight-angle, 0deg)) * 10px) calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px rgba(0, 229, 255, 0.05) !important;
+}
+
+#tabs-container {
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.9),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 0 10px rgba(0, 0, 0, 0.5),
+    inset calc(cos(var(--highlight-angle, 0deg)) * 10px) calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px rgba(0, 229, 255, 0.05) !important;
 }
