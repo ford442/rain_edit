@@ -35,6 +35,30 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--rot-y", "0deg");
         return true;
       }
+      if (this.isRibbonView) {
+        // Ribbon View positions: a winding 3D spiral ribbon
+        const frequency = 0.5; // Controls how fast the ribbon winds
+        const amplitude = 300; // Controls the width of the ribbon
+
+        const tz = -index * 150; // Moving back in Z space
+        const angle = index * frequency;
+
+        const tx = Math.sin(angle) * amplitude;
+        const ty = Math.cos(angle) * (amplitude / 2); // Slightly squashed vertically
+
+        // Rotate items so they "face" along the ribbon curve somewhat
+        const rotY = Math.cos(angle) * 45;
+        const rotX = Math.sin(angle) * 20;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+
+        return true;
+      }
       if (this.isSphereView) {
         // Fibonacci Sphere logic
         const totalEchoes = Math.max(1, inactiveFiles.length);

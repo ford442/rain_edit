@@ -110,6 +110,7 @@ export class TabManager {
     this.isConstellationView = false;
     this.isPrismView = false;
     this.isCoverflowView = false;
+    this.isRibbonView = false;
     this.isCrystalView = false;
     this.isWaveView = false;
     this.isSphereView = false;

@@ -131,3 +131,60 @@ body.repulsor-active .echo-document {
     var(--tz, 0px)
   ) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
 }
+/* Cyberpunk Theme */
+body.theme-cyberpunk {
+  background: #0a0510;
+  color: #ff00ff;
+}
+body.theme-cyberpunk #editor {
+  background: rgba(10, 5, 16, 0.8) !important;
+  border: 1px solid #ff00ff;
+  box-shadow: 0 0 15px #ff00ff, inset 0 0 10px #00ffff;
+  color: #00ffff !important;
+}
+body.theme-cyberpunk .echo-document {
+  background: rgba(20, 0, 30, 0.6) !important;
+  border: 1px solid #00ffff;
+  box-shadow: 0 0 10px #00ffff;
+  color: #ff00ff !important;
+}
+body.theme-cyberpunk .dock {
+  background: rgba(15, 0, 20, 0.9);
+  border-top: 1px solid #ff00ff;
+  box-shadow: 0 -5px 15px rgba(255, 0, 255, 0.5);
+}
+body.theme-cyberpunk .editor-title-bar {
+  background: linear-gradient(90deg, #ff00ff, #00ffff);
+  color: #000;
+  text-shadow: none;
+}
+
+/* Focus Ripple Effect */
+@keyframes focus-ripple {
+  0% {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) scale(1) rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+    filter: brightness(1) blur(0px);
+    box-shadow: 0 0 0px rgba(255, 255, 255, 0);
+  }
+  50% {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+    filter: brightness(1.5) blur(2px);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  }
+  100% {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) scale(1) rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+    filter: brightness(1) blur(0px);
+    box-shadow: 0 0 0px rgba(255, 255, 255, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .echo-document.ripple-active {
+    animation: none;
+  }
+}
+
+.echo-document.ripple-active {
+  animation: focus-ripple 0.6s ease-out forwards;
+  animation-delay: var(--ripple-delay, 0s);
+}
