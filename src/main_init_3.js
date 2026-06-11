@@ -566,3 +566,71 @@ initKineticTypingPulse(editor);
 if (btnExplode) {
   btnExplode.addEventListener("click", triggerExplodeView);
 }
+
+// Dynamic Inset Box-Shadow based on cursor proximity (Dark Glass Polish)
+document.addEventListener("mousemove", (e) => {
+  const normX = e.clientX / window.innerWidth - 0.5;
+  const normY = e.clientY / window.innerHeight - 0.5;
+  const angle = Math.atan2(normY, normX) * (180 / Math.PI);
+  document.documentElement.style.setProperty("--highlight-angle", `${angle}deg`);
+
+  // Fabric Tear Reveal Speed based on cursor velocity
+  if (document.body.classList.contains("fabric-tear-active")) {
+    const now = performance.now();
+    if (window._lastTearTime) {
+      const dt = now - window._lastTearTime;
+      const dx = e.clientX - window._lastTearX;
+      const dy = e.clientY - window._lastTearY;
+      const vel = Math.sqrt(dx*dx + dy*dy) / dt;
+      // Adjust clip-path transition duration based on velocity (faster movement = faster transition)
+      const duration = Math.max(0.05, 0.3 - vel * 0.1);
+      document.body.style.setProperty("--tear-transition", `${duration}s`);
+    }
+    window._lastTearTime = now;
+    window._lastTearX = e.clientX;
+    window._lastTearY = e.clientY;
+  }
+});
+
+// Soft tear sound via Web Audio API for Fabric Tear
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playTearSound() {
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+
+  osc.type = "square";
+
+  // Freq envelope
+  osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+
+  // Gain envelope
+  gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+  gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+
+  // Filter
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(5000, audioCtx.currentTime);
+  filter.frequency.linearRampToValueAtTime(500, audioCtx.currentTime + 0.3);
+
+  osc.connect(filter);
+  filter.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.3);
+}
+
+// Modify existing Alt+T listener to play sound
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    if (!document.body.classList.contains("fabric-tear-active")) {
+      playTearSound();
+    }
+  }
+});
