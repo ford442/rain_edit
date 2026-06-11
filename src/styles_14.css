@@ -1,24 +1,5 @@
-
-body.geode-active .echo-document:hover {
-  transform:
-    translate3d(calc(var(--tx, 0px) * 0.9), calc(var(--ty, 0px) * 0.9), calc(var(--tz, 0px) + 100px))
-    rotateX(calc(var(--rot-x, 0deg) * 0.5))
-    rotateY(calc(var(--rot-y, 0deg) * 0.5))
-    rotateZ(0deg)
-    scale(1.1);
-
-  /* Iridescent inner glow on hover */
-  background: rgba(40, 20, 60, 0.85);
-  border-color: rgba(220, 150, 255, 0.9);
-  box-shadow:
-    0 0 40px rgba(220, 150, 255, 0.6),
-    inset 0 0 50px rgba(100, 200, 255, 0.4);
-  z-index: 100;
-}
-
 /* Holographic Slice Mode */
 body.holographic-slice-active .echo-document {
-  /* Slice based on mouse coordinates */
   clip-path: polygon(
     0% 0%,
     100% 0%,
@@ -32,20 +13,6 @@ body.holographic-slice-active .echo-document {
   box-shadow: 0 5px 25px rgba(0, 255, 200, 0.4);
 }
 
-body.holographic-slice-active .echo-document {
-  /* Slice based on mouse coordinates */
-  clip-path: polygon(
-    0% 0%,
-    100% 0%,
-    100% calc(var(--mouse-y, 50%) - 50px),
-    calc(var(--mouse-x, 50%) + 100px) calc(var(--mouse-y, 50%) + 50px),
-    calc(var(--mouse-x, 50%) - 100px) calc(var(--mouse-y, 50%) + 50px),
-    0% calc(var(--mouse-y, 50%) - 50px)
-  );
-  transition: clip-path 0.1s ease-out;
-  border-bottom: 2px solid rgba(0, 255, 200, 0.8);
-  box-shadow: 0 5px 25px rgba(0, 255, 200, 0.4);
-}
 body.holographic-slice-active #editor {
   clip-path: polygon(
     0% calc(var(--mouse-y, 50%) - 50px),
@@ -60,19 +27,20 @@ body.holographic-slice-active #editor {
   box-shadow: 0 -5px 25px rgba(0, 255, 200, 0.4);
 }
 
-
 /* --- Theater View --- */
 body.theater-active #editor,
 body.theater-active #image-viewer {
   transform: translateZ(200px) scale(0.9);
   transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
 body.theater-active .echo-document {
   transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: center center;
   opacity: 0.7;
   filter: blur(2px) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
 }
+
 body.theater-active .echo-document:hover {
   opacity: 1 !important;
   filter: none !important;
@@ -94,20 +62,24 @@ body.tornado-active #image-viewer {
   opacity: 0.9;
   transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
 body.tornado-active #echo-layer {
   transform-style: preserve-3d;
   animation: tornado-spin 40s linear infinite;
 }
+
 @keyframes tornado-spin {
   0% { transform: rotateY(0deg); }
   100% { transform: rotateY(360deg); }
 }
+
 body.tornado-active .echo-document {
   transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0.6;
   filter: blur(3px) sepia(0.3) hue-rotate(-20deg);
   border-radius: 12px;
 }
+
 body.tornado-active .echo-document:hover {
   opacity: 1 !important;
   filter: none !important;
@@ -121,7 +93,7 @@ body.tornado-active .echo-document:hover {
   box-shadow: 0 0 40px rgba(200, 100, 255, 0.6);
   border-color: rgba(200, 100, 255, 0.8);
 }
-=======
+
 /* Repulsor Field (Moses Effect) */
 body.repulsor-active .echo-document {
   transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -131,28 +103,33 @@ body.repulsor-active .echo-document {
     var(--tz, 0px)
   ) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
 }
+
 /* Cyberpunk Theme */
 body.theme-cyberpunk {
   background: #0a0510;
   color: #ff00ff;
 }
+
 body.theme-cyberpunk #editor {
   background: rgba(10, 5, 16, 0.8) !important;
   border: 1px solid #ff00ff;
   box-shadow: 0 0 15px #ff00ff, inset 0 0 10px #00ffff;
   color: #00ffff !important;
 }
+
 body.theme-cyberpunk .echo-document {
   background: rgba(20, 0, 30, 0.6) !important;
   border: 1px solid #00ffff;
   box-shadow: 0 0 10px #00ffff;
   color: #ff00ff !important;
 }
+
 body.theme-cyberpunk .dock {
   background: rgba(15, 0, 20, 0.9);
   border-top: 1px solid #ff00ff;
   box-shadow: 0 -5px 15px rgba(255, 0, 255, 0.5);
 }
+
 body.theme-cyberpunk .editor-title-bar {
   background: linear-gradient(90deg, #ff00ff, #00ffff);
   color: #000;
