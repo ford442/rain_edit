@@ -244,3 +244,41 @@ body.fanning-active .echo-document:hover {
     inset 0 0 10px rgba(0, 0, 0, 0.5),
     inset calc(cos(var(--highlight-angle, 0deg)) * 10px) calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px rgba(0, 229, 255, 0.05) !important;
 }
+
+
+/* Venetian Blinds View active styles */
+.venetian-active .echo-document {
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease, filter 0.4s ease !important;
+    transform-origin: center center;
+    cursor: pointer;
+}
+.venetian-active .echo-document:hover {
+    transform: translate3d(0, -20px, 150px) rotateX(0deg) scale(1.1) !important;
+    opacity: 1 !important;
+    z-index: 1000 !important;
+    filter: brightness(1.2) drop-shadow(0 10px 20px rgba(0, 255, 255, 0.4)) !important;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+}
+
+/* Enhancing Custom Scrollbars and Tabs Gradient */
+#tabs-container {
+    background: linear-gradient(to right, rgba(20, 20, 30, 0.9), rgba(10, 10, 15, 0.95)) !important;
+    box-shadow: inset 0 -2px 10px rgba(0, 255, 255, 0.1) !important;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(10, 10, 15, 0.8);
+    border-radius: 6px;
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00f0ff, #ff003c);
+    border-radius: 6px;
+    border: 2px solid rgba(10, 10, 15, 0.8);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #ff003c, #00f0ff);
+}
