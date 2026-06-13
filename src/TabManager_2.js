@@ -347,6 +347,32 @@ export const TabManagerMixin2 = {
             el.style.opacity = opacity;
         return true;
       }
+
+      if (this.isVenetianView) {
+        // Venetian Blinds view: stack closely, tilt heavily backward
+        const spacingZ = 40;
+        const tilt = -75; // Heavy backward tilt
+
+        // Adjust position slightly to center the stack
+        const ty = 0;
+        const tz = -(index * spacingZ);
+
+        const tx = 0;
+        const rotX = tilt;
+        const rotY = 0;
+        const rotZ = 0;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+
+        el.style.opacity = Math.max(0.1, 1 - (index * 0.15));
+        return true;
+      }
+
       if (this.isMobiusView) {
         // Mobius Strip View positions
         const totalEchoes = Math.max(1, inactiveFiles.length);

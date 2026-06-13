@@ -238,6 +238,7 @@ if (viewModeSelect) {
     else if (view === "hypercube") tabManager.toggleHypercubeView();
     else if (view === "theater") tabManager.toggleTheaterView();
     else if (view === "tornado") tabManager.toggleTornadoView();
+    else if (view === "venetian") tabManager.toggleVenetianView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }

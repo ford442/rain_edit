@@ -1,5 +1,13 @@
 import StorageAPI from "./StorageAPI.js";
-import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
+import {
+  storageAPI,
+  TOAST_DISPLAY_DURATION,
+  DEPTH_Z_INDEX,
+  DEPTH_ICONS,
+  DEPTH_TITLES,
+  _extractSymbols,
+  _symbolKindIcon,
+} from "./TabManager.js";
 export const TabManagerMixin0 = {
   _deactivateAllViews() {
     this.isCrystalView = false;
@@ -51,6 +59,7 @@ export const TabManagerMixin0 = {
     this.isHypercubeView = false;
     this.isTheaterView = false;
     this.isTornadoView = false;
+    this.isVenetianView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -97,6 +106,7 @@ export const TabManagerMixin0 = {
       "hypercube-active",
       "theater-active",
       "tornado-active",
+      "venetian-active",
     );
 
     this.isOrigamiView = false;
@@ -170,6 +180,15 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isTheaterView = true;
       document.body.classList.add("theater-active");
+    }
+    this._renderEchoes();
+  },
+  toggleVenetianView() {
+    const wasActive = this.isVenetianView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isVenetianView = true;
+      document.body.classList.add("venetian-active");
     }
     this._renderEchoes();
   },
