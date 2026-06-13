@@ -207,6 +207,7 @@ if (viewModeSelect) {
     else if (view === "vortex") tabManager.toggleVortexView();
     else if (view === "constellation") tabManager.toggleConstellationView();
     else if (view === "prism") tabManager.togglePrismView();
+    else if (view === "prism-split") tabManager.togglePrismSplitView();
     else if (view === "coverflow") tabManager.toggleCoverflowView();
     else if (view === "ribbon") tabManager.toggleRibbonView();
     else if (view === "sphere") tabManager.toggleSphereView();

@@ -25,6 +25,7 @@ export const TabManagerMixin0 = {
     this.isVortexView = false;
     this.isConstellationView = false;
     this.isPrismView = false;
+    this.isPrismSplitView = false;
     this.isCoverflowView = false;
     this.isRibbonView = false;
     this.isWaveView = false;
@@ -76,6 +77,7 @@ export const TabManagerMixin0 = {
       "vortex-active",
       "constellation-active",
       "prism-active",
+      "prism-split-active",
       "coverflow-active",
       "wave-active",
       "sphere-active",
@@ -476,6 +478,16 @@ export const TabManagerMixin0 = {
       document.body.classList.add("wave-active");
       const btn = document.getElementById("btn-wave-view");
       if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+
+  togglePrismSplitView() {
+    const wasActive = this.isPrismSplitView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isPrismSplitView = true;
+      document.body.classList.add("prism-split-active");
     }
     this._renderEchoes();
   },

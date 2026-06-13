@@ -383,3 +383,53 @@ document.addEventListener("wheel", (e) => {
     }
   }
 }, { passive: false });
+
+// Depth Slicer Logic (Alt + Scroll)
+window.__depthSliceIndex = 0;
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Alt") {
+    document.body.classList.add("depth-slice-active");
+    updateDepthSlicer();
+  }
+});
+document.addEventListener("keyup", (e) => {
+  if (e.key === "Alt") {
+    document.body.classList.remove("depth-slice-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+        doc.classList.remove("depth-slice-hidden");
+        doc.classList.remove("depth-slice-focus");
+      });
+    }
+  }
+});
+
+document.addEventListener("wheel", (e) => {
+  if (e.altKey && !document.body.classList.contains("archway-active")) {
+    e.preventDefault();
+    if (e.deltaY > 0) {
+      window.__depthSliceIndex++;
+    } else {
+      window.__depthSliceIndex = Math.max(0, window.__depthSliceIndex - 1);
+    }
+    updateDepthSlicer();
+  }
+}, { passive: false });
+
+function updateDepthSlicer() {
+  if (!document.body.classList.contains("depth-slice-active")) return;
+  if (window.echoLayerEl) {
+    const echoes = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
+    // Limit max slice index to number of background documents
+    window.__depthSliceIndex = Math.min(window.__depthSliceIndex, Math.max(0, echoes.length - 1));
+
+    echoes.forEach((doc, i) => {
+      doc.classList.remove("depth-slice-hidden", "depth-slice-focus");
+      if (i < window.__depthSliceIndex) {
+        doc.classList.add("depth-slice-hidden");
+      } else if (i === window.__depthSliceIndex) {
+        doc.classList.add("depth-slice-focus");
+      }
+    });
+  }
+}

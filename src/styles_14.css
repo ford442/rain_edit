@@ -282,3 +282,43 @@ body.fanning-active .echo-document:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, #ff003c, #00f0ff);
 }
+
+/* Prism Split View */
+.prism-split-active .echo-document {
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center center;
+  opacity: 0.6;
+  filter: blur(2px);
+}
+.prism-split-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) * 1.2),
+      calc(var(--ty, 0px) - 20px),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateY(0deg) scale(1.1) !important;
+  z-index: 100 !important;
+  box-shadow: 0 0 30px rgba(0, 255, 200, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
+  border-color: rgba(0, 255, 200, 0.6);
+}
+
+/* Depth Slicer (Alt + Scroll) */
+.depth-slice-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease !important;
+}
+
+.depth-slice-active .echo-document.depth-slice-hidden {
+  opacity: 0.05 !important;
+  filter: blur(10px) grayscale(100%) !important;
+  pointer-events: none;
+}
+
+.depth-slice-active .echo-document.depth-slice-focus {
+  opacity: 1 !important;
+  filter: brightness(1.2) drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)) !important;
+  z-index: 1000 !important;
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 100px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
+  border: 1px solid rgba(0, 255, 255, 0.8) !important;
+}
