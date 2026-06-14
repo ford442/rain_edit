@@ -515,6 +515,29 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--rot-y", "0deg");
         return true;
       }
+
+      if (this.isPrismSplitView) {
+        // V-shape split logic
+        const side = index % 2 === 0 ? 1 : -1;
+        const row = Math.floor(index / 2);
+
+        const tx = side * (300 + row * 50);
+        const ty = row * 20 - 50;
+        const tz = -200 - row * 150;
+
+        // Tilt them to face inwards
+        const rotY = side * -35;
+        const rotX = 10;
+        const rotZ = 0;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        return true;
+      }
       if (this.isPrismView) {
         // Prism View positions (Polyhedron shape)
         let _totalEchoes = inactiveFiles.length;
