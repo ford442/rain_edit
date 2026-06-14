@@ -61,6 +61,8 @@ export const TabManagerMixin0 = {
     this.isTheaterView = false;
     this.isTornadoView = false;
     this.isVenetianView = false;
+    this.isStaircaseView = false;
+    this.isPyramidView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -109,6 +111,8 @@ export const TabManagerMixin0 = {
       "theater-active",
       "tornado-active",
       "venetian-active",
+      "staircase-active",
+      "pyramid-active"
     );
 
     this.isOrigamiView = false;
@@ -153,6 +157,28 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isLotusView = true;
       document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleStaircaseView() {
+    const wasActive = this.isStaircaseView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isStaircaseView = true;
+      document.body.classList.add("staircase-active");
+      const btn = document.getElementById("btn-staircase-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  togglePyramidView() {
+    const wasActive = this.isPyramidView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isPyramidView = true;
+      document.body.classList.add("pyramid-active");
+      const btn = document.getElementById("btn-pyramid-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   },

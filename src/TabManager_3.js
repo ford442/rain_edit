@@ -2,6 +2,73 @@ import StorageAPI from "./StorageAPI.js";
 import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
 export const TabManagerMixin3 = {
   _applyLayoutChunk2(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isStaircaseView) {
+        // Staircase View: cascading step-like arrangement
+        const stepWidth = 100;
+        const stepHeight = 80;
+        const stepDepth = 150;
+
+        // Center the staircase somewhat
+        const offsetX = -((totalEchoes - 1) * stepWidth) / 2;
+        const offsetY = -((totalEchoes - 1) * stepHeight) / 2;
+
+        const tx = offsetX + index * stepWidth;
+        const ty = offsetY + index * stepHeight;
+        const tz = -index * stepDepth;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+
+        return;
+      }
+      if (this.isPyramidView) {
+        // Pyramid View: converging layers
+        const layerDepth = 200;
+        const baseWidth = 800;
+        const baseHeight = 600;
+
+        // Approximate pyramid layers
+        let layers = Math.ceil(Math.sqrt(totalEchoes));
+        let itemsInLayer = layers;
+        let layerIdx = 0;
+        let itemInLayerIdx = 0;
+
+        let remaining = index;
+        for (let l = layers; l > 0; l--) {
+            if (remaining < l) {
+                layerIdx = layers - l;
+                itemInLayerIdx = remaining;
+                itemsInLayer = l;
+                break;
+            }
+            remaining -= l;
+        }
+
+        const scale = 1 - (layerIdx / layers); // Shrink width/height per layer
+        const currentWidth = baseWidth * scale;
+        const currentHeight = baseHeight * scale;
+
+        const tx = itemsInLayer > 1 ? -currentWidth/2 + (currentWidth / (itemsInLayer - 1)) * itemInLayerIdx : 0;
+        const ty = (layerIdx * 100) - 200; // Shift up as we go deeper
+        const tz = -(layerIdx + 1) * layerDepth;
+
+        // Tilt slightly to point towards apex
+        const rotX = 15;
+        const rotY = itemsInLayer > 1 ? -15 + (30 / (itemsInLayer - 1)) * itemInLayerIdx : 0;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+
+        return;
+      }
       if (this.isPinboardView) {
         // Pinboard View positions (Organic spread on a wall)
         let _totalEchoes = inactiveFiles.length;

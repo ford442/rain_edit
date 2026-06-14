@@ -219,6 +219,8 @@ if (viewModeSelect) {
     else if (view === "origami") tabManager.toggleOrigamiView();
     else if (view === "matrix-rain") tabManager.toggleMatrixRainView();
     else if (view === "data-hive") tabManager.toggleDataHiveView();
+    else if (view === "staircase") tabManager.toggleStaircaseView();
+    else if (view === "pyramid") tabManager.togglePyramidView();
     else if (view === "crystal") tabManager.toggleCrystalView();
     else if (view === "fractal") tabManager.toggleFractalView();
     else if (view === "solar-system") tabManager.toggleSolarSystemView();
