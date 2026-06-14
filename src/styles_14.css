@@ -322,3 +322,21 @@ body.fanning-active .echo-document:hover {
   transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 100px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
   border: 1px solid rgba(0, 255, 255, 0.8) !important;
 }
+
+body.staircase-active #editor,
+body.staircase-active #image-viewer,
+body.staircase-active .echo-document {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+    rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+  transform-style: preserve-3d;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.pyramid-active #editor,
+body.pyramid-active #image-viewer,
+body.pyramid-active .echo-document {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+    rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+  transform-style: preserve-3d;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
