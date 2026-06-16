@@ -232,7 +232,8 @@ export const TabManagerMixin5 = {
             !this.isMatrixRainView &&
             !this.isNeonSynthView &&
             !this.isBlueprint3dView &&
-            !this.isCyberCortexView
+            !this.isCyberCortexView &&
+            !this.isAccordionView
           ) {
             el.style.setProperty("--tz", "100px");
           } else if (this.isOrbitView) {
@@ -516,6 +517,10 @@ export const TabManagerMixin5 = {
             el.style.setProperty("--tz", `${tz}px`);
           } else if (this.isWaveView) {
             el.style.setProperty("--tz", `-150px`);
+          } else if (this.isAccordionView) {
+            const idx = parseInt(el.dataset.index || 0);
+            const spacingZ = -100;
+            el.style.setProperty("--tz", `${idx * spacingZ}px`);
           } else if (!this.isCascadeView) {
             const idx = parseInt(el.dataset.index || 0);
             el.style.setProperty(

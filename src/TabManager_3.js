@@ -152,6 +152,15 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--scatter-rot", "0deg");
         return true;
       }
+      if (this.isAccordionView) {
+        const spacingX = 40;
+        const spacingZ = -100;
+        const rotY = 15;
+        el.style.setProperty("--tx", `${idx * spacingX}px`);
+        el.style.setProperty("--tz", `${idx * spacingZ}px`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        return true;
+      }
       if (this.isCarouselView) {
         const total = Math.max(1, inactiveFiles.length);
         const radius = Math.max(800, total * 150); // Dynamic radius

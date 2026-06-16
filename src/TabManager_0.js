@@ -44,6 +44,7 @@ export const TabManagerMixin0 = {
     this.isCyberCortexView = false;
     this.isQuantumSuperpositionView = false;
     this.isOutlineView = false;
+    this.isAccordionView = false;
     this.isInfinityMirrorView = false;
     this.isArchwayView = false;
     this.isArchwayView = false;
@@ -100,6 +101,7 @@ export const TabManagerMixin0 = {
       "infinity-mirror-active",
       "kaleidoscope-active",
       "carousel-active",
+      "accordion-active",
       "cyclone-active",
       "mobius-active",
       "astrolabe-active",
@@ -378,6 +380,12 @@ export const TabManagerMixin0 = {
     this._deactivateAllViews();
     this.isArchwayView = true;
     document.body.classList.add("archway-active");
+    this._renderEchoes();
+  },
+  toggleAccordionView() {
+    this._deactivateAllViews();
+    this.isAccordionView = true;
+    document.body.classList.add("accordion-active");
     this._renderEchoes();
   },
   toggleInfinityMirrorView() {
