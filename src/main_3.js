@@ -259,6 +259,18 @@ if (theaterToggle) {
   });
 }
 
+window.portalToggle = document.getElementById("portal-mode-toggle");
+if (portalToggle) {
+  portalToggle.addEventListener("change", (e) => {
+    window.isPortalModeActive = e.target.checked;
+    if (window.isPortalModeActive) {
+      document.body.classList.add("portal-mode-active");
+    } else {
+      document.body.classList.remove("portal-mode-active");
+    }
+  });
+}
+
 window.autofocusToggle = document.getElementById("cinematic-autofocus-mode");
 
 window.isAutofocusActive = false;
