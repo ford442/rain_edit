@@ -74,6 +74,19 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
+  // Holographic Portal Mode (Alt + P)
+  if (e.altKey && e.code === "KeyP") {
+    isPortalModeActive = !isPortalModeActive;
+    if (portalToggle) portalToggle.checked = isPortalModeActive;
+    if (isPortalModeActive) {
+      document.body.classList.add("portal-mode-active");
+    } else {
+      document.body.classList.remove("portal-mode-active");
+    }
+    e.preventDefault();
+    return;
+  }
+
   // Hyper-Jump
   if (e.altKey && e.shiftKey && e.key === "J") {
     if (!document.body.classList.contains("hyper-jump-active")) {
