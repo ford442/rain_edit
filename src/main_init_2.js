@@ -211,6 +211,17 @@ if (theaterToggle) {
   });
 }
 
+if (portalToggle) {
+  portalToggle.addEventListener("change", (e) => {
+    window.isPortalModeActive = e.target.checked;
+    if (window.isPortalModeActive) {
+      document.body.classList.add("portal-mode-active");
+    } else {
+      document.body.classList.remove("portal-mode-active");
+    }
+  });
+}
+
 if (autofocusToggle) {
   autofocusToggle.addEventListener("change", (e) => {
     isAutofocusActive = e.target.checked;

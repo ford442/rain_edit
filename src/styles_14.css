@@ -340,3 +340,41 @@ body.pyramid-active .echo-document {
   transform-style: preserve-3d;
   transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
+/* Holographic Portal Mode (Alt + P) */
+body.portal-mode-active .echo-document {
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease, opacity 0.4s ease;
+}
+
+body.portal-mode-active #editor-container {
+  clip-path: circle(250px at var(--mouse-x, 50%) var(--mouse-y, 50%));
+  transition: clip-path 0.1s linear, box-shadow 0.3s ease;
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.8), inset 0 0 20px rgba(0, 229, 255, 0.6);
+  z-index: 9999;
+}
+
+body.portal-mode-active::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle 260px at var(--mouse-x, 50%) var(--mouse-y, 50%), transparent 98%, rgba(0, 229, 255, 0.8) 100%, transparent 110%);
+  z-index: 10000;
+  mix-blend-mode: screen;
+}
+
+body.portal-mode-active #editor {
+  border: 2px solid rgba(0, 229, 255, 0.5);
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.5);
+  background: rgba(10, 15, 25, 0.8) !important;
+  backdrop-filter: blur(10px);
+}
+
+body.portal-mode-active .echo-document {
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--mouse-nx, 0) * -50px)),
+    calc(var(--ty, 0px) + (var(--mouse-ny, 0) * -50px)),
+    calc(var(--tz, 0px) - 100px)
+  ) rotateX(calc(var(--mouse-ny, 0) * 10deg)) rotateY(calc(var(--mouse-nx, 0) * -10deg));
+  filter: blur(5px) brightness(0.6);
+}
