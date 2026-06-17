@@ -51,7 +51,9 @@ body.theater-active .echo-document:hover {
     )
     rotateY(var(--rot-y, 0deg)) scale(1.1) !important;
   z-index: 100 !important;
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 30px rgba(255, 215, 0, 0.4),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 215, 0, 0.6);
 }
 
@@ -69,8 +71,12 @@ body.tornado-active #echo-layer {
 }
 
 @keyframes tornado-spin {
-  0% { transform: rotateY(0deg); }
-  100% { transform: rotateY(360deg); }
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
 }
 
 body.tornado-active .echo-document {
@@ -83,11 +89,7 @@ body.tornado-active .echo-document {
 body.tornado-active .echo-document:hover {
   opacity: 1 !important;
   filter: none !important;
-  transform: translate3d(
-      var(--tx, 0px),
-      var(--ty, 0px),
-      var(--tz, 0px)
-    )
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
     rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
   z-index: 100 !important;
   box-shadow: 0 0 40px rgba(200, 100, 255, 0.6);
@@ -98,10 +100,12 @@ body.tornado-active .echo-document:hover {
 body.repulsor-active .echo-document {
   transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
   transform: translate3d(
-    calc(var(--tx, 0px) + var(--repulse-tx, 0px)),
-    calc(var(--ty, 0px) + var(--repulse-ty, 0px)),
-    var(--tz, 0px)
-  ) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+      calc(var(--tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--repulse-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
 }
 
 /* Cyberpunk Theme */
@@ -113,7 +117,9 @@ body.theme-cyberpunk {
 body.theme-cyberpunk #editor {
   background: rgba(10, 5, 16, 0.8) !important;
   border: 1px solid #ff00ff;
-  box-shadow: 0 0 15px #ff00ff, inset 0 0 10px #00ffff;
+  box-shadow:
+    0 0 15px #ff00ff,
+    inset 0 0 10px #00ffff;
   color: #00ffff !important;
 }
 
@@ -139,17 +145,25 @@ body.theme-cyberpunk .editor-title-bar {
 /* Focus Ripple Effect */
 @keyframes focus-ripple {
   0% {
-    transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) scale(1) rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+    transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) scale(1)
+      rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
     filter: brightness(1) blur(0px);
     box-shadow: 0 0 0px rgba(255, 255, 255, 0);
   }
   50% {
-    transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 50px)) scale(1.05) rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+    transform: translate3d(
+        var(--tx, 0),
+        var(--ty, 0),
+        calc(var(--tz, 0) + 50px)
+      )
+      scale(1.05) rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0))
+      rotateZ(var(--rot-z, 0));
     filter: brightness(1.5) blur(2px);
     box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
   }
   100% {
-    transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) scale(1) rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+    transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) scale(1)
+      rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
     filter: brightness(1) blur(0px);
     box-shadow: 0 0 0px rgba(255, 255, 255, 0);
   }
@@ -164,7 +178,7 @@ body.theme-cyberpunk .editor-title-bar {
 .echo-document.ripple-active {
   animation: focus-ripple 0.6s ease-out forwards;
   animation-delay: var(--ripple-delay, 0s);
-}/* Ribbon View Styling */
+} /* Ribbon View Styling */
 body.ribbon-active #echo-layer {
   perspective: 2000px;
 }
@@ -201,18 +215,21 @@ body.fabric-tear-active .echo-document {
 
 body.fanning-active .echo-document {
   transform: translate3d(
-    calc(var(--tx, 0px) + var(--fan-tx, 0px)),
-    calc(var(--ty, 0px) + var(--fan-ty, 0px)),
-    calc(var(--tz, 0px) + 100px)
-  ) rotateZ(var(--fan-rot-z, 0deg)) rotateX(calc(var(--fan-rot-z, 0deg) * 0.2)) rotateY(calc(var(--fan-rot-z, 0deg) * 0.1));
+      calc(var(--tx, 0px) + var(--fan-tx, 0px)),
+      calc(var(--ty, 0px) + var(--fan-ty, 0px)),
+      calc(var(--tz, 0px) + 100px)
+    )
+    rotateZ(var(--fan-rot-z, 0deg)) rotateX(calc(var(--fan-rot-z, 0deg) * 0.2))
+    rotateY(calc(var(--fan-rot-z, 0deg) * 0.1));
 }
 
 body.fanning-active .echo-document:hover {
   transform: translate3d(
-    calc(var(--tx, 0px) + var(--fan-tx, 0px)),
-    calc(var(--ty, 0px) + var(--fan-ty, 0px) - 50px),
-    calc(var(--tz, 0px) + 150px)
-  ) rotateZ(var(--fan-rot-z, 0deg)) rotateX(0deg) rotateY(0deg) scale(1.1) !important;
+      calc(var(--tx, 0px) + var(--fan-tx, 0px)),
+      calc(var(--ty, 0px) + var(--fan-ty, 0px) - 50px),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateZ(var(--fan-rot-z, 0deg)) rotateX(0deg) rotateY(0deg) scale(1.1) !important;
 }
 
 /* Fix Dark Glass Dynamic Highlights and Grain */
@@ -220,8 +237,12 @@ body.fanning-active .echo-document:hover {
   box-shadow:
     0 30px 80px rgba(0, 0, 0, 0.8),
     inset 0 1px 2px rgba(255, 255, 255, 0.1),
-    inset calc(cos(var(--highlight-angle, 0deg)) * 10px) calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px rgba(0, 229, 255, 0.05),
-    inset calc(cos(var(--highlight-angle, 0deg)) * 2px) calc(sin(var(--highlight-angle, 0deg)) * 2px) 5px rgba(255, 255, 255, 0.02) !important;
+    inset calc(cos(var(--highlight-angle, 0deg)) * 10px)
+      calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px
+      rgba(0, 229, 255, 0.05),
+    inset calc(cos(var(--highlight-angle, 0deg)) * 2px)
+      calc(sin(var(--highlight-angle, 0deg)) * 2px) 5px
+      rgba(255, 255, 255, 0.02) !important;
   background-image:
     radial-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
     linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
@@ -234,7 +255,9 @@ body.fanning-active .echo-document:hover {
     0 25px 70px rgba(0, 0, 0, 0.8),
     inset 0 1px 2px rgba(255, 255, 255, 0.2),
     inset 0 -1px 5px rgba(0, 0, 0, 0.5),
-    inset calc(cos(var(--highlight-angle, 0deg)) * 10px) calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px rgba(0, 229, 255, 0.05) !important;
+    inset calc(cos(var(--highlight-angle, 0deg)) * 10px)
+      calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px
+      rgba(0, 229, 255, 0.05) !important;
 }
 
 #tabs-container {
@@ -242,45 +265,54 @@ body.fanning-active .echo-document:hover {
     0 25px 60px rgba(0, 0, 0, 0.9),
     inset 0 1px 2px rgba(255, 255, 255, 0.1),
     inset 0 0 10px rgba(0, 0, 0, 0.5),
-    inset calc(cos(var(--highlight-angle, 0deg)) * 10px) calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px rgba(0, 229, 255, 0.05) !important;
+    inset calc(cos(var(--highlight-angle, 0deg)) * 10px)
+      calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px
+      rgba(0, 229, 255, 0.05) !important;
 }
-
 
 /* Venetian Blinds View active styles */
 .venetian-active .echo-document {
-    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease, filter 0.4s ease !important;
-    transform-origin: center center;
-    cursor: pointer;
+  background-blend-mode: overlay;
+  transition:
+    transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.4s ease,
+    filter 0.4s ease !important;
+  transform-origin: center center;
+  cursor: pointer;
 }
 .venetian-active .echo-document:hover {
-    transform: translate3d(0, -20px, 150px) rotateX(0deg) scale(1.1) !important;
-    opacity: 1 !important;
-    z-index: 1000 !important;
-    filter: brightness(1.2) drop-shadow(0 10px 20px rgba(0, 255, 255, 0.4)) !important;
-    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+  transform: translate3d(0, -20px, 150px) rotateX(0deg) scale(1.1) !important;
+  opacity: 1 !important;
+  z-index: 1000 !important;
+  filter: brightness(1.2) drop-shadow(0 10px 20px rgba(0, 255, 255, 0.4)) !important;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
 }
 
 /* Enhancing Custom Scrollbars and Tabs Gradient */
 #tabs-container {
-    background: linear-gradient(to right, rgba(20, 20, 30, 0.9), rgba(10, 10, 15, 0.95)) !important;
-    box-shadow: inset 0 -2px 10px rgba(0, 255, 255, 0.1) !important;
+  background: linear-gradient(
+    to right,
+    rgba(20, 20, 30, 0.9),
+    rgba(10, 10, 15, 0.95)
+  ) !important;
+  box-shadow: inset 0 -2px 10px rgba(0, 255, 255, 0.1) !important;
 }
 
 ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+  width: 12px;
+  height: 12px;
 }
 ::-webkit-scrollbar-track {
-    background: rgba(10, 10, 15, 0.8);
-    border-radius: 6px;
+  background: rgba(10, 10, 15, 0.8);
+  border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #00f0ff, #ff003c);
-    border-radius: 6px;
-    border: 2px solid rgba(10, 10, 15, 0.8);
+  background: linear-gradient(180deg, #00f0ff, #ff003c);
+  border-radius: 6px;
+  border: 2px solid rgba(10, 10, 15, 0.8);
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #ff003c, #00f0ff);
+  background: linear-gradient(180deg, #ff003c, #00f0ff);
 }
 
 /* Prism Split View */
@@ -300,13 +332,18 @@ body.fanning-active .echo-document:hover {
     )
     rotateY(0deg) scale(1.1) !important;
   z-index: 100 !important;
-  box-shadow: 0 0 30px rgba(0, 255, 200, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 30px rgba(0, 255, 200, 0.4),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
   border-color: rgba(0, 255, 200, 0.6);
 }
 
 /* Depth Slicer (Alt + Scroll) */
 .depth-slice-active .echo-document {
-  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease !important;
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease,
+    transform 0.3s ease !important;
 }
 
 .depth-slice-active .echo-document.depth-slice-hidden {
@@ -319,7 +356,9 @@ body.fanning-active .echo-document:hover {
   opacity: 1 !important;
   filter: brightness(1.2) drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)) !important;
   z-index: 1000 !important;
-  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 100px)) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 100px))
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
   border: 1px solid rgba(0, 255, 255, 0.8) !important;
 }
 
@@ -341,6 +380,38 @@ body.pyramid-active .echo-document {
   transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Lotus View active styles */
+.lotus-active .echo-document {
+  transition:
+    transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.4s ease,
+    filter 0.4s ease !important;
+  transform-origin: center center;
+  cursor: pointer;
+}
+.lotus-active .echo-document:hover {
+  transform: translate3d(0, -20px, 150px) rotateX(0deg) scale(1.1) !important;
+  opacity: 1 !important;
+  z-index: 1000 !important;
+  filter: brightness(1.2) drop-shadow(0 10px 20px rgba(255, 100, 255, 0.4)) !important;
+  box-shadow: 0 0 30px rgba(255, 100, 255, 0.2);
+}
+
+/* Hypercube View active styles */
+.hypercube-active .echo-document {
+  transition:
+    transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+    opacity 0.4s ease,
+    filter 0.4s ease !important;
+  transform-origin: center center;
+  cursor: pointer;
+}
+.hypercube-active .echo-document:hover {
+  transform: translate3d(0, -20px, 150px) rotateX(0deg) scale(1.1) !important;
+  opacity: 1 !important;
+  z-index: 1000 !important;
+  filter: brightness(1.2) drop-shadow(0 10px 20px rgba(100, 255, 255, 0.4)) !important;
+  box-shadow: 0 0 30px rgba(100, 255, 255, 0.2);
 /* Holographic Portal Mode (Alt + P) */
 body.portal-mode-active .echo-document {
   transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease, opacity 0.4s ease;
