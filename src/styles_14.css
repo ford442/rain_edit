@@ -413,6 +413,7 @@ body.pyramid-active .echo-document {
   filter: brightness(1.2) drop-shadow(0 10px 20px rgba(100, 255, 255, 0.4)) !important;
   box-shadow: 0 0 30px rgba(100, 255, 255, 0.2);
 /* Holographic Portal Mode (Alt + P) */
+}
 body.portal-mode-active .echo-document {
   transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease, opacity 0.4s ease;
 }
@@ -448,4 +449,69 @@ body.portal-mode-active .echo-document {
     calc(var(--tz, 0px) - 100px)
   ) rotateX(calc(var(--mouse-ny, 0) * 10deg)) rotateY(calc(var(--mouse-nx, 0) * -10deg));
   filter: blur(5px) brightness(0.6);
+}
+
+/* --- Depth Lens Mode --- */
+body.depth-lens-active #depth-lens-element {
+  opacity: 1;
+  pointer-events: none;
+}
+
+#depth-lens-element {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 1000;
+  transform: translate(calc(var(--lens-x, 0px) - 125px), calc(var(--lens-y, 0px) - 125px));
+  transition: opacity 0.3s ease;
+
+  /* Glassmorphism / Lens effect */
+  background: radial-gradient(circle at center, rgba(0, 229, 255, 0.1) 0%, rgba(0, 229, 255, 0.0) 70%);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.2),
+    inset 0 0 20px rgba(0, 229, 255, 0.2);
+  backdrop-filter: brightness(1.2) contrast(1.1) saturate(1.2) hue-rotate(5deg);
+  -webkit-backdrop-filter: brightness(1.2) contrast(1.1) saturate(1.2) hue-rotate(5deg);
+}
+
+#depth-lens-element::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, rgba(0, 255, 200, 0.8), rgba(0, 150, 255, 0.2)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Echo Document focus inside the lens */
+body.depth-lens-active .echo-document {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease, opacity 0.4s ease;
+}
+
+body.depth-lens-active .echo-document.depth-lens-focus {
+  z-index: 2000 !important;
+  opacity: 1 !important;
+  filter: brightness(1.2) contrast(1.1) drop-shadow(0 15px 30px rgba(0, 229, 255, 0.4)) !important;
+  /* Instead of an absolute translation, we layer on a scale and slight Z push over its existing transform via JS if needed, but CSS transform might override it if not careful.
+     We can just add a scale and Z push if we define the transform carefully, or we let JS do it by adding classes. Let's just use a transform scale and translateZ for now.
+     Actually, if we override transform, we might break the 3D layout.
+     A safer way is to use a pseudoelement or filter, or let JS update the --tx/--ty variables slightly.
+     Wait, existing modes like theater do this: transform: translate3d(var(--tx), var(--ty), calc(var(--tz) + 150px)) scale(1.1).
+  */
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px)) scale(1.15) !important;
+}
+
+body.depth-lens-active .echo-document:not(.depth-lens-focus) {
+  opacity: 0.3;
+  filter: blur(4px) grayscale(50%);
 }

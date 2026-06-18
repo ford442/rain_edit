@@ -35,6 +35,25 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
+  // Depth Lens (Alt + Z)
+  if (e.altKey && e.code === "KeyZ") {
+    e.preventDefault();
+    document.body.classList.toggle("depth-lens-active");
+
+    // Create lens element if it doesn't exist
+    if (!document.getElementById("depth-lens-element")) {
+      const lens = document.createElement("div");
+      lens.id = "depth-lens-element";
+      document.body.appendChild(lens);
+    }
+
+    // Clean up focus state if deactivating
+    if (!document.body.classList.contains("depth-lens-active")) {
+      document.querySelectorAll(".depth-lens-focus").forEach(el => el.classList.remove("depth-lens-focus"));
+    }
+    return;
+  }
+
   // Document Fanning (Alt + C)
   if (e.altKey && e.code === "KeyC") {
     if (!isFanningActive) {
@@ -263,6 +282,43 @@ document.addEventListener("keyup", (e) => {
 });
 
 document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("depth-lens-active")) {
+    document.body.style.setProperty("--lens-x", `${e.clientX}px`);
+    document.body.style.setProperty("--lens-y", `${e.clientY}px`);
+
+    // Find closest document to lens center
+    const lensRadius = 125;
+    let closestDoc = null;
+    let minDistance = Infinity;
+
+    // Get all echo documents that are visible
+    const echoes = window.echoLayerEl ? window.echoLayerEl.querySelectorAll(".echo-document") : document.querySelectorAll(".echo-document");
+
+    echoes.forEach((doc) => {
+      doc.classList.remove("depth-lens-focus"); // reset
+      const rect = doc.getBoundingClientRect();
+      // Calculate center of document
+      const docCenterX = rect.left + rect.width / 2;
+      const docCenterY = rect.top + rect.height / 2;
+
+      const dx = e.clientX - docCenterX;
+      const dy = e.clientY - docCenterY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      // If within a reasonable radius of the lens (allowing for document size)
+      if (dist < lensRadius + Math.max(rect.width, rect.height) / 2) {
+         if (dist < minDistance) {
+           minDistance = dist;
+           closestDoc = doc;
+         }
+      }
+    });
+
+    if (closestDoc) {
+      closestDoc.classList.add("depth-lens-focus");
+    }
+  }
+
   if (document.body.classList.contains("holographic-slice-active")) {
     document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
     document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
