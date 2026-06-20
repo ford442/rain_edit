@@ -502,3 +502,21 @@ function updateDepthSlicer() {
     });
   }
 }
+
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.code === "KeyJ" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    document.body.classList.add("pulse-wave-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+        const index = parseInt(doc.dataset.index || "0", 10);
+        doc.style.setProperty("--pulse-delay", `${index * 0.1}s`);
+      });
+    }
+
+    // Remove class after animation finishes
+    setTimeout(() => {
+      document.body.classList.remove("pulse-wave-active");
+    }, 1500); // Wait long enough for wave to pass through layers
+  }
+});

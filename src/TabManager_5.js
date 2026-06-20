@@ -505,6 +505,44 @@ export const TabManagerMixin5 = {
             const radius = 500;
             const tz = radius * Math.cos(phi) - 200;
             el.style.setProperty("--tz", `${tz}px`);
+          } else if (this.isTorusView) {
+            const inactiveFiles = this.files.filter((f) => f.id !== this.activeId);
+            const totalEchoes = Math.max(1, inactiveFiles.length);
+            const index = parseInt(el.dataset.index || 0);
+
+            // Torus parameters
+            const R = 400; // Major radius
+            const r = 150; // Minor radius
+
+            // Map index to angles
+            // u = poloidal angle (around the minor radius)
+            // v = toroidal angle (around the major radius)
+            // We want a spiral around the torus
+            const t = index / totalEchoes;
+            const wraps = Math.max(1, Math.floor(totalEchoes / 8)); // 8 documents per wrap
+
+            const v = t * Math.PI * 2; // Full circle around major radius
+            const u = t * Math.PI * 2 * wraps; // Multiple circles around minor radius
+
+            const tx = (R + r * Math.cos(u)) * Math.cos(v);
+            const ty = (R + r * Math.cos(u)) * Math.sin(v);
+            const tz = r * Math.sin(u) - 300;
+
+            // Calculate rotation to face outward from the torus surface
+            // This is a simplified rotation approximation
+            const rotZ = v * (180 / Math.PI);
+            const rotX = u * (180 / Math.PI);
+
+            el.style.setProperty("--tx", `${tx}px`);
+            el.style.setProperty("--ty", `${ty}px`);
+            el.style.setProperty("--tz", `${tz}px`);
+            el.style.setProperty("--rot-x", `${rotX}deg`);
+            el.style.setProperty("--rot-y", `0deg`);
+            el.style.setProperty("--rot-z", `${rotZ}deg`);
+            el.style.setProperty("--scatter-x", "0px");
+            el.style.setProperty("--scatter-y", "0px");
+            el.style.setProperty("--scatter-z", "0px");
+            el.style.setProperty("--scatter-rot", "0deg");
           } else if (this.isMobiusView) {
             const totalEchoes = Math.max(1, inactiveFiles.length);
             const index = parseInt(el.dataset.index || 0);

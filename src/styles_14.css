@@ -515,3 +515,35 @@ body.depth-lens-active .echo-document:not(.depth-lens-focus) {
   opacity: 0.3;
   filter: blur(4px) grayscale(50%);
 }
+
+/* Torus View */
+body.torus-active #editor,
+body.torus-active #image-viewer,
+body.torus-active .echo-document {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+    rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+  transform-style: preserve-3d;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Echo Pulse Wave (Alt + J) */
+@keyframes echo-pulse-wave {
+  0% {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 150px)) scale(1.1);
+    filter: brightness(1.5) drop-shadow(0 0 20px rgba(0, 229, 255, 0.8));
+    border-color: rgba(0, 229, 255, 0.8);
+  }
+  100% {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) scale(1);
+    filter: brightness(1);
+  }
+}
+
+body.pulse-wave-active .echo-document {
+  animation: echo-pulse-wave 0.6s ease-out forwards;
+  animation-delay: var(--pulse-delay, 0s);
+}

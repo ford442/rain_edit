@@ -205,6 +205,7 @@ if (viewModeSelect) {
     else if (view === "infinity-mirror") tabManager.toggleInfinityMirrorView();
     else if (view === "archway") tabManager.toggleArchwayView();
     else if (view === "kaleidoscope") tabManager.toggleKaleidoscopeView();
+    else if (view === "torus") tabManager.toggleTorusView();
     else if (view === "vortex") tabManager.toggleVortexView();
     else if (view === "constellation") tabManager.toggleConstellationView();
     else if (view === "prism") tabManager.togglePrismView();
