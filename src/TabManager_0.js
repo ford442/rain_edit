@@ -64,6 +64,7 @@ export const TabManagerMixin0 = {
     this.isVenetianView = false;
     this.isStaircaseView = false;
     this.isPyramidView = false;
+    this.isTorusView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -104,6 +105,7 @@ export const TabManagerMixin0 = {
       "accordion-active",
       "cyclone-active",
       "mobius-active",
+      "torus-active",
       "astrolabe-active",
       "dominoes-active",
       "luminescence-active",
@@ -674,6 +676,15 @@ export const TabManagerMixin0 = {
       document.body.classList.add("tornado-active");
       const btn = document.getElementById("btn-tornado-view");
       if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleTorusView() {
+    const wasActive = this.isTorusView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTorusView = true;
+      document.body.classList.add("torus-active");
     }
     this._renderEchoes();
   },
