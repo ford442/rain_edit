@@ -600,3 +600,24 @@ body.peel-active #editor {
     0 0 8px rgba(255, 0, 128, 0.8),
     0 0 15px rgba(255, 0, 128, 0.4) !important;
 }
+
+/* Layer Peeling / Page Turn Interaction (for clicking background echo documents) */
+.peel-away {
+  transform-origin: left center !important;
+  transform:
+    translate3d(-20%, 0, 100px)
+    rotateY(-60deg)
+    rotateZ(-5deg) !important;
+  opacity: 0 !important;
+  filter: blur(10px) brightness(0.5) !important;
+  transition: all 0.7s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  pointer-events: none !important;
+}
+
+.peel-target {
+  transform: translate3d(0, 0, 150px) scale(1.05) !important;
+  opacity: 1 !important;
+  filter: brightness(1.2) drop-shadow(0 20px 40px rgba(0, 229, 255, 0.4)) !important;
+  z-index: 1000 !important;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}

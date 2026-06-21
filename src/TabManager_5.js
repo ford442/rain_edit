@@ -153,14 +153,68 @@ export const TabManagerMixin5 = {
             return;
           }
 
-          // Add Kaleidoscope Effect
+          // --- Layer Peeling / Page Turn Interaction ---
+          // Synthesize a short "paper rustle/whoosh" sound using Web Audio API
+          try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') {
+              audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+
+            // White noise burst simulation (paper-like whoosh)
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+
+            filter.type = 'highpass';
+            filter.frequency.value = 1000;
+
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+          } catch (err) {
+            console.error("Audio playback failed:", err);
+          }
+
+          // Target document styling (the one being clicked/bringing forward)
+          el.classList.add("peel-target");
+
+          // Select foreground elements (editor + echoes with lower index = in front in the stack)
+          const editorEl = this.editorEl || document.getElementById("editor");
+          if (editorEl) editorEl.classList.add("peel-away");
+
+          const targetDepthIndex = index;
+          const allEchoes = document.querySelectorAll(".echo-document");
+          const peelEchoes = [];
+          allEchoes.forEach((echo) => {
+            const echoIndex = parseInt(echo.dataset.index, 10);
+            if (!isNaN(echoIndex) && echoIndex < targetDepthIndex) {
+              echo.classList.add("peel-away");
+              peelEchoes.push(echo);
+            }
+          });
+
+          // Also add Kaleidoscope Effect just for extra visual flair
           el.classList.add("kaleidoscope-fx");
 
           clickTimeout = setTimeout(() => {
             this.setActive(file.id);
             el.classList.remove("kaleidoscope-fx"); // clean up
+            el.classList.remove("peel-target");
+            if (editorEl) editorEl.classList.remove("peel-away");
+            peelEchoes.forEach(echo => echo.classList.remove("peel-away"));
             clickTimeout = null;
-          }, 600); // Wait for the animation (600ms) to complete before switching
+          }, 800); // Wait for the peel animation to complete
         }
       });
 
