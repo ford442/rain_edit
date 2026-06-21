@@ -49,6 +49,7 @@ export const TabManagerMixin0 = {
     this.isArchwayView = false;
     this.isArchwayView = false;
     this.isKaleidoscopeView = false;
+    this.isBookshelfView = false;
     this.isCarouselView = false;
     this.isCycloneView = false;
     this.isMobiusView = false;
@@ -101,6 +102,7 @@ export const TabManagerMixin0 = {
       "outline-active",
       "infinity-mirror-active",
       "kaleidoscope-active",
+      "bookshelf-active",
       "carousel-active",
       "accordion-active",
       "cyclone-active",
@@ -369,6 +371,15 @@ export const TabManagerMixin0 = {
       document.body.classList.add("solar-system-active");
       const btn = document.getElementById("btn-solar-system-view");
       if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleBookshelfView() {
+    const wasActive = this.isBookshelfView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isBookshelfView = true;
+      document.body.classList.add("bookshelf-active");
     }
     this._renderEchoes();
   },

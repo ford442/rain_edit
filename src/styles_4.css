@@ -332,7 +332,7 @@ body.x-ray-active #echo-layer {
     )
     rotateX(calc(var(--rot-x, 0deg) + (var(--mouse-ny, 0) * -10deg)))
     rotateY(calc(var(--rot-y, 0deg) + (var(--mouse-nx, 0) * 10deg)))
-    rotateZ(var(--rot-z, 0deg)) skewY(calc(var(--scroll-vel, 0) * 0.05deg));
+    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg))) skewY(calc(var(--scroll-vel, 0) * 0.05deg));
 
   will-change: transform, opacity, filter, text-shadow;
   transition:
@@ -637,6 +637,7 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
           (var(--hover-rot-y, 0deg) * var(--wake))
       )
     )
+    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg)))
     scale(calc((1 + (var(--wake) * 0.08)) * var(--wormhole-scale, 1)));
 
   /* Visual depth masking */

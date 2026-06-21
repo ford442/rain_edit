@@ -231,6 +231,7 @@ if (viewModeSelect) {
     else if (view === "cyber-cortex") tabManager.toggleCyberCortexView();
     else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
     else if (view === "outline") tabManager.toggleOutlineView();
+    else if (view === "bookshelf") tabManager.toggleBookshelfView();
     else if (view === "tesseract") tabManager.toggleTesseractView();
     else if (view === "cyclone") tabManager.toggleCycloneView();
     else if (view === "mobius") tabManager.toggleMobiusView();
