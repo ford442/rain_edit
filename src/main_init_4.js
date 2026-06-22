@@ -520,3 +520,16 @@ document.addEventListener("keydown", (e) => {
     }, 1500); // Wait long enough for wave to pass through layers
   }
 });
+
+// Interactive Drawer Peek logic
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Shift") {
+    document.body.classList.add("drawer-peek-ready");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "Shift") {
+    document.body.classList.remove("drawer-peek-ready");
+  }
+});

@@ -264,6 +264,35 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--orbit-index", index + 1);
         return true;
       }
+      if (this.isBookshelfView) {
+        const inactiveFiles = this.files.filter((f) => f.id !== this.activeId);
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        // Arrange like books on a shelf
+        const spacingX = 400;
+        const spacingY = 300;
+        const startX = -((cols - 1) * spacingX) / 2;
+        const startY = -(((Math.ceil(totalEchoes / cols)) - 1) * spacingY) / 2;
+
+        const tx = startX + col * spacingX;
+        const ty = startY + row * spacingY;
+        const tz = -400; // Pushed back
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+        return true;
+      }
       if (this.isTesseractView) {
         const face = index % 6;
         const isOuter = Math.floor(index / 6) % 2 === 0;

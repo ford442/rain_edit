@@ -143,6 +143,37 @@ body.theme-cyberpunk .editor-title-bar {
 }
 
 /* Focus Ripple Effect */
+
+/* Bookshelf View */
+body.bookshelf-active .echo-document {
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, filter 0.3s ease;
+  opacity: 0.7;
+  filter: blur(1px) brightness(0.8);
+}
+
+body.bookshelf-active .echo-document:hover {
+  transform: translate3d(var(--tx), var(--ty), 0px) scale(1.1) !important;
+  opacity: 1;
+  filter: blur(0px) brightness(1.1);
+  z-index: 100;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 229, 255, 0.5);
+  border-color: #00e5ff;
+}
+
+
+/* Interactive Drawer Peek - Slides partially obscured tabs out when holding Shift */
+body.drawer-peek-ready .echo-document:not(.active) {
+  transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.3s ease, filter 0.3s ease;
+}
+
+body.drawer-peek-ready .echo-document:not(.active):hover {
+  transform: translateX(350px) translateZ(100px) scale(1.05) !important;
+  z-index: 1000 !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 229, 255, 0.3);
+  filter: blur(0px) brightness(1.2) !important;
+  opacity: 1 !important;
+}
+
 @keyframes focus-ripple {
   0% {
     transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) scale(1)

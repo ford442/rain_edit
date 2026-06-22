@@ -78,10 +78,19 @@ document.addEventListener("mousemove", (e) => {
   document.body.style.setProperty("--mouse-nx", nx);
   document.body.style.setProperty("--mouse-ny", ny);
 
-  // "Parallax Edge Fanning" - pushing documents outwards when mouse nears edges
-  const edgeFanMagnitude = 50; // pixels to push
-  const edgeFanX = Math.abs(nx) > 0.6 ? nx * edgeFanMagnitude : 0;
-  const edgeFanY = Math.abs(ny) > 0.6 ? ny * edgeFanMagnitude : 0;
+  // "Parallax Edge Fanning" & "Dynamic Parallax Fan"
+  // Fanning documents outward based on mouse distance from center
+  const edgeFanMagnitude = 80; // Increased magnitude for a more pronounced fan
+  // We apply a continuous dynamic fan instead of just at the edges (nx > 0.6)
+  const edgeFanX = nx * edgeFanMagnitude;
+  const edgeFanY = ny * edgeFanMagnitude;
+
+  // Calculate dynamic rotation fan based on mouse X for a card-like spread
+  const fanRot = nx * 15; // up to 15 degrees rotation
+
+  document.body.style.setProperty("--mouse-edge-x", nx);
+  document.body.style.setProperty("--mouse-edge-y", ny);
+
 
   if (echoLayerEl) {
     const echoes = echoLayerEl.querySelectorAll(".echo-document");
@@ -95,6 +104,12 @@ document.addEventListener("mousemove", (e) => {
       echo.style.setProperty(
         "--edge-fan-ty",
         `${edgeFanY * depthMultiplier}px`,
+      );
+      // Dynamic rotation based on depth and mouse position
+      const dir = (index % 2 === 0 ? 1 : -1);
+      echo.style.setProperty(
+        "--edge-fan-rot",
+        `${fanRot * depthMultiplier * dir}deg`,
       );
     });
   }
