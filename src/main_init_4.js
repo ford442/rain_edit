@@ -27,6 +27,9 @@ import backFrag from "./shaders/water-back.frag?glslify";
 import frontFrag from "./shaders/water.frag?glslify";
 import vertSrc from "./shaders/simple.vert?glslify";
 
+window.isSteppedCraterActive = false;
+window.isFoldOutGalleryActive = false;
+
 document.addEventListener("keydown", (e) => {
   // Explode View (Ctrl + Alt + E)
   if ((e.ctrlKey || e.metaKey) && e.altKey && e.code === "KeyE") {
@@ -241,6 +244,45 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     document.body.classList.add("focus-torch-active");
   }
+
+  // Stepped Crater Reveal (Alt + Shift + C)
+  if (e.altKey && e.shiftKey && e.code === "KeyC") {
+    e.preventDefault();
+    if (!window.isSteppedCraterActive) {
+      window.isSteppedCraterActive = true;
+      document.body.classList.add("stepped-crater-active");
+    }
+  }
+
+  // Fold-out Gallery Interaction (Alt + Shift + G)
+  if (e.altKey && e.shiftKey && e.code === "KeyG") {
+    e.preventDefault();
+    if (!window.isFoldOutGalleryActive) {
+      window.isFoldOutGalleryActive = true;
+      document.body.classList.add("fold-out-gallery-active");
+
+      if (window.echoLayerEl) {
+        const echoes = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
+        const total = echoes.length;
+        echoes.forEach((doc, i) => {
+          // Spread logic: even indices go right, odd indices go left
+          const isRight = i % 2 === 0;
+          const spreadIndex = Math.floor(i / 2) + 1;
+          const xOffset = spreadIndex * 350; // Horizontal spacing
+
+          const tx = isRight ? xOffset : -xOffset;
+          const ty = (i * 10) - (total * 5); // Slight vertical arc
+          const tz = -100 - (spreadIndex * 50); // Push further ones back slightly
+          const ry = isRight ? -15 : 15; // Angle them inwards
+
+          doc.style.setProperty("--fold-tx", `${tx}px`);
+          doc.style.setProperty("--fold-ty", `${ty}px`);
+          doc.style.setProperty("--fold-tz", `${tz}px`);
+          doc.style.setProperty("--fold-ry", `${ry}deg`);
+        });
+      }
+    }
+  }
   // Holographic Document Dispersion (Alt+X)
   if (e.altKey && e.code === "KeyX" && !e.shiftKey) {
     e.preventDefault();
@@ -274,6 +316,33 @@ document.addEventListener("keyup", (e) => {
 
   if (e.key === "f" || e.key === "F" || e.key === "Alt" || e.key === "Shift") {
     document.body.classList.remove("focus-torch-active");
+  }
+
+  if (e.key === "c" || e.key === "C" || e.key === "Alt" || e.key === "Shift") {
+    if (window.isSteppedCraterActive && (!e.altKey || !e.shiftKey || e.code === "KeyC")) {
+      window.isSteppedCraterActive = false;
+      document.body.classList.remove("stepped-crater-active");
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          doc.style.removeProperty("--crater-radius");
+        });
+      }
+    }
+  }
+
+  if (e.key === "g" || e.key === "G" || e.key === "Alt" || e.key === "Shift") {
+    if (window.isFoldOutGalleryActive && (!e.altKey || !e.shiftKey || e.code === "KeyG")) {
+      window.isFoldOutGalleryActive = false;
+      document.body.classList.remove("fold-out-gallery-active");
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          doc.style.removeProperty("--fold-tx");
+          doc.style.removeProperty("--fold-ty");
+          doc.style.removeProperty("--fold-tz");
+          doc.style.removeProperty("--fold-ry");
+        });
+      }
+    }
   }
 
   if (e.key === "s" || e.key === "S" || e.key === "Alt" || e.key === "Shift") {
@@ -322,6 +391,34 @@ document.addEventListener("mousemove", (e) => {
   if (document.body.classList.contains("holographic-slice-active")) {
     document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
     document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
+  }
+
+  if (document.body.classList.contains("stepped-crater-active")) {
+    document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
+    document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
+
+    if (window.editorEl) {
+      const rect = window.editorEl.getBoundingClientRect();
+      window.editorEl.style.setProperty("--mouse-local-x", `${e.clientX - rect.left}px`);
+      window.editorEl.style.setProperty("--mouse-local-y", `${e.clientY - rect.top}px`);
+    }
+
+    if (window.echoLayerEl) {
+      const echoes = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
+      // Map echoes to depth level
+      echoes.forEach((doc, idx) => {
+        // Calculate crater radius. Larger for closer elements, smaller for deeper.
+        // Base is 150px, each deeper level shrinks it by 30px.
+        let depth = parseInt(doc.getAttribute("data-index") || idx, 10);
+        let radius = Math.max(0, 150 - (depth * 30));
+        doc.style.setProperty("--crater-radius", `${radius}px`);
+
+        // Also set local mouse coords for the crater ring glow
+        const rect = doc.getBoundingClientRect();
+        doc.style.setProperty("--mouse-local-x", `${e.clientX - rect.left}px`);
+        doc.style.setProperty("--mouse-local-y", `${e.clientY - rect.top}px`);
+      });
+    }
   }
   if (document.body.classList.contains("curtain-pull-active")) {
     // Normalize mouse X from -1 to 1 based on screen width
