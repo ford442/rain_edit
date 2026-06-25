@@ -27,6 +27,104 @@ import backFrag from "./shaders/water-back.frag?glslify";
 import frontFrag from "./shaders/water.frag?glslify";
 import vertSrc from "./shaders/simple.vert?glslify";
 
+
+// Holographic Depth Cursor Logic
+window.cursorZDepth = 0;
+let depthCursorEl = document.getElementById("holographic-depth-cursor");
+
+document.addEventListener("wheel", (e) => {
+  if (e.altKey && !e.shiftKey && !e.ctrlKey) {
+    e.preventDefault();
+
+    if (!depthCursorEl) {
+      depthCursorEl = document.createElement("div");
+      depthCursorEl.id = "holographic-depth-cursor";
+      document.body.appendChild(depthCursorEl);
+      document.body.classList.add("depth-cursor-active");
+    }
+
+    // Adjust depth based on scroll (invert so scrolling down goes "deeper" / more negative)
+    window.cursorZDepth -= e.deltaY * 0.5;
+
+    // Clamp or let it go deep? Let's clamp between 500 and -5000
+    if (window.cursorZDepth > 500) window.cursorZDepth = 500;
+    if (window.cursorZDepth < -5000) window.cursorZDepth = -5000;
+
+    depthCursorEl.style.setProperty("--cursor-tz", `${window.cursorZDepth}px`);
+
+    // Throttle intersection checks for performance
+    if (window.depthCursorThrottle) clearTimeout(window.depthCursorThrottle);
+    window.depthCursorThrottle = setTimeout(() => {
+      // Check intersection with echo-documents
+      const echoes = document.querySelectorAll(".echo-document");
+      echoes.forEach(doc => {
+        // Get the document's computed --tz value
+        const tzStr = doc.style.getPropertyValue("--tz");
+        if (tzStr) {
+          const match = tzStr.match(/-?\d+/);
+          if (match) {
+            const docZ = parseFloat(match[0]);
+
+            // If within 150px depth, count as a hit
+            if (Math.abs(docZ - window.cursorZDepth) < 150) {
+              doc.classList.add("depth-cursor-hit");
+              // Play a very subtle audio cue if it just entered the hit zone
+              if (!doc.dataset.depthHitPlayed && window.AudioContext) {
+                doc.dataset.depthHitPlayed = "true";
+                try {
+                  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                  const osc = ctx.createOscillator();
+                  const gain = ctx.createGain();
+                  osc.type = "sine";
+                  osc.frequency.setValueAtTime(800 + Math.random() * 400, ctx.currentTime);
+                  gain.gain.setValueAtTime(0.01, ctx.currentTime); // Very low volume
+                  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                  osc.connect(gain);
+                  gain.connect(ctx.destination);
+                  osc.start();
+                  osc.stop(ctx.currentTime + 0.1);
+                } catch(e) {}
+              }
+            } else {
+              doc.classList.remove("depth-cursor-hit");
+              delete doc.dataset.depthHitPlayed;
+            }
+          }
+        }
+      });
+    }, 50); // 50ms debounce
+  }
+}, { passive: false });
+
+document.addEventListener("mousemove", (e) => {
+  if (depthCursorEl && document.body.classList.contains("depth-cursor-active")) {
+    depthCursorEl.style.setProperty("--cursor-x", `${e.clientX}px`);
+    depthCursorEl.style.setProperty("--cursor-y", `${e.clientY}px`);
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "Alt") {
+    if (depthCursorEl) {
+      depthCursorEl.remove();
+      depthCursorEl = null;
+    }
+    document.body.classList.remove("depth-cursor-active");
+    const echoes = document.querySelectorAll(".echo-document");
+    echoes.forEach(doc => doc.classList.remove("depth-cursor-hit"));
+  }
+});
+
+window.addEventListener("blur", () => {
+  if (depthCursorEl) {
+    depthCursorEl.remove();
+    depthCursorEl = null;
+  }
+  document.body.classList.remove("depth-cursor-active");
+  const echoes = document.querySelectorAll(".echo-document");
+  echoes.forEach(doc => doc.classList.remove("depth-cursor-hit"));
+});
+
 window.isSteppedCraterActive = false;
 window.isFoldOutGalleryActive = false;
 
