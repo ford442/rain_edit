@@ -2,6 +2,22 @@ import StorageAPI from "./StorageAPI.js";
 import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
 export const TabManagerMixin3 = {
   _applyLayoutChunk2(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+
+      if (this.isAuroraView) {
+        // Aurora View: undulating sine wave in 3D space
+        const spreadX = 250;
+        const spreadY = 100;
+        const tx = Math.sin(index * 0.6) * spreadX;
+        const ty = Math.cos(index * 0.4) * spreadY - 50;
+        const tz = -index * 120;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${Math.sin(index * 0.3) * 15}deg`);
+        el.style.setProperty("--rot-y", `${Math.cos(index * 0.5) * 20}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+      }
       if (this.isStaircaseView) {
         // Staircase View: cascading step-like arrangement
         const stepWidth = 100;

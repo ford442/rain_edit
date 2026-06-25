@@ -64,6 +64,7 @@ export const TabManagerMixin0 = {
     this.isTornadoView = false;
     this.isVenetianView = false;
     this.isStaircaseView = false;
+    this.isAuroraView = false;
     this.isPyramidView = false;
     this.isTorusView = false;
 
@@ -118,6 +119,7 @@ export const TabManagerMixin0 = {
       "tornado-active",
       "venetian-active",
       "staircase-active",
+      "aurora-active",
       "pyramid-active"
     );
 
@@ -754,4 +756,14 @@ export const TabManagerMixin0 = {
     this._saveTabsToStorage();
     return id;
   },
+};
+
+TabManagerMixin0.toggleAuroraView = function() {
+  const wasActive = this.isAuroraView;
+  this._deactivateAllViews();
+  if (!wasActive) {
+    this.isAuroraView = true;
+    document.body.classList.add("aurora-active");
+  }
+  this._renderEchoes();
 };
