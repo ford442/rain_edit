@@ -392,6 +392,43 @@ document.addEventListener("mousemove", (e) => {
 
   // Update CSS variables for X-Ray and Lantern
   document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
+
+  // Refraction Glass Velocity Tracking
+  if (!window.lastMouseX) window.lastMouseX = e.clientX;
+  if (!window.lastMouseY) window.lastMouseY = e.clientY;
+
+  const vx = e.clientX - window.lastMouseX;
+  const vy = e.clientY - window.lastMouseY;
+
+  window.refractVx = (window.refractVx || 0) * 0.8 + vx * 0.2;
+  window.refractVy = (window.refractVy || 0) * 0.8 + vy * 0.2;
+
+  document.body.style.setProperty("--refract-vx", `${window.refractVx}px`);
+  document.body.style.setProperty("--refract-vy", `${window.refractVy}px`);
+
+  window.lastMouseX = e.clientX;
+  window.lastMouseY = e.clientY;
+
+  // Setup decay loop if not running
+  if (!window.refractDecayLoop) {
+    window.refractDecayLoop = function() {
+      if (Math.abs(window.refractVx) > 0.1 || Math.abs(window.refractVy) > 0.1) {
+        window.refractVx *= 0.9;
+        window.refractVy *= 0.9;
+        document.body.style.setProperty("--refract-vx", `${window.refractVx}px`);
+        document.body.style.setProperty("--refract-vy", `${window.refractVy}px`);
+        requestAnimationFrame(window.refractDecayLoop);
+      } else {
+        window.refractVx = 0;
+        window.refractVy = 0;
+        document.body.style.setProperty("--refract-vx", `0px`);
+        document.body.style.setProperty("--refract-vy", `0px`);
+        window.refractDecayLoop = null; // Reset
+      }
+    };
+    requestAnimationFrame(window.refractDecayLoop);
+  }
+
   document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
 
   // Update Neon Scatter Layer position
