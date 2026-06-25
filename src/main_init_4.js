@@ -728,3 +728,17 @@ document.addEventListener("keyup", (e) => {
     document.body.classList.remove("drawer-peek-ready");
   }
 });
+
+// Layer Isolate Logic (Hold 'I')
+document.addEventListener("keydown", (e) => {
+  if (e.key === "i" || e.key === "I") {
+    // Only trigger if not typing in an input or textarea
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.classList.contains("monaco-editor")) return;
+    document.body.classList.add("layer-isolate-active");
+  }
+});
+document.addEventListener("keyup", (e) => {
+  if (e.key === "i" || e.key === "I") {
+    document.body.classList.remove("layer-isolate-active");
+  }
+});
