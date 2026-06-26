@@ -905,3 +905,30 @@ body.layer-isolate-active #editor {
   filter: blur(5px);
   transition: all 0.3s;
 }
+
+/* Stack Deck View */
+body.stack-deck-active #editor,
+body.stack-deck-active #image-viewer,
+body.stack-deck-active .echo-document {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+    rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+  transform-style: preserve-3d;
+  transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.stack-deck-active .echo-document {
+  background: rgba(10, 15, 25, 0.8) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 2px 5px rgba(255, 255, 255, 0.1) !important;
+}
+
+body.stack-deck-active .echo-document:hover {
+  border-color: rgba(0, 229, 255, 0.8) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 229, 255, 0.4), inset 0 2px 10px rgba(255, 255, 255, 0.2) !important;
+  transform: translate3d(var(--tx, 0), calc(var(--ty, 0) - 20px), calc(var(--tz, 0) + 20px))
+    rotateX(0deg) rotateY(0deg) scale(1.05) !important;
+  z-index: 1000 !important;
+  opacity: 1 !important;
+}

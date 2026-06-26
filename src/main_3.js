@@ -245,6 +245,7 @@ if (viewModeSelect) {
     else if (view === "theater") tabManager.toggleTheaterView();
     else if (view === "tornado") tabManager.toggleTornadoView();
     else if (view === "venetian") tabManager.toggleVenetianView();
+    else if (view === "stackdeck") tabManager.toggleStackDeckView();
     else if (view === "aurora") tabManager.toggleAuroraView();
     else tabManager._deactivateAllViews(); // Default view
   });
