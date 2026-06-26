@@ -56,6 +56,7 @@ export const TabManagerMixin0 = {
     this.isAstrolabeView = false;
     this.isDominoesView = false;
     this.isHexagonMatrixView = false;
+    this.isStackDeckView = false;
     this.isLuminescenceView = false;
     this.isGeodeView = false;
     this.isLotusView = false;
@@ -120,6 +121,7 @@ export const TabManagerMixin0 = {
       "venetian-active",
       "staircase-active",
       "aurora-active",
+      "stack-deck-active",
       "pyramid-active"
     );
 
@@ -165,6 +167,15 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isLotusView = true;
       document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleStackDeckView() {
+    const wasActive = this.isStackDeckView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isStackDeckView = true;
+      document.body.classList.add("stack-deck-active");
     }
     this._renderEchoes();
   },

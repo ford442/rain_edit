@@ -3,6 +3,18 @@ import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_T
 export const TabManagerMixin3 = {
   _applyLayoutChunk2(el, index, totalEchoes, file, inactiveFiles, activeFile) {
 
+      if (this.isStackDeckView) {
+        // Stack Deck View: vertically overlapping cards like a deck
+        const yOffset = index * 40;
+        const zOffset = -index * 5;
+
+        el.style.setProperty("--tx", `0px`);
+        el.style.setProperty("--ty", `${yOffset}px`);
+        el.style.setProperty("--tz", `${zOffset}px`);
+        el.style.setProperty("--rot-x", `0deg`);
+        el.style.setProperty("--rot-y", `0deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+      }
       if (this.isAuroraView) {
         // Aurora View: undulating sine wave in 3D space
         const spreadX = 250;
