@@ -287,7 +287,8 @@ export const TabManagerMixin5 = {
             !this.isNeonSynthView &&
             !this.isBlueprint3dView &&
             !this.isCyberCortexView &&
-            !this.isAccordionView
+            !this.isAccordionView &&
+            !this.isTimeTunnelView
           ) {
             el.style.setProperty("--tz", "100px");
           } else if (this.isOrbitView) {

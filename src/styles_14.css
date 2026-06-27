@@ -881,6 +881,106 @@ body.aurora-active .echo-document:hover {
   opacity: 1 !important;
 }
 
+/* Time Tunnel View Styles */
+body.time-tunnel-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+  animation: time-tunnel-fly 20s linear infinite;
+}
+
+body.time-tunnel-active #echo-layer:hover {
+  animation-play-state: paused;
+}
+
+@keyframes time-tunnel-fly {
+  0% { transform: translateZ(0); }
+  100% { transform: translateZ(1200px); }
+}
+
+body.time-tunnel-active .echo-document {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
+  background: rgba(10, 15, 25, 0.7);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.1), inset 0 0 20px rgba(0, 229, 255, 0.05);
+  backdrop-filter: blur(10px);
+  opacity: 0.8;
+  /* Apply the layout transforms from inline styles */
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+    rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0)) scale(var(--scale, 1));
+}
+
+body.time-tunnel-active .echo-document:hover {
+  opacity: 1 !important;
+  z-index: 100 !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.8), inset 0 0 30px rgba(0, 229, 255, 0.4);
+  border-color: rgba(0, 229, 255, 0.8);
+  /* Pull slightly towards the center on hover */
+  transform: translate3d(calc(var(--tx, 0) * 0.8), calc(var(--ty, 0) * 0.8), var(--tz, 0))
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+}
+
+/* Peel Reveal Interaction (Alt + Shift + V) */
+body.peel-reveal-active .echo-document {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+}
+
+body.peel-reveal-active .echo-document:not(:hover) {
+  /* Slice off the top right corner based on mouse position relative to viewport */
+  /* This creates a diagonal line that follows the cursor */
+  clip-path: polygon(
+    0% 0%,
+    calc(var(--mouse-x, 100%) - 50px) 0%,
+    100% calc(var(--mouse-y, 0px) + 50px),
+    100% 100%,
+    0% 100%
+  );
+  filter: drop-shadow(-5px 5px 15px rgba(0, 0, 0, 0.8));
+}
+
+body.peel-reveal-active #editor {
+  clip-path: polygon(
+    0% 0%,
+    calc(var(--mouse-x, 100%) - 100px) 0%,
+    100% calc(var(--mouse-y, 0px) + 100px),
+    100% 100%,
+    0% 100%
+  );
+  transition: clip-path 0.1s linear;
+}
+
+body.peel-reveal-active .echo-document:hover {
+  transform: scale(1.05) translateZ(50px) !important;
+  z-index: 1000 !important;
+  opacity: 1 !important;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  border-color: rgba(0, 229, 255, 0.8) !important;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.4) !important;
+}
+
+/* Add a curled edge effect */
+body.peel-reveal-active .echo-document::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    225deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    transparent 100px
+  );
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+body.peel-reveal-active .echo-document:not(:hover)::before {
+  opacity: 1;
+}
+
 /* Layer Isolate Mode (Hold 'I') */
 body.layer-isolate-active .echo-document {
   opacity: 0.05 !important;
