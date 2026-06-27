@@ -524,6 +524,11 @@ document.addEventListener("mousemove", (e) => {
     document.body.style.setProperty("--mouse-x-norm", normX.toFixed(3));
   }
 
+  if (document.body.classList.contains("peel-reveal-active")) {
+    document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
+    document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
+  }
+
   if (document.body.classList.contains("fabric-tear-active")) {
     if (editorEl) {
       const mouseX = e.clientX;
@@ -536,6 +541,20 @@ document.addEventListener("mousemove", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Shift" && !document.body.classList.contains("x-ray-active")) {
     document.body.classList.add("quantum-depth-active");
+  }
+});
+
+// Peel Reveal logic
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.shiftKey && e.key.toLowerCase() === "v" && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    document.body.classList.add("peel-reveal-active");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key.toLowerCase() === "v" || e.key === "Alt" || e.key === "Shift") {
+    document.body.classList.remove("peel-reveal-active");
   }
 });
 

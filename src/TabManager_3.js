@@ -586,6 +586,57 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--scale", scale.toFixed(2));
         return true;
       }
+      if (this.isTimeTunnelView) {
+        // Time Tunnel View
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const zStep = -300; // How deep each layer goes
+        const tz = index * zStep;
+
+        // Arrange them into left, top, right, bottom walls
+        const wallIndex = index % 4;
+        const offset = 400; // Tunnel radius
+
+        let tx = 0;
+        let ty = 0;
+        let rotY = 0;
+        let rotX = 0;
+
+        if (wallIndex === 0) {
+          // Left wall
+          tx = -offset;
+          rotY = 90;
+        } else if (wallIndex === 1) {
+          // Top wall
+          ty = -offset;
+          rotX = -90;
+        } else if (wallIndex === 2) {
+          // Right wall
+          tx = offset;
+          rotY = -90;
+        } else if (wallIndex === 3) {
+          // Bottom wall
+          ty = offset;
+          rotX = 90;
+        }
+
+        // Add a slight spin/twist to the tunnel over depth
+        const rotZ = index * 5;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+
+        // Reset scale and scatter
+        el.style.setProperty("--scale", "1");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+        return true;
+      }
       if (this.isCoverflowView) {
         // Coverflow View positions
         let _totalEchoes = inactiveFiles.length;

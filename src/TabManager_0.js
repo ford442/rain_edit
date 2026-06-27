@@ -21,6 +21,7 @@ export const TabManagerMixin0 = {
     this.isTunnelView = false;
     this.isGridView = false;
     this.isHelixView = false;
+    this.isTimeTunnelView = false;
     this.isPinboardView = false;
     this.isVortexView = false;
     this.isConstellationView = false;
@@ -106,6 +107,7 @@ export const TabManagerMixin0 = {
       "kaleidoscope-active",
       "bookshelf-active",
       "carousel-active",
+      "time-tunnel-active",
       "accordion-active",
       "cyclone-active",
       "mobius-active",
@@ -559,6 +561,15 @@ export const TabManagerMixin0 = {
       document.body.classList.add("prism-active");
       const btn = document.getElementById("btn-prism-view");
       if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleTimeTunnelView() {
+    const wasActive = this.isTimeTunnelView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTimeTunnelView = true;
+      document.body.classList.add("time-tunnel-active");
     }
     this._renderEchoes();
   },
