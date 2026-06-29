@@ -381,6 +381,12 @@ document.addEventListener("keydown", (e) => {
       }
     }
   }
+  // Matrix Dissolve Reveal (Alt+Y)
+  if (e.altKey && e.code === "KeyY" && !e.shiftKey) {
+    e.preventDefault();
+    document.body.classList.add("matrix-dissolve-active");
+  }
+
   // Holographic Document Dispersion (Alt+X)
   if (e.altKey && e.code === "KeyX" && !e.shiftKey) {
     e.preventDefault();
@@ -395,6 +401,11 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  // Matrix Dissolve Reveal (Alt+Y)
+  if (e.key === "y" || e.key === "Y" || e.key === "Alt") {
+    document.body.classList.remove("matrix-dissolve-active");
+  }
+
   // Holographic Document Dispersion (Alt+X)
   if (e.key === "x" || e.key === "X" || e.key === "Alt") {
     document.body.classList.remove("dispersion-active");
@@ -759,5 +770,45 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("keyup", (e) => {
   if (e.key === "i" || e.key === "I") {
     document.body.classList.remove("layer-isolate-active");
+  }
+});
+
+// Echo Typing Ripple
+let typingTimeout;
+document.addEventListener("keydown", (e) => {
+  // Only trigger if typing inside the editor, input, or textarea
+  if (e.target.closest(".monaco-editor") || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+    // Ignore modifier keys
+    if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") return;
+
+    document.body.classList.add("typing-pulse");
+
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(() => {
+      document.body.classList.remove("typing-pulse");
+    }, 150); // Remove quickly for a snappy ripple
+  }
+});
+
+// Obscured Layer Magnifier (Alt+M)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.code === "KeyM" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (!document.body.classList.contains("obscured-magnifier-active")) {
+      document.body.classList.add("obscured-magnifier-active");
+    }
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "m" || e.key === "M" || e.key === "Alt") {
+    document.body.classList.remove("obscured-magnifier-active");
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("obscured-magnifier-active")) {
+    document.body.style.setProperty("--mag-x", `${e.clientX}px`);
+    document.body.style.setProperty("--mag-y", `${e.clientY}px`);
   }
 });

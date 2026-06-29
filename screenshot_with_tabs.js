@@ -1,33 +1,23 @@
-const { chromium } = require('playwright');
-
+const { sync_playwright } = require('playwright');
 (async () => {
+  const { chromium } = require('playwright');
   const browser = await chromium.launch();
   const page = await browser.newPage();
+  await page.goto('http://localhost:5173');
+  await page.waitForTimeout(3000); // wait for load
 
-  await page.goto('http://localhost:5173/');
-  await page.waitForTimeout(1000);
-
-  // Add some dummy files using a method that exists
+  // Add some fake tabs using the global tabManager
   await page.evaluate(() => {
-    // If tabManager exists globally
-    if (window.tabManager && window.tabManager.addTab) {
-      for (let i = 0; i < 15; i++) {
-        window.tabManager.addTab(`file_${i}.js`, `// Content for file ${i}\nconsole.log(${i});`, 'javascript');
-      }
-    }
+    window.tabManager.addFile('app.js', 'console.log("app");', 'javascript');
+    window.tabManager.addFile('style.css', 'body { color: red; }', 'css');
+    window.tabManager.addFile('index.html', '<div>Hello</div>', 'html');
+    window.tabManager.addFile('utils.js', 'export const pi = 3.14;', 'javascript');
+    window.tabManager.addFile('data.json', '{"key": "value"}', 'json');
   });
 
   await page.waitForTimeout(1000);
-
-  // Select staircase view
-  await page.selectOption('#view-mode-select', 'staircase');
+  await page.selectOption('#view-mode-select', 'rolodex');
   await page.waitForTimeout(1000);
-  await page.screenshot({ path: 'screenshot_staircase_tabs.png' });
-
-  // Select pyramid view
-  await page.selectOption('#view-mode-select', 'pyramid');
-  await page.waitForTimeout(1000);
-  await page.screenshot({ path: 'screenshot_pyramid_tabs.png' });
-
+  await page.screenshot({ path: 'screenshot_rolodex_tabs.png' });
   await browser.close();
 })();
