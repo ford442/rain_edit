@@ -1087,3 +1087,56 @@ body.obscured-magnifier-active #editor {
   filter: blur(4px);
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
+
+/* X-Ray Lens Interaction (Ctrl+Alt+X) */
+body.xray-lens-active .echo-document {
+  /* Dim and blur documents outside the lens */
+  opacity: 0.15 !important;
+  filter: blur(8px) grayscale(100%) !important;
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  will-change: opacity, filter, clip-path, transform;
+}
+
+body.xray-lens-active #editor {
+  opacity: 0.2;
+  filter: blur(10px) grayscale(80%);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  pointer-events: none; /* Let clicks pass through to background layers */
+}
+
+/* The Lens Effect on the documents */
+body.xray-lens-active .echo-document {
+  /* Use a complex clip-path or mask to reveal the area under the cursor */
+  mask-image: radial-gradient(circle 200px at var(--xray-local-x, 50%) var(--xray-local-y, 50%), black 0%, black 80%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle 200px at var(--xray-local-x, 50%) var(--xray-local-y, 50%), black 0%, black 80%, transparent 100%);
+}
+
+/* Focused element under the X-Ray lens */
+body.xray-lens-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) contrast(1.2) drop-shadow(0 0 20px rgba(0, 255, 170, 0.6)) !important;
+  transform: translate3d(var(--tx, 0), var(--ty, 0), 300px) scale(1.1) !important;
+  z-index: 1000 !important;
+  border-color: rgba(0, 255, 170, 0.8) !important;
+  box-shadow: 0 0 40px rgba(0, 255, 170, 0.3), inset 0 0 20px rgba(0, 255, 170, 0.2) !important;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+/* Add a scanline / noise overlay to the hovered document to sell the "X-Ray" feel */
+body.xray-lens-active .echo-document:hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 170, 0.05) 0px,
+    rgba(0, 255, 170, 0.05) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+  border-radius: inherit;
+  mix-blend-mode: screen;
+}
