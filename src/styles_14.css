@@ -1087,3 +1087,49 @@ body.obscured-magnifier-active #editor {
   filter: blur(4px);
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
+
+/* Card Shuffle Spread Interaction (Alt+Shift+D) */
+body.card-shuffle-active #editor {
+  opacity: 0.15;
+  filter: blur(8px);
+  transform: scale(0.95);
+  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.card-shuffle-active .echo-document {
+  opacity: 0.95 !important;
+  filter: blur(0px) brightness(1.1) !important;
+  z-index: 1000 !important;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 0.4s ease !important;
+}
+
+body.card-shuffle-active .echo-document:nth-child(1) { transform: translate3d(-40vw, -30vh, 100px) rotateZ(-12deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(2) { transform: translate3d(-20vw, -35vh, 120px) rotateZ(-5deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(3) { transform: translate3d(0vw, -40vh, 140px) rotateZ(0deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(4) { transform: translate3d(20vw, -35vh, 160px) rotateZ(5deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(5) { transform: translate3d(40vw, -30vh, 180px) rotateZ(12deg) scale(0.7) !important; }
+
+body.card-shuffle-active .echo-document:nth-child(6) { transform: translate3d(-45vw, -5vh, 200px) rotateZ(-15deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(7) { transform: translate3d(-25vw, 0vh, 220px) rotateZ(-8deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(8) { transform: translate3d(25vw, 0vh, 240px) rotateZ(8deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(9) { transform: translate3d(45vw, -5vh, 260px) rotateZ(15deg) scale(0.7) !important; }
+
+body.card-shuffle-active .echo-document:nth-child(10) { transform: translate3d(-40vw, 25vh, 280px) rotateZ(-10deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(11) { transform: translate3d(-20vw, 30vh, 300px) rotateZ(-3deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(12) { transform: translate3d(0vw, 35vh, 320px) rotateZ(0deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(13) { transform: translate3d(20vw, 30vh, 340px) rotateZ(3deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(14) { transform: translate3d(40vw, 25vh, 360px) rotateZ(10deg) scale(0.7) !important; }
+
+/* Catch-all for extra documents to scatter randomly around the edges */
+body.card-shuffle-active .echo-document:nth-child(n+15) {
+  transform: translate3d(calc(var(--tx, 0) * 2), calc(var(--ty, 0) * 2), 380px) rotateZ(calc(var(--rot-z, 0) + 15deg)) scale(0.6) !important;
+}
+
+body.card-shuffle-active .echo-document:hover {
+  transform: translate3d(0, 0, 500px) scale(1) rotateZ(0deg) !important;
+  z-index: 9999 !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 229, 255, 0.6) !important;
+  border-color: rgba(0, 229, 255, 1) !important;
+  opacity: 1 !important;
+}

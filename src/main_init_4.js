@@ -127,8 +127,18 @@ window.addEventListener("blur", () => {
 
 window.isSteppedCraterActive = false;
 window.isFoldOutGalleryActive = false;
+window.isCardShuffleActive = false;
 
 document.addEventListener("keydown", (e) => {
+  // Card Shuffle Spread (Alt + Shift + D)
+  if (e.altKey && e.shiftKey && e.code === "KeyD") {
+    e.preventDefault();
+    if (!window.isCardShuffleActive) {
+      window.isCardShuffleActive = true;
+      document.body.classList.add("card-shuffle-active");
+    }
+  }
+
   // Explode View (Ctrl + Alt + E)
   if ((e.ctrlKey || e.metaKey) && e.altKey && e.code === "KeyE") {
     e.preventDefault();
@@ -451,6 +461,13 @@ document.addEventListener("keyup", (e) => {
           doc.style.removeProperty("--fold-ry");
         });
       }
+    }
+  }
+
+  if (e.key === "d" || e.key === "D" || e.key === "Alt" || e.key === "Shift") {
+    if (window.isCardShuffleActive && (!e.altKey || !e.shiftKey || e.code === "KeyD")) {
+      window.isCardShuffleActive = false;
+      document.body.classList.remove("card-shuffle-active");
     }
   }
 
