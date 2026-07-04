@@ -461,6 +461,14 @@ document.addEventListener("mousemove", (e) => {
       echoLayerEl.style.setProperty("--helix-global-rot", `${helixRot}deg`);
     }
 
+    if (tabManager.isMeteorView) {
+      // Global slight rotation and tilt for the entire meteor field based on mouse
+      const meteorRotY = -x * 60;
+      const meteorRotX = y * 60;
+      echoLayerEl.style.setProperty("--meteor-global-rot-x", `${meteorRotX}deg`);
+      echoLayerEl.style.setProperty("--meteor-global-rot-y", `${meteorRotY}deg`);
+    }
+
     echoes.forEach((echo, index) => {
       // Don't apply parallax if peeking (handled by CSS)
       if (echo.classList.contains("peek")) return;

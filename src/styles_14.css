@@ -1133,3 +1133,68 @@ body.card-shuffle-active .echo-document:hover {
   border-color: rgba(0, 229, 255, 1) !important;
   opacity: 1 !important;
 }
+
+/* Meteor Scatter View active styles */
+body.meteor-active {
+  --bio-glow-color: rgba(255, 120, 50, 0.6);
+  --bio-glow-strong: rgba(255, 120, 50, 0.8);
+}
+body.meteor-active #editor,
+body.meteor-active #image-viewer {
+  transform: scale(0.65) translateZ(-150px);
+  filter: blur(2px) drop-shadow(0 0 20px rgba(255, 120, 50, 0.2));
+  opacity: 0.7;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+body.meteor-active #echo-layer {
+  perspective: 1600px;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--meteor-global-rot-x, 0deg)) rotateY(var(--meteor-global-rot-y, 0deg));
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+body.meteor-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  background: rgba(20, 15, 30, 0.7) !important;
+  border: 1px solid rgba(255, 150, 80, 0.4) !important;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.7),
+    inset 0 0 30px rgba(255, 120, 50, 0.1),
+    0 0 20px rgba(255, 120, 50, 0.3) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+              opacity 0.4s ease, filter 0.4s ease;
+}
+body.meteor-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) drop-shadow(0 0 30px rgba(255, 150, 80, 0.6)) !important;
+  border-color: rgba(255, 180, 100, 0.8) !important;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    inset 0 0 40px rgba(255, 150, 80, 0.2),
+    0 0 40px rgba(255, 150, 80, 0.5) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
+  z-index: 50 !important;
+}
+body.meteor-active .echo-document::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 40%);
+  pointer-events: none;
+  border-radius: inherit;
+}
