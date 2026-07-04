@@ -128,6 +128,8 @@ window.addEventListener("blur", () => {
 window.isSteppedCraterActive = false;
 window.isFoldOutGalleryActive = false;
 window.isCardShuffleActive = false;
+window.isDepthScanActive = false;
+window.__depthScanTarget = 0;
 
 document.addEventListener("keydown", (e) => {
   // Card Shuffle Spread (Alt + Shift + D)
@@ -146,8 +148,44 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  // Depth Lens (Alt + Z)
-  if (e.altKey && e.code === "KeyZ") {
+  // Depth X-Ray Scan (Alt + Z)
+  if (e.altKey && e.code === "KeyZ" && !e.ctrlKey && !e.shiftKey) {
+    e.preventDefault();
+    if (!window.isDepthScanActive) {
+      window.isDepthScanActive = true;
+      document.body.classList.add("depth-scan-active");
+
+      // Start scanning animation
+      window.__depthScanTarget = 0;
+      const animateScan = () => {
+        if (!window.isDepthScanActive) return;
+
+        window.__depthScanTarget = (window.__depthScanTarget + 0.1) % 15; // Assuming max depth ~15
+        document.body.style.setProperty("--scan-depth", window.__depthScanTarget);
+
+        if (window.echoLayerEl) {
+          const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+          echoes.forEach((doc) => {
+            const idx = parseInt(doc.dataset.index || 0, 10);
+            const dist = Math.abs(idx - window.__depthScanTarget);
+
+            if (dist < 1.5) {
+              doc.classList.add("scan-highlight");
+            } else {
+              doc.classList.remove("scan-highlight");
+            }
+          });
+        }
+
+        requestAnimationFrame(animateScan);
+      };
+      requestAnimationFrame(animateScan);
+    }
+    return;
+  }
+
+  // Depth Lens (Ctrl + Alt + Z)
+  if (e.ctrlKey && e.altKey && e.code === "KeyZ") {
     e.preventDefault();
     document.body.classList.toggle("depth-lens-active");
 
@@ -414,6 +452,19 @@ document.addEventListener("keyup", (e) => {
   // Matrix Dissolve Reveal (Alt+Y)
   if (e.key === "y" || e.key === "Y" || e.key === "Alt") {
     document.body.classList.remove("matrix-dissolve-active");
+  }
+
+  // Depth X-Ray Scan (Alt + Z)
+  if (e.key === "z" || e.key === "Z" || e.key === "Alt") {
+    if (window.isDepthScanActive && (!e.altKey || e.code === "KeyZ")) {
+      window.isDepthScanActive = false;
+      document.body.classList.remove("depth-scan-active");
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          doc.classList.remove("scan-highlight");
+        });
+      }
+    }
   }
 
   // Holographic Document Dispersion (Alt+X)

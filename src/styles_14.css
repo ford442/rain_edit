@@ -1134,6 +1134,79 @@ body.card-shuffle-active .echo-document:hover {
   opacity: 1 !important;
 }
 
+/* --- Depth X-Ray Scan Interaction --- */
+body.depth-scan-active #editor {
+  opacity: 0.3;
+  filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+body.depth-scan-active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 10;
+  background: radial-gradient(circle at 50% calc(var(--scan-depth) * 5%), rgba(0, 255, 255, 0.1) 0%, transparent 40%);
+  mix-blend-mode: screen;
+}
+
+body.depth-scan-active .echo-document {
+  opacity: 0.1;
+  filter: blur(8px) grayscale(100%);
+  transform:
+    translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg))
+    scale(0.8);
+  transition: all 0.2s linear;
+}
+
+body.depth-scan-active .echo-document.scan-highlight {
+  opacity: 0.9;
+  filter: blur(0px) drop-shadow(0 0 15px rgba(0, 255, 255, 0.8)) brightness(1.5);
+  transform:
+    translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 50px))
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg))
+    scale(1.05);
+  border: 1px solid rgba(0, 255, 255, 0.8);
+  z-index: 50;
+}
+
+
+/* --- Card Spread View --- */
+body.card-spread-active .echo-document {
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform:
+    translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg))
+    scale(0.8);
+  box-shadow:
+    -10px 10px 20px rgba(0,0,0,0.5),
+    inset 0 0 10px rgba(255,255,255,0.1);
+  transform-origin: center bottom;
+}
+
+body.card-spread-active .echo-document:hover {
+  transform:
+    translate3d(var(--tx, 0px), calc(var(--ty, 0px) - 30px), calc(var(--tz, 0px) + 30px))
+    rotateX(0deg)
+    rotateY(0deg)
+    rotateZ(var(--rot-z, 0deg))
+    scale(0.9);
+  box-shadow:
+    -15px 15px 30px rgba(0,0,0,0.7),
+    0 0 20px rgba(0, 255, 255, 0.4),
+    inset 0 0 10px rgba(255,255,255,0.2);
+  z-index: 100 !important;
 /* Meteor Scatter View active styles */
 body.meteor-active {
   --bio-glow-color: rgba(255, 120, 50, 0.6);

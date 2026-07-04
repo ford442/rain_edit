@@ -67,6 +67,7 @@ export const TabManagerMixin0 = {
     this.isTornadoView = false;
     this.isVenetianView = false;
     this.isStaircaseView = false;
+    this.isCardSpreadView = false;
     this.isAuroraView = false;
     this.isPyramidView = false;
     this.isTorusView = false;
@@ -126,11 +127,13 @@ export const TabManagerMixin0 = {
       "staircase-active",
       "aurora-active",
       "stack-deck-active",
+      "card-spread-active",
       "pyramid-active"
     );
 
     this.isOrigamiView = false;
     this.isDataHiveView = false;
+    this.isCardSpreadView = false;
 
     [
       "btn-waterfall-view",
@@ -174,6 +177,13 @@ export const TabManagerMixin0 = {
     }
     this._renderEchoes();
   },
+  toggleCardSpreadView() {
+    const wasActive = this.isCardSpreadView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCardSpreadView = true;
+      document.body.classList.add("card-spread-active");
+      const btn = document.getElementById("btn-card-spread-view");
   toggleMeteorView() {
     const wasActive = this.isMeteorView;
     this._deactivateAllViews();
