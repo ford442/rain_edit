@@ -15,6 +15,31 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--rot-y", `0deg`);
         el.style.setProperty("--rot-z", `0deg`);
       }
+      if (this.isCardSpreadView) {
+        // Card Spread View: arched overlapping cards
+        const total = totalEchoes || 1;
+        // Center the spread
+        const offsetIndex = index - (total - 1) / 2;
+
+        // Spread angle (total span ~60 degrees)
+        const angleDeg = offsetIndex * (60 / total);
+        const angleRad = (angleDeg * Math.PI) / 180;
+
+        const radius = 600;
+
+        const tx = Math.sin(angleRad) * radius;
+        const ty = radius - Math.cos(angleRad) * radius + (index * 5); // Slight vertical drop
+        const tz = -index * 20 - 50; // Push back slightly to show overlap
+        const rotZ = angleDeg;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `5deg`); // Slight tilt back
+        el.style.setProperty("--rot-y", `0deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        return true;
+      }
       if (this.isAuroraView) {
         // Aurora View: undulating sine wave in 3D space
         const spreadX = 250;

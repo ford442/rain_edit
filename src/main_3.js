@@ -222,6 +222,7 @@ if (viewModeSelect) {
     else if (view === "origami") tabManager.toggleOrigamiView();
     else if (view === "matrix-rain") tabManager.toggleMatrixRainView();
     else if (view === "data-hive") tabManager.toggleDataHiveView();
+    else if (view === "card-spread") tabManager.toggleCardSpreadView();
     else if (view === "staircase") tabManager.toggleStaircaseView();
     else if (view === "pyramid") tabManager.togglePyramidView();
     else if (view === "crystal") tabManager.toggleCrystalView();
