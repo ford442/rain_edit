@@ -198,6 +198,7 @@ if (viewModeSelect) {
     else if (view === "tunnel") tabManager.toggleTunnelView();
     else if (view === "grid") tabManager.toggleGridView();
     else if (view === "helix") tabManager.toggleHelixView();
+    else if (view === "meteor") tabManager.toggleMeteorView();
     else if (view === "time-tunnel") tabManager.toggleTimeTunnelView();
     else if (view === "pinboard") tabManager.togglePinboardView();
     else if (view === "carousel") tabManager.toggleCarouselView();

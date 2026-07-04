@@ -21,6 +21,7 @@ export const TabManagerMixin0 = {
     this.isTunnelView = false;
     this.isGridView = false;
     this.isHelixView = false;
+    this.isMeteorView = false;
     this.isTimeTunnelView = false;
     this.isPinboardView = false;
     this.isVortexView = false;
@@ -82,6 +83,7 @@ export const TabManagerMixin0 = {
       "tunnel-active",
       "grid-active",
       "helix-active",
+      "meteor-active",
       "pinboard-active",
       "vortex-active",
       "constellation-active",
@@ -182,6 +184,13 @@ export const TabManagerMixin0 = {
       this.isCardSpreadView = true;
       document.body.classList.add("card-spread-active");
       const btn = document.getElementById("btn-card-spread-view");
+  toggleMeteorView() {
+    const wasActive = this.isMeteorView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isMeteorView = true;
+      document.body.classList.add("meteor-active");
+      const btn = document.getElementById("btn-meteor-view");
       if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
