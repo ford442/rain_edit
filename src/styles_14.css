@@ -1087,6 +1087,56 @@ body.obscured-magnifier-active #editor {
   filter: blur(4px);
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
+/* X-Ray Lens - More robust & performant */
+@layer ui-modes {
+  body.xray-lens-active {
+    --xray-radius: 200px;
+  }
+
+  body.xray-lens-active #editor,
+  body.xray-lens-active .echo-document:not(.xray-highlight) {
+    opacity: 0.15;
+    filter: blur(8px) grayscale(100%);
+    transition: opacity 0.3s ease, filter 0.3s ease;
+    pointer-events: none;
+  }
+
+  body.xray-lens-active .echo-document {
+    mask-image: radial-gradient(
+      circle var(--xray-radius) at var(--xray-local-x, 50%) var(--xray-local-y, 50%),
+      black 70%, transparent 100%
+    );
+    -webkit-mask-image: radial-gradient(...); /* same */
+    transition: mask-image 0.1s linear;
+  }
+
+  body.xray-lens-active .echo-document.xray-highlight,
+  body.xray-lens-active .echo-document:hover {
+    opacity: 1 !important;
+    filter: blur(0) brightness(1.4) contrast(1.15) drop-shadow(0 0 25px rgba(0, 255, 170, 0.7));
+    transform: translate3d(var(--tx, 0), var(--ty, 0), 320px) scale(1.08);
+    z-index: 1000;
+    mask-image: none;
+    -webkit-mask-image: none;
+    box-shadow: 0 0 45px rgba(0, 255, 170, 0.4), inset 0 0 25px rgba(0, 255, 170, 0.25);
+  }
+
+  /* Scanline overlay */
+  body.xray-lens-active .echo-document.xray-highlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,255,170,0.06) 0px, transparent 2px, transparent 5px);
+    pointer-events: none;
+    mix-blend-mode: screen;
+    animation: xray-scan 1.5s linear infinite;
+  }
+
+  @keyframes xray-scan {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+  }
+}
 
 /* Card Shuffle Spread Interaction (Alt+Shift+D) */
 body.card-shuffle-active #editor {
