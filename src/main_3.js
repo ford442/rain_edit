@@ -198,6 +198,7 @@ if (viewModeSelect) {
     else if (view === "tunnel") tabManager.toggleTunnelView();
     else if (view === "grid") tabManager.toggleGridView();
     else if (view === "helix") tabManager.toggleHelixView();
+    else if (view === "meteor") tabManager.toggleMeteorView();
     else if (view === "time-tunnel") tabManager.toggleTimeTunnelView();
     else if (view === "pinboard") tabManager.togglePinboardView();
     else if (view === "carousel") tabManager.toggleCarouselView();
@@ -222,6 +223,7 @@ if (viewModeSelect) {
     else if (view === "origami") tabManager.toggleOrigamiView();
     else if (view === "matrix-rain") tabManager.toggleMatrixRainView();
     else if (view === "data-hive") tabManager.toggleDataHiveView();
+    else if (view === "card-spread") tabManager.toggleCardSpreadView();
     else if (view === "staircase") tabManager.toggleStaircaseView();
     else if (view === "pyramid") tabManager.togglePyramidView();
     else if (view === "crystal") tabManager.toggleCrystalView();

@@ -21,6 +21,7 @@ export const TabManagerMixin0 = {
     this.isTunnelView = false;
     this.isGridView = false;
     this.isHelixView = false;
+    this.isMeteorView = false;
     this.isTimeTunnelView = false;
     this.isPinboardView = false;
     this.isVortexView = false;
@@ -66,6 +67,7 @@ export const TabManagerMixin0 = {
     this.isTornadoView = false;
     this.isVenetianView = false;
     this.isStaircaseView = false;
+    this.isCardSpreadView = false;
     this.isAuroraView = false;
     this.isPyramidView = false;
     this.isTorusView = false;
@@ -81,6 +83,7 @@ export const TabManagerMixin0 = {
       "tunnel-active",
       "grid-active",
       "helix-active",
+      "meteor-active",
       "pinboard-active",
       "vortex-active",
       "constellation-active",
@@ -124,11 +127,13 @@ export const TabManagerMixin0 = {
       "staircase-active",
       "aurora-active",
       "stack-deck-active",
+      "card-spread-active",
       "pyramid-active"
     );
 
     this.isOrigamiView = false;
     this.isDataHiveView = false;
+    this.isCardSpreadView = false;
 
     [
       "btn-waterfall-view",
@@ -169,6 +174,24 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isLotusView = true;
       document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleCardSpreadView() {
+    const wasActive = this.isCardSpreadView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCardSpreadView = true;
+      document.body.classList.add("card-spread-active");
+      const btn = document.getElementById("btn-card-spread-view");
+  toggleMeteorView() {
+    const wasActive = this.isMeteorView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isMeteorView = true;
+      document.body.classList.add("meteor-active");
+      const btn = document.getElementById("btn-meteor-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   },
