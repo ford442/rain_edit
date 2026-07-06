@@ -858,19 +858,26 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// Obscured Layer Magnifier (Alt+M)
+// Obscured Layer Magnifier (Alt+M) / Magnetic Separation (Alt+Shift+M)
 document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.code === "KeyM" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+  if (e.altKey && e.code === "KeyM" && !e.ctrlKey && !e.metaKey) {
     e.preventDefault();
-    if (!document.body.classList.contains("obscured-magnifier-active")) {
-      document.body.classList.add("obscured-magnifier-active");
+    if (e.shiftKey) {
+      if (!document.body.classList.contains("magnetic-sep-active")) {
+        document.body.classList.add("magnetic-sep-active");
+      }
+    } else {
+      if (!document.body.classList.contains("obscured-magnifier-active")) {
+        document.body.classList.add("obscured-magnifier-active");
+      }
     }
   }
 });
 
 document.addEventListener("keyup", (e) => {
-  if (e.key === "m" || e.key === "M" || e.key === "Alt") {
+  if (e.key === "m" || e.key === "M" || e.key === "Alt" || e.key === "Shift") {
     document.body.classList.remove("obscured-magnifier-active");
+    document.body.classList.remove("magnetic-sep-active");
   }
 });
 
@@ -878,5 +885,9 @@ document.addEventListener("mousemove", (e) => {
   if (document.body.classList.contains("obscured-magnifier-active")) {
     document.body.style.setProperty("--mag-x", `${e.clientX}px`);
     document.body.style.setProperty("--mag-y", `${e.clientY}px`);
+  }
+  if (document.body.classList.contains("magnetic-sep-active")) {
+    document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
+    document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
   }
 });

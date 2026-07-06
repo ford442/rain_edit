@@ -424,6 +424,34 @@ export const TabManagerMixin3 = {
     return false;
   },
   _applyLayoutChunk3(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isChronoRingView) {
+        // Multi-layered clockface arrangement
+        const total = Math.max(1, inactiveFiles.length);
+        const layers = Math.ceil(total / 12); // Max 12 docs per ring
+        const docsPerRing = Math.min(12, total);
+        const layerIndex = Math.floor(index / docsPerRing);
+        const ringIndex = index % docsPerRing;
+
+        const angle = (ringIndex / docsPerRing) * Math.PI * 2;
+        const radius = 300 + (layerIndex * 150); // Rings expand outward
+
+        const tx = Math.cos(angle - Math.PI / 2) * radius;
+        const ty = Math.sin(angle - Math.PI / 2) * radius;
+        // Layers go backward in Z
+        const tz = layerIndex * -300 - 200;
+
+        // Face outward relative to center
+        const rotZ = (angle * 180 / Math.PI);
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `0deg`);
+        el.style.setProperty("--rot-y", `0deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+
+        return true;
+      }
       if (this.isCyberCortexView) {
         // Brain-like cluster / spherical node map
         const totalEchoes = Math.max(1, inactiveFiles.length);

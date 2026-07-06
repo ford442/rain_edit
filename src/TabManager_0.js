@@ -48,6 +48,7 @@ export const TabManagerMixin0 = {
     this.isOutlineView = false;
     this.isAccordionView = false;
     this.isInfinityMirrorView = false;
+    this.isChronoRingView = false;
     this.isArchwayView = false;
     this.isArchwayView = false;
     this.isKaleidoscopeView = false;
@@ -112,6 +113,7 @@ export const TabManagerMixin0 = {
       "carousel-active",
       "time-tunnel-active",
       "accordion-active",
+      "chrono-ring-active",
       "cyclone-active",
       "mobius-active",
       "torus-active",
@@ -177,6 +179,15 @@ export const TabManagerMixin0 = {
     }
     this._renderEchoes();
   },
+  toggleChronoRingView() {
+    const wasActive = this.isChronoRingView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isChronoRingView = true;
+      document.body.classList.add("chrono-ring-active");
+    }
+    this._renderEchoes();
+  },
   toggleCardSpreadView() {
     const wasActive = this.isCardSpreadView;
     this._deactivateAllViews();
@@ -184,6 +195,10 @@ export const TabManagerMixin0 = {
       this.isCardSpreadView = true;
       document.body.classList.add("card-spread-active");
       const btn = document.getElementById("btn-card-spread-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
   toggleMeteorView() {
     const wasActive = this.isMeteorView;
     this._deactivateAllViews();
