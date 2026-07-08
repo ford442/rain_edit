@@ -203,6 +203,37 @@
   box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
 }
 
+#view-mode-select {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 800;
+  font-family: var(--font-primary);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.05)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+  color: #c0d0e0;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+#view-mode-select:hover {
+  background: rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.65);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+#view-mode-select option {
+  background: #101520;
+  color: #c0d0e0;
+}
+
 .tab-layer-controls {
   display: inline-flex;
   align-items: center;

@@ -46,6 +46,7 @@ export const TabManagerMixin0 = {
     this.isCyberCortexView = false;
     this.isQuantumSuperpositionView = false;
     this.isOutlineView = false;
+    this.isDnaHelixView = false;
     this.isAccordionView = false;
     this.isInfinityMirrorView = false;
     this.isChronoRingView = false;
@@ -185,6 +186,12 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isChronoRingView = true;
       document.body.classList.add("chrono-ring-active");
+  toggleDnaHelixView() {
+    const wasActive = this.isDnaHelixView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDnaHelixView = true;
+      document.body.classList.add("dna-helix-active");
     }
     this._renderEchoes();
   },

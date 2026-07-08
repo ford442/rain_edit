@@ -891,3 +891,36 @@ document.addEventListener("mousemove", (e) => {
     document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
   }
 });
+
+// X-Ray Lens Interaction (Ctrl+Alt+X toggle)
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.altKey && e.code === "KeyX" && !e.shiftKey && !e.metaKey) {
+    e.preventDefault();
+    document.body.classList.toggle("xray-lens-active");
+
+    // Set initial local coordinates if activating
+    if (document.body.classList.contains("xray-lens-active")) {
+       const echoLayer = document.getElementById("echo-layer");
+       if (echoLayer) {
+         echoLayer.querySelectorAll(".echo-document").forEach((doc) => {
+             const rect = doc.getBoundingClientRect();
+             doc.style.setProperty("--xray-local-x", `${e.clientX - rect.left}px`);
+             doc.style.setProperty("--xray-local-y", `${e.clientY - rect.top}px`);
+         });
+       }
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("xray-lens-active")) {
+    const echoLayer = document.getElementById("echo-layer");
+    if (echoLayer) {
+      echoLayer.querySelectorAll(".echo-document").forEach((doc) => {
+          const rect = doc.getBoundingClientRect();
+          doc.style.setProperty("--xray-local-x", `${e.clientX - rect.left}px`);
+          doc.style.setProperty("--xray-local-y", `${e.clientY - rect.top}px`);
+      });
+    }
+  }
+});

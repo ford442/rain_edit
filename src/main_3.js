@@ -229,6 +229,7 @@ if (viewModeSelect) {
     else if (view === "pyramid") tabManager.togglePyramidView();
     else if (view === "crystal") tabManager.toggleCrystalView();
     else if (view === "fractal") tabManager.toggleFractalView();
+    else if (view === "dna-helix") tabManager.toggleDnaHelixView();
     else if (view === "solar-system") tabManager.toggleSolarSystemView();
     else if (view === "neon-synth") tabManager.toggleNeonSynthView();
     else if (view === "blueprint-3d") tabManager.toggleBlueprint3dView();
