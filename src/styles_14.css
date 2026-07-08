@@ -1257,6 +1257,8 @@ body.card-spread-active .echo-document:hover {
     0 0 20px rgba(0, 255, 255, 0.4),
     inset 0 0 10px rgba(255,255,255,0.2);
   z-index: 100 !important;
+}
+
 /* Meteor Scatter View active styles */
 body.meteor-active {
   --bio-glow-color: rgba(255, 120, 50, 0.6);
@@ -1320,4 +1322,36 @@ body.meteor-active .echo-document::before {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 40%);
   pointer-events: none;
   border-radius: inherit;
+}
+
+body.dna-helix-active .echo-document {
+  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.8s ease;
+  opacity: 0.85;
+  filter: blur(1px);
+}
+body.dna-helix-active .echo-document:hover {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px)),
+      calc(var(--tz, 0px) + 50px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(calc(var(--rot-y, 0deg)))
+    rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
+  z-index: 30 !important;
+}
+body.dna-helix-active #echo-layer {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  animation: dna-spin 20s linear infinite;
+}
+
+@keyframes dna-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
 }
