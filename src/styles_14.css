@@ -1267,6 +1267,7 @@ body.card-spread-active .echo-document:hover {
     inset 0 0 10px rgba(255,255,255,0.2);
   z-index: 100 !important;
 }
+
 /* Meteor Scatter View active styles */
 body.meteor-active {
   --bio-glow-color: rgba(255, 120, 50, 0.6);
@@ -1330,4 +1331,91 @@ body.meteor-active .echo-document::before {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 40%);
   pointer-events: none;
   border-radius: inherit;
+}
+
+/* Chrono-Ring View */
+body.chrono-ring-active .echo-document {
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: center center;
+  opacity: 0.5;
+  filter: blur(2px) drop-shadow(0 10px 30px rgba(0, 0, 0, 0.8));
+  border-radius: 50%; /* Make them slightly circular or curved */
+  /* Override basic transform to include dynamic rotation */
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+             rotateZ(var(--rot-z, 0deg)) scale(0.6);
+}
+
+body.chrono-ring-active .echo-document::before {
+  /* Inner clock tick marks effect */
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+body.chrono-ring-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: none !important;
+  /* Pop out towards the user when hovered */
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px))
+             rotateZ(0deg) scale(1) !important;
+  z-index: 100 !important;
+  border-radius: 20px; /* Return to rectangular on hover */
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6);
+  border-color: rgba(0, 229, 255, 0.8);
+}
+
+/* Magnetic Separation (Alt + Shift + M) */
+body.magnetic-sep-active .echo-document {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  /* Push document away from cursor horizontally */
+  /* We use the custom property calc to check distance but CSS cannot do conditionals easily without JS setting variables per element.
+     Instead, we can use a basic calc to push based on center offset.
+     Since CSS doesn't know element's left/right easily, let's just push it outwards relative to the viewport center for a dramatic "parting of the red sea" effect based on mouse hover.
+  */
+}
+
+body.magnetic-sep-active .echo-document:hover {
+  translate: calc(var(--tx, 0px) * 0.5) 0px 50px;
+  scale: 1.05;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+body.magnetic-sep-active .echo-document:not(:hover) {
+  /* Push non-hovered documents away. A simple hack is adding a translate X based on mouse X */
+  translate: calc((var(--mouse-x, 50vw) - 50vw) * 0.2) calc((var(--mouse-y, 50vh) - 50vh) * 0.2) -50px;
+  opacity: 0.3;
+body.dna-helix-active .echo-document {
+  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.8s ease;
+  opacity: 0.85;
+  filter: blur(1px);
+}
+body.dna-helix-active .echo-document:hover {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px)),
+      calc(var(--tz, 0px) + 50px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(calc(var(--rot-y, 0deg)))
+    rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
+  z-index: 30 !important;
+}
+body.dna-helix-active #echo-layer {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  animation: dna-spin 20s linear infinite;
+}
+
+@keyframes dna-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
 }

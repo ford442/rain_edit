@@ -46,8 +46,10 @@ export const TabManagerMixin0 = {
     this.isCyberCortexView = false;
     this.isQuantumSuperpositionView = false;
     this.isOutlineView = false;
+    this.isDnaHelixView = false;
     this.isAccordionView = false;
     this.isInfinityMirrorView = false;
+    this.isChronoRingView = false;
     this.isArchwayView = false;
     this.isArchwayView = false;
     this.isKaleidoscopeView = false;
@@ -112,6 +114,7 @@ export const TabManagerMixin0 = {
       "carousel-active",
       "time-tunnel-active",
       "accordion-active",
+      "chrono-ring-active",
       "cyclone-active",
       "mobius-active",
       "torus-active",
@@ -174,6 +177,21 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isLotusView = true;
       document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleChronoRingView() {
+    const wasActive = this.isChronoRingView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isChronoRingView = true;
+      document.body.classList.add("chrono-ring-active");
+  toggleDnaHelixView() {
+    const wasActive = this.isDnaHelixView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDnaHelixView = true;
+      document.body.classList.add("dna-helix-active");
     }
     this._renderEchoes();
   },
