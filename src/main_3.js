@@ -213,6 +213,7 @@ if (viewModeSelect) {
     else if (view === "prism") tabManager.togglePrismView();
     else if (view === "prism-split") tabManager.togglePrismSplitView();
     else if (view === "coverflow") tabManager.toggleCoverflowView();
+    else if (view === "chrono-ring") tabManager.toggleChronoRingView();
     else if (view === "ribbon") tabManager.toggleRibbonView();
     else if (view === "sphere") tabManager.toggleSphereView();
     else if (view === "wave") tabManager.toggleWaveView();
