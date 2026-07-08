@@ -184,6 +184,10 @@ export const TabManagerMixin0 = {
       this.isCardSpreadView = true;
       document.body.classList.add("card-spread-active");
       const btn = document.getElementById("btn-card-spread-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
   toggleMeteorView() {
     const wasActive = this.isMeteorView;
     this._deactivateAllViews();
