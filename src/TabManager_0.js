@@ -46,6 +46,7 @@ export const TabManagerMixin0 = {
     this.isCyberCortexView = false;
     this.isQuantumSuperpositionView = false;
     this.isOutlineView = false;
+    this.isDnaHelixView = false;
     this.isAccordionView = false;
     this.isInfinityMirrorView = false;
     this.isArchwayView = false;
@@ -177,6 +178,15 @@ export const TabManagerMixin0 = {
     }
     this._renderEchoes();
   },
+  toggleDnaHelixView() {
+    const wasActive = this.isDnaHelixView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDnaHelixView = true;
+      document.body.classList.add("dna-helix-active");
+    }
+    this._renderEchoes();
+  },
   toggleCardSpreadView() {
     const wasActive = this.isCardSpreadView;
     this._deactivateAllViews();
@@ -184,6 +194,10 @@ export const TabManagerMixin0 = {
       this.isCardSpreadView = true;
       document.body.classList.add("card-spread-active");
       const btn = document.getElementById("btn-card-spread-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
   toggleMeteorView() {
     const wasActive = this.isMeteorView;
     this._deactivateAllViews();
