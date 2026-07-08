@@ -624,16 +624,44 @@ document.addEventListener("keydown", (e) => {
 });
 
 // Peel Reveal logic
+let isPeeling = false;
+
 document.addEventListener("keydown", (e) => {
   if (e.altKey && e.shiftKey && e.key.toLowerCase() === "v" && !e.ctrlKey && !e.metaKey) {
     e.preventDefault();
     document.body.classList.add("peel-reveal-active");
+    document.body.style.setProperty("--peel-x", `100vw`);
+    document.body.style.setProperty("--peel-y", `0px`);
   }
 });
 
 document.addEventListener("keyup", (e) => {
   if (e.key.toLowerCase() === "v" || e.key === "Alt" || e.key === "Shift") {
     document.body.classList.remove("peel-reveal-active");
+    isPeeling = false;
+  }
+});
+
+document.addEventListener("mousedown", (e) => {
+  if (document.body.classList.contains("peel-reveal-active")) {
+    isPeeling = true;
+    document.body.style.setProperty("--peel-x", `${e.clientX}px`);
+    document.body.style.setProperty("--peel-y", `${e.clientY}px`);
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (isPeeling && document.body.classList.contains("peel-reveal-active")) {
+    document.body.style.setProperty("--peel-x", `${e.clientX}px`);
+    document.body.style.setProperty("--peel-y", `${e.clientY}px`);
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  if (isPeeling) {
+    isPeeling = false;
+    document.body.style.setProperty("--peel-x", `100vw`);
+    document.body.style.setProperty("--peel-y", `0px`);
   }
 });
 
