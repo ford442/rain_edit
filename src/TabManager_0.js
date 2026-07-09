@@ -186,6 +186,9 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isChronoRingView = true;
       document.body.classList.add("chrono-ring-active");
+    }
+    this._renderEchoes();
+  },
   toggleDnaHelixView() {
     const wasActive = this.isDnaHelixView;
     this._deactivateAllViews();
