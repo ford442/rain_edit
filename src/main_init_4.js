@@ -148,6 +148,14 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
+  // Innovate: Focus Pull Interaction (Alt + F)
+  if (e.altKey && e.code === "KeyF" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (!document.body.classList.contains("focus-pull-active")) {
+      document.body.classList.add("focus-pull-active");
+    }
+  }
+
   // Depth X-Ray Scan (Alt + Z)
   if (e.altKey && e.code === "KeyZ" && !e.ctrlKey && !e.shiftKey) {
     e.preventDefault();
@@ -277,6 +285,11 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  // Innovate: Focus Pull Interaction (Alt + F)
+  if (e.key === "f" || e.key === "F" || e.key === "Alt") {
+    document.body.classList.remove("focus-pull-active");
+  }
+
   if (e.key === "c" || e.key === "C" || e.key === "Alt") {
     if (isFanningActive && (!e.altKey || (e.code === "KeyC" && !e.altKey))) {
       isFanningActive = false;
