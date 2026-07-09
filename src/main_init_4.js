@@ -404,6 +404,15 @@ document.addEventListener("keydown", (e) => {
     document.body.classList.add("focus-torch-active");
   }
 
+  // Venetian Blinds Interaction (Alt + Shift + B)
+  if (e.altKey && e.shiftKey && e.code === "KeyB") {
+    e.preventDefault();
+    if (!window.isVenetianBlindsActive) {
+      window.isVenetianBlindsActive = true;
+      document.body.classList.add("venetian-blinds-interaction-active");
+    }
+  }
+
   // Stepped Crater Reveal (Alt + Shift + C)
   if (e.altKey && e.shiftKey && e.code === "KeyC") {
     e.preventDefault();
@@ -501,6 +510,13 @@ document.addEventListener("keyup", (e) => {
     document.body.classList.remove("focus-torch-active");
   }
 
+  if (e.key === "b" || e.key === "B" || e.key === "Alt" || e.key === "Shift") {
+    if (window.isVenetianBlindsActive && (!e.altKey || !e.shiftKey || e.code === "KeyB")) {
+      window.isVenetianBlindsActive = false;
+      document.body.classList.remove("venetian-blinds-interaction-active");
+    }
+  }
+
   if (e.key === "c" || e.key === "C" || e.key === "Alt" || e.key === "Shift") {
     if (window.isSteppedCraterActive && (!e.altKey || !e.shiftKey || e.code === "KeyC")) {
       window.isSteppedCraterActive = false;
@@ -581,6 +597,11 @@ document.addEventListener("mousemove", (e) => {
   if (document.body.classList.contains("holographic-slice-active")) {
     document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
     document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
+  }
+
+  if (document.body.classList.contains("venetian-blinds-interaction-active")) {
+    const blindAngle = (e.clientY / window.innerHeight) * 100;
+    document.body.style.setProperty("--blind-angle", `${blindAngle}%`);
   }
 
   if (document.body.classList.contains("stepped-crater-active")) {

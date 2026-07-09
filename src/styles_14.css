@@ -1439,3 +1439,24 @@ body.dna-helix-active #echo-layer {
     transform: rotateY(360deg);
   }
 }
+
+/* Innovate: Venetian Blinds Reveal (Alt + Shift + B) */
+body.venetian-blinds-interaction-active .echo-document {
+  transition: opacity 0.3s ease, transform 0.4s ease;
+  mask-image: repeating-linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(var(--blind-angle, 50%) * 0.8),
+    transparent calc(var(--blind-angle, 50%) * 0.8),
+    transparent 100%
+  );
+  mask-size: 100% 40px;
+  -webkit-mask-image: repeating-linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(var(--blind-angle, 50%) * 0.8),
+    transparent calc(var(--blind-angle, 50%) * 0.8),
+    transparent 100%
+  );
+  -webkit-mask-size: 100% 40px;
+}
