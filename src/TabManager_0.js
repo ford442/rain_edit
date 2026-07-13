@@ -9,7 +9,18 @@ import {
   _symbolKindIcon,
 } from "./TabManager.js";
 export const TabManagerMixin0 = {
+
   _deactivateAllViews() {
+    this.isFloatingNexusView = false;
+
+    // Clear inline styles that could freeze layouts
+    const echoes = document.querySelectorAll('.echo-document');
+    echoes.forEach(doc => {
+      doc.style.transform = '';
+      doc.style.boxShadow = '';
+      doc.style.borderColor = '';
+    });
+
     this.isCrystalView = false;
     this.isWaterfallView = false;
     this.isCascadeView = false;
@@ -73,6 +84,7 @@ export const TabManagerMixin0 = {
     this.isAuroraView = false;
     this.isPyramidView = false;
     this.isTorusView = false;
+    this.isFloatingNexusView = false;
 
     document.body.classList.remove(
       "waterfall-active",
@@ -118,6 +130,7 @@ export const TabManagerMixin0 = {
       "cyclone-active",
       "mobius-active",
       "torus-active",
+      "floating-nexus-active",
       "astrolabe-active",
       "dominoes-active",
       "luminescence-active",
@@ -485,6 +498,16 @@ TabManagerMixin0.toggleAuroraView = function() {
   if (!wasActive) {
     this.isAuroraView = true;
     document.body.classList.add("aurora-active");
+  }
+  this._renderEchoes();
+};
+
+TabManagerMixin0.toggleFloatingNexusView = function() {
+  const wasActive = this.isFloatingNexusView;
+  this._deactivateAllViews();
+  if (!wasActive) {
+    this.isFloatingNexusView = true;
+    document.body.classList.add("floating-nexus-active");
   }
   this._renderEchoes();
 };

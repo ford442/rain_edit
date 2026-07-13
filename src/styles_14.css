@@ -1464,3 +1464,26 @@ body.venetian-blinds-interaction-active .echo-document {
   );
   -webkit-mask-size: 100% 40px;
 }
+
+/* Floating Nexus View */
+body.floating-nexus-active {
+  --bio-glow-color: rgba(180, 50, 255, 0.5);
+  --bio-glow-strong: rgba(180, 50, 255, 0.9);
+}
+
+body.floating-nexus-active .echo-document {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease, opacity 0.5s ease;
+
+  background: rgba(15, 15, 20, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+
+  /* Make sure transforms use the data-base-transform */
+  /* Fallback in case JS hasn't acted yet */
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+    rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+}
