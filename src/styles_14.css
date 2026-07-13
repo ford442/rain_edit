@@ -1323,8 +1323,8 @@ body.meteor-active .echo-document {
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       var(--tz, 0px)
     )
     rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
@@ -1340,8 +1340,8 @@ body.meteor-active .echo-document:hover {
     inset 0 0 40px rgba(255, 150, 80, 0.2),
     0 0 40px rgba(255, 150, 80, 0.5) !important;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       calc(var(--tz, 0px) + 200px)
     )
     rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
@@ -1486,4 +1486,64 @@ body.floating-nexus-active .echo-document {
   /* Fallback in case JS hasn't acted yet */
   transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
     rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+}
+
+/* Magnetic Repulsion Field */
+body.magnetic-repulsion-active .echo-document {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+body.magnetic-repulsion-active .echo-document[style*="--repulse-tx"]:not([style*="--repulse-tx: 0px"]) {
+  /* Give repelled documents a slight highlight and pop */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.4);
+  filter: brightness(1.3) blur(0px);
+  border-color: rgba(0, 229, 255, 0.6);
+  z-index: 900 !important;
+}
+
+/* Neon Trace Scanner (Alt + S) */
+#trace-scanner-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 4px;
+  background: #00ffcc;
+  box-shadow:
+    0 0 10px #00ffcc,
+    0 0 20px #00ffcc,
+    0 0 40px rgba(0, 255, 204, 0.5);
+  z-index: 10000;
+  pointer-events: none;
+  display: none;
+}
+
+body.trace-scanner-active .echo-document {
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+}
+
+body.trace-scanner-active .echo-document.trace-hit {
+  /* Use mask-image to create a bright scanning band across the document */
+  box-shadow: 0 0 40px rgba(0, 255, 204, 0.4), inset 0 0 20px rgba(0, 255, 204, 0.2);
+  border-color: #00ffcc;
+  filter: brightness(1.5) contrast(1.2);
+  z-index: 950 !important;
+}
+
+body.trace-scanner-active .echo-document.trace-hit::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent calc(var(--trace-y-percent, 50%) - 10%),
+    rgba(0, 255, 204, 0.6) var(--trace-y-percent, 50%),
+    transparent calc(var(--trace-y-percent, 50%) + 10%)
+  );
+  z-index: 10;
+  mix-blend-mode: screen;
 }

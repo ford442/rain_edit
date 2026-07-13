@@ -117,8 +117,8 @@
   filter: blur(0px) drop-shadow(0 0 30px rgba(255, 0, 128, 0.8)) brightness(1.3) !important;
   opacity: 1 !important;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       calc(var(--tz, 0px) + 150px)
     )
     scale(1.2) !important;
@@ -359,11 +359,11 @@ body.data-hive-active .echo-document:hover {
   0% {
     transform: translate3d(
         calc(
-          var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) +
+          var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px) +
             var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px)
         ),
         calc(
-          var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) -
+          var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px) -
             (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) +
             var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px)
         ),
@@ -386,11 +386,11 @@ body.data-hive-active .echo-document:hover {
   100% {
     transform: translate3d(
         calc(
-          var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) +
+          var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px) +
             var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px)
         ),
         calc(
-          var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) -
+          var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px) -
             (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) +
             var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px)
         ),
@@ -543,8 +543,8 @@ body.matrix-rain-active .echo-document {
   animation: matrix-fall 10s linear infinite;
   animation-delay: var(--matrix-delay, 0s);
   transform: translate3d(
-    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
     var(--tz, 0px)
   );
   transition:
@@ -577,8 +577,8 @@ body.matrix-rain-active .echo-document:hover {
 @keyframes matrix-fall {
   0% {
     transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       var(--tz, 0px)
     );
     opacity: 0;
@@ -591,8 +591,8 @@ body.matrix-rain-active .echo-document:hover {
   }
   100% {
     transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + 200vh),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px) + 200vh),
       var(--tz, 0px)
     );
     opacity: 0;

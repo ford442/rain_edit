@@ -986,3 +986,121 @@ document.addEventListener("mousemove", (e) => {
     }
   }
 });
+
+// Neon Trace Scanner (Alt + S)
+let isTraceScannerActive = false;
+let traceScannerRaf = null;
+let traceScannerY = 0;
+let traceScannerVelocity = 15;
+let traceScannerEl = null;
+
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && (e.key === "s" || e.key === "S") && !e.shiftKey && !e.ctrlKey && !e.metaKey && !isTraceScannerActive) {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    e.preventDefault();
+    isTraceScannerActive = true;
+    document.body.classList.add("trace-scanner-active");
+
+    if (!traceScannerEl) {
+      traceScannerEl = document.createElement("div");
+      traceScannerEl.id = "trace-scanner-line";
+      document.body.appendChild(traceScannerEl);
+    }
+
+    traceScannerEl.style.display = "block";
+    traceScannerY = -100;
+
+    const scanLoop = () => {
+      if (!isTraceScannerActive) return;
+
+      traceScannerY += traceScannerVelocity;
+      traceScannerEl.style.transform = `translateY(${traceScannerY}px)`;
+
+      // Hit detection
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+          const rect = doc.getBoundingClientRect();
+          // Check if scanline intersects with document bounding box
+          if (traceScannerY > rect.top && traceScannerY < rect.bottom) {
+            doc.classList.add("trace-hit");
+            doc.style.setProperty("--trace-y-percent", `${((traceScannerY - rect.top) / rect.height) * 100}%`);
+          } else {
+            doc.classList.remove("trace-hit");
+          }
+        });
+      }
+
+      if (traceScannerY > window.innerHeight + 100) {
+        // Reset or finish
+        isTraceScannerActive = false;
+        document.body.classList.remove("trace-scanner-active");
+        traceScannerEl.style.display = "none";
+        if (window.echoLayerEl) {
+          window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+            doc.classList.remove("trace-hit");
+          });
+        }
+      } else {
+        traceScannerRaf = requestAnimationFrame(scanLoop);
+      }
+    };
+
+    traceScannerRaf = requestAnimationFrame(scanLoop);
+  }
+});
+
+// Magnetic Repulsion Field (Hold M)
+let isMagneticRepulsionActive = false;
+document.addEventListener("keydown", (e) => {
+  if ((e.key === "m" || e.key === "M") && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if (!isMagneticRepulsionActive) {
+      isMagneticRepulsionActive = true;
+      document.body.classList.add("magnetic-repulsion-active");
+    }
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "m" || e.key === "M") {
+    isMagneticRepulsionActive = false;
+    document.body.classList.remove("magnetic-repulsion-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+        doc.style.removeProperty("--repulse-tx");
+        doc.style.removeProperty("--repulse-ty");
+        doc.style.removeProperty("--repulse-rot");
+      });
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (isMagneticRepulsionActive && window.echoLayerEl) {
+    const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+    const maxDist = 300;
+    echoes.forEach(doc => {
+      const rect = doc.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dist = Math.sqrt((cx - e.clientX)**2 + (cy - e.clientY)**2);
+
+      if (dist < maxDist) {
+        const force = Math.pow(1 - dist / maxDist, 2);
+        const dx = cx - e.clientX;
+        const dy = cy - e.clientY;
+        const pushX = (dx / (dist || 1)) * force * 150;
+        const pushY = (dy / (dist || 1)) * force * 150;
+        const rot = (dx / (dist || 1)) * force * 15;
+
+        doc.style.setProperty("--repulse-tx", `${pushX}px`);
+        doc.style.setProperty("--repulse-ty", `${pushY}px`);
+        doc.style.setProperty("--repulse-rot", `${rot}deg`);
+      } else {
+        doc.style.setProperty("--repulse-tx", `0px`);
+        doc.style.setProperty("--repulse-ty", `0px`);
+        doc.style.setProperty("--repulse-rot", `0deg`);
+      }
+    });
+  }
+});

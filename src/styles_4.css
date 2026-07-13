@@ -349,11 +349,11 @@ body.x-ray-active #echo-layer {
 
   transform: translate3d(
       calc(
-        var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) +
+        var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px) +
           var(--edge-fan-tx, 0px)
       ),
       calc(
-        var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) +
+        var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px) +
           var(--edge-fan-ty, 0px) + (var(--scroll-vel, 0) * 0.5px)
       ),
       calc(
@@ -363,7 +363,7 @@ body.x-ray-active #echo-layer {
     )
     rotateX(calc(var(--rot-x, 0deg) + (var(--mouse-ny, 0) * -10deg)))
     rotateY(calc(var(--rot-y, 0deg) + (var(--mouse-nx, 0) * 10deg)))
-    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg))) skewY(calc(var(--scroll-vel, 0) * 0.05deg));
+    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg) + var(--repulse-rot, 0deg))) skewY(calc(var(--scroll-vel, 0) * 0.05deg));
 
   will-change: transform, opacity, filter, text-shadow;
   transition:
@@ -654,13 +654,13 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
       calc(
         calc(var(--tx, 0px) + var(--part-tx, 0px)) +
           var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px) +
-          var(--repel-tx, 0px) + var(--edge-fan-tx, 0px)
+          var(--repel-tx, 0px) + var(--repulse-tx, 0px) + var(--edge-fan-tx, 0px)
       ),
       calc(
         calc(var(--ty, 0px) + var(--part-ty, 0px)) -
           (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) +
           var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px) +
-          var(--repel-ty, 0px) + var(--edge-fan-ty, 0px)
+          var(--repel-ty, 0px) + var(--repulse-ty, 0px) + var(--edge-fan-ty, 0px)
       ),
       calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px))
     )
@@ -671,7 +671,7 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
           (var(--hover-rot-y, 0deg) * var(--wake))
       )
     )
-    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg)))
+    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg) + var(--repulse-rot, 0deg)))
     scale(calc((1 + (var(--wake) * 0.08)) * var(--wormhole-scale, 1)));
 
   /* Visual depth masking */

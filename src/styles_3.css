@@ -286,8 +286,8 @@ body.theme-blueprint #rain-front {
 @keyframes distant-glitch {
   0% {
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       rotateY(var(--ry, 0deg));
@@ -297,11 +297,11 @@ body.theme-blueprint #rain-front {
   10% {
     transform: translate3d(
         calc(
-          calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)) -
+          calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)) -
             2px
         ),
         calc(
-          calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) +
+          calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)) +
             2px
         ),
         var(--tz, 0px)
@@ -313,11 +313,11 @@ body.theme-blueprint #rain-front {
   12% {
     transform: translate3d(
         calc(
-          calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)) +
+          calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)) +
             3px
         ),
         calc(
-          calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) -
+          calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)) -
             1px
         ),
         var(--tz, 0px)
@@ -328,8 +328,8 @@ body.theme-blueprint #rain-front {
   }
   14% {
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       rotateY(var(--ry, 0deg));
@@ -338,8 +338,8 @@ body.theme-blueprint #rain-front {
   }
   100% {
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       rotateY(var(--ry, 0deg));
