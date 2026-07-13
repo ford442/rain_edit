@@ -224,6 +224,7 @@ export const TabManagerMixin7 = {
         el.style.setProperty("--rot-x", `${rotX}deg`);
         el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", `0deg`);
+
         return true;
       }
       if (this.isGalaxyView) {
@@ -383,6 +384,39 @@ export const TabManagerMixin7 = {
     return false;
   },
   _applyLayoutChunk4(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isFloatingNexusView) {
+        const total = Math.max(1, inactiveFiles.length);
+        const radius = Math.max(400, total * 60);
+
+        // Calculate a spiral or layered hexagon orbit
+        const goldenRatio = 1.61803398875;
+        const angle = index * Math.PI * 2 * goldenRatio;
+
+        // As index grows, push slightly back and out
+        const currentRadius = radius + (index * 15);
+
+        const tx = Math.cos(angle) * currentRadius;
+        const ty = Math.sin(angle) * currentRadius;
+
+        // Stagger in Z to avoid perfect overlapping
+        const tz = -200 - (index * 40);
+
+        // Rotate slightly to face the user or slightly off-center
+        const rotX = (ty / 20);
+        const rotY = -(tx / 20);
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+
+        // Save base transform for magnetic fluid interaction
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
       if (this.isScatteredView) {
         // Scattered View positions
         let _totalEchoes = inactiveFiles.length;

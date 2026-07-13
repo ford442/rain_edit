@@ -234,6 +234,7 @@ if (viewModeSelect) {
     else if (view === "neon-synth") tabManager.toggleNeonSynthView();
     else if (view === "blueprint-3d") tabManager.toggleBlueprint3dView();
     else if (view === "cyber-cortex") tabManager.toggleCyberCortexView();
+    else if (view === "floating-nexus") tabManager.toggleFloatingNexusView();
     else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
     else if (view === "outline") tabManager.toggleOutlineView();
     else if (view === "bookshelf") tabManager.toggleBookshelfView();
