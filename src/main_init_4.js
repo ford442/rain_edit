@@ -156,6 +156,22 @@ document.addEventListener("keydown", (e) => {
     }
   }
 
+  // Innovate: Sonar Pulse Reveal (Alt + O)
+  if (e.altKey && e.code === "KeyO" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (!document.body.classList.contains("sonar-pulse-active")) {
+      document.body.classList.add("sonar-pulse-active");
+    }
+  }
+
+  // Innovate: Prismatic Depth Separation (Alt + U)
+  if (e.altKey && e.code === "KeyU" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (!document.body.classList.contains("prism-depth-active")) {
+      document.body.classList.add("prism-depth-active");
+    }
+  }
+
   // Depth X-Ray Scan (Alt + Z)
   if (e.altKey && e.code === "KeyZ" && !e.ctrlKey && !e.shiftKey) {
     e.preventDefault();
@@ -288,6 +304,16 @@ document.addEventListener("keyup", (e) => {
   // Innovate: Focus Pull Interaction (Alt + F)
   if (e.key === "f" || e.key === "F" || e.key === "Alt") {
     document.body.classList.remove("focus-pull-active");
+  }
+
+  // Innovate: Sonar Pulse Reveal (Alt + O)
+  if (e.key === "o" || e.key === "O" || e.key === "Alt") {
+    document.body.classList.remove("sonar-pulse-active");
+  }
+
+  // Innovate: Prismatic Depth Separation (Alt + U)
+  if (e.key === "u" || e.key === "U" || e.key === "Alt") {
+    document.body.classList.remove("prism-depth-active");
   }
 
   if (e.key === "c" || e.key === "C" || e.key === "Alt") {
@@ -557,6 +583,34 @@ document.addEventListener("keyup", (e) => {
 });
 
 document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("sonar-pulse-active")) {
+    document.body.style.setProperty("--sonar-x", `${e.clientX}px`);
+    document.body.style.setProperty("--sonar-y", `${e.clientY}px`);
+
+    // Use requestAnimationFrame for smooth UI updates
+    if (!window.sonarPulseTicking) {
+      window.requestAnimationFrame(() => {
+        // Calculate local mouse position and distance for each document for the mask and blur effect
+        const echoes = document.querySelectorAll(".echo-document");
+        echoes.forEach((doc) => {
+          const rect = doc.getBoundingClientRect();
+          // Local coordinates relative to the element (for masks/backgrounds)
+          const localX = e.clientX - rect.left;
+          const localY = e.clientY - rect.top;
+          doc.style.setProperty("--sonar-local-x", `${localX}px`);
+          doc.style.setProperty("--sonar-local-y", `${localY}px`);
+
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const dist = Math.sqrt(Math.pow(centerX - e.clientX, 2) + Math.pow(centerY - e.clientY, 2));
+          doc.style.setProperty("--sonar-dist", dist);
+        });
+        window.sonarPulseTicking = false;
+      });
+      window.sonarPulseTicking = true;
+    }
+  }
+
   if (document.body.classList.contains("depth-lens-active")) {
     document.body.style.setProperty("--lens-x", `${e.clientX}px`);
     document.body.style.setProperty("--lens-y", `${e.clientY}px`);

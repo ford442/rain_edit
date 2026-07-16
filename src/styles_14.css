@@ -1065,6 +1065,75 @@ body.focus-pull-active .echo-document:not(:hover) {
   transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) - 100px)) scale(0.9) !important;
 }
 
+/* Innovate: Sonar Pulse Reveal (Alt + O) */
+body.sonar-pulse-active .echo-document {
+  opacity: 0.1 !important;
+  /* Use element-local coordinates for mask positioning */
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--sonar-local-x, 50%) var(--sonar-local-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 30%,
+    rgba(0, 0, 0, 0.2) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: radial-gradient(
+    circle 300px at var(--sonar-local-x, 50%) var(--sonar-local-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 30%,
+    rgba(0, 0, 0, 0.2) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  /* Clarify (reduce blur) elements that are closer to the cursor */
+  /* If distance is 0, blur is 0. If distance > 300, blur is 8px. */
+  filter: blur(calc(min(8, max(0, var(--sonar-dist, 300) / 37.5)) * 1px)) grayscale(50%) !important;
+  transition: opacity 0.1s linear, filter 0.1s linear, mask-image 0.1s linear, -webkit-mask-image 0.1s linear;
+}
+body.sonar-pulse-active .echo-document::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 250px at var(--sonar-local-x, 50%) var(--sonar-local-y, 50%),
+    rgba(0, 255, 200, 0.4) 0%,
+    rgba(0, 255, 200, 0.1) 40%,
+    rgba(0, 0, 0, 0) 70%
+  );
+  mix-blend-mode: color-dodge;
+  z-index: 1000;
+  opacity: 1;
+}
+
+/* Innovate: Prismatic Depth Separation (Alt + U) */
+body.prism-depth-active .echo-document {
+  /* Leverage the existing --tz (translateZ) variable, map it to positive values using abs or calc mapping */
+  /* We use the tz value to compute a hue angle. Since tz is often negative (e.g. -200px), we can't directly map length to angle in standard CSS. */
+  /* Instead, we set a fallback filter here that relies on z-index or DOM order visually if JS isn't setting a custom variable. */
+  /* A better approach is to let JS set --hue-val, but for pure CSS fallback: */
+  filter: saturate(250%) brightness(1.2) !important;
+  opacity: 0.8 !important;
+  border: 1px solid rgba(0, 229, 255, 0.4) !important;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.3) !important;
+  transition: filter 0.5s ease-out, opacity 0.5s ease-out, box-shadow 0.5s ease-out, border 0.5s ease-out;
+}
+
+/* For specific depths, use a clean 5-cycle */
+body.prism-depth-active .echo-document:nth-child(5n + 1) { filter: hue-rotate(0deg) saturate(250%) brightness(1.2) !important; border-color: hsla(0, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(0, 100%, 50%, 0.3) !important; }
+body.prism-depth-active .echo-document:nth-child(5n + 2) { filter: hue-rotate(72deg) saturate(250%) brightness(1.2) !important; border-color: hsla(72, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(72, 100%, 50%, 0.3) !important;}
+body.prism-depth-active .echo-document:nth-child(5n + 3) { filter: hue-rotate(144deg) saturate(250%) brightness(1.2) !important; border-color: hsla(144, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(144, 100%, 50%, 0.3) !important;}
+body.prism-depth-active .echo-document:nth-child(5n + 4) { filter: hue-rotate(216deg) saturate(250%) brightness(1.2) !important; border-color: hsla(216, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(216, 100%, 50%, 0.3) !important;}
+body.prism-depth-active .echo-document:nth-child(5n + 5) { filter: hue-rotate(288deg) saturate(250%) brightness(1.2) !important; border-color: hsla(288, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(288, 100%, 50%, 0.3) !important;}
+
+body.prism-depth-active .echo-document:hover {
+  filter: saturate(300%) brightness(1.5) !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.8), inset 0 0 20px rgba(0, 229, 255, 0.5) !important;
+  z-index: 1000 !important;
+}
+
 /* Matrix Dissolve Reveal (Alt+Y) */
 body.matrix-dissolve-active #editor {
   opacity: 0.1;
