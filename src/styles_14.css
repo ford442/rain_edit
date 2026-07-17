@@ -466,6 +466,50 @@ body.portal-mode-active::before {
   mix-blend-mode: screen;
 }
 
+/* Fibonacci Spiral View */
+.fibonacci-spiral-active .echo-document:not(.active) {
+  opacity: 0.6;
+  filter: blur(2px) saturate(0.8);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease;
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) rotateZ(var(--rot-z, 0));
+  transform-origin: center center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.fibonacci-spiral-active .echo-document:not(.active):hover {
+  opacity: 1;
+  filter: blur(0px) saturate(1.2);
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 150px)) rotateZ(var(--rot-z, 0)) scale(1.1);
+  z-index: 1000;
+  box-shadow: 0 10px 40px rgba(0, 255, 204, 0.4), inset 0 0 0 1px rgba(0, 255, 204, 0.3);
+  cursor: pointer;
+}
+
+/* Ripple Wave Interaction (Alt + R) */
+.ripple-wave-active .echo-document:not(.active) {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-wave-active .echo-document:not(.active)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 200px at calc(var(--ripple-x) - var(--item-x, 0px)) calc(var(--ripple-y) - var(--item-y, 0px)),
+    rgba(255, 100, 200, 0.4) 0%,
+    rgba(100, 200, 255, 0.2) 40%,
+    transparent 80%
+  );
+  mix-blend-mode: color-dodge;
+  z-index: 5;
+  transition: background 0.1s;
+}
+
 body.portal-mode-active #editor {
   border: 2px solid rgba(0, 229, 255, 0.5);
   box-shadow: 0 0 30px rgba(0, 229, 255, 0.5);

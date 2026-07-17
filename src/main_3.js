@@ -247,6 +247,7 @@ if (viewModeSelect) {
     else if (view === "luminescence") tabManager.toggleLuminescenceView();
     else if (view === "geode") tabManager.toggleGeodeView();
     else if (view === "lotus") tabManager.toggleLotusView();
+    else if (view === "fibonacci-spiral") tabManager.toggleFibonacciSpiralView();
     else if (view === "hypercube") tabManager.toggleHypercubeView();
     else if (view === "theater") tabManager.toggleTheaterView();
     else if (view === "tornado") tabManager.toggleTornadoView();

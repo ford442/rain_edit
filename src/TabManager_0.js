@@ -75,6 +75,7 @@ export const TabManagerMixin0 = {
     this.isLuminescenceView = false;
     this.isGeodeView = false;
     this.isLotusView = false;
+    this.isFibonacciSpiralView = false;
     this.isHypercubeView = false;
     this.isTheaterView = false;
     this.isTornadoView = false;
@@ -117,6 +118,7 @@ export const TabManagerMixin0 = {
       "solar-system-active",
       "neon-synth-active",
       "tesseract-active",
+      "fibonacci-spiral-active",
       "blueprint-3d-active",
       "cyber-cortex-active",
       "outline-active",
@@ -190,6 +192,17 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isLotusView = true;
       document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleFibonacciSpiralView() {
+    const wasActive = this.isFibonacciSpiralView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isFibonacciSpiralView = true;
+      document.body.classList.add("fibonacci-spiral-active");
+      const btn = document.getElementById("btn-fibonacci-spiral-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   },
