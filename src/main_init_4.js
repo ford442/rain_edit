@@ -1184,3 +1184,101 @@ document.addEventListener("mousemove", (e) => {
     });
   }
 });
+
+// Layer Peek Glass (Alt+K)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.code === "KeyK" && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+    e.preventDefault();
+    document.body.classList.add("layer-peek-glass-active");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key.toLowerCase() === "k" || e.key === "Alt") {
+    document.body.classList.remove("layer-peek-glass-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+        doc.classList.remove("peek-focus");
+        doc.style.removeProperty("--peek-x");
+        doc.style.removeProperty("--peek-y");
+      });
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("layer-peek-glass-active")) {
+    // Find the topmost document under cursor that isn't the editor
+    let target = document.elementFromPoint(e.clientX, e.clientY);
+    let echoDoc = target ? target.closest(".echo-document") : null;
+
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+        if (doc === echoDoc) {
+          doc.classList.add("peek-focus");
+        } else {
+          doc.classList.remove("peek-focus");
+          const rect = doc.getBoundingClientRect();
+          doc.style.setProperty("--peek-x", `${e.clientX - rect.left}px`);
+          doc.style.setProperty("--peek-y", `${e.clientY - rect.top}px`);
+        }
+      });
+    }
+  }
+});
+
+// Holographic Explode View (Alt+Shift+E)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.shiftKey && e.code === "KeyE" && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (!window.isHolographicExplodeActive) {
+      window.isHolographicExplodeActive = true;
+      document.body.classList.add("holographic-explode-active");
+
+      if (window.echoLayerEl) {
+        const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+        const total = echoes.length;
+        if (total > 0) {
+          echoes.forEach((doc, index) => {
+            // Golden spiral distribution in 3D
+            const phi = Math.acos(1 - 2 * (index + 0.5) / total);
+            const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+
+            const radius = 800 + Math.random() * 400; // Explode outward
+
+            const tx = radius * Math.sin(phi) * Math.cos(theta);
+            const ty = radius * Math.sin(phi) * Math.sin(theta);
+            const tz = radius * Math.cos(phi) * 0.5; // flatten z slightly
+
+            const rx = (Math.random() - 0.5) * 60; // random tilt
+            const ry = (Math.random() - 0.5) * 60;
+
+            doc.style.setProperty("--explode-tx", `${tx}px`);
+            doc.style.setProperty("--explode-ty", `${ty}px`);
+            doc.style.setProperty("--explode-tz", `${tz}px`);
+            doc.style.setProperty("--explode-rx", `${rx}deg`);
+            doc.style.setProperty("--explode-ry", `${ry}deg`);
+          });
+        }
+      }
+    }
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if ((e.key.toLowerCase() === "e" || e.key === "Alt" || e.key === "Shift") && window.isHolographicExplodeActive) {
+    if (!e.altKey || !e.shiftKey || e.code === "KeyE") {
+      window.isHolographicExplodeActive = false;
+      document.body.classList.remove("holographic-explode-active");
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+          doc.style.removeProperty("--explode-tx");
+          doc.style.removeProperty("--explode-ty");
+          doc.style.removeProperty("--explode-tz");
+          doc.style.removeProperty("--explode-rx");
+          doc.style.removeProperty("--explode-ry");
+        });
+      }
+    }
+  }
+});
