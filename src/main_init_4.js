@@ -1000,6 +1000,8 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.altKey && e.code === "KeyM" && !e.ctrlKey && !e.metaKey) {
     e.preventDefault();
+    if (!document.body.classList.contains("magnifier-active")) {
+      document.body.classList.add("magnifier-active");
     if (e.shiftKey) {
       if (!document.body.classList.contains("magnetic-sep-active")) {
         document.body.classList.add("magnetic-sep-active");
@@ -1013,6 +1015,8 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  if (e.key === "m" || e.key === "M" || e.key === "Alt") {
+    document.body.classList.remove("magnifier-active");
   if (e.key === "m" || e.key === "M" || e.key === "Alt" || e.key === "Shift") {
     document.body.classList.remove("obscured-magnifier-active");
     document.body.classList.remove("magnetic-sep-active");
@@ -1020,9 +1024,9 @@ document.addEventListener("keyup", (e) => {
 });
 
 document.addEventListener("mousemove", (e) => {
-  if (document.body.classList.contains("obscured-magnifier-active")) {
-    document.body.style.setProperty("--mag-x", `${e.clientX}px`);
-    document.body.style.setProperty("--mag-y", `${e.clientY}px`);
+  if (document.body.classList.contains("magnifier-active")) {
+    document.body.style.setProperty("--lens-x", `${e.clientX}px`);
+    document.body.style.setProperty("--lens-y", `${e.clientY}px`);
   }
   if (document.body.classList.contains("magnetic-sep-active")) {
     document.body.style.setProperty("--mouse-x", `${e.clientX}px`);

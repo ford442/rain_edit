@@ -1215,9 +1215,9 @@ body.typing-pulse .echo-document {
 }
 
 /* Obscured Layer Magnifier (Alt+M) */
-body.obscured-magnifier-active .echo-document {
-  clip-path: circle(150px at var(--mag-x) var(--mag-y));
-  -webkit-clip-path: circle(150px at var(--mag-x) var(--mag-y));
+body.magnifier-active .echo-document {
+  clip-path: circle(150px at var(--lens-x) var(--lens-y));
+  -webkit-clip-path: circle(150px at var(--lens-x) var(--lens-y));
   opacity: 1 !important;
   filter: blur(0px) brightness(1.2) !important;
   z-index: 1000 !important;
@@ -1227,11 +1227,35 @@ body.obscured-magnifier-active .echo-document {
   pointer-events: auto !important;
 }
 
-body.obscured-magnifier-active #editor {
+body.magnifier-active #editor {
   opacity: 0.3; /* Dim the main editor so the magnifier stands out */
   filter: blur(4px);
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
+
+#magnifier-lens {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 229, 255, 0.6);
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.4),
+    inset 0 0 30px rgba(0, 229, 255, 0.2);
+  pointer-events: none;
+  z-index: 9999;
+  backdrop-filter: saturate(200%) brightness(1.5);
+  -webkit-backdrop-filter: saturate(200%) brightness(1.5);
+  transform: translate(calc(var(--lens-x, 50vw) - 150px), calc(var(--lens-y, 50vh) - 150px));
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  background: radial-gradient(circle, rgba(0,229,255,0.1) 0%, rgba(0,0,0,0) 70%);
+}
+
+body.magnifier-active #magnifier-lens {
+  opacity: 1;
 /* X-Ray Lens - More robust & performant */
 @layer ui-modes {
   body.xray-lens-active {
