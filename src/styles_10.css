@@ -55,7 +55,7 @@
 #z-slicer-ui {
   position: absolute;
   left: 24px;
-  top: 50%;
+  top: 35%;
   transform: translateY(-50%);
   width: 40px;
   height: 300px;
@@ -89,6 +89,7 @@
   margin-bottom: 20px;
   opacity: 0.8;
   text-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+  transform: rotate(180deg);
 }
 
 #z-slicer-range {
