@@ -5,8 +5,8 @@ body.quantum-superposition-active .echo-document:hover {
   border-color: rgba(100, 200, 255, 1);
   box-shadow: 0 0 40px rgba(100, 200, 255, 0.6);
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       calc(var(--tz, 0px) + 200px)
     )
     rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
@@ -31,8 +31,8 @@ body.focus-torch-active #echo-layer .echo-document:not(:hover) {
   opacity: 0.1 !important;
   filter: blur(8px) grayscale(50%) !important;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       -200px
     )
     scale(0.8) !important;
@@ -43,8 +43,8 @@ body.focus-torch-active #echo-layer .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) brightness(1.5) saturate(200%) !important;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       200px
     )
     scale(1.1) !important;
@@ -81,8 +81,8 @@ body.depth-spotlight-active #echo-layer .echo-document.spotlight-target {
   border: 1px solid rgba(0, 255, 255, 1) !important;
   /* Lift it slightly forward based on its base transform */
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       calc(var(--tz, 0px) + 100px)
     )
     scale(1.05) !important;
@@ -111,8 +111,8 @@ body.hologram-preview-active #echo-layer .echo-document.hologram-target {
   opacity: 1 !important;
   filter: none !important;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       400px
     )
     scale(1.5) !important;
@@ -154,35 +154,42 @@ body.hologram-preview-active #echo-layer .echo-document:not(.hologram-target) {
 
 /* Enhanced tab active appearance in outline mode */
 body.outline-active .tab-item.active {
-  background: rgba(0, 229, 255, 0.15);
+  background: rgba(0, 229, 255, 0.25);
   border-bottom: 2px solid #00e5ff;
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
 }
 
 body.outline-active .tab-depth-badge.depth-2 {
   color: #fff;
-  text-shadow: 0 0 10px rgba(0, 229, 255, 0.9);
+  text-shadow: 0 0 12px rgba(0, 229, 255, 1);
 }
 
 /* Echo documents get stronger outlines in outline view */
 body.outline-active .echo-document {
-  border: 1px solid hsla(var(--echo-tint, 180deg), 100%, 60%, 0.55);
+  border: 1px solid hsla(var(--echo-tint, 180deg), 100%, 70%, 0.65);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 1px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.25),
-    inset 0 0 24px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.1);
-  opacity: calc(var(--base-opacity, 0.4) + 0.15);
-  filter: blur(calc(var(--base-blur, 4px) * 0.6))
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.35),
+    inset 0 0 30px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.15);
+  opacity: calc(var(--base-opacity, 0.4) + 0.2);
+  filter: blur(calc(var(--base-blur, 4px) * 0.5))
     hue-rotate(var(--echo-tint, 0deg));
+  backdrop-filter: blur(10px) saturate(160%);
+  background: linear-gradient(135deg, rgba(15, 20, 25, 0.6), rgba(5, 10, 15, 0.8));
+  border-radius: 12px;
+  transform: scale(0.95);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 body.outline-active .echo-document:hover {
-  border-color: hsla(var(--echo-tint, 180deg), 100%, 70%, 0.85) !important;
+  border-color: hsla(var(--echo-tint, 180deg), 100%, 80%, 1) !important;
   box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.5),
-    0 0 0 2px hsla(var(--echo-tint, 180deg), 100%, 70%, 0.5),
-    0 0 30px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.2),
-    inset 0 0 30px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.15) !important;
+    0 15px 45px rgba(0, 0, 0, 0.6),
+    0 0 0 2px hsla(var(--echo-tint, 180deg), 100%, 80%, 0.6),
+    0 0 40px hsla(var(--echo-tint, 180deg), 100%, 70%, 0.3),
+    inset 0 0 40px hsla(var(--echo-tint, 180deg), 100%, 70%, 0.2) !important;
+  transform: scale(1.02) translateY(-10px) !important;
+  z-index: 1000 !important;
 }
 
 /* Animated neon border in outline mode */
@@ -260,20 +267,28 @@ body.outline-active .echo-header::before {
 /* Symbol Outline panel */
 .echo-symbol-outline {
   margin: 8px 0 6px;
-  border: 1px solid hsla(var(--echo-tint, 180deg), 80%, 55%, 0.3);
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid hsla(var(--echo-tint, 180deg), 90%, 65%, 0.4);
+  border-radius: 12px;
+  background: rgba(10, 15, 25, 0.65);
+  backdrop-filter: blur(8px) saturate(120%);
   overflow: hidden;
   flex-shrink: 0;
   transition:
-    max-height 0.3s ease,
-    opacity 0.3s ease;
+    max-height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.4s ease,
+    box-shadow 0.4s ease;
   max-height: 300px;
   opacity: 1;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.echo-symbol-outline:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 15px hsla(var(--echo-tint, 180deg), 70%, 50%, 0.2);
+  border-color: hsla(var(--echo-tint, 180deg), 100%, 75%, 0.6);
 }
 
 .echo-symbol-outline[data-collapsed="true"] {
-  max-height: 32px;
+  max-height: 36px;
 }
 
 .echo-symbol-outline[data-collapsed="true"] .echo-outline-list {
@@ -284,31 +299,33 @@ body.outline-active .echo-header::before {
   width: 100%;
   background: linear-gradient(
     90deg,
-    hsla(var(--echo-tint, 180deg), 60%, 25%, 0.5) 0%,
-    rgba(0, 0, 0, 0.3) 100%
+    hsla(var(--echo-tint, 180deg), 60%, 20%, 0.7) 0%,
+    rgba(15, 20, 25, 0.8) 100%
   );
   border: none;
-  border-bottom: 1px solid hsla(var(--echo-tint, 180deg), 80%, 55%, 0.3);
-  color: hsla(var(--echo-tint, 180deg), 100%, 75%, 0.9);
+  border-bottom: 1px solid hsla(var(--echo-tint, 180deg), 80%, 55%, 0.4);
+  color: hsla(var(--echo-tint, 180deg), 100%, 85%, 1);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 1.5px;
-  padding: 6px 12px;
+  padding: 8px 14px;
   text-align: left;
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: background 0.2s ease;
+  gap: 8px;
+  transition: all 0.3s ease;
 }
 
 .echo-outline-toggle:hover {
   background: linear-gradient(
     90deg,
-    hsla(var(--echo-tint, 180deg), 60%, 35%, 0.6) 0%,
-    rgba(0, 0, 0, 0.2) 100%
+    hsla(var(--echo-tint, 180deg), 70%, 30%, 0.85) 0%,
+    rgba(20, 25, 30, 0.9) 100%
   );
+  color: #fff;
+  text-shadow: 0 0 8px hsla(var(--echo-tint, 180deg), 100%, 70%, 0.8);
 }
 
 .echo-symbol-outline[data-collapsed="true"] .echo-outline-toggle {
@@ -348,23 +365,27 @@ body.outline-active .echo-header::before {
 }
 
 .echo-outline-item {
+  padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 12px;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 11px;
-  color: rgba(200, 230, 255, 0.75);
-  cursor: default;
-  transition: background 0.15s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 2px solid transparent;
+  color: hsla(var(--echo-tint, 180deg), 70%, 75%, 0.8);
+  background: rgba(0, 0, 0, 0.2);
+  margin-bottom: 2px;
+  border-radius: 4px;
 }
 
 .echo-outline-item:hover {
-  background: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.08);
-  color: rgba(220, 245, 255, 0.95);
+  background: rgba(0, 229, 255, 0.15);
+  border-left: 2px solid hsla(var(--echo-tint, 180deg), 100%, 65%, 1);
+  color: hsla(var(--echo-tint, 180deg), 100%, 95%, 1);
+  transform: translateX(4px);
+  box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
 }
 
 .outline-kind-icon {
@@ -451,10 +472,10 @@ body.veil-excavator-active .echo-document {
 body.veil-excavator-active #echo-layer .echo-document {
   -webkit-mask-size: 100vw 100vh;
   mask-size: 100vw 100vh;
-  -webkit-mask-position: calc(-10vw - var(--tx, 0px) - var(--repel-tx, 0px))
-    calc(-10vh - var(--ty, 0px) - var(--repel-ty, 0px));
-  mask-position: calc(-10vw - var(--tx, 0px) - var(--repel-tx, 0px))
-    calc(-10vh - var(--ty, 0px) - var(--repel-ty, 0px));
+  -webkit-mask-position: calc(-10vw - var(--tx, 0px) - var(--repel-tx, 0px) + var(--repulse-tx, 0px))
+    calc(-10vh - var(--ty, 0px) - var(--repel-ty, 0px) + var(--repulse-ty, 0px));
+  mask-position: calc(-10vw - var(--tx, 0px) - var(--repel-tx, 0px) + var(--repulse-tx, 0px))
+    calc(-10vh - var(--ty, 0px) - var(--repel-ty, 0px) + var(--repulse-ty, 0px));
 }
 
 /* UI overlay for Excavator */
@@ -545,10 +566,10 @@ body.curtain-pull-active #echo-layer .echo-document {
   --pull-magnitude: calc(800px - (var(--index, 0) * 100px));
   transform: translate3d(
       calc(
-        var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) +
+        var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px) +
           (var(--pull-dir) * var(--pull-magnitude) * var(--mouse-x-norm, 0))
       ),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       calc(var(--tz, 0px) + (var(--index, 0) * 50px))
         /* slightly pull forward to see them peeling */
     )
@@ -574,8 +595,8 @@ body.explode-view-active .echo-document {
   opacity: 0.9 !important;
   filter: blur(0px) drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) !important;
   transform: translate3d(
-      calc(var(--exp-tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--exp-ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--exp-tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--exp-ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       var(--exp-tz, 0px)
     )
     rotateX(var(--exp-rot-x, 0deg)) rotateY(var(--exp-rot-y, 0deg))
@@ -590,8 +611,8 @@ body.explode-view-active .echo-document {
 
 body.explode-view-active .echo-document:hover {
   transform: translate3d(
-      calc(var(--exp-tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--exp-ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--exp-tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--exp-ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       calc(var(--exp-tz, 0px) + 200px)
     )
     rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;

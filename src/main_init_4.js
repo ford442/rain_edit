@@ -127,8 +127,20 @@ window.addEventListener("blur", () => {
 
 window.isSteppedCraterActive = false;
 window.isFoldOutGalleryActive = false;
+window.isCardShuffleActive = false;
+window.isDepthScanActive = false;
+window.__depthScanTarget = 0;
 
 document.addEventListener("keydown", (e) => {
+  // Card Shuffle Spread (Alt + Shift + D)
+  if (e.altKey && e.shiftKey && e.code === "KeyD") {
+    e.preventDefault();
+    if (!window.isCardShuffleActive) {
+      window.isCardShuffleActive = true;
+      document.body.classList.add("card-shuffle-active");
+    }
+  }
+
   // Explode View (Ctrl + Alt + E)
   if ((e.ctrlKey || e.metaKey) && e.altKey && e.code === "KeyE") {
     e.preventDefault();
@@ -136,8 +148,68 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 
-  // Depth Lens (Alt + Z)
-  if (e.altKey && e.code === "KeyZ") {
+  // Innovate: Focus Pull Interaction (Alt + F)
+  if (e.altKey && e.code === "KeyF" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (!document.body.classList.contains("focus-pull-active")) {
+      document.body.classList.add("focus-pull-active");
+    }
+  }
+
+  // Innovate: Sonar Pulse Reveal (Alt + O)
+  if (e.altKey && e.code === "KeyO" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (!document.body.classList.contains("sonar-pulse-active")) {
+      document.body.classList.add("sonar-pulse-active");
+    }
+  }
+
+  // Innovate: Prismatic Depth Separation (Alt + U)
+  if (e.altKey && e.code === "KeyU" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    if (!document.body.classList.contains("prism-depth-active")) {
+      document.body.classList.add("prism-depth-active");
+    }
+  }
+
+  // Depth X-Ray Scan (Alt + Z)
+  if (e.altKey && e.code === "KeyZ" && !e.ctrlKey && !e.shiftKey) {
+    e.preventDefault();
+    if (!window.isDepthScanActive) {
+      window.isDepthScanActive = true;
+      document.body.classList.add("depth-scan-active");
+
+      // Start scanning animation
+      window.__depthScanTarget = 0;
+      const animateScan = () => {
+        if (!window.isDepthScanActive) return;
+
+        window.__depthScanTarget = (window.__depthScanTarget + 0.1) % 15; // Assuming max depth ~15
+        document.body.style.setProperty("--scan-depth", window.__depthScanTarget);
+
+        if (window.echoLayerEl) {
+          const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+          echoes.forEach((doc) => {
+            const idx = parseInt(doc.dataset.index || 0, 10);
+            const dist = Math.abs(idx - window.__depthScanTarget);
+
+            if (dist < 1.5) {
+              doc.classList.add("scan-highlight");
+            } else {
+              doc.classList.remove("scan-highlight");
+            }
+          });
+        }
+
+        requestAnimationFrame(animateScan);
+      };
+      requestAnimationFrame(animateScan);
+    }
+    return;
+  }
+
+  // Depth Lens (Ctrl + Alt + Z)
+  if (e.ctrlKey && e.altKey && e.code === "KeyZ") {
     e.preventDefault();
     document.body.classList.toggle("depth-lens-active");
 
@@ -229,6 +301,21 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
+  // Innovate: Focus Pull Interaction (Alt + F)
+  if (e.key === "f" || e.key === "F" || e.key === "Alt") {
+    document.body.classList.remove("focus-pull-active");
+  }
+
+  // Innovate: Sonar Pulse Reveal (Alt + O)
+  if (e.key === "o" || e.key === "O" || e.key === "Alt") {
+    document.body.classList.remove("sonar-pulse-active");
+  }
+
+  // Innovate: Prismatic Depth Separation (Alt + U)
+  if (e.key === "u" || e.key === "U" || e.key === "Alt") {
+    document.body.classList.remove("prism-depth-active");
+  }
+
   if (e.key === "c" || e.key === "C" || e.key === "Alt") {
     if (isFanningActive && (!e.altKey || (e.code === "KeyC" && !e.altKey))) {
       isFanningActive = false;
@@ -317,6 +404,28 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// Ripple Wave Hover Interaction (Alt + R)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.key.toLowerCase() === "r" && !e.shiftKey && !e.ctrlKey) {
+    if (!document.body.classList.contains("ripple-wave-active")) {
+      document.body.classList.add("ripple-wave-active");
+    }
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key.toLowerCase() === "r" || !e.altKey) {
+    document.body.classList.remove("ripple-wave-active");
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("ripple-wave-active")) {
+    document.body.style.setProperty("--ripple-x", `${e.clientX}px`);
+    document.body.style.setProperty("--ripple-y", `${e.clientY}px`);
+  }
+});
+
 document.addEventListener("keydown", (e) => {
   if (
     e.altKey &&
@@ -341,6 +450,15 @@ document.addEventListener("keydown", (e) => {
   if (e.altKey && e.shiftKey && e.code === "KeyF") {
     e.preventDefault();
     document.body.classList.add("focus-torch-active");
+  }
+
+  // Venetian Blinds Interaction (Alt + Shift + B)
+  if (e.altKey && e.shiftKey && e.code === "KeyB") {
+    e.preventDefault();
+    if (!window.isVenetianBlindsActive) {
+      window.isVenetianBlindsActive = true;
+      document.body.classList.add("venetian-blinds-interaction-active");
+    }
   }
 
   // Stepped Crater Reveal (Alt + Shift + C)
@@ -406,6 +524,19 @@ document.addEventListener("keyup", (e) => {
     document.body.classList.remove("matrix-dissolve-active");
   }
 
+  // Depth X-Ray Scan (Alt + Z)
+  if (e.key === "z" || e.key === "Z" || e.key === "Alt") {
+    if (window.isDepthScanActive && (!e.altKey || e.code === "KeyZ")) {
+      window.isDepthScanActive = false;
+      document.body.classList.remove("depth-scan-active");
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          doc.classList.remove("scan-highlight");
+        });
+      }
+    }
+  }
+
   // Holographic Document Dispersion (Alt+X)
   if (e.key === "x" || e.key === "X" || e.key === "Alt") {
     document.body.classList.remove("dispersion-active");
@@ -425,6 +556,13 @@ document.addEventListener("keyup", (e) => {
 
   if (e.key === "f" || e.key === "F" || e.key === "Alt" || e.key === "Shift") {
     document.body.classList.remove("focus-torch-active");
+  }
+
+  if (e.key === "b" || e.key === "B" || e.key === "Alt" || e.key === "Shift") {
+    if (window.isVenetianBlindsActive && (!e.altKey || !e.shiftKey || e.code === "KeyB")) {
+      window.isVenetianBlindsActive = false;
+      document.body.classList.remove("venetian-blinds-interaction-active");
+    }
   }
 
   if (e.key === "c" || e.key === "C" || e.key === "Alt" || e.key === "Shift") {
@@ -454,12 +592,47 @@ document.addEventListener("keyup", (e) => {
     }
   }
 
+  if (e.key === "d" || e.key === "D" || e.key === "Alt" || e.key === "Shift") {
+    if (window.isCardShuffleActive && (!e.altKey || !e.shiftKey || e.code === "KeyD")) {
+      window.isCardShuffleActive = false;
+      document.body.classList.remove("card-shuffle-active");
+    }
+  }
+
   if (e.key === "s" || e.key === "S" || e.key === "Alt" || e.key === "Shift") {
     document.body.classList.remove("holographic-slice-active");
   }
 });
 
 document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("sonar-pulse-active")) {
+    document.body.style.setProperty("--sonar-x", `${e.clientX}px`);
+    document.body.style.setProperty("--sonar-y", `${e.clientY}px`);
+
+    // Use requestAnimationFrame for smooth UI updates
+    if (!window.sonarPulseTicking) {
+      window.requestAnimationFrame(() => {
+        // Calculate local mouse position and distance for each document for the mask and blur effect
+        const echoes = document.querySelectorAll(".echo-document");
+        echoes.forEach((doc) => {
+          const rect = doc.getBoundingClientRect();
+          // Local coordinates relative to the element (for masks/backgrounds)
+          const localX = e.clientX - rect.left;
+          const localY = e.clientY - rect.top;
+          doc.style.setProperty("--sonar-local-x", `${localX}px`);
+          doc.style.setProperty("--sonar-local-y", `${localY}px`);
+
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const dist = Math.sqrt(Math.pow(centerX - e.clientX, 2) + Math.pow(centerY - e.clientY, 2));
+          doc.style.setProperty("--sonar-dist", dist);
+        });
+        window.sonarPulseTicking = false;
+      });
+      window.sonarPulseTicking = true;
+    }
+  }
+
   if (document.body.classList.contains("depth-lens-active")) {
     document.body.style.setProperty("--lens-x", `${e.clientX}px`);
     document.body.style.setProperty("--lens-y", `${e.clientY}px`);
@@ -500,6 +673,11 @@ document.addEventListener("mousemove", (e) => {
   if (document.body.classList.contains("holographic-slice-active")) {
     document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
     document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
+  }
+
+  if (document.body.classList.contains("venetian-blinds-interaction-active")) {
+    const blindAngle = (e.clientY / window.innerHeight) * 100;
+    document.body.style.setProperty("--blind-angle", `${blindAngle}%`);
   }
 
   if (document.body.classList.contains("stepped-crater-active")) {
@@ -556,16 +734,44 @@ document.addEventListener("keydown", (e) => {
 });
 
 // Peel Reveal logic
+let isPeeling = false;
+
 document.addEventListener("keydown", (e) => {
   if (e.altKey && e.shiftKey && e.key.toLowerCase() === "v" && !e.ctrlKey && !e.metaKey) {
     e.preventDefault();
     document.body.classList.add("peel-reveal-active");
+    document.body.style.setProperty("--peel-x", `100vw`);
+    document.body.style.setProperty("--peel-y", `0px`);
   }
 });
 
 document.addEventListener("keyup", (e) => {
   if (e.key.toLowerCase() === "v" || e.key === "Alt" || e.key === "Shift") {
     document.body.classList.remove("peel-reveal-active");
+    isPeeling = false;
+  }
+});
+
+document.addEventListener("mousedown", (e) => {
+  if (document.body.classList.contains("peel-reveal-active")) {
+    isPeeling = true;
+    document.body.style.setProperty("--peel-x", `${e.clientX}px`);
+    document.body.style.setProperty("--peel-y", `${e.clientY}px`);
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (isPeeling && document.body.classList.contains("peel-reveal-active")) {
+    document.body.style.setProperty("--peel-x", `${e.clientX}px`);
+    document.body.style.setProperty("--peel-y", `${e.clientY}px`);
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  if (isPeeling) {
+    isPeeling = false;
+    document.body.style.setProperty("--peel-x", `100vw`);
+    document.body.style.setProperty("--peel-y", `0px`);
   }
 });
 
@@ -790,12 +996,20 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// Obscured Layer Magnifier (Alt+M)
+// Obscured Layer Magnifier (Alt+M) / Magnetic Separation (Alt+Shift+M)
 document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.code === "KeyM" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+  if (e.altKey && e.code === "KeyM" && !e.ctrlKey && !e.metaKey) {
     e.preventDefault();
     if (!document.body.classList.contains("magnifier-active")) {
       document.body.classList.add("magnifier-active");
+    if (e.shiftKey) {
+      if (!document.body.classList.contains("magnetic-sep-active")) {
+        document.body.classList.add("magnetic-sep-active");
+      }
+    } else {
+      if (!document.body.classList.contains("obscured-magnifier-active")) {
+        document.body.classList.add("obscured-magnifier-active");
+      }
     }
   }
 });
@@ -803,6 +1017,9 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("keyup", (e) => {
   if (e.key === "m" || e.key === "M" || e.key === "Alt") {
     document.body.classList.remove("magnifier-active");
+  if (e.key === "m" || e.key === "M" || e.key === "Alt" || e.key === "Shift") {
+    document.body.classList.remove("obscured-magnifier-active");
+    document.body.classList.remove("magnetic-sep-active");
   }
 });
 
@@ -810,5 +1027,160 @@ document.addEventListener("mousemove", (e) => {
   if (document.body.classList.contains("magnifier-active")) {
     document.body.style.setProperty("--lens-x", `${e.clientX}px`);
     document.body.style.setProperty("--lens-y", `${e.clientY}px`);
+  }
+  if (document.body.classList.contains("magnetic-sep-active")) {
+    document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
+    document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
+  }
+});
+
+// X-Ray Lens Interaction (Ctrl+Alt+X toggle)
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.altKey && e.code === "KeyX" && !e.shiftKey && !e.metaKey) {
+    e.preventDefault();
+    document.body.classList.toggle("xray-lens-active");
+
+    // Set initial local coordinates if activating
+    if (document.body.classList.contains("xray-lens-active")) {
+       const echoLayer = document.getElementById("echo-layer");
+       if (echoLayer) {
+         echoLayer.querySelectorAll(".echo-document").forEach((doc) => {
+             const rect = doc.getBoundingClientRect();
+             doc.style.setProperty("--xray-local-x", `${e.clientX - rect.left}px`);
+             doc.style.setProperty("--xray-local-y", `${e.clientY - rect.top}px`);
+         });
+       }
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("xray-lens-active")) {
+    const echoLayer = document.getElementById("echo-layer");
+    if (echoLayer) {
+      echoLayer.querySelectorAll(".echo-document").forEach((doc) => {
+          const rect = doc.getBoundingClientRect();
+          doc.style.setProperty("--xray-local-x", `${e.clientX - rect.left}px`);
+          doc.style.setProperty("--xray-local-y", `${e.clientY - rect.top}px`);
+      });
+    }
+  }
+});
+
+// Neon Trace Scanner (Alt + S)
+let isTraceScannerActive = false;
+let traceScannerRaf = null;
+let traceScannerY = 0;
+let traceScannerVelocity = 15;
+let traceScannerEl = null;
+
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && (e.key === "s" || e.key === "S") && !e.shiftKey && !e.ctrlKey && !e.metaKey && !isTraceScannerActive) {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    e.preventDefault();
+    isTraceScannerActive = true;
+    document.body.classList.add("trace-scanner-active");
+
+    if (!traceScannerEl) {
+      traceScannerEl = document.createElement("div");
+      traceScannerEl.id = "trace-scanner-line";
+      document.body.appendChild(traceScannerEl);
+    }
+
+    traceScannerEl.style.display = "block";
+    traceScannerY = -100;
+
+    const scanLoop = () => {
+      if (!isTraceScannerActive) return;
+
+      traceScannerY += traceScannerVelocity;
+      traceScannerEl.style.transform = `translateY(${traceScannerY}px)`;
+
+      // Hit detection
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+          const rect = doc.getBoundingClientRect();
+          // Check if scanline intersects with document bounding box
+          if (traceScannerY > rect.top && traceScannerY < rect.bottom) {
+            doc.classList.add("trace-hit");
+            doc.style.setProperty("--trace-y-percent", `${((traceScannerY - rect.top) / rect.height) * 100}%`);
+          } else {
+            doc.classList.remove("trace-hit");
+          }
+        });
+      }
+
+      if (traceScannerY > window.innerHeight + 100) {
+        // Reset or finish
+        isTraceScannerActive = false;
+        document.body.classList.remove("trace-scanner-active");
+        traceScannerEl.style.display = "none";
+        if (window.echoLayerEl) {
+          window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+            doc.classList.remove("trace-hit");
+          });
+        }
+      } else {
+        traceScannerRaf = requestAnimationFrame(scanLoop);
+      }
+    };
+
+    traceScannerRaf = requestAnimationFrame(scanLoop);
+  }
+});
+
+// Magnetic Repulsion Field (Hold M)
+let isMagneticRepulsionActive = false;
+document.addEventListener("keydown", (e) => {
+  if ((e.key === "m" || e.key === "M") && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    if (!isMagneticRepulsionActive) {
+      isMagneticRepulsionActive = true;
+      document.body.classList.add("magnetic-repulsion-active");
+    }
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "m" || e.key === "M") {
+    isMagneticRepulsionActive = false;
+    document.body.classList.remove("magnetic-repulsion-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+        doc.style.removeProperty("--repulse-tx");
+        doc.style.removeProperty("--repulse-ty");
+        doc.style.removeProperty("--repulse-rot");
+      });
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (isMagneticRepulsionActive && window.echoLayerEl) {
+    const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+    const maxDist = 300;
+    echoes.forEach(doc => {
+      const rect = doc.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dist = Math.sqrt((cx - e.clientX)**2 + (cy - e.clientY)**2);
+
+      if (dist < maxDist) {
+        const force = Math.pow(1 - dist / maxDist, 2);
+        const dx = cx - e.clientX;
+        const dy = cy - e.clientY;
+        const pushX = (dx / (dist || 1)) * force * 150;
+        const pushY = (dy / (dist || 1)) * force * 150;
+        const rot = (dx / (dist || 1)) * force * 15;
+
+        doc.style.setProperty("--repulse-tx", `${pushX}px`);
+        doc.style.setProperty("--repulse-ty", `${pushY}px`);
+        doc.style.setProperty("--repulse-rot", `${rot}deg`);
+      } else {
+        doc.style.setProperty("--repulse-tx", `0px`);
+        doc.style.setProperty("--repulse-ty", `0px`);
+        doc.style.setProperty("--repulse-rot", `0deg`);
+      }
+    });
   }
 });

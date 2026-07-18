@@ -42,6 +42,61 @@ document.addEventListener("mousemove", (e) => {
   }
 
   if (
+    document.body.classList.contains("floating-nexus-active")
+  ) {
+    const MAX_DISTANCE = 350; // The radius of the cursor's magnetic field
+    const MAX_PUSH = 60;      // Maximum pixels the document will be pushed away
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    // Use requestAnimationFrame for smooth 60fps rendering without jank
+    requestAnimationFrame(() => {
+      const docs = document.querySelectorAll('.echo-document');
+
+      docs.forEach(doc => {
+        const rect = doc.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        const deltaX = mouseX - centerX;
+        const deltaY = mouseY - centerY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        // Fetch the base transform set by your layout logic
+        const baseTransform = doc.getAttribute('data-base-transform') || '';
+
+        if (distance < MAX_DISTANCE) {
+          // Calculate force (closer = higher force, between 0 and 1)
+          const force = (MAX_DISTANCE - distance) / MAX_DISTANCE;
+
+          // Calculate push vectors (push away from cursor)
+          const pushX = -(deltaX / distance) * (force * MAX_PUSH);
+          const pushY = -(deltaY / distance) * (force * MAX_PUSH);
+
+          // Add a slight tilt (parallax) and scale up slightly as it repels
+          const tiltX = (deltaY / distance) * force * 10; // degrees
+          const tiltY = -(deltaX / distance) * force * 10;
+
+          doc.style.transform = `${baseTransform} translate3d(${pushX}px, ${pushY}px, 20px) scale(${1 + force * 0.05}) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+
+          // Intensify the glow based on proximity
+          doc.style.boxShadow = `
+            0 0 ${20 + force * 40}px var(--bio-glow-color),
+            inset 0 0 ${10 + force * 20}px rgba(255,255,255,0.2)`;
+
+          doc.style.borderColor = `rgba(255, 255, 255, ${0.2 + force * 0.5})`;
+
+        } else {
+          // Reset to base layout smoothly if outside magnetic field
+          doc.style.transform = baseTransform;
+          doc.style.boxShadow = '';
+          doc.style.borderColor = '';
+        }
+      });
+    });
+  }
+
+  if (
     isTesseractDragging &&
     document.body.classList.contains("tesseract-active")
   ) {
@@ -459,6 +514,14 @@ document.addEventListener("mousemove", (e) => {
       // Rotate entire echo layer based on horizontal mouse position
       const helixRot = -x * 360;
       echoLayerEl.style.setProperty("--helix-global-rot", `${helixRot}deg`);
+    }
+
+    if (tabManager.isMeteorView) {
+      // Global slight rotation and tilt for the entire meteor field based on mouse
+      const meteorRotY = -x * 60;
+      const meteorRotX = y * 60;
+      echoLayerEl.style.setProperty("--meteor-global-rot-x", `${meteorRotX}deg`);
+      echoLayerEl.style.setProperty("--meteor-global-rot-y", `${meteorRotY}deg`);
     }
 
     echoes.forEach((echo, index) => {

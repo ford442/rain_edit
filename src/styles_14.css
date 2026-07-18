@@ -466,6 +466,50 @@ body.portal-mode-active::before {
   mix-blend-mode: screen;
 }
 
+/* Fibonacci Spiral View */
+.fibonacci-spiral-active .echo-document:not(.active) {
+  opacity: 0.6;
+  filter: blur(2px) saturate(0.8);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease;
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0)) rotateZ(var(--rot-z, 0));
+  transform-origin: center center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.fibonacci-spiral-active .echo-document:not(.active):hover {
+  opacity: 1;
+  filter: blur(0px) saturate(1.2);
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 150px)) rotateZ(var(--rot-z, 0)) scale(1.1);
+  z-index: 1000;
+  box-shadow: 0 10px 40px rgba(0, 255, 204, 0.4), inset 0 0 0 1px rgba(0, 255, 204, 0.3);
+  cursor: pointer;
+}
+
+/* Ripple Wave Interaction (Alt + R) */
+.ripple-wave-active .echo-document:not(.active) {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-wave-active .echo-document:not(.active)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 200px at calc(var(--ripple-x) - var(--item-x, 0px)) calc(var(--ripple-y) - var(--item-y, 0px)),
+    rgba(255, 100, 200, 0.4) 0%,
+    rgba(100, 200, 255, 0.2) 40%,
+    transparent 80%
+  );
+  mix-blend-mode: color-dodge;
+  z-index: 5;
+  transition: background 0.1s;
+}
+
 body.portal-mode-active #editor {
   border: 2px solid rgba(0, 229, 255, 0.5);
   box-shadow: 0 0 30px rgba(0, 229, 255, 0.5);
@@ -926,23 +970,23 @@ body.peel-reveal-active .echo-document {
 }
 
 body.peel-reveal-active .echo-document:not(:hover) {
-  /* Slice off the top right corner based on mouse position relative to viewport */
-  /* This creates a diagonal line that follows the cursor */
   clip-path: polygon(
     0% 0%,
-    calc(var(--mouse-x, 100%) - 50px) 0%,
-    100% calc(var(--mouse-y, 0px) + 50px),
+    var(--peel-x, 100vw) 0%,
+    calc(var(--peel-x, 100vw) - 60px) calc(var(--peel-y, 0px) * 0.5 + 20px),
+    calc(var(--peel-x, 100vw) - 20px) calc(var(--peel-y, 0px) + 50px),
+    100% calc(var(--peel-y, 0px) + 150px),
     100% 100%,
     0% 100%
   );
-  filter: drop-shadow(-5px 5px 15px rgba(0, 0, 0, 0.8));
+  filter: drop-shadow(-10px 10px 20px rgba(0, 0, 0, 0.9));
 }
 
 body.peel-reveal-active #editor {
   clip-path: polygon(
     0% 0%,
-    calc(var(--mouse-x, 100%) - 100px) 0%,
-    100% calc(var(--mouse-y, 0px) + 100px),
+    calc(var(--peel-x, 100vw) - 100px) 0%,
+    100% calc(var(--peel-y, 0px) + 150px),
     100% 100%,
     0% 100%
   );
@@ -958,26 +1002,35 @@ body.peel-reveal-active .echo-document:hover {
   box-shadow: 0 0 30px rgba(0, 229, 255, 0.4) !important;
 }
 
-/* Add a curled edge effect */
-body.peel-reveal-active .echo-document::before {
+/* Curled edge effect */
+body.peel-reveal-active .echo-document::after {
   content: "";
-  position: absolute;
+  position: fixed;
   top: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
+  left: 0;
+  width: 250px;
+  height: 250px;
+  transform-origin: center;
   pointer-events: none;
-  background: linear-gradient(
-    225deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    transparent 100px
+  background: radial-gradient(
+    circle at top right,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(0, 0, 0, 0.5) 50%,
+    transparent 80%
   );
-  z-index: 10;
+  box-shadow: -15px 15px 25px rgba(0, 0, 0, 0.7);
+  border-bottom-left-radius: 100%;
+  border-top-right-radius: 20%;
+  transform: translate(
+    calc(var(--peel-x, 100vw) - 125px),
+    calc(var(--peel-y, 0px) - 50px)
+  ) rotateZ(35deg);
+  z-index: 15;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, transform 0.05s linear;
 }
 
-body.peel-reveal-active .echo-document:not(:hover)::before {
+body.peel-reveal-active .echo-document:not(:hover)::after {
   opacity: 1;
 }
 
@@ -1017,20 +1070,112 @@ body.stack-deck-active .echo-document {
 }
 
 body.stack-deck-active .echo-document {
-  background: rgba(10, 15, 25, 0.8) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 2px 5px rgba(255, 255, 255, 0.1) !important;
+  background: linear-gradient(135deg, rgba(20, 25, 40, 0.85) 0%, rgba(5, 10, 20, 0.95) 100%) !important;
+  backdrop-filter: blur(12px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), inset 0 2px 10px rgba(255, 255, 255, 0.05) !important;
 }
 
 body.stack-deck-active .echo-document:hover {
-  border-color: rgba(0, 229, 255, 0.8) !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 229, 255, 0.4), inset 0 2px 10px rgba(255, 255, 255, 0.2) !important;
-  transform: translate3d(var(--tx, 0), calc(var(--ty, 0) - 20px), calc(var(--tz, 0) + 20px))
-    rotateX(0deg) rotateY(0deg) scale(1.05) !important;
+  border-color: rgba(0, 229, 255, 0.9) !important;
+  border-top: 1px solid rgba(0, 255, 255, 1) !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 229, 255, 0.3), inset 0 2px 15px rgba(255, 255, 255, 0.3) !important;
+  transform: translate3d(calc(var(--tx, 0) - 20px), calc(var(--ty, 0) - 20px), calc(var(--tz, 0) + 40px)) scale(1.05) rotateX(5deg) rotateY(-5deg) !important;
   z-index: 1000 !important;
   opacity: 1 !important;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s, border-color 0.4s !important;
+}
+
+/* Innovate: Focus Pull Interaction (Alt + F) */
+body.focus-pull-active .echo-document {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, filter 0.4s ease;
+}
+
+body.focus-pull-active .echo-document:hover {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), 100px) scale(1.1) !important;
+  z-index: 9999 !important;
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.2) !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 229, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.3) !important;
+}
+
+body.focus-pull-active .echo-document:not(:hover) {
+  opacity: 0.1 !important;
+  filter: blur(8px) grayscale(50%) !important;
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) - 100px)) scale(0.9) !important;
+}
+
+/* Innovate: Sonar Pulse Reveal (Alt + O) */
+body.sonar-pulse-active .echo-document {
+  opacity: 0.1 !important;
+  /* Use element-local coordinates for mask positioning */
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--sonar-local-x, 50%) var(--sonar-local-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 30%,
+    rgba(0, 0, 0, 0.2) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: radial-gradient(
+    circle 300px at var(--sonar-local-x, 50%) var(--sonar-local-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 30%,
+    rgba(0, 0, 0, 0.2) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  /* Clarify (reduce blur) elements that are closer to the cursor */
+  /* If distance is 0, blur is 0. If distance > 300, blur is 8px. */
+  filter: blur(calc(min(8, max(0, var(--sonar-dist, 300) / 37.5)) * 1px)) grayscale(50%) !important;
+  transition: opacity 0.1s linear, filter 0.1s linear, mask-image 0.1s linear, -webkit-mask-image 0.1s linear;
+}
+body.sonar-pulse-active .echo-document::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 250px at var(--sonar-local-x, 50%) var(--sonar-local-y, 50%),
+    rgba(0, 255, 200, 0.4) 0%,
+    rgba(0, 255, 200, 0.1) 40%,
+    rgba(0, 0, 0, 0) 70%
+  );
+  mix-blend-mode: color-dodge;
+  z-index: 1000;
+  opacity: 1;
+}
+
+/* Innovate: Prismatic Depth Separation (Alt + U) */
+body.prism-depth-active .echo-document {
+  /* Leverage the existing --tz (translateZ) variable, map it to positive values using abs or calc mapping */
+  /* We use the tz value to compute a hue angle. Since tz is often negative (e.g. -200px), we can't directly map length to angle in standard CSS. */
+  /* Instead, we set a fallback filter here that relies on z-index or DOM order visually if JS isn't setting a custom variable. */
+  /* A better approach is to let JS set --hue-val, but for pure CSS fallback: */
+  filter: saturate(250%) brightness(1.2) !important;
+  opacity: 0.8 !important;
+  border: 1px solid rgba(0, 229, 255, 0.4) !important;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.3) !important;
+  transition: filter 0.5s ease-out, opacity 0.5s ease-out, box-shadow 0.5s ease-out, border 0.5s ease-out;
+}
+
+/* For specific depths, use a clean 5-cycle */
+body.prism-depth-active .echo-document:nth-child(5n + 1) { filter: hue-rotate(0deg) saturate(250%) brightness(1.2) !important; border-color: hsla(0, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(0, 100%, 50%, 0.3) !important; }
+body.prism-depth-active .echo-document:nth-child(5n + 2) { filter: hue-rotate(72deg) saturate(250%) brightness(1.2) !important; border-color: hsla(72, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(72, 100%, 50%, 0.3) !important;}
+body.prism-depth-active .echo-document:nth-child(5n + 3) { filter: hue-rotate(144deg) saturate(250%) brightness(1.2) !important; border-color: hsla(144, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(144, 100%, 50%, 0.3) !important;}
+body.prism-depth-active .echo-document:nth-child(5n + 4) { filter: hue-rotate(216deg) saturate(250%) brightness(1.2) !important; border-color: hsla(216, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(216, 100%, 50%, 0.3) !important;}
+body.prism-depth-active .echo-document:nth-child(5n + 5) { filter: hue-rotate(288deg) saturate(250%) brightness(1.2) !important; border-color: hsla(288, 100%, 50%, 0.4) !important; box-shadow: 0 0 20px hsla(288, 100%, 50%, 0.3) !important;}
+
+body.prism-depth-active .echo-document:hover {
+  filter: saturate(300%) brightness(1.5) !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 40px rgba(0, 229, 255, 0.8), inset 0 0 20px rgba(0, 229, 255, 0.5) !important;
+  z-index: 1000 !important;
 }
 
 /* Matrix Dissolve Reveal (Alt+Y) */
@@ -1111,4 +1256,431 @@ body.magnifier-active #editor {
 
 body.magnifier-active #magnifier-lens {
   opacity: 1;
+/* X-Ray Lens - More robust & performant */
+@layer ui-modes {
+  body.xray-lens-active {
+    --xray-radius: 200px;
+  }
+
+  body.xray-lens-active #editor,
+  body.xray-lens-active .echo-document:not(.xray-highlight) {
+    opacity: 0.15;
+    filter: blur(8px) grayscale(100%);
+    transition: opacity 0.3s ease, filter 0.3s ease;
+    pointer-events: none;
+  }
+
+  body.xray-lens-active .echo-document {
+    mask-image: radial-gradient(
+      circle var(--xray-radius) at var(--xray-local-x, 50%) var(--xray-local-y, 50%),
+      black 70%, transparent 100%
+    );
+    -webkit-mask-image: radial-gradient(...); /* same */
+    transition: mask-image 0.1s linear;
+  }
+
+  body.xray-lens-active .echo-document.xray-highlight,
+  body.xray-lens-active .echo-document:hover {
+    opacity: 1 !important;
+    filter: blur(0) brightness(1.4) contrast(1.15) drop-shadow(0 0 25px rgba(0, 255, 170, 0.7));
+    transform: translate3d(var(--tx, 0), var(--ty, 0), 320px) scale(1.08);
+    z-index: 1000;
+    mask-image: none;
+    -webkit-mask-image: none;
+    box-shadow: 0 0 45px rgba(0, 255, 170, 0.4), inset 0 0 25px rgba(0, 255, 170, 0.25);
+  }
+
+  /* Scanline overlay */
+  body.xray-lens-active .echo-document.xray-highlight::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,255,170,0.06) 0px, transparent 2px, transparent 5px);
+    pointer-events: none;
+    mix-blend-mode: screen;
+    animation: xray-scan 1.5s linear infinite;
+  }
+
+  @keyframes xray-scan {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+  }
+}
+
+/* Card Shuffle Spread Interaction (Alt+Shift+D) */
+body.card-shuffle-active #editor {
+  opacity: 0.15;
+  filter: blur(8px);
+  transform: scale(0.95);
+  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.card-shuffle-active .echo-document {
+  opacity: 0.95 !important;
+  filter: blur(0px) brightness(1.1) !important;
+  z-index: 1000 !important;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 0.4s ease !important;
+}
+
+body.card-shuffle-active .echo-document:nth-child(1) { transform: translate3d(-40vw, -30vh, 100px) rotateZ(-12deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(2) { transform: translate3d(-20vw, -35vh, 120px) rotateZ(-5deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(3) { transform: translate3d(0vw, -40vh, 140px) rotateZ(0deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(4) { transform: translate3d(20vw, -35vh, 160px) rotateZ(5deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(5) { transform: translate3d(40vw, -30vh, 180px) rotateZ(12deg) scale(0.7) !important; }
+
+body.card-shuffle-active .echo-document:nth-child(6) { transform: translate3d(-45vw, -5vh, 200px) rotateZ(-15deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(7) { transform: translate3d(-25vw, 0vh, 220px) rotateZ(-8deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(8) { transform: translate3d(25vw, 0vh, 240px) rotateZ(8deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(9) { transform: translate3d(45vw, -5vh, 260px) rotateZ(15deg) scale(0.7) !important; }
+
+body.card-shuffle-active .echo-document:nth-child(10) { transform: translate3d(-40vw, 25vh, 280px) rotateZ(-10deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(11) { transform: translate3d(-20vw, 30vh, 300px) rotateZ(-3deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(12) { transform: translate3d(0vw, 35vh, 320px) rotateZ(0deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(13) { transform: translate3d(20vw, 30vh, 340px) rotateZ(3deg) scale(0.7) !important; }
+body.card-shuffle-active .echo-document:nth-child(14) { transform: translate3d(40vw, 25vh, 360px) rotateZ(10deg) scale(0.7) !important; }
+
+/* Catch-all for extra documents to scatter randomly around the edges */
+body.card-shuffle-active .echo-document:nth-child(n+15) {
+  transform: translate3d(calc(var(--tx, 0) * 2), calc(var(--ty, 0) * 2), 380px) rotateZ(calc(var(--rot-z, 0) + 15deg)) scale(0.6) !important;
+}
+
+body.card-shuffle-active .echo-document:hover {
+  transform: translate3d(0, 0, 500px) scale(1) rotateZ(0deg) !important;
+  z-index: 9999 !important;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 229, 255, 0.6) !important;
+  border-color: rgba(0, 229, 255, 1) !important;
+  opacity: 1 !important;
+}
+
+/* --- Depth X-Ray Scan Interaction --- */
+body.depth-scan-active #editor {
+  opacity: 0.3;
+  filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+body.depth-scan-active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 10;
+  background: radial-gradient(circle at 50% calc(var(--scan-depth) * 5%), rgba(0, 255, 255, 0.1) 0%, transparent 40%);
+  mix-blend-mode: screen;
+}
+
+body.depth-scan-active .echo-document {
+  opacity: 0.1;
+  filter: blur(8px) grayscale(100%);
+  transform:
+    translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg))
+    scale(0.8);
+  transition: all 0.2s linear;
+}
+
+body.depth-scan-active .echo-document.scan-highlight {
+  opacity: 0.9;
+  filter: blur(0px) drop-shadow(0 0 15px rgba(0, 255, 255, 0.8)) brightness(1.5);
+  transform:
+    translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 50px))
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg))
+    scale(1.05);
+  border: 1px solid rgba(0, 255, 255, 0.8);
+  z-index: 50;
+}
+
+
+/* --- Card Spread View --- */
+body.card-spread-active .echo-document {
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform:
+    translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg))
+    scale(0.8);
+  box-shadow:
+    -10px 10px 20px rgba(0,0,0,0.5),
+    inset 0 0 10px rgba(255,255,255,0.1);
+  transform-origin: center bottom;
+}
+
+body.card-spread-active .echo-document:hover {
+  transform:
+    translate3d(var(--tx, 0px), calc(var(--ty, 0px) - 30px), calc(var(--tz, 0px) + 30px))
+    rotateX(0deg)
+    rotateY(0deg)
+    rotateZ(var(--rot-z, 0deg))
+    scale(0.9);
+  box-shadow:
+    -15px 15px 30px rgba(0,0,0,0.7),
+    0 0 20px rgba(0, 255, 255, 0.4),
+    inset 0 0 10px rgba(255,255,255,0.2);
+  z-index: 100 !important;
+}
+
+/* Meteor Scatter View active styles */
+body.meteor-active {
+  --bio-glow-color: rgba(255, 120, 50, 0.6);
+  --bio-glow-strong: rgba(255, 120, 50, 0.8);
+}
+body.meteor-active #editor,
+body.meteor-active #image-viewer {
+  transform: scale(0.65) translateZ(-150px);
+  filter: blur(2px) drop-shadow(0 0 20px rgba(255, 120, 50, 0.2));
+  opacity: 0.7;
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+body.meteor-active #echo-layer {
+  perspective: 1600px;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--meteor-global-rot-x, 0deg)) rotateY(var(--meteor-global-rot-y, 0deg));
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+body.meteor-active .echo-document {
+  opacity: 0.85;
+  filter: blur(1px);
+  cursor: pointer;
+  background: rgba(20, 15, 30, 0.7) !important;
+  border: 1px solid rgba(255, 150, 80, 0.4) !important;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.7),
+    inset 0 0 30px rgba(255, 120, 50, 0.1),
+    0 0 20px rgba(255, 120, 50, 0.3) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+              opacity 0.4s ease, filter 0.4s ease;
+}
+body.meteor-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) drop-shadow(0 0 30px rgba(255, 150, 80, 0.6)) !important;
+  border-color: rgba(255, 180, 100, 0.8) !important;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.8),
+    inset 0 0 40px rgba(255, 150, 80, 0.2),
+    0 0 40px rgba(255, 150, 80, 0.5) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
+  z-index: 50 !important;
+}
+body.meteor-active .echo-document::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 40%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Chrono-Ring View */
+body.chrono-ring-active .echo-document {
+  transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: center center;
+  opacity: 0.5;
+  filter: blur(2px) drop-shadow(0 10px 30px rgba(0, 0, 0, 0.8));
+  border-radius: 50%; /* Make them slightly circular or curved */
+  /* Override basic transform to include dynamic rotation */
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+             rotateZ(var(--rot-z, 0deg)) scale(0.6);
+}
+
+body.chrono-ring-active .echo-document::before {
+  /* Inner clock tick marks effect */
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+body.chrono-ring-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: none !important;
+  /* Pop out towards the user when hovered */
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), calc(var(--tz, 0px) + 200px))
+             rotateZ(0deg) scale(1) !important;
+  z-index: 100 !important;
+  border-radius: 20px; /* Return to rectangular on hover */
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.6);
+  border-color: rgba(0, 229, 255, 0.8);
+}
+
+/* Magnetic Separation (Alt + Shift + M) */
+body.magnetic-sep-active .echo-document {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  /* Push document away from cursor horizontally */
+  /* We use the custom property calc to check distance but CSS cannot do conditionals easily without JS setting variables per element.
+     Instead, we can use a basic calc to push based on center offset.
+     Since CSS doesn't know element's left/right easily, let's just push it outwards relative to the viewport center for a dramatic "parting of the red sea" effect based on mouse hover.
+  */
+}
+
+body.magnetic-sep-active .echo-document:hover {
+  translate: calc(var(--tx, 0px) * 0.5) 0px 50px;
+  scale: 1.05;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+body.magnetic-sep-active .echo-document:not(:hover) {
+  /* Push non-hovered documents away. A simple hack is adding a translate X based on mouse X */
+  translate: calc((var(--mouse-x, 50vw) - 50vw) * 0.2) calc((var(--mouse-y, 50vh) - 50vh) * 0.2) -50px;
+  opacity: 0.3;
+}
+body.dna-helix-active .echo-document {
+  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.8s ease;
+  opacity: 0.85;
+  filter: blur(1px);
+}
+body.dna-helix-active .echo-document:hover {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px)),
+      calc(var(--tz, 0px) + 50px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(calc(var(--rot-y, 0deg)))
+    rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
+  z-index: 30 !important;
+}
+body.dna-helix-active #echo-layer {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  animation: dna-spin 20s linear infinite;
+}
+
+@keyframes dna-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+/* Innovate: Venetian Blinds Reveal (Alt + Shift + B) */
+body.venetian-blinds-interaction-active .echo-document {
+  transition: opacity 0.3s ease, transform 0.4s ease;
+  mask-image: repeating-linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(var(--blind-angle, 50%) * 0.8),
+    transparent calc(var(--blind-angle, 50%) * 0.8),
+    transparent 100%
+  );
+  mask-size: 100% 40px;
+  -webkit-mask-image: repeating-linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(var(--blind-angle, 50%) * 0.8),
+    transparent calc(var(--blind-angle, 50%) * 0.8),
+    transparent 100%
+  );
+  -webkit-mask-size: 100% 40px;
+}
+
+/* Floating Nexus View */
+body.floating-nexus-active {
+  --bio-glow-color: rgba(180, 50, 255, 0.5);
+  --bio-glow-strong: rgba(180, 50, 255, 0.9);
+}
+
+body.floating-nexus-active .echo-document {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, border-color 0.15s ease, opacity 0.5s ease;
+
+  background: rgba(15, 15, 20, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+
+  /* Make sure transforms use the data-base-transform */
+  /* Fallback in case JS hasn't acted yet */
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+    rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+}
+
+/* Magnetic Repulsion Field */
+body.magnetic-repulsion-active .echo-document {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+body.magnetic-repulsion-active .echo-document[style*="--repulse-tx"]:not([style*="--repulse-tx: 0px"]) {
+  /* Give repelled documents a slight highlight and pop */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.4);
+  filter: brightness(1.3) blur(0px);
+  border-color: rgba(0, 229, 255, 0.6);
+  z-index: 900 !important;
+}
+
+/* Neon Trace Scanner (Alt + S) */
+#trace-scanner-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 4px;
+  background: #00ffcc;
+  box-shadow:
+    0 0 10px #00ffcc,
+    0 0 20px #00ffcc,
+    0 0 40px rgba(0, 255, 204, 0.5);
+  z-index: 10000;
+  pointer-events: none;
+  display: none;
+}
+
+body.trace-scanner-active .echo-document {
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+}
+
+body.trace-scanner-active .echo-document.trace-hit {
+  /* Use mask-image to create a bright scanning band across the document */
+  box-shadow: 0 0 40px rgba(0, 255, 204, 0.4), inset 0 0 20px rgba(0, 255, 204, 0.2);
+  border-color: #00ffcc;
+  filter: brightness(1.5) contrast(1.2);
+  z-index: 950 !important;
+}
+
+body.trace-scanner-active .echo-document.trace-hit::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent calc(var(--trace-y-percent, 50%) - 10%),
+    rgba(0, 255, 204, 0.6) var(--trace-y-percent, 50%),
+    transparent calc(var(--trace-y-percent, 50%) + 10%)
+  );
+  z-index: 10;
+  mix-blend-mode: screen;
 }
