@@ -404,6 +404,28 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// Ripple Wave Hover Interaction (Alt + R)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.key.toLowerCase() === "r" && !e.shiftKey && !e.ctrlKey) {
+    if (!document.body.classList.contains("ripple-wave-active")) {
+      document.body.classList.add("ripple-wave-active");
+    }
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key.toLowerCase() === "r" || !e.altKey) {
+    document.body.classList.remove("ripple-wave-active");
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("ripple-wave-active")) {
+    document.body.style.setProperty("--ripple-x", `${e.clientX}px`);
+    document.body.style.setProperty("--ripple-y", `${e.clientY}px`);
+  }
+});
+
 document.addEventListener("keydown", (e) => {
   if (
     e.altKey &&

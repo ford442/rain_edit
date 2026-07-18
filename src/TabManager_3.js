@@ -203,6 +203,27 @@ export const TabManagerMixin3 = {
 
         return true;
       }
+      if (this.isFibonacciSpiralView) {
+        // Golden ratio spiral
+        const phi = (1 + Math.sqrt(5)) / 2;
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const radius = index * 40;
+        const theta = index * phi * Math.PI * 2;
+        const tz = -index * 60 - 100;
+
+        const tx = Math.cos(theta) * radius;
+        const ty = Math.sin(theta) * radius;
+
+        const rotZ = theta * (180 / Math.PI);
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        return true;
+      }
       if (this.isSphereView) {
         // Fibonacci Sphere logic
         const totalEchoes = Math.max(1, inactiveFiles.length);
