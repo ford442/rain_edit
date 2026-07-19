@@ -210,3 +210,13 @@ Opening a file from the 3D cabinet pushes existing tabs to depth 1 and pulls the
 
 - The `Kimi_Agent/` directory contains patches and alternate file versions. It is **not part of the main build** and should not be edited unless you are specifically working on agent-side patches.
 - If you change any of the above architectural patterns (build tool, module wiring, backend base URL handling, or depth/view-mode systems), update this file to keep it accurate.
+
+---
+
+## Cursor Cloud specific instructions
+
+- **Runtime**: Node 22 (`package.json` requires `>=22.0.0`). Dependencies install with plain `npm install`; the startup update script already runs this, so you normally do not need to reinstall.
+- **Run the app (dev)**: `npm run dev` (Vite dev server, default port `5173`). Standard commands live in the `Build & Dev Commands` section above and in `package.json` — don't duplicate them. `dev.log` in the repo shows a past run using `--host 0.0.0.0 --port 3000`; that host/port is arbitrary, the app works on the default `5173`.
+- **Lint/tests**: none exist (no linter config, no test framework/tests). See the `Testing` section above. "Passing lint/tests" is not applicable in this repo.
+- **`src/` is split into many hand-maintained fragment files** (`main_*.js`, `TabManager_*.js`, `Cabinet3D_*.js`, `styles_*.css`, etc.). Vite fails hard on any single syntax error in these: `npm run dev` shows a blank page with a `Failed to scan for dependencies` / `Pre-transform error` in the Vite terminal, and `npm run build` aborts with `invalid JS syntax`. If the app renders blank, first check the Vite terminal (or run `node_modules/.bin/esbuild <file> --outfile=/dev/null` on suspect files) to locate the offending fragment before debugging anything else.
+- **Backend**: `StorageAPI.js` calls the remote FastAPI backend at `https://storage.noahcohn.com` (override with `VITE_STORAGE_BASE_URL`). There is no local backend to run — File Cabinet / VPS Files features depend on that remote host being reachable. The editor, rain effects, tabs, and view modes all work fully offline without it.
