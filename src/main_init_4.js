@@ -1,31 +1,6 @@
-import * as monaco from "monaco-editor";
-import "monaco-editor/esm/vs/basic-languages/javascript/javascript.js";
-import "monaco-editor/esm/vs/basic-languages/typescript/typescript.js";
-import "monaco-editor/esm/vs/language/json/monaco.contribution";
-import "monaco-editor/esm/vs/basic-languages/html/html.js";
-import "monaco-editor/esm/vs/basic-languages/css/css.js";
-import "monaco-editor/esm/vs/basic-languages/markdown/markdown.js";
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
-import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-import RainLayer from "./RainLayer";
-import Raindrops from "./vendor/raindrops.js";
-import { ReferenceManager } from "./ReferenceManager.js";
-import { ConnectionManager } from "./ConnectionManager.js";
-import { FogManager } from "./FogManager.js";
-import { HoloManager } from "./HoloManager.js";
-import { TabManager } from "./TabManager.js";
-import { StorageAPI } from "./StorageAPI.js";
-import { Cabinet3D } from "./Cabinet3D.js";
-import { VPSFileBrowser } from "./VPSFileBrowser.js";
-import DataSiphon from "./DataSiphon.js";
-import { VeilExcavator } from "./VeilExcavator.js";
-import { HolographicMinimap } from "./HolographicMinimap.js";
-import backFrag from "./shaders/water-back.frag?glslify";
-import frontFrag from "./shaders/water.frag?glslify";
-import vertSrc from "./shaders/simple.vert?glslify";
+import { monaco } from "./editor/setupMonaco.js";
+import { initMagneticRepulsion } from "./interactions/MagneticRepulsion.js";
+import { initMagnifierLens } from "./interactions/MagnifierLens.js";
 
 
 // Holographic Depth Cursor Logic
@@ -1033,44 +1008,8 @@ document.addEventListener("keydown", (e) => {
 });
 
 // Obscured Layer Magnifier (Alt+M) / Magnetic Separation (Alt+Shift+M)
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.code === "KeyM" && !e.ctrlKey && !e.metaKey) {
-    e.preventDefault();
-    if (!document.body.classList.contains("magnifier-active")) {
-      document.body.classList.add("magnifier-active");
-    }
-    if (e.shiftKey) {
-      if (!document.body.classList.contains("magnetic-sep-active")) {
-        document.body.classList.add("magnetic-sep-active");
-      }
-    } else {
-      if (!document.body.classList.contains("obscured-magnifier-active")) {
-        document.body.classList.add("obscured-magnifier-active");
-      }
-    }
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key === "m" || e.key === "M" || e.key === "Alt") {
-    document.body.classList.remove("magnifier-active");
-  }
-  if (e.key === "m" || e.key === "M" || e.key === "Alt" || e.key === "Shift") {
-    document.body.classList.remove("obscured-magnifier-active");
-    document.body.classList.remove("magnetic-sep-active");
-  }
-});
-
-document.addEventListener("mousemove", (e) => {
-  if (document.body.classList.contains("magnifier-active")) {
-    document.body.style.setProperty("--lens-x", `${e.clientX}px`);
-    document.body.style.setProperty("--lens-y", `${e.clientY}px`);
-  }
-  if (document.body.classList.contains("magnetic-sep-active")) {
-    document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
-    document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
-  }
-});
+initMagnifierLens({ eventTarget: document, body: document.body });
+initMagneticRepulsion({ eventTarget: document, body: document.body });
 
 // X-Ray Lens Interaction (Ctrl+Alt+X toggle)
 document.addEventListener("keydown", (e) => {

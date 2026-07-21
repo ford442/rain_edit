@@ -1811,6 +1811,7 @@ body.holographic-explode-active .echo-document:hover {
   box-shadow: 0 0 50px rgba(0, 229, 255, 0.5) !important;
   border: 1px solid rgba(0, 229, 255, 0.8) !important;
 }
+
 /* ─── Layer Dispersion Feature (Alt+D) ─────────────────────────────── */
 body.layer-dispersion-active .echo-document {
   transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, filter 0.4s ease !important;

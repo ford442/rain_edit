@@ -2,3 +2,8 @@ node_modules/
 dist/
 .env
 .vscode/
+*.log
+screenshot_*.png
+card_*.png
+playwright-report/
+test-results/
