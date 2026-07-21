@@ -5,3 +5,5 @@ dist/
 *.log
 screenshot_*.png
 card_*.png
+playwright-report/
+test-results/

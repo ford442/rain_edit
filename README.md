@@ -1,18 +1,41 @@
-rain-2 — Monaco + dual rain layers
+# rain-2 — Monaco + dual rain layers
 
-Quick start
+## Quick start
 
 1. Install dependencies: `npm install`
 2. Run dev server: `npm run dev`
 3. Open http://localhost:5173
 
-Notes
+## Validation
 
-- This project uses `vite` and `vite-plugin-monaco-editor` to bundle Monaco and its workers.
-- Shaders are handled via `rollup-plugin-glslify` so the same `glslify` style imports should work.
+```bash
+# Focused Node tests
+npm test
+
+# Parse every src/**/*.js file with esbuild
+npm run check
+
+# Canonical browser smoke (one-time setup: npx playwright install chromium)
+npm run test:smoke
+
+# Complete local CI gate
+npm run ci
+```
+
+The Playwright smoke starts Vite itself and verifies that Monaco initializes and
+both rain canvases are visible and sized. Scripts and screenshots under
+`verification/` are legacy, feature-specific checks and are not part of the
+standard CI path.
+
+## Notes
+
+- Vite bundles Monaco directly. Worker and language registration lives in
+  `src/editor/setupMonaco.js`; no Monaco Vite plugin is installed.
+- Shader imports ending in `?glslify` are compiled by the custom plugin in
+  `vite.config.js`; no Rollup glslify plugin is installed.
 - This demo reuses the original raindrops simulation from `../ra1n/src/raindrops.js` to drive the dynamic water map. The Vite dev server is configured to allow access to the parent folder (so assets can be referenced from the original project). If you prefer to copy images locally, put them under `public/img/`.
 
-Deployment
+## Deployment
 
 1. Build the production bundle: `npm run build`
 2. Obtain the current deploy token from the project secret manager. Never commit it or place it in a tracked file.
