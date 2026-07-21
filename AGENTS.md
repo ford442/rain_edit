@@ -135,15 +135,14 @@ There is **no test framework** and **no tests** in this project. `.github/copilo
 
 ## Deployment
 
-There is **no deployment script** in the repository. The only automation helper is `git.sh`, which runs:
+Production builds are emitted to `dist/` via `npm run build`. Deploy them through the storage service with a token supplied only through the process environment:
 
 ```bash
-git add .
-git commit -m 'codespace'
-git push
+export DEPLOY_TOKEN='<token from the project secret manager>'
+python deploy.py
 ```
 
-Production builds are emitted to `dist/` via `npm run build`. Deployment to the remote server is handled outside this repo (previously referenced as `deploy.py`, which no longer exists).
+`deploy.py` fails before making network requests if `DEPLOY_TOKEN` is missing. Never commit the token or put it in a tracked configuration file. `.env` is gitignored, but the script does not load it automatically.
 
 ---
 
@@ -151,7 +150,9 @@ Production builds are emitted to `dist/` via `npm run build`. Deployment to the 
 
 - **`vite.config.js` allows FS access to `'..'`**. This is intentional for local development asset sharing but should be reviewed if the dev server is ever exposed.
 - The app fetches remote content from `https://storage.noahcohn.com` (configurable via `VITE_STORAGE_BASE_URL`). Be mindful of XSS when rendering remote file contents; the existing code does basic HTML escaping in some places but not all.
-- There are no hardcoded credentials in the current repository.
+- `DEPLOY_TOKEN` is required for production deployment and must be supplied through the process environment. Store it in the project secret manager, rotate it immediately after any suspected exposure, and never commit it.
+- `deploy_old.py` is a legacy SFTP helper. It must prompt interactively for its password; never replace the prompt with a source-code literal.
+- A deploy token was previously committed. Removing it from the current tree does not remove it from Git history; coordinate a `git filter-repo` or BFG rewrite before force-pushing if the repository is or was public.
 
 ---
 
