@@ -1735,3 +1735,24 @@ body.holographic-explode-active .echo-document:hover {
     calc(var(--tz, 0px) + var(--explode-tz, 0px) + 100px)
   ) rotateX(0deg) rotateY(0deg) scale(1.1) !important;
 }
+
+/* ─── Layer Dispersion Feature (Alt+D) ─────────────────────────────── */
+body.layer-dispersion-active .echo-document {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, filter 0.4s ease !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--disperse-x, 0px)),
+    calc(var(--ty, 0px) + var(--disperse-y, 0px)),
+    calc(var(--tz, 0px) + var(--disperse-z, 0px))
+  ) rotateX(var(--rot-x, 0deg)) rotateY(calc(var(--rot-y, 0deg) + var(--disperse-rot, 0deg))) !important;
+}
+
+body.layer-dispersion-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: brightness(1.2) drop-shadow(0 8px 32px rgba(255, 255, 255, 0.2)) !important;
+  z-index: 2000 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--disperse-x, 0px)),
+    calc(var(--ty, 0px) + var(--disperse-y, 0px) - 20px),
+    calc(var(--tz, 0px) + var(--disperse-z, 0px) + 50px)
+  ) rotateX(0deg) rotateY(0deg) scale(1.05) !important;
+}

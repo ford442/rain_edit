@@ -1229,6 +1229,66 @@ document.addEventListener("mousemove", (e) => {
   }
 });
 
+// Interactive Layer Dispersion (Alt+D)
+let isLayerDispersionActive = false;
+
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && (e.key === "d" || e.key === "D") && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+    e.preventDefault();
+    if (!isLayerDispersionActive) {
+      isLayerDispersionActive = true;
+      document.body.classList.add("layer-dispersion-active");
+    }
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "d" || e.key === "D" || e.key === "Alt") {
+    if (isLayerDispersionActive) {
+      isLayerDispersionActive = false;
+      document.body.classList.remove("layer-dispersion-active");
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+          doc.style.removeProperty("--disperse-x");
+          doc.style.removeProperty("--disperse-y");
+          doc.style.removeProperty("--disperse-z");
+          doc.style.removeProperty("--disperse-rot");
+        });
+      }
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (isLayerDispersionActive && window.echoLayerEl) {
+    const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+    const total = echoes.length;
+
+    // Normalize mouse position (-1 to 1)
+    const nx = (e.clientX / window.innerWidth) * 2 - 1;
+    const ny = (e.clientY / window.innerHeight) * 2 - 1;
+
+    echoes.forEach((doc, index) => {
+      // Base calculation: Center is 0, outer items fan out
+      const offset = index - (total - 1) / 2;
+
+      // Horizontal mouse drives horizontal spread
+      const spreadX = offset * 120 * nx;
+
+      // Vertical mouse drives z-depth separation and tilt
+      const spreadZ = offset * 80 * ny;
+      const rotY = offset * -15 * nx;
+      const spreadY = Math.abs(offset) * 20 * ny;
+
+      doc.style.setProperty("--disperse-x", `${spreadX}px`);
+      doc.style.setProperty("--disperse-y", `${spreadY}px`);
+      doc.style.setProperty("--disperse-z", `${spreadZ}px`);
+      doc.style.setProperty("--disperse-rot", `${rotY}deg`);
+    });
+  }
+});
+
 // Holographic Explode View (Alt+Shift+E)
 document.addEventListener("keydown", (e) => {
   if (e.altKey && e.shiftKey && e.code === "KeyE" && !e.ctrlKey && !e.metaKey) {
