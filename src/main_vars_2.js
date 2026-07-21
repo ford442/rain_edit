@@ -304,7 +304,12 @@ window.tabManager = new TabManager(
 window._urlNote = new URLSearchParams(window.location.search).get("note");
 window.holoManager = new HoloManager(editor, holoLayerEl);
 window.storageAPI = new StorageAPI();
-window.cabinet3D = new Cabinet3D(storageAPI, tabManager, monaco);
+const cabinetPreserveDrawingBuffer =
+  new URLSearchParams(window.location.search).get("cabinetPreserveBuffer") ===
+  "1";
+window.cabinet3D = new Cabinet3D(storageAPI, tabManager, monaco, {
+  preserveDrawingBuffer: cabinetPreserveDrawingBuffer,
+});
 window.veilExcavator = new VeilExcavator(tabManager);
 window.cabinetBtn = document.getElementById("btn-cabinet");
 window.vpsBrowser = new VPSFileBrowser(storageAPI, tabManager);

@@ -57,12 +57,14 @@ root/
       InputRegistry.js    # Listener lifecycle/disposal helper
       MagnifierLens.js    # Alt+M obscured-layer magnifier
       MagneticRepulsion.js # Alt+Shift+M magnetic separation
+    rendering/
+      createGLContext.js  # Shared WebGL2-first context policy + DPR sizing
     TabManager.js         # File tabs/depth shell composed with TabManager_0.js - TabManager_7.js mixins
     ConnectionManager.js  # Radar/minimap canvas drawing (echo blips + reference cards)
     ReferenceManager.js   # Markdown note cards + visual effects (lantern, spotlight, frost, drag)
     FogManager.js         # Canvas fog that regenerates and is cleared by mouse
     HoloManager.js        # Scans editor for // TODO/FIXME/etc. and renders badges
-    RainLayer.js          # WebGL helper: compiles shaders, binds textures, draws fullscreen quad
+    RainLayer.js          # Recoverable WebGL rain pass; rebuilds resources after context loss
     StorageAPI.js         # HTTP client for categories, notes, and VPS file operations
     Cabinet3D.js          # Three.js modal file browser (split into Cabinet3D_0.js - Cabinet3D_1.js mixins)
     VPSFileBrowser.js     # Slide-in panel to browse/open/save VPS remote files
@@ -94,6 +96,8 @@ root/
 - `ConnectionManager` draws on the radar canvas (`#radar-canvas`) using 2D canvas. It receives reference card data from `ReferenceManager` and echo targets from the DOM.
 - `StorageAPI` is a thin REST client. It is consumed by `Cabinet3D`, `VPSFileBrowser`, and `main.js`.
 - `Cabinet3D` dispatches a custom `fileCubeClicked` event on `window`; `main.js` listens for it to open files and adjust depth focus.
+- `createGLContext` is the single context factory. Rain prefers WebGL2, falls back to WebGL1, and uses non-antialiased, non-preserved drawing buffers. Cabinet rendering is synchronized immediately before cross-context texture upload, so its drawing buffer is also non-preserved by default. See `docs/rendering-contexts.md` before changing this frame order.
+- `RainLayer` caches texture sources and uniform values, pauses the shared rain RAF on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy.
 - `window.tabManager` is intentionally exposed on the global object for manual/debug automation.
 
 ---

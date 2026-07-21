@@ -2,6 +2,7 @@ import RainLayer from "./RainLayer";
 import Raindrops from "./vendor/raindrops.js";
 import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
+import { resizeCanvasToDisplaySize } from "./rendering/createGLContext.js";
 import backFrag from "./shaders/water-back.frag?glslify";
 import frontFrag from "./shaders/water.frag?glslify";
 import vertSrc from "./shaders/simple.vert?glslify";
@@ -54,31 +55,22 @@ window._triggerVpsSave = async function _triggerVpsSave() {
   }
 };
 window.resizeCanvases = function resizeCanvases() {
-  const rect = editorEl.getBoundingClientRect();
+  const sizingElement = backCanvas.parentElement || editorEl;
+  const rect = sizingElement.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
-  backCanvas.width = rect.width * dpr;
-  backCanvas.height = rect.height * dpr;
-  backCanvas.style.width = rect.width + "px";
-  backCanvas.style.height = rect.height + "px";
+  if (bgLayer) bgLayer.setSize(rect.width, rect.height, dpr);
+  else resizeCanvasToDisplaySize(backCanvas, rect.width, rect.height, dpr);
 
-  frontCanvas.width = rect.width * dpr;
-  frontCanvas.height = rect.height * dpr;
-  frontCanvas.style.width = rect.width + "px";
-  frontCanvas.style.height = rect.height + "px";
+  if (fgLayer) fgLayer.setSize(rect.width, rect.height, dpr);
+  else resizeCanvasToDisplaySize(frontCanvas, rect.width, rect.height, dpr);
 
   if (matrixLayer) {
-    matrixLayer.width = rect.width * dpr;
-    matrixLayer.height = rect.height * dpr;
-    matrixLayer.style.width = rect.width + "px";
-    matrixLayer.style.height = rect.height + "px";
+    resizeCanvasToDisplaySize(matrixLayer, rect.width, rect.height, dpr);
     initMatrixRain();
   }
 
   if (dustLayerEl) {
-    dustLayerEl.width = rect.width * dpr;
-    dustLayerEl.height = rect.height * dpr;
-    dustLayerEl.style.width = rect.width + "px";
-    dustLayerEl.style.height = rect.height + "px";
+    resizeCanvasToDisplaySize(dustLayerEl, rect.width, rect.height, dpr);
   }
 };
 window.initMatrixRain = function initMatrixRain() {
@@ -253,11 +245,34 @@ window.initLayers = async function initLayers() {
     u_parallaxBg: 5.0,
     u_textureRatio: bgImg.width / bgImg.height,
   };
+  let rainAnimationPaused = false;
+  let rainAnimationFrame = null;
+
+  const pauseRainAnimation = () => {
+    rainAnimationPaused = true;
+    if (rainAnimationFrame !== null) {
+      cancelAnimationFrame(rainAnimationFrame);
+      rainAnimationFrame = null;
+    }
+  };
+
+  const resumeRainAnimation = () => {
+    if (bgLayer?.contextLost || fgLayer?.contextLost) return;
+    rainAnimationPaused = false;
+    scheduleRainAnimation();
+  };
+
+  const rainContextLifecycle = {
+    onContextLost: pauseRainAnimation,
+    onContextRestored: resumeRainAnimation,
+  };
+
   bgLayer = new RainLayer(backCanvas, {
     vertex: vertSrc,
     fragment: backFrag,
     textures: { u_waterMap: raindrops.canvas, u_textureBg: bgImg },
     options: { u_brightness: 1.0 },
+    ...rainContextLifecycle,
   });
   fgLayer = new RainLayer(frontCanvas, {
     vertex: vertSrc,
@@ -268,7 +283,9 @@ window.initLayers = async function initLayers() {
       u_textureBg: bgImg,
     },
     options,
+    ...rainContextLifecycle,
   });
+  resizeCanvases();
 
   // Pass raindrops to reference manager for shield effect
   if (referenceManager) {
@@ -281,7 +298,14 @@ window.initLayers = async function initLayers() {
   const RAIN_CHANCE_CABINET = 0.12;
   let _cabinetWasVisible = false;
 
+  function scheduleRainAnimation() {
+    if (rainAnimationPaused || rainAnimationFrame !== null) return;
+    rainAnimationFrame = requestAnimationFrame(animate);
+  }
+
   function animate() {
+    rainAnimationFrame = null;
+    if (rainAnimationPaused) return;
     // Modulate rain density when cabinet opens/closes
     if (cabinet3D) {
       if (cabinet3D.visible && !_cabinetWasVisible) {
@@ -379,12 +403,17 @@ window.initLayers = async function initLayers() {
     // When Cabinet3D is open, feed its live canvas as the rain background texture
     // so droplets refract the 3D scene. Restore static images when it closes.
     if (cabinet3D && cabinet3D.visible) {
+      // Render and upload in the same RAF. This keeps the source pixels valid
+      // without forcing preserveDrawingBuffer on the Three.js context.
+      cabinet3D.renderFrame();
       const cabCanvas = cabinet3D.getRendererCanvas();
+      const uploadStart = performance.now();
       if (bgLayer) bgLayer.bindTexture("u_textureBg", cabCanvas);
       if (fgLayer) {
         fgLayer.bindTexture("u_textureBg", cabCanvas);
         fgLayer.bindTexture("u_textureFg", cabCanvas);
       }
+      cabinet3D.recordRainTextureUpload(performance.now() - uploadStart);
       _usingCabinetBg = true;
     } else if (_usingCabinetBg) {
       if (bgLayer && _staticBgImg)
@@ -402,10 +431,10 @@ window.initLayers = async function initLayers() {
     if (fogManager) fogManager.render();
     drawMatrix();
     drawDust(time);
-    requestAnimationFrame(animate);
+    scheduleRainAnimation();
   }
 
-  animate();
+  scheduleRainAnimation();
 };
 window.fireSiphonPacket = function fireSiphonPacket(text, startX, startY) {
   const packet = document.createElement("div");

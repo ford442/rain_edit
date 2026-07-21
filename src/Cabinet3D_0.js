@@ -1,6 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { STORAGE_CATEGORIES } from "./StorageAPI.js";
+import {
+  createGLContext,
+  getGLContextInfo,
+} from "./rendering/createGLContext.js";
 import { CATEGORY_COLORS, CAT_CUBE_SIZE, FILE_CUBE_SIZE, GRID_GAP, FILE_ORBIT_R, CAM_ANIM_MS, LABEL_TRUNCATE_LEN, PREVIEW_DEBOUNCE_MS, PREVIEW_MAX_CHARS, PREVIEW_HIDE_GRACE_MS, LOD_NEAR, LOD_FAR, lerp, easeOut, _fileTypeIcon, _isImageFile, _formatSize } from './Cabinet3D.js';
 export const Cabinet3DMixin0 = {
   show() {
@@ -9,18 +13,47 @@ export const Cabinet3DMixin0 = {
     this._overlay.style.display = "flex";
     this._renderer.domElement.style.display = "block";
     this._onResize();
-    this._startLoop();
+    this.renderFrame();
   },
   hide() {
     if (!this.visible) return;
     this.visible = false;
     this._overlay.style.display = "none";
     this._renderer.domElement.style.display = "none";
-    this._stopLoop();
     this._hidePreview();
   },
   getRendererCanvas() {
     return this._renderer.domElement;
+  },
+  recordRainTextureUpload(durationMs) {
+    const stats = this._rainTextureUploadStats;
+    stats.samples += 1;
+    stats.totalMs += durationMs;
+    stats.maxMs = Math.max(stats.maxMs, durationMs);
+    stats.lastMs = durationMs;
+  },
+  getCompositingDiagnostics() {
+    const stats = this._rainTextureUploadStats;
+    return {
+      context: this._contextInfo,
+      mode: "synchronized-cross-context-upload",
+      preserveDrawingBuffer: this._preserveDrawingBuffer,
+      uploadCountPerFrame: 3,
+      samples: stats.samples,
+      averageUploadMs: stats.samples ? stats.totalMs / stats.samples : 0,
+      maxUploadMs: stats.maxMs,
+      lastUploadMs: stats.lastMs,
+    };
+  },
+  renderFrame() {
+    if (!this.visible) return;
+    this._updateCameraAnim();
+    this._updateIdleRotation();
+    this._updateHoverAnimation();
+    this._updateLabelLOD();
+    this._updatePreviewPanelPosition();
+    this._controls.update();
+    this._renderer.render(this._scene, this._camera);
   },
   getHoverScreenPos() {
     const mesh = this._hoveredFileMesh || this._pinnedFileMesh;
@@ -97,12 +130,23 @@ export const Cabinet3DMixin0 = {
     this._overlay = overlay;
   },
   _buildScene() {
-    // preserveDrawingBuffer lets the rain shader read pixels cross-context each frame
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      preserveDrawingBuffer: true,
+    const canvas = document.createElement("canvas");
+    const context = createGLContext(canvas, {
+      attributes: {
+        alpha: true,
+        premultipliedAlpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
+        failIfMajorPerformanceCaveat: false,
+        preserveDrawingBuffer: this._preserveDrawingBuffer,
+      },
+      webgl1Fallback: false,
+      label: "Cabinet3D",
     });
+    if (!context) throw new Error("Cabinet3D requires WebGL2.");
+
+    this._contextInfo = getGLContextInfo(context);
+    const renderer = new THREE.WebGLRenderer({ canvas, context });
     renderer.setPixelRatio(window.devicePixelRatio);
     // Dark background so rain has something opaque to refract
     renderer.setClearColor(0x020a14, 0.92);
