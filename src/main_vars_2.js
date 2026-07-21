@@ -1,17 +1,4 @@
-import * as monaco from "monaco-editor";
-import "monaco-editor/esm/vs/basic-languages/javascript/javascript.js";
-import "monaco-editor/esm/vs/basic-languages/typescript/typescript.js";
-import "monaco-editor/esm/vs/language/json/monaco.contribution";
-import "monaco-editor/esm/vs/basic-languages/html/html.js";
-import "monaco-editor/esm/vs/basic-languages/css/css.js";
-import "monaco-editor/esm/vs/basic-languages/markdown/markdown.js";
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
-import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-import RainLayer from "./RainLayer";
-import Raindrops from "./vendor/raindrops.js";
+import { monaco } from "./editor/setupMonaco.js";
 import { ReferenceManager } from "./ReferenceManager.js";
 import { ConnectionManager } from "./ConnectionManager.js";
 import { FogManager } from "./FogManager.js";
@@ -22,10 +9,6 @@ import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
 import DataSiphon from "./DataSiphon.js";
 import { VeilExcavator } from "./VeilExcavator.js";
-import { HolographicMinimap } from "./HolographicMinimap.js";
-import backFrag from "./shaders/water-back.frag?glslify";
-import frontFrag from "./shaders/water.frag?glslify";
-import vertSrc from "./shaders/simple.vert?glslify";
 
 window.scanPortals = function scanPortals() {
   const model = editor.getModel();

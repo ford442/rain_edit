@@ -30,10 +30,10 @@ Key product features:
 | -------------- | --------------------------------------------------------------------------------------------- |
 | Build tool     | Vite 5                                                                                        |
 | Language       | Vanilla ES modules (JavaScript), no TypeScript                                                |
-| Editor         | `monaco-editor` v0.43.0 (workers imported explicitly in `main.js`)                            |
+| Editor         | `monaco-editor` v0.43.0 (workers configured in `src/editor/setupMonaco.js`)                  |
 | 3D graphics    | `three` v0.183.2 (used only in `Cabinet3D.js`)                                                |
 | Shaders        | Custom WebGL in `RainLayer.js`; GLSL source files compiled via a custom `glslify` Vite plugin |
-| Styling        | Single large `src/styles.css` (~5,620 lines), heavy use of CSS variables                      |
+| Styling        | Sequential `src/styles_1.css`–`styles_14.css` shards, heavy use of CSS variables             |
 | Backend client | `StorageAPI.js` talks to a FastAPI backend at `https://storage.noahcohn.com`                  |
 | Dev server     | Vite (port 5173); configured to allow FS access to parent directory (`'..'`)                  |
 
@@ -44,13 +44,20 @@ Key product features:
 ```
 root/
   index.html              # SPA shell: many layered divs/canvases for effects
-  package.json            # npm scripts: dev, build, preview
+  package.json            # npm scripts: dev, test, build, preview
   vite.config.js          # Vite config + custom glslify plugin
   git.sh                  # Simple helper: git add/commit/push
   src/
-    main.js               # Entry point: bootstrap Monaco, init all managers (split into main_0.js - main_6.js)
-    main_0.js - main_6.js # Modularized chunks of main.js sequentially imported.
-    TabManager.js         # File tabs, depth switching, echo rendering (split into TabManager_0.js - TabManager_5.js mixins)
+    main.js               # Thin entry point; loads Monaco setup, state shards, then init shards
+    main_vars_0.js - main_vars_2.js # Transitional global state/function shards
+    main_init_0.js - main_init_4.js # Transitional side-effect initialization shards
+    editor/
+      setupMonaco.js      # Sole Monaco language/worker registration point
+    interactions/
+      InputRegistry.js    # Listener lifecycle/disposal helper
+      MagnifierLens.js    # Alt+M obscured-layer magnifier
+      MagneticRepulsion.js # Alt+Shift+M magnetic separation
+    TabManager.js         # File tabs/depth shell composed with TabManager_0.js - TabManager_7.js mixins
     ConnectionManager.js  # Radar/minimap canvas drawing (echo blips + reference cards)
     ReferenceManager.js   # Markdown note cards + visual effects (lantern, spotlight, frost, drag)
     FogManager.js         # Canvas fog that regenerates and is cleared by mouse
@@ -72,13 +79,16 @@ root/
       random.js
       times.js
   public/img/             # Local texture assets (drop-alpha, drop-color, textures, backgrounds)
+  tests/                  # Focused Node tests for extracted domain modules
   Kimi_Agent/             # Agent workspace: patches and alternate file versions (not part of main build)
   .github/copilot-instructions.md  # Copilot guidance; references this file as primary architecture doc
 ```
 
 ### Module relationships
 
-- `main.js` is the orchestrator. It imports all other managers and wires them together. It also hosts the main animation loop, mouse/keyboard interaction handlers (parallax, flashlight, wormhole, magnifier, peel, proximity wake), and the matrix rain / dust particle systems.
+- `main.js` is the build entry point. It loads `editor/setupMonaco.js` once, then the transitional `main_vars_*` state shards followed by `main_init_*` initialization shards. Do not recreate deleted `main_0.js`–`main_6.js` files or add another full Monaco import block.
+- New or extracted interactions belong in `src/interactions/` as named classes/functions with explicit DOM or manager dependencies, an `init()`/`destroy()` lifecycle, and focused tests. Do not add new `window.*` globals.
+- `main_vars_*` and `main_init_*` remain legacy migration surfaces. When touching a self-contained feature there, prefer extracting it into a domain module rather than appending another listener block.
 - `TabManager` owns the list of open files, switches active models in Monaco, manages per-file depth (0/1/2), and renders background echoes in `#echo-layer`. It implements 25+ CSS-driven 3D view modes.
 - `ReferenceManager` owns `#reference-layer` and `#reference-overlay`. It parses markdown into floating cards and handles lantern/spotlight/frost interactions, drag-and-drop, and rain-shield clearing.
 - `ConnectionManager` draws on the radar canvas (`#radar-canvas`) using 2D canvas. It receives reference card data from `ReferenceManager` and echo targets from the DOM.
@@ -99,6 +109,9 @@ npm run dev
 
 # Production build -> dist/
 npm run build
+
+# Focused Node tests
+npm test
 
 # Preview production build locally
 npm run preview
@@ -129,7 +142,7 @@ The Vite dev server is configured to allow file-system access to the parent dire
 
 ## Testing
 
-There is **no test framework** and **no tests** in this project. `.github/copilot-instructions.md` mentions an ad-hoc visual smoke script `ui_test.py`, but this file does not exist in the repository. If you add significant logic, consider adding a lightweight test runner (e.g. Vitest) and placing tests next to source files or in a `tests/` directory.
+Focused unit tests use the built-in Node test runner and live in `tests/*.test.js`; run them with `npm test`. The build workflow runs both `npm test` and `npm run build`. Browser-only verification scripts under `verification/` are not part of the Node unit-test glob and may require Chromium permissions.
 
 ---
 
