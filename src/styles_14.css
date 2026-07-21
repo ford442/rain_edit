@@ -1257,6 +1257,7 @@ body.magnifier-active #editor {
 body.magnifier-active #magnifier-lens {
   opacity: 1;
 }
+
 /* X-Ray Lens - More robust & performant */
 @layer ui-modes {
   body.xray-lens-active {

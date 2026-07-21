@@ -1002,6 +1002,7 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     if (!document.body.classList.contains("magnifier-active")) {
       document.body.classList.add("magnifier-active");
+    }
     if (e.shiftKey) {
       if (!document.body.classList.contains("magnetic-sep-active")) {
         document.body.classList.add("magnetic-sep-active");
