@@ -64,6 +64,7 @@
   transition:
     transform 0.2s ease-out,
     box-shadow 0.2s ease-out;
+  border-radius: 12px;
 }
 
 /* ─── Z-Axis Slicer UI ────────────────────────────────────────────────────── */
@@ -293,7 +294,7 @@ body.origami-active .echo-document:hover {
     0 50px 120px rgba(0, 0, 0, 0.95),
     0 0 75px rgba(0, 229, 255, 0.2),
     inset 0 2px 8px rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  border-radius: 16px;
   margin: 5px;
   transition: all 0.3s ease-in-out;
 }
@@ -310,11 +311,13 @@ body.origami-active .echo-document:hover {
 #dock button {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 8px;
   color: #fff;
   transition: all 0.3s ease;
   padding: 8px 12px;
   margin: 0 4px;
+  font-family: inherit;
+  font-size: 13px;
 }
 
 #dock button:hover {
@@ -327,7 +330,7 @@ body.origami-active .echo-document:hover {
 .tab {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
+  border-radius: 8px;
   margin: 0 2px;
   transition: all 0.3s ease;
 }

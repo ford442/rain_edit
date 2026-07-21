@@ -7,10 +7,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/styles_1.css" />
+    <link rel="stylesheet" href="/src/styles_2.css" />
+    <link rel="stylesheet" href="/src/styles_3.css" />
+    <link rel="stylesheet" href="/src/styles_4.css" />
+    <link rel="stylesheet" href="/src/styles_5.css" />
+    <link rel="stylesheet" href="/src/styles_6.css" />
+    <link rel="stylesheet" href="/src/styles_7.css" />
+    <link rel="stylesheet" href="/src/styles_8.css" />
+    <link rel="stylesheet" href="/src/styles_9.css" />
+    <link rel="stylesheet" href="/src/styles_10.css" />
+    <link rel="stylesheet" href="/src/styles_11.css" />
+    <link rel="stylesheet" href="/src/styles_12.css" />
+    <link rel="stylesheet" href="/src/styles_13.css" />
+    <link rel="stylesheet" href="/src/styles_14.css" />
   </head>
   <body>
     <div id="app">
@@ -26,6 +39,7 @@
         <div id="editor-title-bar" class="editor-title-bar">main.js</div>
         <div id="editor"></div>
         <div id="image-viewer"></div>
+        <div id="magnifier-lens"></div>
         <div id="neon-scatter-layer"></div>
         <div id="scanline-overlay"></div>
         <canvas id="rain-front" class="rain-canvas"></canvas>
@@ -33,6 +47,7 @@
         <div id="fog-layer"></div>
         <div id="lightning-layer"></div>
         <div id="vignette-layer"></div>
+        <div id="depth-beam"></div>
       </div>
 
       <div id="tabs-container">
@@ -53,7 +68,15 @@
           </button>
           <select id="view-mode-select" title="Toggle View Mode">
             <option value="">Default View</option>
+            <option value="floating-nexus">✨ Floating Nexus</option>
             <option value="quantum">🌌 Quantum Superposition</option>
+            <option value="time-tunnel">🕳️ Time Tunnel View</option>
+            <option value="theater">🎭 Theater View</option>
+            <option value="tornado">🌪️ Tornado View</option>
+            <option value="venetian">Venetian Blinds</option>
+            <option value="stackdeck">🗂️ Stack Deck View</option>
+            <option value="card-spread">🎴 Card Spread View</option>
+            <option value="aurora">🌌 Aurora View</option>
             <option value="waterfall">💧 Waterfall View</option>
             <option value="cascade">🌊 Cascade View</option>
             <option value="orbit">🪐 Orbit View</option>
@@ -65,12 +88,17 @@
             <option value="grid">🧊 Grid View</option>
             <option value="helix">🧬 Helix View</option>
             <option value="carousel">🎠 Carousel View</option>
-            <option value="infinity-mirror">🪞 Infinity Mirror</option>
+            <option value="accordion">🪗 Accordion View</option>
+            <option value="meteor">☄️ Meteor Scatter</option>
+            <option value="infinity-mirror">🪞 Infinity Mirror</option>\n            <option value="archway">⛩️ Archway View</option>
             <option value="pinboard">📌 Pinboard</option>
             <option value="vortex">🌀 Vortex View</option>
             <option value="constellation">✨ Constellation View</option>
             <option value="prism">💎 Prism View</option>
+            <option value="prism-split">💎 Prism Split</option>
             <option value="coverflow">🗂️ Coverflow</option>
+            <option value="chrono-ring">⏱️ Chrono-Ring View</option>
+            <option value="ribbon">🎀 Ribbon View</option>
             <option value="sphere">🌐 Sphere View</option>
             <option value="wave">🌊 Wave View</option>
             <option value="black-hole">🕳️ Black Hole</option>
@@ -80,11 +108,14 @@
             <option value="data-hive">🐝 Data Hive</option>
             <option value="origami">🦢 Origami View</option>
             <option value="matrix-rain">🔣 Matrix Rain View</option>
+            <option value="staircase">🪜 Staircase View</option>
+            <option value="pyramid">🔺 Pyramid View</option>
             <option value="crystal">💎 Crystal Lattice View</option>
             <option value="fractal">🌳 Fractal Tree View</option>
             <option value="solar-system">☀️ Solar System View</option>
             <option value="neon-synth">🏎️ Neon Synth View</option>
             <option value="tesseract">🌌 Tesseract View</option>
+            <option value="bookshelf">📚 Bookshelf View</option>
             <option value="blueprint-3d">📐 Blueprint 3D</option>
             <option value="cyber-cortex">🧠 Cyber Cortex</option>
             <option value="outline">📋 Outline View</option>
@@ -93,6 +124,18 @@
             <option value="astrolabe">⚙️ Astrolabe View</option>
             <option value="dominoes">🁣 Dominoes View</option>
             <option value="hexagon-matrix">⬡ Hexagon Matrix</option>
+            <option value="kaleidoscope">👁️ Kaleidoscope View</option>
+            <option value="torus">🍩 Torus View</option>
+            <option value="luminescence">🌟 Luminescence View</option>
+            <option value="geode">🪨 Geode View</option>
+            <option value="lotus">🪷 Lotus View</option>
+            <option value="fibonacci-spiral">🌀 Fibonacci Spiral View</option>
+            <option value="hypercube">🧊 Hypercube View</option>
+            <option value="theater">🎭 Theater View</option>
+            <option value="tornado">🌪️ Tornado View</option>
+            <option value="venetian">Venetian Blinds</option>
+            <option value="stackdeck">🗂️ Stack Deck View</option>
+            <option value="dna-helix">🧬 DNA Helix View</option>
           </select>
         </div>
       </div>
@@ -101,7 +144,7 @@
         <div class="ui-sheen"></div>
         <div class="dock-title">RAIN CONTROL</div>
 
-        <div class="dock-group" style="align-items: center; margin-bottom: 5px">
+        <div class="dock-group">
           <canvas
             id="radar-canvas"
             width="160"
@@ -217,14 +260,25 @@
           <label title="Ghost Mode"
             ><input id="ghost-mode" type="checkbox" /> Ghost Mode</label
           >
+          <label title="Cinematic Autofocus"
+            ><input id="cinematic-autofocus-mode" type="checkbox" /> Cinematic
+            Autofocus</label
+          >
           <label title="Wiper Mode"
             ><input id="wiper-mode" type="checkbox" /> Wiper Mode</label
           >
           <label title="Expose Mode"
             ><input id="expose-mode" type="checkbox" /> Expose Mode</label
           >
+          <label title="Portal Mode"
+            ><input id="portal-mode-toggle" type="checkbox" /> Portal Mode</label
+          >
           <label title="Theater Mode"
             ><input id="theater-mode" type="checkbox" /> Theater Mode</label
+          >
+          <label title="Cinematic Autofocus"
+            ><input id="cinematic-autofocus-mode" type="checkbox" /> Cinematic
+            Autofocus</label
           >
           <div>
             <button
@@ -300,19 +354,25 @@
         id="btn-cabinet"
         title="Open 3D File Cabinet"
         style="
-          background: rgba(10, 15, 25, 0.8);
-          border: 1px solid rgba(0, 229, 255, 0.3);
-          color: #c0d0e0;
+          background: rgba(10, 15, 40, 0.6);
+          border: 1px solid rgba(140, 200, 255, 0.3);
+          color: #e0f0ff;
           font-family: inherit;
-          font-size: 13px;
-          padding: 10px 20px;
-          border-radius: 16px;
+          font-size: 14px;
+          font-weight: 500;
+          padding: 12px 24px;
+          border-radius: 20px;
           cursor: pointer;
-          backdrop-filter: blur(6px);
-          transition: background 0.2s;
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(140, 200, 255, 0.1);
+          transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+          text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         "
-        onmouseover="this.style.background = 'rgba(0, 229, 255, 0.15)'"
-        onmouseout="this.style.background = 'rgba(10, 15, 25, 0.8)'"
+        onmouseover="this.style.background = 'rgba(10, 15, 40, 0.8)'; this.style.border = '1px solid rgba(0, 229, 255, 0.6)'; this.style.boxShadow = '0 6px 20px rgba(0, 229, 255, 0.3), inset 0 0 25px rgba(0, 229, 255, 0.2)'; this.style.backdropFilter = 'blur(20px)'; this.style.transform = 'scale(1.05) translateY(-2px)';"
+        onmouseout="this.style.background = 'rgba(10, 15, 40, 0.6)'; this.style.border = '1px solid rgba(140, 200, 255, 0.3)'; this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(140, 200, 255, 0.1)'; this.style.backdropFilter = 'blur(16px)'; this.style.transform = 'scale(1) translateY(0)';"
+        onmousedown="this.style.boxShadow = 'inset 0 4px 10px rgba(0, 0, 0, 0.6), inset 0 0 5px rgba(0, 229, 255, 0.1)'; this.style.transform = 'scale(0.98) translateY(1px)';"
+        onmouseup="this.style.boxShadow = '0 6px 20px rgba(0, 229, 255, 0.3), inset 0 0 25px rgba(0, 229, 255, 0.2)'; this.style.transform = 'scale(1.05) translateY(-2px)';"
       >
         🗄️ File Cabinet
       </button>
@@ -321,19 +381,25 @@
         id="btn-vps-open"
         title="Open file from Contabo VPS (storage.noahcohn.com)"
         style="
-          background: rgba(10, 15, 25, 0.8);
-          border: 1px solid rgba(0, 229, 255, 0.3);
-          color: #c0d0e0;
+          background: rgba(10, 15, 40, 0.6);
+          border: 1px solid rgba(140, 200, 255, 0.3);
+          color: #e0f0ff;
           font-family: inherit;
-          font-size: 13px;
-          padding: 10px 20px;
-          border-radius: 16px;
+          font-size: 14px;
+          font-weight: 500;
+          padding: 12px 24px;
+          border-radius: 20px;
           cursor: pointer;
-          backdrop-filter: blur(6px);
-          transition: background 0.2s;
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(140, 200, 255, 0.1);
+          transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+          text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         "
-        onmouseover="this.style.background = 'rgba(0, 229, 255, 0.15)'"
-        onmouseout="this.style.background = 'rgba(10, 15, 25, 0.8)'"
+        onmouseover="this.style.background = 'rgba(10, 15, 40, 0.8)'; this.style.border = '1px solid rgba(0, 229, 255, 0.6)'; this.style.boxShadow = '0 6px 20px rgba(0, 229, 255, 0.3), inset 0 0 25px rgba(0, 229, 255, 0.2)'; this.style.backdropFilter = 'blur(20px)'; this.style.transform = 'scale(1.05) translateY(-2px)';"
+        onmouseout="this.style.background = 'rgba(10, 15, 40, 0.6)'; this.style.border = '1px solid rgba(140, 200, 255, 0.3)'; this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(140, 200, 255, 0.1)'; this.style.backdropFilter = 'blur(16px)'; this.style.transform = 'scale(1) translateY(0)';"
+        onmousedown="this.style.boxShadow = 'inset 0 4px 10px rgba(0, 0, 0, 0.6), inset 0 0 5px rgba(0, 229, 255, 0.1)'; this.style.transform = 'scale(0.98) translateY(1px)';"
+        onmouseup="this.style.boxShadow = '0 6px 20px rgba(0, 229, 255, 0.3), inset 0 0 25px rgba(0, 229, 255, 0.2)'; this.style.transform = 'scale(1.05) translateY(-2px)';"
       >
         📡 VPS Files
       </button>
@@ -342,19 +408,25 @@
         id="btn-vps-save"
         title="Save current file to Contabo VPS (Ctrl+Shift+S)"
         style="
-          background: rgba(10, 15, 25, 0.8);
-          border: 1px solid rgba(0, 229, 255, 0.3);
-          color: #c0d0e0;
+          background: rgba(10, 15, 40, 0.6);
+          border: 1px solid rgba(140, 200, 255, 0.3);
+          color: #e0f0ff;
           font-family: inherit;
-          font-size: 13px;
-          padding: 10px 20px;
-          border-radius: 16px;
+          font-size: 14px;
+          font-weight: 500;
+          padding: 12px 24px;
+          border-radius: 20px;
           cursor: pointer;
-          backdrop-filter: blur(6px);
-          transition: background 0.2s;
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(140, 200, 255, 0.1);
+          transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+          text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         "
-        onmouseover="this.style.background = 'rgba(0, 229, 255, 0.15)'"
-        onmouseout="this.style.background = 'rgba(10, 15, 25, 0.8)'"
+        onmouseover="this.style.background = 'rgba(10, 15, 40, 0.8)'; this.style.border = '1px solid rgba(0, 229, 255, 0.6)'; this.style.boxShadow = '0 6px 20px rgba(0, 229, 255, 0.3), inset 0 0 25px rgba(0, 229, 255, 0.2)'; this.style.backdropFilter = 'blur(20px)'; this.style.transform = 'scale(1.05) translateY(-2px)';"
+        onmouseout="this.style.background = 'rgba(10, 15, 40, 0.6)'; this.style.border = '1px solid rgba(140, 200, 255, 0.3)'; this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(140, 200, 255, 0.1)'; this.style.backdropFilter = 'blur(16px)'; this.style.transform = 'scale(1) translateY(0)';"
+        onmousedown="this.style.boxShadow = 'inset 0 4px 10px rgba(0, 0, 0, 0.6), inset 0 0 5px rgba(0, 229, 255, 0.1)'; this.style.transform = 'scale(0.98) translateY(1px)';"
+        onmouseup="this.style.boxShadow = '0 6px 20px rgba(0, 229, 255, 0.3), inset 0 0 25px rgba(0, 229, 255, 0.2)'; this.style.transform = 'scale(1.05) translateY(-2px)';"
       >
         💾 Save to VPS
       </button>

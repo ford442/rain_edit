@@ -1810,6 +1810,7 @@ body.holographic-explode-active .echo-document:hover {
   z-index: 1000 !important;
   box-shadow: 0 0 50px rgba(0, 229, 255, 0.5) !important;
   border: 1px solid rgba(0, 229, 255, 0.8) !important;
+}
 /* ─── Layer Dispersion Feature (Alt+D) ─────────────────────────────── */
 body.layer-dispersion-active .echo-document {
   transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, filter 0.4s ease !important;
@@ -1829,4 +1830,61 @@ body.layer-dispersion-active .echo-document:hover {
     calc(var(--ty, 0px) + var(--disperse-y, 0px) - 20px),
     calc(var(--tz, 0px) + var(--disperse-z, 0px) + 50px)
   ) rotateX(0deg) rotateY(0deg) scale(1.05) !important;
+}
+
+/* ─── Improvise: Kinetic Typography Echo (Alt + T) ─────────────────────────────── */
+body.kinetic-echo-active .echo-document::after {
+  content: attr(data-kinetic-word);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+  text-transform: uppercase;
+  letter-spacing: 0.5rem;
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+  animation: kinetic-pulse 2s infinite alternate;
+}
+
+body.kinetic-echo-active .echo-document {
+    filter: blur(2px) brightness(0.8) !important;
+}
+
+body.kinetic-echo-active .echo-document:nth-child(even)::after {
+   color: rgba(255, 0, 128, 0.1);
+   text-shadow: 0 0 20px rgba(255, 0, 128, 0.5);
+   animation-delay: 0.5s;
+}
+
+@keyframes kinetic-pulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+}
+
+/* ─── Improvise: Depth Peel Feature (Alt + Q) ─────────────────────────────── */
+body.depth-peel-active .echo-document {
+  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease, filter 0.4s ease !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--peel-offset, 0px)),
+    var(--ty, 0px),
+    var(--tz, 0px)
+  ) rotateX(0deg) rotateY(15deg) scale(0.9) !important;
+  opacity: 0.9 !important;
+  filter: drop-shadow(20px 0 30px rgba(0, 0, 0, 0.5)) brightness(1.1) !important;
+}
+
+body.depth-peel-active .echo-document:hover {
+  opacity: 1 !important;
+  z-index: 100 !important;
+  filter: drop-shadow(40px 0 50px rgba(0, 229, 255, 0.4)) brightness(1.3) !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--peel-offset, 0px) + 20px),
+    calc(var(--ty, 0px) - 20px),
+    calc(var(--tz, 0px) + 50px)
+  ) rotateX(0deg) rotateY(5deg) scale(1.05) !important;
 }
