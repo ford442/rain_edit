@@ -1284,3 +1284,57 @@ document.addEventListener("keyup", (e) => {
     }
   }
 });
+
+
+/* ─── Orbital Focus Scrubber (Alt + D + Mousemove) ───────────────────────────────── */
+window.isOrbitalScrubberActive = false;
+
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && !e.shiftKey && e.code === "KeyD" && !window.isOrbitalScrubberActive) {
+    e.preventDefault();
+    window.isOrbitalScrubberActive = true;
+    document.body.classList.add("orbital-scrubber-active");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if ((e.key === "Alt" || e.code === "KeyD") && window.isOrbitalScrubberActive) {
+    if (!e.altKey || e.code === "KeyD") {
+      window.isOrbitalScrubberActive = false;
+      document.body.classList.remove("orbital-scrubber-active");
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+          doc.style.removeProperty("--orbital-scrub-scale");
+          doc.style.removeProperty("--orbital-scrub-angle");
+          doc.style.removeProperty("--orbital-scrub-z");
+        });
+      }
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (window.isOrbitalScrubberActive && window.echoLayerEl) {
+    const docs = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
+    if (docs.length === 0) return;
+
+    const pctX = e.clientX / window.innerWidth;
+    const targetIndex = Math.floor(pctX * docs.length);
+
+    docs.forEach((doc, idx) => {
+      // Calculate distance from target focus
+      const dist = Math.abs(idx - targetIndex);
+
+      // Determine rotation and placement based on how far from target
+      // Target is flat and forward. Others curve away into a ring/orbit.
+
+      let scale = dist === 0 ? 1.1 : Math.max(0.7, 1 - (dist * 0.1));
+      let z = dist === 0 ? 150 : - (dist * 100);
+      let angle = (idx - targetIndex) * 20; // 20 degrees spread
+
+      doc.style.setProperty("--orbital-scrub-scale", scale);
+      doc.style.setProperty("--orbital-scrub-z", `${z}px`);
+      doc.style.setProperty("--orbital-scrub-angle", `${angle}deg`);
+    });
+  }
+});

@@ -3,7 +3,7 @@
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 34px;
+  border-radius: 14px;
   background: linear-gradient(
     90deg,
     rgba(0, 229, 255, 0.6),
@@ -162,33 +162,26 @@
 .depth-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 4px;
-  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .depth-controls button {
-  padding: 8px 14px;
-  font-size: 12px;
-  font-weight: 800;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
   font-family: var(--font-primary);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.05)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  color: #c0d0e0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  box-shadow: none;
+  color: #fff;
   cursor: pointer;
   white-space: nowrap;
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    transform 0.15s;
+  transition: all 0.3s ease;
 }
 .depth-controls button:hover {
   background: rgba(0, 229, 255, 0.3);
@@ -204,19 +197,17 @@
 }
 
 #view-mode-select {
-  padding: 8px 14px;
-  font-size: 12px;
-  font-weight: 800;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
   font-family: var(--font-primary);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.05)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  color: #c0d0e0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
   cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
   outline: none;
   appearance: none;
   -webkit-appearance: none;

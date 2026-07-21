@@ -292,13 +292,22 @@ body.fanning-active .echo-document:hover {
 }
 
 #tabs-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(15, 20, 25, 0.7);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   box-shadow:
-    0 25px 60px rgba(0, 0, 0, 0.9),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1),
-    inset 0 0 10px rgba(0, 0, 0, 0.5),
-    inset calc(cos(var(--highlight-angle, 0deg)) * 10px)
-      calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px
-      rgba(0, 229, 255, 0.05) !important;
+    0 10px 30px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+  z-index: 1000;
 }
 
 /* Venetian Blinds View active styles */
@@ -1734,4 +1743,71 @@ body.holographic-explode-active .echo-document:hover {
     calc(var(--ty, 0px) + var(--explode-ty, 0px)),
     calc(var(--tz, 0px) + var(--explode-tz, 0px) + 100px)
   ) rotateX(0deg) rotateY(0deg) scale(1.1) !important;
+}
+
+
+/* Premium Glassmorphism UI Refinements */
+#tabs-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 16px !important;
+  padding: 12px 20px !important;
+  background: linear-gradient(135deg, rgba(20, 25, 35, 0.85), rgba(10, 15, 20, 0.95)) !important;
+  backdrop-filter: blur(60px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
+  border: 1px solid rgba(0, 229, 255, 0.25) !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 50px 120px rgba(0, 0, 0, 0.95),
+    0 0 75px rgba(0, 229, 255, 0.2),
+    inset 0 2px 8px rgba(255, 255, 255, 0.15) !important;
+  margin-bottom: 24px !important;
+}
+
+#dock {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 16px !important;
+  padding: 16px 32px !important;
+  background: linear-gradient(135deg, rgba(20, 25, 35, 0.85), rgba(10, 15, 20, 0.95)) !important;
+  backdrop-filter: blur(60px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
+  border: 1px solid rgba(0, 229, 255, 0.25) !important;
+  border-radius: 40px !important;
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.9),
+    0 0 60px rgba(0, 229, 255, 0.15),
+    inset 0 2px 5px rgba(255, 255, 255, 0.1) !important;
+}
+
+#tabs-container .echo-tab {
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+}
+
+
+/* ─── Orbital Focus Scrubber ──────────────────────────────────────────────────────── */
+.orbital-scrubber-active .echo-document {
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.4s ease,
+    opacity 0.4s ease !important;
+  transform-origin: center center;
+  transform:
+    perspective(1200px)
+    translate3d(calc(var(--orbital-scrub-angle, 0deg) * 20), 0, var(--orbital-scrub-z, 0px))
+    rotateY(var(--orbital-scrub-angle, 0deg))
+    scale(var(--orbital-scrub-scale, 1)) !important;
+  opacity: calc(var(--orbital-scrub-scale, 1)) !important;
+  filter: brightness(calc(var(--orbital-scrub-scale, 1))) !important;
+}
+
+.orbital-scrubber-active .echo-document[style*="--orbital-scrub-scale: 1.1"] {
+  z-index: 1000 !important;
+  box-shadow: 0 0 50px rgba(0, 229, 255, 0.5) !important;
+  border: 1px solid rgba(0, 229, 255, 0.8) !important;
 }
