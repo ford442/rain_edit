@@ -188,7 +188,9 @@ window.viewModeSelect = document.getElementById("view-mode-select");
 if (viewModeSelect) {
   viewModeSelect.addEventListener("change", (e) => {
     const view = e.target.value;
-    if (view === "waterfall") tabManager.toggleWaterfallView();
+    if (view === "cityscape") tabManager.toggleCityscapeView();
+    else if (view === "house-of-cards") tabManager.toggleHouseOfCardsView();
+    else if (view === "waterfall") tabManager.toggleWaterfallView();
     else if (view === "cascade") tabManager.toggleCascadeView();
     else if (view === "orbit") tabManager.toggleOrbitView();
     else if (view === "scattered") tabManager.toggleScatteredView();

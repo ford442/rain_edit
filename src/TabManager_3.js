@@ -2,6 +2,38 @@ import StorageAPI from "./StorageAPI.js";
 import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
 export const TabManagerMixin3 = {
   _applyLayoutChunk2(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isCityscapeView) {
+        // Cityscape View: buildings of varying heights jutting out from a flat grid
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const row = Math.floor(index / cols);
+        const col = index % cols;
+
+        const spacingX = 400;
+        const spacingZ = 300;
+
+        const offsetX = -((cols - 1) * spacingX) / 2;
+        const offsetZ = -((Math.ceil(totalEchoes / cols) - 1) * spacingZ) / 2;
+
+        const tx = offsetX + col * spacingX;
+        // Pseudo-random height (tz) variation based on index to look like buildings
+        const pseudoRandom = Math.sin(index * 13.37) * 0.5 + 0.5; // value between 0 and 1
+        const buildingHeight = 100 + pseudoRandom * 600;
+
+        const tz = offsetZ - row * spacingZ - 400; // push everything back a bit
+        // Tilt the documents so they stand up from the floor
+        const ty = 300 - buildingHeight / 2;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz + buildingHeight}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+        // add some minor scale to vary thickness visually
+        el.style.transform = `translate3d(var(--tx), var(--ty), var(--tz)) rotateX(var(--rot-x)) rotateY(var(--rot-y)) rotateZ(var(--rot-z)) scale(${1 - pseudoRandom * 0.2})`;
+
+        return;
+      }
       if (this.isStaircaseView) {
         // Staircase View: cascading step-like arrangement
         const stepWidth = 100;
@@ -368,6 +400,57 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--rot-z", `${rZ}deg`);
         return true;
       }
+
+      if (this.isHouseOfCardsView) {
+        // House of Cards View: stacked structure
+        let _totalEchoes = inactiveFiles.length;
+
+        // Build rows starting from bottom
+        // Row 0 has max items, Row 1 has max-1, etc.
+        let row = 0;
+        let col = 0;
+        let itemsInRow = 4; // Start with 4 items at the base
+        let itemsCounted = 0;
+
+        for (let i = 0; i < index; i++) {
+          col++;
+          if (col >= itemsInRow) {
+            row++;
+            col = 0;
+            itemsInRow = Math.max(1, itemsInRow - 1);
+          }
+        }
+
+        // Random slight offsets for realism
+        const randomSeed = index * 9876.54321;
+        const jitterX = (Math.sin(randomSeed) - 0.5) * 20;
+        const jitterY = (Math.cos(randomSeed * 1.5) - 0.5) * 20;
+        const jitterZ = (Math.sin(randomSeed * 2.5) - 0.5) * 10;
+        const jitterRotZ = (Math.cos(randomSeed * 3.5) - 0.5) * 10;
+
+        const spacingX = 220;
+        const spacingY = 180;
+
+        // Center the rows
+        const startX = -((itemsInRow - 1) * spacingX) / 2;
+
+        // Ty goes UP (negative) as row increases
+        const tx = startX + col * spacingX + jitterX;
+        const ty = 200 - row * spacingY + jitterY;
+        const tz = -150 - row * 50 + jitterZ; // Push higher rows further back slightly
+
+        // Slight leaning inward for stability illusion
+        const rotY = tx > 0 ? -10 : tx < 0 ? 10 : 0;
+        const rotX = -5; // Tilt slightly up
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${jitterRotZ}deg`);
+        return true;
+      }
     return false;
   },
   _applyLayoutChunk3(el, index, totalEchoes, file, inactiveFiles, activeFile) {
@@ -670,6 +753,57 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--rot-z", `${rotZ}deg`);
         return true;
       }
+
+      if (this.isHouseOfCardsView) {
+        // House of Cards View: stacked structure
+        let _totalEchoes = inactiveFiles.length;
+
+        // Build rows starting from bottom
+        // Row 0 has max items, Row 1 has max-1, etc.
+        let row = 0;
+        let col = 0;
+        let itemsInRow = 4; // Start with 4 items at the base
+        let itemsCounted = 0;
+
+        for (let i = 0; i < index; i++) {
+          col++;
+          if (col >= itemsInRow) {
+            row++;
+            col = 0;
+            itemsInRow = Math.max(1, itemsInRow - 1);
+          }
+        }
+
+        // Random slight offsets for realism
+        const randomSeed = index * 9876.54321;
+        const jitterX = (Math.sin(randomSeed) - 0.5) * 20;
+        const jitterY = (Math.cos(randomSeed * 1.5) - 0.5) * 20;
+        const jitterZ = (Math.sin(randomSeed * 2.5) - 0.5) * 10;
+        const jitterRotZ = (Math.cos(randomSeed * 3.5) - 0.5) * 10;
+
+        const spacingX = 220;
+        const spacingY = 180;
+
+        // Center the rows
+        const startX = -((itemsInRow - 1) * spacingX) / 2;
+
+        // Ty goes UP (negative) as row increases
+        const tx = startX + col * spacingX + jitterX;
+        const ty = 200 - row * spacingY + jitterY;
+        const tz = -150 - row * 50 + jitterZ; // Push higher rows further back slightly
+
+        // Slight leaning inward for stability illusion
+        const rotY = tx > 0 ? -10 : tx < 0 ? 10 : 0;
+        const rotX = -5; // Tilt slightly up
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${jitterRotZ}deg`);
+        return true;
+      }
     return false;
   },
   _applyLayoutChunk4(el, index, totalEchoes, file, inactiveFiles, activeFile) {
@@ -740,6 +874,57 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--scatter-y", "0px");
         el.style.setProperty("--scatter-z", "0px");
         el.style.setProperty("--scatter-rot", "0deg");
+        return true;
+      }
+
+      if (this.isHouseOfCardsView) {
+        // House of Cards View: stacked structure
+        let _totalEchoes = inactiveFiles.length;
+
+        // Build rows starting from bottom
+        // Row 0 has max items, Row 1 has max-1, etc.
+        let row = 0;
+        let col = 0;
+        let itemsInRow = 4; // Start with 4 items at the base
+        let itemsCounted = 0;
+
+        for (let i = 0; i < index; i++) {
+          col++;
+          if (col >= itemsInRow) {
+            row++;
+            col = 0;
+            itemsInRow = Math.max(1, itemsInRow - 1);
+          }
+        }
+
+        // Random slight offsets for realism
+        const randomSeed = index * 9876.54321;
+        const jitterX = (Math.sin(randomSeed) - 0.5) * 20;
+        const jitterY = (Math.cos(randomSeed * 1.5) - 0.5) * 20;
+        const jitterZ = (Math.sin(randomSeed * 2.5) - 0.5) * 10;
+        const jitterRotZ = (Math.cos(randomSeed * 3.5) - 0.5) * 10;
+
+        const spacingX = 220;
+        const spacingY = 180;
+
+        // Center the rows
+        const startX = -((itemsInRow - 1) * spacingX) / 2;
+
+        // Ty goes UP (negative) as row increases
+        const tx = startX + col * spacingX + jitterX;
+        const ty = 200 - row * spacingY + jitterY;
+        const tz = -150 - row * 50 + jitterZ; // Push higher rows further back slightly
+
+        // Slight leaning inward for stability illusion
+        const rotY = tx > 0 ? -10 : tx < 0 ? 10 : 0;
+        const rotX = -5; // Tilt slightly up
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${jitterRotZ}deg`);
         return true;
       }
     return false;

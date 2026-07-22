@@ -622,3 +622,65 @@ document.addEventListener("wheel", (e) => {
     }
   }
 }, { passive: false });
+
+// Gravity Well (Alt+G)
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && e.code === "KeyG" && !e.shiftKey) {
+    e.preventDefault();
+    if (!document.body.classList.contains("gravity-well-active")) {
+      document.body.classList.add("gravity-well-active");
+    }
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "g" || e.key === "G" || e.key === "Alt") {
+    document.body.classList.remove("gravity-well-active");
+    if (echoLayerEl) {
+      const echoes = echoLayerEl.querySelectorAll(".echo-document");
+      echoes.forEach((echo) => {
+        echo.style.removeProperty("--gravity-tx");
+        echo.style.removeProperty("--gravity-ty");
+        echo.style.removeProperty("--gravity-tz");
+      });
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("gravity-well-active") && echoLayerEl) {
+    const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    const maxDist = 600; // Pull radius
+
+    echoes.forEach((echo) => {
+      const rect = echo.getBoundingClientRect();
+      // Calculate center of the echo
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      const dx = mouseX - cx;
+      const dy = mouseY - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < maxDist) {
+        // Calculate gravity strength (closer = stronger pull)
+        const strength = Math.pow((maxDist - dist) / maxDist, 1.5);
+
+        // Max pull distance toward cursor
+        const pullFactorX = dx * strength * 0.8;
+        const pullFactorY = dy * strength * 0.8;
+        const pullFactorZ = strength * 200; // Lift up toward screen
+
+        echo.style.setProperty("--gravity-tx", `${pullFactorX}px`);
+        echo.style.setProperty("--gravity-ty", `${pullFactorY}px`);
+        echo.style.setProperty("--gravity-tz", `${pullFactorZ}px`);
+      } else {
+        echo.style.setProperty("--gravity-tx", `0px`);
+        echo.style.setProperty("--gravity-ty", `0px`);
+        echo.style.setProperty("--gravity-tz", `0px`);
+      }
+    });
+  }
+});

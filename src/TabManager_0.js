@@ -47,7 +47,8 @@ export const TabManagerMixin0 = {
     this.isAccordionView = false;
     this.isInfinityMirrorView = false;
     this.isArchwayView = false;
-    this.isArchwayView = false;
+    this.isCityscapeView = false;
+    this.isHouseOfCardsView = false;
     this.isKaleidoscopeView = false;
     this.isBookshelfView = false;
     this.isCarouselView = false;
@@ -69,6 +70,8 @@ export const TabManagerMixin0 = {
 
     document.body.classList.remove(
       "waterfall-active",
+      "cityscape-active",
+      "house-of-cards-active",
       "cascade-active",
       "orbit-active",
       "scattered-active",
@@ -432,6 +435,24 @@ export const TabManagerMixin0 = {
       document.body.classList.add("crystal-active");
       const btn = document.getElementById("btn-crystal-view");
       if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCityscapeView() {
+    const wasActive = this.isCityscapeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCityscapeView = true;
+      document.body.classList.add("cityscape-active");
+    }
+    this._renderEchoes();
+  },
+  toggleHouseOfCardsView() {
+    const wasActive = this.isHouseOfCardsView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHouseOfCardsView = true;
+      document.body.classList.add("house-of-cards-active");
     }
     this._renderEchoes();
   },
