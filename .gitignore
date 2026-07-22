@@ -7,3 +7,4 @@ screenshot_*.png
 card_*.png
 playwright-report/
 test-results/
+crates/**/target/

@@ -1,5 +1,5 @@
 import RainLayer from "./RainLayer";
-import Raindrops from "./vendor/raindrops.js";
+import { WaterMapSim } from "./rain/WaterMapSim.js";
 import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
 import { resizeCanvasToDisplaySize } from "./rendering/createGLContext.js";
@@ -221,16 +221,33 @@ window.initLayers = async function initLayers() {
     (await awaitImage("/ra1n/img/drop-color.png"));
 
   const dpi = window.devicePixelRatio || 1;
-  raindrops = new Raindrops(
+  raindrops = await WaterMapSim.create(
     backCanvas.width,
     backCanvas.height,
     dpi,
     dropAlpha,
     dropColor,
   );
+  window.raindrops = raindrops;
 
   if (referenceManager) {
     referenceManager.setRaindrops(raindrops);
+  }
+
+  const rainSimSelect = document.getElementById("rain-sim-backend");
+  if (rainSimSelect) {
+    rainSimSelect.value = raindrops.preference || raindrops.backend;
+    rainSimSelect.addEventListener("change", async (e) => {
+      const next = e.target.value;
+      try {
+        await raindrops.setBackend(next);
+        e.target.value = raindrops.preference || raindrops.backend;
+        console.info("[rain] water-map backend:", raindrops.getDiagnostics());
+      } catch (err) {
+        console.warn("[rain] failed to switch water-map backend", err);
+        e.target.value = raindrops.preference || raindrops.backend;
+      }
+    });
   }
 
   const options = {

@@ -75,11 +75,14 @@ root/
       water.frag          # Front rain fragment shader
       water-back.frag     # Back rain fragment shader
     vendor/
-      raindrops.js        # Original raindrop simulation (drives water map)
+      raindrops.js        # Original raindrop simulation (main-thread fallback)
       create-canvas.js
       image-loader.js
       random.js
       times.js
+    rain/                 # Off-main-thread water-map (WaterMapSim, worker, wasm)
+  crates/
+    rain-sim/             # Rust wasm32 droplet sim → src/rain/wasm/rain_sim.wasm
   public/img/             # Local texture assets (drop-alpha, drop-color, textures, backgrounds)
   tests/                  # Focused Node tests for extracted domain modules
   Kimi_Agent/             # Agent workspace: patches and alternate file versions (not part of main build)
@@ -99,6 +102,7 @@ root/
 - `createGLContext` is the single context factory. Rain prefers WebGL2, falls back to WebGL1, and uses non-antialiased, non-preserved drawing buffers. Cabinet rendering is synchronized immediately before cross-context texture upload, so its drawing buffer is also non-preserved by default. See `docs/rendering-contexts.md` before changing this frame order.
 - `RainLayer` caches texture sources and uniform values, pauses the shared rain RAF on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy.
 - `window.tabManager` is intentionally exposed on the global object for manual/debug automation.
+- Water-map simulation lives behind `src/rain/WaterMapSim.js`. It prefers an off-main-thread worker (`js` OffscreenCanvas or `wasm` Rust pixel sim in `crates/rain-sim`), and falls back to `src/vendor/raindrops.js` on the main thread. Toggle with the dock **Rain Sim** control, `?rainSim=wasm|js|main|auto`, or `localStorage['rain-edit:rainSimBackend']`. Rebuild the wasm artifact with `npm run build:wasm` (Vite imports `src/rain/wasm/rain_sim.wasm` via `?url` — no public/ copy).
 
 ---
 
@@ -113,6 +117,9 @@ npm run dev
 
 # Production build -> dist/
 npm run build
+
+# Rebuild Rust water-map wasm into src/rain/wasm/ (optional; artifact is checked in)
+npm run build:wasm
 
 # Focused Node tests
 npm test

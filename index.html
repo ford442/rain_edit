@@ -237,6 +237,27 @@
         </div>
 
         <div class="dock-toggles">
+          <div title="Water-map simulation backend (visual parity)">
+            <label for="rain-sim-backend">Rain Sim</label>
+            <select
+              id="rain-sim-backend"
+              style="
+                background: rgba(0, 0, 0, 0.5);
+                color: #0ff;
+                border: 1px solid #0ff;
+                border-radius: 4px;
+                padding: 2px 4px;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.7rem;
+                cursor: pointer;
+              "
+            >
+              <option value="auto">Auto</option>
+              <option value="wasm">WASM Worker</option>
+              <option value="js">JS Worker</option>
+              <option value="main">Main-thread JS</option>
+            </select>
+          </div>
           <label title="Back Rain"
             ><input id="toggle-back" type="checkbox" checked /> Back Rain</label
           >
