@@ -639,6 +639,7 @@ export class VPSFileBrowser {
       // Update the tab's vpsPath and name, then re-activate to refresh the tab bar
       activeFile.vpsPath = filePath;
       activeFile.name = filename;
+      this.tabManager.workspaceSession?.markClean?.(activeFile.id);
       this.tabManager.setActive(activeFile.id);
       this.tabManager._saveTabsToStorage();
 

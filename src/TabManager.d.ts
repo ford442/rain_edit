@@ -16,6 +16,17 @@ export interface TabFile {
   cabinetType?: string;
   cabinetId?: string;
   vpsPath?: string;
+  localPath?: string;
+  opfsPath?: string;
+  dirty?: boolean;
+  savedContent?: string;
+  cursor?: { lineNumber: number; column: number } | null;
+  selection?: {
+    startLineNumber: number;
+    startColumn: number;
+    endLineNumber: number;
+    endColumn: number;
+  } | null;
   [key: string]: unknown;
 }
 
@@ -52,6 +63,16 @@ export class TabManager {
   cycleActiveTab(direction: number): void;
   /** Remove a document/tab by id. */
   removeFile(id: number): void;
+  /** Serialize open files for workspace session persistence. */
+  serializeFiles(): object[];
+  /** Persist hooks / workspace session controller (optional). */
+  workspaceSession?: {
+    schedulePersist(): void;
+    restore(opts?: { preferRemote?: boolean }): Promise<boolean>;
+    unwatchFile?(id: number): void;
+    watchFile?(file: TabFile): void;
+    markClean?(id: number): void;
+  };
   /** Deactivate every 3D view mode. */
   _deactivateAllViews(): void;
   /** Show a transient status toast. */

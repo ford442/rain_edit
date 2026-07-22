@@ -236,7 +236,84 @@
           </select>
         </div>
 
+        <div class="dock-group" id="workspace-dock">
+          <label><span class="icon">💾</span> Workspace</label>
+          <div class="workspace-actions">
+            <button
+              type="button"
+              id="btn-local-folder"
+              class="dock-btn-workspace"
+              title="Open a local folder (File System Access API)"
+            >
+              Open folder
+            </button>
+            <button
+              type="button"
+              id="btn-local-opfs"
+              class="dock-btn-workspace"
+              title="Open Origin Private File System sandbox"
+            >
+              OPFS sandbox
+            </button>
+            <button
+              type="button"
+              id="btn-workspace-export"
+              class="dock-btn-workspace"
+              title="Export storm layout JSON"
+            >
+              Export layout
+            </button>
+            <button
+              type="button"
+              id="btn-workspace-import"
+              class="dock-btn-workspace"
+              title="Import storm layout JSON"
+            >
+              Import layout
+            </button>
+            <input
+              id="workspace-import-input"
+              type="file"
+              accept="application/json,.json"
+              hidden
+            />
+            <button
+              type="button"
+              id="btn-workspace-clear"
+              class="dock-btn-workspace"
+              title="Clear saved session from IndexedDB/localStorage"
+            >
+              Clear saved
+            </button>
+          </div>
+          <label title="Opt-in: sync session JSON via StorageAPI notes"
+            ><input id="workspace-remote-sync" type="checkbox" /> Remote session
+            sync</label
+          >
+        </div>
+
         <div class="dock-toggles">
+          <div title="Water-map simulation backend (visual parity)">
+            <label for="rain-sim-backend">Rain Sim</label>
+            <select
+              id="rain-sim-backend"
+              style="
+                background: rgba(0, 0, 0, 0.5);
+                color: #0ff;
+                border: 1px solid #0ff;
+                border-radius: 4px;
+                padding: 2px 4px;
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.7rem;
+                cursor: pointer;
+              "
+            >
+              <option value="auto">Auto</option>
+              <option value="wasm">WASM Worker</option>
+              <option value="js">JS Worker</option>
+              <option value="main">Main-thread JS</option>
+            </select>
+          </div>
           <label title="Back Rain"
             ><input id="toggle-back" type="checkbox" checked /> Back Rain</label
           >

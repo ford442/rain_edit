@@ -354,7 +354,12 @@ export const TabManagerMixin6 = {
       isImage,
       language,
       url: isImage ? content : null,
+      dirty: false,
+      savedContent: isImage ? undefined : content,
     });
+    this.workspaceSession?.watchFile?.(
+      this.files[this.files.length - 1],
+    );
     this._renderTabs();
     this._saveTabsToStorage();
     return id;

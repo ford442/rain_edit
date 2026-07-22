@@ -66,6 +66,12 @@
   text-transform: uppercase;
   letter-spacing: 1.5px;
 }
+.tab-item.dirty .tab-name {
+  color: #ffe08a;
+}
+.tab-item.dirty {
+  border-color: rgba(255, 200, 80, 0.35);
+}
 .tab-item:hover {
   background: rgba(30, 30, 35, 0.8);
   border-color: rgba(255, 255, 255, 0.2);
