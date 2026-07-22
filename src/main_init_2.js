@@ -1,5 +1,6 @@
 import { monaco } from "./editor/setupMonaco.js";
 import { FogManager } from "./FogManager.js";
+import { inputManager as im } from "./interactions/InputManager.js";
 
 document.addEventListener("mouseup", (e) => {
   if (!document.body.classList.contains("siphon-mode-active")) return;
@@ -54,18 +55,7 @@ document.addEventListener("mouseup", (e) => {
   }
 });
 
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Control" || e.key === "Meta") {
-    editorEl.classList.remove("x-ray-active");
-    document.body.classList.remove("x-ray-active");
-  }
-
-  // Semantic X-Ray toggle removal
-  if (!e.altKey || !e.shiftKey) {
-    document.body.classList.remove("semantic-xray-active");
-    document.body.classList.remove("siphon-mode-active");
-  }
-});
+// (X-ray and siphon release are handled by their bindings' onUp in main_init_1.)
 
 document.getElementById("toggle-back").addEventListener("change", (e) => {
   if (bgLayer) bgLayer.setVisible(e.target.checked);
@@ -93,16 +83,24 @@ if (btnDepthBack) {
   });
 }
 
-document.addEventListener("keydown", (e) => {
-  if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
-
-  if (e.key === "ArrowUp") {
-    e.preventDefault();
-    tabManager.cycleDepth(1);
-  } else if (e.key === "ArrowDown") {
-    e.preventDefault();
-    tabManager.cycleDepth(-1);
-  }
+// Depth cycling (Ctrl/Cmd + Arrow Up/Down)
+im.register({
+  id: "depth-cycle-up",
+  category: "navigation",
+  description: "Cycle depth forward (Ctrl+Up)",
+  combo: { ctrlOrMeta: true, key: "ArrowUp" },
+  type: "action",
+  allowInEditor: true,
+  onDown: () => tabManager.cycleDepth(1),
+});
+im.register({
+  id: "depth-cycle-down",
+  category: "navigation",
+  description: "Cycle depth back (Ctrl+Down)",
+  combo: { ctrlOrMeta: true, key: "ArrowDown" },
+  type: "action",
+  allowInEditor: true,
+  onDown: () => tabManager.cycleDepth(-1),
 });
 
 window.addEventListener(

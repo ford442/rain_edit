@@ -1,4 +1,5 @@
 import { TabManager } from "./TabManager.js";
+import { inputManager as im } from "./interactions/InputManager.js";
 
 if (globalSearch) {
   globalSearch.addEventListener("input", (e) => {
@@ -72,46 +73,52 @@ if (globalSearch) {
 
 updateFocusVisuals();
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Alt") {
+// Alt focus (hold Alt)
+im.register({
+  id: "alt-focus",
+  category: "navigation",
+  description: "Alt focus depth (hold Alt)",
+  combo: { key: "Alt" },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onDown: () => {
     if (!isAltDown) {
       isAltDown = true;
       setFocusDepth(userPreferredDepth);
       document.body.classList.add("alt-focus-active");
     }
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Alt") {
+  },
+  onUp: () => {
     isAltDown = false;
     setFocusDepth(0);
     document.body.classList.remove("alt-focus-active");
-  }
+  },
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.metaKey && e.shiftKey && !e.repeat) {
+// Loupe magnifier (hold Meta+Shift)
+im.register({
+  id: "loupe-magnifier",
+  category: "lens",
+  description: "Loupe magnifier (hold Cmd+Shift)",
+  combo: { meta: true, shift: true },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onDown: () => {
     isMagnifierMode = true;
-    editorEl.classList.add("x-ray-active"); // Re-use x-ray hole effect for the editor
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Meta" || e.key === "Shift") {
+    editorEl.classList.add("x-ray-active");
+  },
+  onUp: () => {
     isMagnifierMode = false;
-    // Don't remove x-ray-active if the normal X-Ray shortcut (just Meta) is still held
-    if (!e.metaKey && !e.ctrlKey) {
-      editorEl.classList.remove("x-ray-active");
-    }
-
+    editorEl.classList.remove("x-ray-active");
     if (echoLayerEl) {
       echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
         echo.classList.remove("magnifier-active");
         echo.classList.remove("loupe-active");
       });
     }
-  }
+  },
 });
 
 window.addEventListener(
@@ -156,48 +163,60 @@ window.addEventListener(
   { passive: false },
 );
 
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.key.toLowerCase() === "f") {
-    e.preventDefault();
-    document.body.classList.toggle("flashlight-active");
-  }
+// Flashlight — reassigned Alt+F -> Alt+L (Alt+F is Focus Pull in main_init_4).
+im.register({
+  id: "flashlight",
+  category: "lens",
+  description: "Flashlight (Alt+L)",
+  combo: { alt: true, code: "KeyL" },
+  type: "toggle",
+  onDown: () => document.body.classList.add("flashlight-active"),
+  onUp: () => document.body.classList.remove("flashlight-active"),
 });
 
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Alt") {
+// Z-Axis camera fly-through reset (release Alt). Shares Alt with alt-focus;
+// both fire on release, each cleaning up its own state.
+im.register({
+  id: "z-camera",
+  category: "navigation",
+  description: "Z-axis camera fly-through (hold Alt + scroll)",
+  combo: { key: "Alt" },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onUp: () => {
     zCameraOffset = 0;
     document.body.style.setProperty("--z-camera-offset", "0px");
     if (echoLayerEl) {
-      const echoes = echoLayerEl.querySelectorAll(".echo-document");
-      echoes.forEach((echo) => {
-        echo.classList.remove("z-intersect");
-      });
+      echoLayerEl
+        .querySelectorAll(".echo-document")
+        .forEach((echo) => echo.classList.remove("z-intersect"));
     }
-
-    // Also clear the old alt focus state
     isAltDown = false;
     setFocusDepth(0);
     document.body.classList.remove("alt-focus-active");
-  }
+  },
 });
 
-document.addEventListener("keydown", (e) => {
-  // Shift + Alt to toggle Lens Mode
-  if (e.altKey && e.shiftKey && !e.repeat) {
-    isLensMode = !isLensMode;
-    if (referenceManager) {
-      referenceManager.isLensMode = isLensMode;
-    }
-    if (isLensMode) {
-      editorEl.classList.add("lens-active");
-    } else {
-      editorEl.classList.remove("lens-active");
-    }
-    // If we have portals, we need to update the composed mask immediately
-    if (typeof updatePortals === "function") {
-      requestAnimationFrame(updatePortals);
-    }
-  }
+// Lens Mode — reassigned bare Alt+Shift -> Alt+Shift+L.
+im.register({
+  id: "lens-mode",
+  category: "lens",
+  description: "Lens mode (Alt+Shift+L)",
+  combo: { alt: true, shift: true, code: "KeyL" },
+  type: "toggle",
+  onDown: () => {
+    isLensMode = true;
+    if (referenceManager) referenceManager.isLensMode = true;
+    editorEl.classList.add("lens-active");
+    if (typeof updatePortals === "function") requestAnimationFrame(updatePortals);
+  },
+  onUp: () => {
+    isLensMode = false;
+    if (referenceManager) referenceManager.isLensMode = false;
+    editorEl.classList.remove("lens-active");
+    if (typeof updatePortals === "function") requestAnimationFrame(updatePortals);
+  },
 });
 
 if (themeSelect) {
@@ -388,21 +407,25 @@ setInterval(() => {
   }
 }, 1000);
 
+// Double-tap Shift for sonar (timing chord — kept as a dedicated listener).
 document.addEventListener("keydown", (e) => {
   if (e.key === "Shift") {
     const now = Date.now();
     if (now - lastShiftTime < 300) {
-      // Double Shift detected
       triggerSonar();
     }
     lastShiftTime = now;
   }
+});
 
-  // Ctrl+Space for Sonar Ping
-  if (e.ctrlKey && e.code === "Space") {
-    e.preventDefault();
-    triggerSonar();
-  }
+// Ctrl+Space sonar ping
+im.register({
+  id: "sonar-ping",
+  category: "effects",
+  description: "Sonar ping (Ctrl+Space)",
+  combo: { ctrl: true, code: "Space" },
+  type: "action",
+  onDown: () => triggerSonar(),
 });
 
 if (btnSonar) {
@@ -448,75 +471,92 @@ document.addEventListener("mousemove", () => {
 
 scanPortals();
 
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.shiftKey && e.code === "KeyS" && !e.ctrlKey && !e.metaKey) {
-    e.preventDefault();
-    document.body.classList.toggle("holographic-slice-active");
-  }
+// Holographic Slice — reassigned Alt+Shift+S -> Ctrl+Alt+S (Alt+Shift+S is the
+// depth spotlight in main_init_4).
+im.register({
+  id: "holographic-slice",
+  category: "reveal",
+  description: "Holographic slice (Ctrl+Alt+S)",
+  combo: { ctrl: true, alt: true, code: "KeyS" },
+  type: "toggle",
+  onDown: () => document.body.classList.add("holographic-slice-active"),
+  onUp: () => document.body.classList.remove("holographic-slice-active"),
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.shiftKey && e.code === "KeyX" && !e.ctrlKey && !e.metaKey) {
-    document.body.classList.add("x-ray-active");
-  }
+// Semantic X-Ray (hold Alt+Shift+X)
+im.register({
+  id: "semantic-xray",
+  category: "lens",
+  description: "Semantic x-ray (Alt+Shift+X)",
+  combo: { alt: true, shift: true, code: "KeyX" },
+  type: "hold",
+  preventDefault: false,
+  onDown: () => document.body.classList.add("x-ray-active"),
+  onUp: () => document.body.classList.remove("x-ray-active"),
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.shiftKey && e.key === "Backspace") {
-    e.preventDefault();
-    document.body.classList.toggle("singularity-active");
-  }
+// Singularity (Alt+Shift+Backspace)
+im.register({
+  id: "singularity",
+  category: "reveal",
+  description: "Singularity collapse (Alt+Shift+Backspace)",
+  combo: { alt: true, shift: true, key: "Backspace" },
+  type: "toggle",
+  onDown: () => document.body.classList.add("singularity-active"),
+  onUp: () => document.body.classList.remove("singularity-active"),
 });
 
-document.addEventListener("keyup", (e) => {
-  if (e.key.toLowerCase() === "x" || e.key === "Shift" || e.key === "Alt") {
-    document.body.classList.remove("x-ray-active");
-  }
+// VPS Save (Ctrl/Cmd+Shift+S)
+im.register({
+  id: "vps-save",
+  category: "editor",
+  description: "Save to VPS (Ctrl+Shift+S)",
+  combo: { ctrlOrMeta: true, shift: true, code: "KeyS" },
+  type: "action",
+  allowInEditor: true,
+  onDown: () => _triggerVpsSave(),
 });
 
-document.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "S") {
-    e.preventDefault();
-    _triggerVpsSave();
-  }
-});
-
-document.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "O") {
-    e.preventDefault();
+// Outline view (Ctrl/Cmd+Shift+O)
+im.register({
+  id: "outline-view",
+  category: "editor",
+  description: "Toggle outline view (Ctrl+Shift+O)",
+  combo: { ctrlOrMeta: true, shift: true, code: "KeyO" },
+  type: "action",
+  allowInEditor: true,
+  onDown: () => {
     tabManager.toggleOutlineView();
     const sel = document.getElementById("view-mode-select");
     if (sel) {
-      sel.value = document.body.classList.contains("outline-active")
-        ? "outline"
-        : "";
+      sel.value = document.body.classList.contains("outline-active") ? "outline" : "";
     }
-  }
+  },
 });
 
-document.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === "s") {
-    e.preventDefault();
-
-    // Trigger Sonic Boom animation
+// Save note + sonic boom (Ctrl/Cmd+S)
+im.register({
+  id: "save-note",
+  category: "editor",
+  description: "Save note (Ctrl+S)",
+  combo: { ctrlOrMeta: true, code: "KeyS" },
+  type: "action",
+  allowInEditor: true,
+  onDown: () => {
     document.body.classList.add("sonic-boom-active");
-    setTimeout(() => {
-      document.body.classList.remove("sonic-boom-active");
-    }, 400);
+    setTimeout(() => document.body.classList.remove("sonic-boom-active"), 400);
 
-    const activeFile = tabManager.files.find(
-      (f) => f.id === tabManager.activeId,
-    );
+    const activeFile = tabManager.files.find((f) => f.id === tabManager.activeId);
     if (!activeFile || activeFile.isImage) return;
 
     if (activeFile.cabinetType === "notes" || activeFile.noteName) {
-      const noteName =
-        activeFile.noteName || activeFile.cabinetId || activeFile.name;
+      const noteName = activeFile.noteName || activeFile.cabinetId || activeFile.name;
       const content = activeFile.model ? activeFile.model.getValue() : "";
       storageAPI
         .saveNote(noteName, content)
         .then((result) => {
           if (result && result.success) {
+            window.workspaceSession?.markClean(activeFile.id);
             tabManager._showToast(`✅ Note "${noteName}" saved!`);
           } else {
             tabManager._showToast(`❌ Failed to save note "${noteName}"`, true);
@@ -527,7 +567,7 @@ document.addEventListener("keydown", (e) => {
           tabManager._showToast(`❌ Error saving note: ${err.message}`, true);
         });
     }
-  }
+  },
 });
 
 window.tabManager = tabManager;
@@ -599,11 +639,5 @@ function playTearSound() {
   osc.stop(audioCtx.currentTime + 0.3);
 }
 
-// Modify existing Alt+T listener to play sound
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-    if (!document.body.classList.contains("fabric-tear-active")) {
-      playTearSound();
-    }
-  }
-});
+// (Alt+T fabric-tear sound is merged into the fabric-tear binding in main_init_4.)
+window.playTearSound = playTearSound;

@@ -1,5 +1,5 @@
 import RainLayer from "./RainLayer";
-import Raindrops from "./vendor/raindrops.js";
+import { WaterMapSim } from "./rain/WaterMapSim.js";
 import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
 import { resizeCanvasToDisplaySize } from "./rendering/createGLContext.js";
@@ -12,6 +12,29 @@ window._triggerVpsSave = async function _triggerVpsSave() {
   const activeFile = tabManager.files.find((f) => f.id === tabManager.activeId);
   if (!activeFile) return;
 
+  // Prefer local File System Access / OPFS handles when the tab is already local.
+  if (
+    window.localProject &&
+    (activeFile.fileHandle || activeFile.opfsPath || activeFile.localPath)
+  ) {
+    try {
+      const savedLocal = await window.localProject.saveActiveLocal();
+      if (savedLocal) {
+        if (vpsSaveBtn) {
+          const orig = vpsSaveBtn.textContent;
+          vpsSaveBtn.textContent = "✅ Local";
+          setTimeout(() => {
+            vpsSaveBtn.textContent = orig;
+          }, 1500);
+        }
+        tabManager._showToast?.(`Saved ${activeFile.name} locally`);
+        return;
+      }
+    } catch (err) {
+      console.warn("[localProject] save failed, trying VPS path", err);
+    }
+  }
+
   if (activeFile.vpsPath) {
     // Direct save — re-upload to the same VPS path
     const content = activeFile.model
@@ -22,6 +45,7 @@ window._triggerVpsSave = async function _triggerVpsSave() {
     try {
       const result = await storageAPI.saveVPSFile(activeFile.vpsPath, content);
       if (result) {
+        window.workspaceSession?.markClean(activeFile.id);
         // Invalidate Cabinet3D preview cache for this file so next hover is fresh
         window.dispatchEvent(
           new CustomEvent("cabinet-cache-invalidate", {
@@ -221,16 +245,33 @@ window.initLayers = async function initLayers() {
     (await awaitImage("/ra1n/img/drop-color.png"));
 
   const dpi = window.devicePixelRatio || 1;
-  raindrops = new Raindrops(
+  raindrops = await WaterMapSim.create(
     backCanvas.width,
     backCanvas.height,
     dpi,
     dropAlpha,
     dropColor,
   );
+  window.raindrops = raindrops;
 
   if (referenceManager) {
     referenceManager.setRaindrops(raindrops);
+  }
+
+  const rainSimSelect = document.getElementById("rain-sim-backend");
+  if (rainSimSelect) {
+    rainSimSelect.value = raindrops.preference || raindrops.backend;
+    rainSimSelect.addEventListener("change", async (e) => {
+      const next = e.target.value;
+      try {
+        await raindrops.setBackend(next);
+        e.target.value = raindrops.preference || raindrops.backend;
+        console.info("[rain] water-map backend:", raindrops.getDiagnostics());
+      } catch (err) {
+        console.warn("[rain] failed to switch water-map backend", err);
+        e.target.value = raindrops.preference || raindrops.backend;
+      }
+    });
   }
 
   const options = {

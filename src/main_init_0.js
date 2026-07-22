@@ -1,5 +1,11 @@
 import { monaco } from "./editor/setupMonaco.js";
 import { HolographicMinimap } from "./HolographicMinimap.js";
+import { inputManager as im } from "./interactions/InputManager.js";
+import {
+  WorkspaceSession,
+  setWorkspaceSession,
+} from "./workspace/WorkspaceSession.js";
+import { LocalProject } from "./workspace/LocalProject.js";
 
 portalLayer.id = "portal-visuals";
 
@@ -38,11 +44,30 @@ monaco.editor.defineTheme("transparent-vs-dark", {
   },
 });
 
+const workspaceSession = setWorkspaceSession(
+  new WorkspaceSession({
+    tabManager,
+    referenceManager,
+    referenceInput: document.getElementById("reference-input"),
+    viewModeSelect: document.getElementById("view-mode-select"),
+    storageAPI,
+  }),
+);
+window.workspaceSession = workspaceSession;
+workspaceSession.bindDockControls();
+workspaceSession.installUnloadGuard();
+
+const localProject = new LocalProject({ tabManager, workspaceSession });
+window.localProject = localProject;
+localProject.bindUi();
+
 (async () => {
-  await tabManager.loadTabsFromStorage();
+  const restored = await workspaceSession.restore({
+    preferRemote: workspaceSession.remoteSync,
+  });
 
   // If no tabs were restored, add the initial demo file
-  if (tabManager.files.length === 0) {
+  if (!restored && tabManager.files.length === 0) {
     const INITIAL_CODE = [
       "// rain-2 demo",
       "function hello(){",
@@ -234,39 +259,58 @@ document.addEventListener("mouseup", (e) => {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.altKey) {
+// Wormhole (hold Ctrl+Alt)
+im.register({
+  id: "wormhole",
+  category: "depth",
+  description: "Wormhole warp (hold Ctrl+Alt)",
+  combo: { ctrl: true, alt: true },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onDown: () => {
     isWormholeActive = true;
-  }
-
-  if (e.altKey && e.code === "KeyZ") {
-    document.body.classList.toggle("gravity-well-active");
-  }
+  },
+  onUp: () => {
+    isWormholeActive = false;
+    if (echoLayerEl) {
+      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
+        echo.style.removeProperty("--wormhole-tx");
+        echo.style.removeProperty("--wormhole-ty");
+        echo.style.removeProperty("--wormhole-tz");
+        echo.style.removeProperty("--wormhole-scale");
+      });
+    }
+  },
 });
 
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Escape") {
-    if (document.body.classList.contains("tesseract-active")) {
-      const viewSelect = document.getElementById("view-mode-select");
-      if (viewSelect) viewSelect.value = "";
-      tabManager._deactivateAllViews();
-    }
-  }
+// Gravity Well — reassigned Alt+Z -> Alt+Shift+Z (Alt+Z is the depth x-ray scan).
+im.register({
+  id: "gravity-well",
+  category: "depth",
+  description: "Gravity well (Alt+Shift+Z)",
+  combo: { alt: true, shift: true, code: "KeyZ" },
+  type: "toggle",
+  preventDefault: false,
+  onDown: () => document.body.classList.add("gravity-well-active"),
+  onUp: () => document.body.classList.remove("gravity-well-active"),
+});
 
-  if (e.key === "Control" || e.key === "Alt") {
-    if (!e.ctrlKey || !e.altKey) {
-      isWormholeActive = false;
-      if (echoLayerEl) {
-        const echoes = echoLayerEl.querySelectorAll(".echo-document");
-        echoes.forEach((echo) => {
-          echo.style.removeProperty("--wormhole-tx");
-          echo.style.removeProperty("--wormhole-ty");
-          echo.style.removeProperty("--wormhole-tz");
-          echo.style.removeProperty("--wormhole-scale");
-        });
-      }
-    }
-  }
+// Tesseract exit (Escape)
+im.register({
+  id: "tesseract-exit",
+  category: "navigation",
+  description: "Exit tesseract view (Esc)",
+  combo: { key: "Escape" },
+  type: "action",
+  preventDefault: false,
+  allowInEditor: true,
+  when: () => document.body.classList.contains("tesseract-active"),
+  onDown: () => {
+    const viewSelect = document.getElementById("view-mode-select");
+    if (viewSelect) viewSelect.value = "";
+    tabManager._deactivateAllViews();
+  },
 });
 
 if (document.getElementById("radar-canvas")) {

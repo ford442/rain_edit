@@ -75,11 +75,17 @@ root/
       water.frag          # Front rain fragment shader
       water-back.frag     # Back rain fragment shader
     vendor/
-      raindrops.js        # Original raindrop simulation (drives water map)
+      raindrops.js        # Original raindrop simulation (main-thread fallback)
       create-canvas.js
       image-loader.js
       random.js
       times.js
+    rain/                 # Off-main-thread water-map (WaterMapSim, worker, wasm)
+    workspace/            # Session persist/restore, local project, export/import
+  crates/
+    rain-sim/             # Rust wasm32 droplet sim → src/rain/wasm/rain_sim.wasm
+  docs/
+    workspace-session.md  # Session schema, StorageAPI sync, local project mode
   public/img/             # Local texture assets (drop-alpha, drop-color, textures, backgrounds)
   tests/                  # Focused Node tests for extracted domain modules
   Kimi_Agent/             # Agent workspace: patches and alternate file versions (not part of main build)
@@ -99,6 +105,8 @@ root/
 - `createGLContext` is the single context factory. Rain prefers WebGL2, falls back to WebGL1, and uses non-antialiased, non-preserved drawing buffers. Cabinet rendering is synchronized immediately before cross-context texture upload, so its drawing buffer is also non-preserved by default. See `docs/rendering-contexts.md` before changing this frame order.
 - `RainLayer` caches texture sources and uniform values, pauses the shared rain RAF on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy.
 - `window.tabManager` is intentionally exposed on the global object for manual/debug automation.
+- Water-map simulation lives behind `src/rain/WaterMapSim.js`. It prefers an off-main-thread worker (`js` OffscreenCanvas or `wasm` Rust pixel sim in `crates/rain-sim`), and falls back to `src/vendor/raindrops.js` on the main thread. Toggle with the dock **Rain Sim** control, `?rainSim=wasm|js|main|auto`, or `localStorage['rain-edit:rainSimBackend']`. Rebuild the wasm artifact with `npm run build:wasm` (Vite imports `src/rain/wasm/rain_sim.wasm` via `?url` — no public/ copy).
+- Workspace sessions live in `src/workspace/` (`WorkspaceSession`, `LocalProject`). Refresh restores tabs (content + depth), view mode, and reference layouts from IndexedDB (localStorage fallback). Dirty tabs show `*`; `beforeunload` confirms. Optional remote sync writes note `__rain_workspace_session__.json` via StorageAPI. See `docs/workspace-session.md`.
 
 ---
 
@@ -113,6 +121,9 @@ npm run dev
 
 # Production build -> dist/
 npm run build
+
+# Rebuild Rust water-map wasm into src/rain/wasm/ (optional; artifact is checked in)
+npm run build:wasm
 
 # Focused Node tests
 npm test
@@ -158,6 +169,39 @@ The Vite dev server is configured to allow file-system access to the parent dire
 Focused unit tests use the built-in Node test runner and live in `tests/*.test.js`; run them with `npm test`. `npm run check` parses every `src/**/*.js` file with esbuild. The canonical browser check is `npm run test:smoke`; it starts Vite and uses Playwright to verify Monaco and both rain canvases. Install its browser once with `npx playwright install chromium`. Run `npm run ci` for the complete local gate. Browser-only scripts under `verification/` are legacy, feature-specific checks and are not part of CI.
 
 ---
+
+## TypeScript adoption (incremental, JSDoc-first)
+
+This project stays vanilla ES modules; there is **no big-bang TS conversion**. Types
+are added incrementally at stable seams and enforced by `npm run typecheck`
+(`tsc --noEmit -p jsconfig.json`), which is part of `npm run ci`.
+
+How it works:
+
+- **`jsconfig.json`** is strict with `checkJs: true`, but its `include` list is
+  curated: only files that are fully annotated and pass today are type-checked.
+  `src/StorageAPI.js` is the first fully-typed seam (its response shapes live in
+  `src/types/storage.d.ts`; no `any`/loose `object` leaks from its public methods).
+- **Mixin-composed managers** (`TabManager`, `Cabinet3D`) and the WebGL-heavy
+  `RainLayer` have **authored sibling `.d.ts` files** (`TabManager.d.ts`,
+  `Cabinet3D.d.ts`, `RainLayer.d.ts`) describing their trusted public APIs.
+  TypeScript resolves imports of `./TabManager.js` to the `.d.ts` for types, so
+  agents get a reliable surface without type-checking the mixin bodies. Keep these
+  declarations in sync when you change a public method.
+- **Ambient shims** live in `src/types/globals.d.ts` (`*?glslify` shader imports,
+  `import.meta.env`).
+
+To type another seam:
+
+1. Add JSDoc types (and `// @ts-check`) to the `.js` file, reusing shapes from
+   `src/types/*.d.ts`.
+2. Add the file to the `include` list in `jsconfig.json`.
+3. Run `npm run typecheck` and fix until green.
+
+Optionally, a fully-typed seam can later be renamed to `.ts` (Vite compiles it
+transparently); prefer this only once its JSDoc types are stable. Interaction
+one-offs stay untyped JS until they move into managers. Non-goals: rewriting
+shaders in TS, introducing a UI framework.
 
 ## Deployment
 

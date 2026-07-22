@@ -29,6 +29,12 @@ function glslifyPlugin() {
 export default defineConfig({
   base: "./",
   plugins: [glslifyPlugin()],
+  // Keep .wasm in the module graph so rain-sim imports resolve without a
+  // manual public/ copy (see src/rain/wasmEngine.js `?url` import).
+  assetsInclude: ["**/*.wasm"],
+  worker: {
+    format: "es",
+  },
   server: {
     fs: {
       // allow access to parent folder so we can reuse images from the original repo

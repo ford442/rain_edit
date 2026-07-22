@@ -167,6 +167,53 @@ input[type="range"]::-webkit-slider-thumb:hover {
   box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
 }
 
+.workspace-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.dock-btn-workspace {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(230, 240, 255, 0.9);
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.dock-btn-workspace:hover {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.45);
+  color: #00e5ff;
+}
+
+#container.local-drop-active::after {
+  content: "Drop files to open";
+  position: absolute;
+  inset: 12px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  border: 2px dashed rgba(0, 229, 255, 0.55);
+  border-radius: 16px;
+  background: rgba(0, 20, 30, 0.45);
+  color: #00e5ff;
+  font-family: var(--font-mono, monospace);
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .dock-btn-zscan {
   background: rgba(255, 0, 128, 0.1);
   border: 1px solid rgba(255, 0, 128, 0.3);
