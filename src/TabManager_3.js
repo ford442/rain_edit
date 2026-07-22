@@ -2,6 +2,7 @@ import StorageAPI from "./StorageAPI.js";
 import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
 export const TabManagerMixin3 = {
   _applyLayoutChunk2(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+<<<<<<< HEAD
       if (this.isCityscapeView) {
         // Cityscape View: buildings of varying heights jutting out from a flat grid
         const cols = Math.ceil(Math.sqrt(totalEchoes));
@@ -33,6 +34,84 @@ export const TabManagerMixin3 = {
         el.style.transform = `translate3d(var(--tx), var(--ty), var(--tz)) rotateX(var(--rot-x)) rotateY(var(--rot-y)) rotateZ(var(--rot-z)) scale(${1 - pseudoRandom * 0.2})`;
 
         return;
+=======
+
+      if (this.isDnaHelixView) {
+        const theta = index * Math.PI / 4;
+        const yOffset = (index - totalEchoes / 2) * 60;
+
+        // Alternate strands
+        const strandOffset = index % 2 === 0 ? 0 : Math.PI;
+
+        const radius = 300;
+
+        const tx = radius * Math.cos(theta + strandOffset);
+        const ty = yOffset;
+        const tz = radius * Math.sin(theta + strandOffset) - 200;
+
+        const rotY = -(theta + strandOffset) * (180 / Math.PI) + 90;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `0deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+        return true;
+      }
+
+      if (this.isStackDeckView) {
+        // Stack Deck View: vertically overlapping cards like a deck
+        const yOffset = index * 40;
+        const zOffset = -index * 5;
+
+        el.style.setProperty("--tx", `0px`);
+        el.style.setProperty("--ty", `${yOffset}px`);
+        el.style.setProperty("--tz", `${zOffset}px`);
+        el.style.setProperty("--rot-x", `0deg`);
+        el.style.setProperty("--rot-y", `0deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+      }
+      if (this.isCardSpreadView) {
+        // Card Spread View: arched overlapping cards
+        const total = totalEchoes || 1;
+        // Center the spread
+        const offsetIndex = index - (total - 1) / 2;
+
+        // Spread angle (total span ~60 degrees)
+        const angleDeg = offsetIndex * (60 / total);
+        const angleRad = (angleDeg * Math.PI) / 180;
+
+        const radius = 600;
+
+        const tx = Math.sin(angleRad) * radius;
+        const ty = radius - Math.cos(angleRad) * radius + (index * 5); // Slight vertical drop
+        const tz = -index * 20 - 50; // Push back slightly to show overlap
+        const rotZ = angleDeg;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `5deg`); // Slight tilt back
+        el.style.setProperty("--rot-y", `0deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        return true;
+      }
+      if (this.isAuroraView) {
+        // Aurora View: undulating sine wave in 3D space
+        const spreadX = 250;
+        const spreadY = 100;
+        const tx = Math.sin(index * 0.6) * spreadX;
+        const ty = Math.cos(index * 0.4) * spreadY - 50;
+        const tz = -index * 120;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${Math.sin(index * 0.3) * 15}deg`);
+        el.style.setProperty("--rot-y", `${Math.cos(index * 0.5) * 20}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+>>>>>>> origin/main
       }
       if (this.isStaircaseView) {
         // Staircase View: cascading step-like arrangement
@@ -156,6 +235,27 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--rot-y", `${rotY}deg`);
         el.style.setProperty("--rot-z", `0deg`);
 
+        return true;
+      }
+      if (this.isFibonacciSpiralView) {
+        // Golden ratio spiral
+        const phi = (1 + Math.sqrt(5)) / 2;
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const radius = index * 40;
+        const theta = index * phi * Math.PI * 2;
+        const tz = -index * 60 - 100;
+
+        const tx = Math.cos(theta) * radius;
+        const ty = Math.sin(theta) * radius;
+
+        const rotZ = theta * (180 / Math.PI);
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
         return true;
       }
       if (this.isSphereView) {
@@ -453,6 +553,7 @@ export const TabManagerMixin3 = {
       }
     return false;
   },
+<<<<<<< HEAD
   _applyLayoutChunk3(el, index, totalEchoes, file, inactiveFiles, activeFile) {
       if (this.isCyberCortexView) {
         // Brain-like cluster / spherical node map
@@ -929,4 +1030,6 @@ export const TabManagerMixin3 = {
       }
     return false;
   },
+=======
+>>>>>>> origin/main
 };

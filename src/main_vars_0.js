@@ -1,28 +1,8 @@
-import * as monaco from "monaco-editor";
-import "monaco-editor/esm/vs/basic-languages/javascript/javascript.js";
-import "monaco-editor/esm/vs/basic-languages/typescript/typescript.js";
-import "monaco-editor/esm/vs/language/json/monaco.contribution";
-import "monaco-editor/esm/vs/basic-languages/html/html.js";
-import "monaco-editor/esm/vs/basic-languages/css/css.js";
-import "monaco-editor/esm/vs/basic-languages/markdown/markdown.js";
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
-import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 import RainLayer from "./RainLayer";
-import Raindrops from "./vendor/raindrops.js";
-import { ReferenceManager } from "./ReferenceManager.js";
-import { ConnectionManager } from "./ConnectionManager.js";
-import { FogManager } from "./FogManager.js";
-import { HoloManager } from "./HoloManager.js";
-import { TabManager } from "./TabManager.js";
-import { StorageAPI } from "./StorageAPI.js";
+import { WaterMapSim } from "./rain/WaterMapSim.js";
 import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
-import DataSiphon from "./DataSiphon.js";
-import { VeilExcavator } from "./VeilExcavator.js";
-import { HolographicMinimap } from "./HolographicMinimap.js";
+import { resizeCanvasToDisplaySize } from "./rendering/createGLContext.js";
 import backFrag from "./shaders/water-back.frag?glslify";
 import frontFrag from "./shaders/water.frag?glslify";
 import vertSrc from "./shaders/simple.vert?glslify";
@@ -31,6 +11,29 @@ import vertSrc from "./shaders/simple.vert?glslify";
 window._triggerVpsSave = async function _triggerVpsSave() {
   const activeFile = tabManager.files.find((f) => f.id === tabManager.activeId);
   if (!activeFile) return;
+
+  // Prefer local File System Access / OPFS handles when the tab is already local.
+  if (
+    window.localProject &&
+    (activeFile.fileHandle || activeFile.opfsPath || activeFile.localPath)
+  ) {
+    try {
+      const savedLocal = await window.localProject.saveActiveLocal();
+      if (savedLocal) {
+        if (vpsSaveBtn) {
+          const orig = vpsSaveBtn.textContent;
+          vpsSaveBtn.textContent = "✅ Local";
+          setTimeout(() => {
+            vpsSaveBtn.textContent = orig;
+          }, 1500);
+        }
+        tabManager._showToast?.(`Saved ${activeFile.name} locally`);
+        return;
+      }
+    } catch (err) {
+      console.warn("[localProject] save failed, trying VPS path", err);
+    }
+  }
 
   if (activeFile.vpsPath) {
     // Direct save — re-upload to the same VPS path
@@ -42,6 +45,7 @@ window._triggerVpsSave = async function _triggerVpsSave() {
     try {
       const result = await storageAPI.saveVPSFile(activeFile.vpsPath, content);
       if (result) {
+        window.workspaceSession?.markClean(activeFile.id);
         // Invalidate Cabinet3D preview cache for this file so next hover is fresh
         window.dispatchEvent(
           new CustomEvent("cabinet-cache-invalidate", {
@@ -75,31 +79,22 @@ window._triggerVpsSave = async function _triggerVpsSave() {
   }
 };
 window.resizeCanvases = function resizeCanvases() {
-  const rect = editorEl.getBoundingClientRect();
+  const sizingElement = backCanvas.parentElement || editorEl;
+  const rect = sizingElement.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
-  backCanvas.width = rect.width * dpr;
-  backCanvas.height = rect.height * dpr;
-  backCanvas.style.width = rect.width + "px";
-  backCanvas.style.height = rect.height + "px";
+  if (bgLayer) bgLayer.setSize(rect.width, rect.height, dpr);
+  else resizeCanvasToDisplaySize(backCanvas, rect.width, rect.height, dpr);
 
-  frontCanvas.width = rect.width * dpr;
-  frontCanvas.height = rect.height * dpr;
-  frontCanvas.style.width = rect.width + "px";
-  frontCanvas.style.height = rect.height + "px";
+  if (fgLayer) fgLayer.setSize(rect.width, rect.height, dpr);
+  else resizeCanvasToDisplaySize(frontCanvas, rect.width, rect.height, dpr);
 
   if (matrixLayer) {
-    matrixLayer.width = rect.width * dpr;
-    matrixLayer.height = rect.height * dpr;
-    matrixLayer.style.width = rect.width + "px";
-    matrixLayer.style.height = rect.height + "px";
+    resizeCanvasToDisplaySize(matrixLayer, rect.width, rect.height, dpr);
     initMatrixRain();
   }
 
   if (dustLayerEl) {
-    dustLayerEl.width = rect.width * dpr;
-    dustLayerEl.height = rect.height * dpr;
-    dustLayerEl.style.width = rect.width + "px";
-    dustLayerEl.style.height = rect.height + "px";
+    resizeCanvasToDisplaySize(dustLayerEl, rect.width, rect.height, dpr);
   }
 };
 window.initMatrixRain = function initMatrixRain() {
@@ -250,16 +245,33 @@ window.initLayers = async function initLayers() {
     (await awaitImage("/ra1n/img/drop-color.png"));
 
   const dpi = window.devicePixelRatio || 1;
-  raindrops = new Raindrops(
+  raindrops = await WaterMapSim.create(
     backCanvas.width,
     backCanvas.height,
     dpi,
     dropAlpha,
     dropColor,
   );
+  window.raindrops = raindrops;
 
   if (referenceManager) {
     referenceManager.setRaindrops(raindrops);
+  }
+
+  const rainSimSelect = document.getElementById("rain-sim-backend");
+  if (rainSimSelect) {
+    rainSimSelect.value = raindrops.preference || raindrops.backend;
+    rainSimSelect.addEventListener("change", async (e) => {
+      const next = e.target.value;
+      try {
+        await raindrops.setBackend(next);
+        e.target.value = raindrops.preference || raindrops.backend;
+        console.info("[rain] water-map backend:", raindrops.getDiagnostics());
+      } catch (err) {
+        console.warn("[rain] failed to switch water-map backend", err);
+        e.target.value = raindrops.preference || raindrops.backend;
+      }
+    });
   }
 
   const options = {
@@ -274,11 +286,34 @@ window.initLayers = async function initLayers() {
     u_parallaxBg: 5.0,
     u_textureRatio: bgImg.width / bgImg.height,
   };
+  let rainAnimationPaused = false;
+  let rainAnimationFrame = null;
+
+  const pauseRainAnimation = () => {
+    rainAnimationPaused = true;
+    if (rainAnimationFrame !== null) {
+      cancelAnimationFrame(rainAnimationFrame);
+      rainAnimationFrame = null;
+    }
+  };
+
+  const resumeRainAnimation = () => {
+    if (bgLayer?.contextLost || fgLayer?.contextLost) return;
+    rainAnimationPaused = false;
+    scheduleRainAnimation();
+  };
+
+  const rainContextLifecycle = {
+    onContextLost: pauseRainAnimation,
+    onContextRestored: resumeRainAnimation,
+  };
+
   bgLayer = new RainLayer(backCanvas, {
     vertex: vertSrc,
     fragment: backFrag,
     textures: { u_waterMap: raindrops.canvas, u_textureBg: bgImg },
     options: { u_brightness: 1.0 },
+    ...rainContextLifecycle,
   });
   fgLayer = new RainLayer(frontCanvas, {
     vertex: vertSrc,
@@ -289,7 +324,9 @@ window.initLayers = async function initLayers() {
       u_textureBg: bgImg,
     },
     options,
+    ...rainContextLifecycle,
   });
+  resizeCanvases();
 
   // Pass raindrops to reference manager for shield effect
   if (referenceManager) {
@@ -302,7 +339,14 @@ window.initLayers = async function initLayers() {
   const RAIN_CHANCE_CABINET = 0.12;
   let _cabinetWasVisible = false;
 
+  function scheduleRainAnimation() {
+    if (rainAnimationPaused || rainAnimationFrame !== null) return;
+    rainAnimationFrame = requestAnimationFrame(animate);
+  }
+
   function animate() {
+    rainAnimationFrame = null;
+    if (rainAnimationPaused) return;
     // Modulate rain density when cabinet opens/closes
     if (cabinet3D) {
       if (cabinet3D.visible && !_cabinetWasVisible) {
@@ -400,12 +444,17 @@ window.initLayers = async function initLayers() {
     // When Cabinet3D is open, feed its live canvas as the rain background texture
     // so droplets refract the 3D scene. Restore static images when it closes.
     if (cabinet3D && cabinet3D.visible) {
+      // Render and upload in the same RAF. This keeps the source pixels valid
+      // without forcing preserveDrawingBuffer on the Three.js context.
+      cabinet3D.renderFrame();
       const cabCanvas = cabinet3D.getRendererCanvas();
+      const uploadStart = performance.now();
       if (bgLayer) bgLayer.bindTexture("u_textureBg", cabCanvas);
       if (fgLayer) {
         fgLayer.bindTexture("u_textureBg", cabCanvas);
         fgLayer.bindTexture("u_textureFg", cabCanvas);
       }
+      cabinet3D.recordRainTextureUpload(performance.now() - uploadStart);
       _usingCabinetBg = true;
     } else if (_usingCabinetBg) {
       if (bgLayer && _staticBgImg)
@@ -423,10 +472,10 @@ window.initLayers = async function initLayers() {
     if (fogManager) fogManager.render();
     drawMatrix();
     drawDust(time);
-    requestAnimationFrame(animate);
+    scheduleRainAnimation();
   }
 
-  animate();
+  scheduleRainAnimation();
 };
 window.fireSiphonPacket = function fireSiphonPacket(text, startX, startY) {
   const packet = document.createElement("div");

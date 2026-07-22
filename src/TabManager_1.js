@@ -135,6 +135,7 @@ export const TabManagerMixin1 = {
         }, 600);
       }
     }
+    this._saveTabsToStorage();
   },
   _renderTabs() {
     if (!this.tabsEl) return;
@@ -143,8 +144,11 @@ export const TabManagerMixin1 = {
     list.innerHTML = "";
     this.files.forEach((file) => {
       const tab = document.createElement("div");
-      tab.className = "tab-item" + (file.id === this.activeId ? " active" : "");
-      tab.title = `${file.name} — ${DEPTH_TITLES[file.depth]}
+      tab.className =
+        "tab-item" +
+        (file.id === this.activeId ? " active" : "") +
+        (file.dirty ? " dirty" : "");
+      tab.title = `${file.name}${file.dirty ? " (unsaved)" : ""} — ${DEPTH_TITLES[file.depth]}
 Drag to change depth`;
       tab.draggable = true;
 
@@ -155,7 +159,7 @@ Drag to change depth`;
 
       const nameEl = document.createElement("span");
       nameEl.className = "tab-name";
-      nameEl.textContent = file.name;
+      nameEl.textContent = file.dirty ? `${file.name} *` : file.name;
 
       const layerControls = document.createElement("span");
       layerControls.className = "tab-layer-controls";
@@ -323,6 +327,10 @@ Drag to change depth`;
     });
   },
   _saveTabsToStorage() {
+    if (this.workspaceSession) {
+      this.workspaceSession.schedulePersist();
+      return;
+    }
     try {
       const tabData = this.files.map((file) => ({
         fileId: file.id,
@@ -331,19 +339,50 @@ Drag to change depth`;
         vpsPath: file.vpsPath || null,
         isImage: file.isImage,
         url: file.url || null,
-        noteName: file.noteName || null, // ← Added for notes compatibility
+        noteName: file.noteName || null,
+        depth: file.depth ?? 1,
       }));
       localStorage.setItem("rain_edit_open_tabs", JSON.stringify(tabData));
     } catch (err) {
       console.error("Failed to save tabs to localStorage:", err);
     }
   },
+  /**
+   * Serialize open documents for workspace session persistence.
+   * @returns {object[]}
+   */
+  serializeFiles() {
+    return this.files.map((file) => ({
+      id: file.id,
+      name: file.name,
+      language: file.language,
+      depth: file.depth ?? 1,
+      dirty: Boolean(file.dirty),
+      isImage: Boolean(file.isImage),
+      url: file.url || null,
+      vpsPath: file.vpsPath || null,
+      noteName: file.noteName || null,
+      cabinetType: file.cabinetType || null,
+      cabinetId: file.cabinetId || null,
+      localPath: file.localPath || null,
+      opfsPath: file.opfsPath || null,
+      content:
+        file.isImage || !file.model
+          ? null
+          : file.model.getValue?.() ?? null,
+    }));
+  },
   async loadTabsFromStorage() {
+    if (this.workspaceSession) {
+      return this.workspaceSession.restore({
+        preferRemote: this.workspaceSession.remoteSync,
+      });
+    }
     try {
       const stored = localStorage.getItem("rain_edit_open_tabs");
-      if (!stored) return;
+      if (!stored) return false;
       const tabData = JSON.parse(stored);
-      if (!Array.isArray(tabData) || tabData.length === 0) return;
+      if (!Array.isArray(tabData) || tabData.length === 0) return false;
 
       const { StorageAPI } = await import("./StorageAPI.js");
       const storageAPI = new StorageAPI();
@@ -358,12 +397,10 @@ Drag to change depth`;
           } else if (tab.vpsPath) {
             content = await storageAPI.getVPSFile(tab.vpsPath);
           } else if (tab.noteName) {
-            // New: restore note content from backend
             const note = await storageAPI.loadNote(tab.noteName);
             content = note ? note.content : "";
             language = "markdown";
           }
-          // else: unsaved file → empty content
 
           const fileId = this.addFile(tab.name, content, language);
           const file = this.files.find((f) => f.id === fileId);
@@ -371,6 +408,7 @@ Drag to change depth`;
           if (file) {
             if (tab.vpsPath) file.vpsPath = tab.vpsPath;
             if (tab.noteName) file.noteName = tab.noteName;
+            if (tab.depth != null) file.depth = tab.depth;
           }
         } catch (err) {
           console.error(`Failed to restore tab ${tab.name}:`, err);
@@ -380,8 +418,10 @@ Drag to change depth`;
       if (this.files.length > 0) {
         this.setActive(this.files[0].id);
       }
+      return this.files.length > 0;
     } catch (err) {
       console.error("Failed to load tabs from localStorage:", err);
+      return false;
     }
   },
   removeFile(id) {
@@ -389,6 +429,7 @@ Drag to change depth`;
     if (index === -1) return;
 
     const file = this.files[index];
+    this.workspaceSession?.unwatchFile?.(id);
     if (file.model && file.model.dispose) {
       file.model.dispose();
     }

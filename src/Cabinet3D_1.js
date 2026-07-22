@@ -504,13 +504,7 @@ export const Cabinet3DMixin1 = {
   },
   _loop() {
     this._rafId = requestAnimationFrame(() => this._loop());
-    this._updateCameraAnim();
-    this._updateIdleRotation();
-    this._updateHoverAnimation();
-    this._updateLabelLOD();
-    this._updatePreviewPanelPosition();
-    this._controls.update();
-    this._renderer.render(this._scene, this._camera);
+    this.renderFrame();
   },
   _startLoop() {
     if (this._rafId !== null) return;

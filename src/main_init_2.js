@@ -1,31 +1,6 @@
-import * as monaco from "monaco-editor";
-import "monaco-editor/esm/vs/basic-languages/javascript/javascript.js";
-import "monaco-editor/esm/vs/basic-languages/typescript/typescript.js";
-import "monaco-editor/esm/vs/language/json/monaco.contribution";
-import "monaco-editor/esm/vs/basic-languages/html/html.js";
-import "monaco-editor/esm/vs/basic-languages/css/css.js";
-import "monaco-editor/esm/vs/basic-languages/markdown/markdown.js";
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
-import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-import RainLayer from "./RainLayer";
-import Raindrops from "./vendor/raindrops.js";
-import { ReferenceManager } from "./ReferenceManager.js";
-import { ConnectionManager } from "./ConnectionManager.js";
+import { monaco } from "./editor/setupMonaco.js";
 import { FogManager } from "./FogManager.js";
-import { HoloManager } from "./HoloManager.js";
-import { TabManager } from "./TabManager.js";
-import { StorageAPI } from "./StorageAPI.js";
-import { Cabinet3D } from "./Cabinet3D.js";
-import { VPSFileBrowser } from "./VPSFileBrowser.js";
-import DataSiphon from "./DataSiphon.js";
-import { VeilExcavator } from "./VeilExcavator.js";
-import { HolographicMinimap } from "./HolographicMinimap.js";
-import backFrag from "./shaders/water-back.frag?glslify";
-import frontFrag from "./shaders/water.frag?glslify";
-import vertSrc from "./shaders/simple.vert?glslify";
+import { inputManager as im } from "./interactions/InputManager.js";
 
 document.addEventListener("mouseup", (e) => {
   if (!document.body.classList.contains("siphon-mode-active")) return;
@@ -80,18 +55,7 @@ document.addEventListener("mouseup", (e) => {
   }
 });
 
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Control" || e.key === "Meta") {
-    editorEl.classList.remove("x-ray-active");
-    document.body.classList.remove("x-ray-active");
-  }
-
-  // Semantic X-Ray toggle removal
-  if (!e.altKey || !e.shiftKey) {
-    document.body.classList.remove("semantic-xray-active");
-    document.body.classList.remove("siphon-mode-active");
-  }
-});
+// (X-ray and siphon release are handled by their bindings' onUp in main_init_1.)
 
 document.getElementById("toggle-back").addEventListener("change", (e) => {
   if (bgLayer) bgLayer.setVisible(e.target.checked);
@@ -119,16 +83,24 @@ if (btnDepthBack) {
   });
 }
 
-document.addEventListener("keydown", (e) => {
-  if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
-
-  if (e.key === "ArrowUp") {
-    e.preventDefault();
-    tabManager.cycleDepth(1);
-  } else if (e.key === "ArrowDown") {
-    e.preventDefault();
-    tabManager.cycleDepth(-1);
-  }
+// Depth cycling (Ctrl/Cmd + Arrow Up/Down)
+im.register({
+  id: "depth-cycle-up",
+  category: "navigation",
+  description: "Cycle depth forward (Ctrl+Up)",
+  combo: { ctrlOrMeta: true, key: "ArrowUp" },
+  type: "action",
+  allowInEditor: true,
+  onDown: () => tabManager.cycleDepth(1),
+});
+im.register({
+  id: "depth-cycle-down",
+  category: "navigation",
+  description: "Cycle depth back (Ctrl+Down)",
+  combo: { ctrlOrMeta: true, key: "ArrowDown" },
+  type: "action",
+  allowInEditor: true,
+  onDown: () => tabManager.cycleDepth(-1),
 });
 
 window.addEventListener(
@@ -162,6 +134,7 @@ if (viewModeSelect) {
     else if (view === "tunnel") tabManager.toggleTunnelView();
     else if (view === "grid") tabManager.toggleGridView();
     else if (view === "helix") tabManager.toggleHelixView();
+    else if (view === "time-tunnel") tabManager.toggleTimeTunnelView();
     else if (view === "pinboard") tabManager.togglePinboardView();
     else if (view === "carousel") tabManager.toggleCarouselView();
     // UI binding for Infinity Mirror view mode (added in previous iteration)
@@ -190,6 +163,7 @@ if (viewModeSelect) {
     else if (view === "quantum") tabManager.toggleQuantumSuperpositionView();
     else if (view === "outline") tabManager.toggleOutlineView();
     else if (view === "tesseract") tabManager.toggleTesseractView();
+    else if (view === "floating-nexus") tabManager.toggleFloatingNexusView();
     else if (view === "cyclone") tabManager.toggleCycloneView();
     else if (view === "mobius") tabManager.toggleMobiusView();
     else if (view === "astrolabe") tabManager.toggleAstrolabeView();

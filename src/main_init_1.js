@@ -1,31 +1,5 @@
-import * as monaco from "monaco-editor";
-import "monaco-editor/esm/vs/basic-languages/javascript/javascript.js";
-import "monaco-editor/esm/vs/basic-languages/typescript/typescript.js";
-import "monaco-editor/esm/vs/language/json/monaco.contribution";
-import "monaco-editor/esm/vs/basic-languages/html/html.js";
-import "monaco-editor/esm/vs/basic-languages/css/css.js";
-import "monaco-editor/esm/vs/basic-languages/markdown/markdown.js";
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
-import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-import RainLayer from "./RainLayer";
-import Raindrops from "./vendor/raindrops.js";
-import { ReferenceManager } from "./ReferenceManager.js";
-import { ConnectionManager } from "./ConnectionManager.js";
-import { FogManager } from "./FogManager.js";
-import { HoloManager } from "./HoloManager.js";
-import { TabManager } from "./TabManager.js";
-import { StorageAPI } from "./StorageAPI.js";
-import { Cabinet3D } from "./Cabinet3D.js";
-import { VPSFileBrowser } from "./VPSFileBrowser.js";
-import DataSiphon from "./DataSiphon.js";
-import { VeilExcavator } from "./VeilExcavator.js";
-import { HolographicMinimap } from "./HolographicMinimap.js";
-import backFrag from "./shaders/water-back.frag?glslify";
-import frontFrag from "./shaders/water.frag?glslify";
-import vertSrc from "./shaders/simple.vert?glslify";
+import { monaco } from "./editor/setupMonaco.js";
+import { inputManager as im } from "./interactions/InputManager.js";
 
 document.addEventListener("mousemove", (e) => {
   if (isAutofocusActive) {
@@ -561,17 +535,41 @@ document.addEventListener("dblclick", (e) => {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Control" || e.key === "Meta") {
+// X-Ray (hold Ctrl/Cmd)
+im.register({
+  id: "x-ray",
+  category: "lens",
+  description: "Editor x-ray (hold Ctrl/Cmd)",
+  combo: { ctrlOrMeta: true },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onDown: () => {
     editorEl.classList.add("x-ray-active");
     document.body.classList.add("x-ray-active");
-  }
+  },
+  onUp: () => {
+    editorEl.classList.remove("x-ray-active");
+    document.body.classList.remove("x-ray-active");
+  },
+});
 
-  // Semantic X-Ray toggle (Alt + Shift) -> CHANGED TO HOLOGRAPHIC SIPHON MODE
-  if (e.altKey && e.shiftKey) {
+// Holographic Siphon — reassigned from the old bare Alt+Shift catch-all (which
+// collided with every Alt+Shift+letter combo) to a dedicated Alt+Shift+W.
+im.register({
+  id: "siphon-mode",
+  category: "reveal",
+  description: "Holographic siphon mode (Alt+Shift+W)",
+  combo: { alt: true, shift: true, code: "KeyW" },
+  type: "hold",
+  onDown: () => {
     document.body.classList.add("siphon-mode-active");
-    document.body.classList.remove("semantic-xray-active"); // Ensure old behavior is overridden or merged
-  }
+    document.body.classList.remove("semantic-xray-active");
+  },
+  onUp: () => {
+    document.body.classList.remove("semantic-xray-active");
+    document.body.classList.remove("siphon-mode-active");
+  },
 });
 
 editorEl.addEventListener("dragover", (e) => {

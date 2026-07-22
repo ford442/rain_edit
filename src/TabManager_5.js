@@ -275,6 +275,7 @@ export const TabManagerMixin5 = {
             !this.isOrbitView &&
             !this.isScatteredView &&
             !this.isHelixView &&
+            !this.isMeteorView &&
             !this.isPinboardView &&
             !this.isVortexView &&
             !this.isPrismView &&
@@ -287,7 +288,8 @@ export const TabManagerMixin5 = {
             !this.isNeonSynthView &&
             !this.isBlueprint3dView &&
             !this.isCyberCortexView &&
-            !this.isAccordionView
+            !this.isAccordionView &&
+            !this.isTimeTunnelView
           ) {
             el.style.setProperty("--tz", "100px");
           } else if (this.isOrbitView) {
@@ -304,6 +306,7 @@ export const TabManagerMixin5 = {
           } else if (
             this.isPinboardView ||
             this.isHelixView ||
+            this.isMeteorView ||
             this.isVortexView ||
             this.isPrismView ||
             this.isWaveView ||
@@ -373,6 +376,29 @@ export const TabManagerMixin5 = {
             const tz = -150 + Math.sin(index * 789) * 50;
             const rotZ = Math.sin(index * 111) * 15;
             el.style.setProperty("--tz", `${tz}px`);
+            el.style.setProperty("--rot-z", `${rotZ}deg`);
+          } else if (this.isMeteorView) {
+            const index = parseInt(el.dataset.index || 0);
+            // Pseudo-random deterministic values based on index
+            const rand1 = Math.sin(index * 123.456);
+            const rand2 = Math.cos(index * 987.654);
+            const rand3 = Math.sin(index * 345.678);
+
+            // Scatter around with high chaotic variation
+            const tx = rand1 * window.innerWidth * 0.4;
+            const ty = rand2 * window.innerHeight * 0.4;
+            const tz = (rand3 - 0.5) * 800 - 300;
+
+            // Random chaotic rotations
+            const rotX = rand2 * 360;
+            const rotY = rand1 * 360;
+            const rotZ = rand3 * 360;
+
+            el.style.setProperty("--tx", `${tx}px`);
+            el.style.setProperty("--ty", `${ty}px`);
+            el.style.setProperty("--tz", `${tz}px`);
+            el.style.setProperty("--rot-x", `${rotX}deg`);
+            el.style.setProperty("--rot-y", `${rotY}deg`);
             el.style.setProperty("--rot-z", `${rotZ}deg`);
           } else if (this.isHelixView) {
             const inactiveFiles = this.files.filter(

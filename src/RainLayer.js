@@ -1,125 +1,265 @@
+import {
+  createGLContext,
+  getGLContextInfo,
+  resizeCanvasToDisplaySize,
+} from "./rendering/createGLContext.js";
 import vertSrc from "./shaders/simple.vert?glslify";
 import fragSrc from "./shaders/water.frag?glslify";
 
-function createShader(gl, type, src) {
+
+function prepareShaderSource(api, type, source) {
+  if (api !== "webgl2" || /^\s*#version\s+300\s+es/m.test(source)) {
+    return source;
+  }
+
+  let compatibleSource = source;
+  if (type === "vertex") {
+    compatibleSource = compatibleSource
+      .replace(/\battribute\b/g, "in")
+      .replace(/\bvarying\b/g, "out");
+  } else {
+    compatibleSource = compatibleSource
+      .replace(/\bvarying\b/g, "in")
+      .replace(/\btexture2D\s*\(/g, "texture(")
+      .replace(/\bgl_FragColor\b/g, "rainFragmentColor")
+      .replace(/\bvoid\s+main\s*\(/, "out vec4 rainFragmentColor;\nvoid main(");
+  }
+
+  return `#version 300 es\n${compatibleSource}`;
+}
+
+
+function createShader(gl, api, type, source) {
   const shader = gl.createShader(type);
-  gl.shaderSource(shader, src);
+  const shaderType = type === gl.VERTEX_SHADER ? "vertex" : "fragment";
+  gl.shaderSource(shader, prepareShaderSource(api, shaderType, source));
   gl.compileShader(shader);
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const err = gl.getShaderInfoLog(shader);
+    const error = gl.getShaderInfoLog(shader);
     gl.deleteShader(shader);
-    throw new Error("Shader compile error: " + err);
+    throw new Error(`${api} ${shaderType} shader compile error: ${error}`);
   }
   return shader;
 }
 
-function createProgram(gl, vs, fs) {
-  const v = createShader(gl, gl.VERTEX_SHADER, vs);
-  const f = createShader(gl, gl.FRAGMENT_SHADER, fs);
-  const prog = gl.createProgram();
-  gl.attachShader(prog, v);
-  gl.attachShader(prog, f);
-  gl.bindAttribLocation(prog, 0, "a_position");
-  gl.linkProgram(prog);
-  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-    const err = gl.getProgramInfoLog(prog);
-    gl.deleteProgram(prog);
-    throw new Error("Program link error: " + err);
+
+function createProgram(gl, api, vertexSource, fragmentSource) {
+  const vertexShader = createShader(
+    gl,
+    api,
+    gl.VERTEX_SHADER,
+    vertexSource,
+  );
+  const fragmentShader = createShader(
+    gl,
+    api,
+    gl.FRAGMENT_SHADER,
+    fragmentSource,
+  );
+  const program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.bindAttribLocation(program, 0, "a_position");
+  gl.linkProgram(program);
+  gl.deleteShader(vertexShader);
+  gl.deleteShader(fragmentShader);
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    const error = gl.getProgramInfoLog(program);
+    gl.deleteProgram(program);
+    throw new Error(`${api} program link error: ${error}`);
   }
-  return prog;
+  return program;
 }
+
 
 export default class RainLayer {
   constructor(
     canvas,
-    { vertex = vertSrc, fragment = fragSrc, textures = {}, options = {} } = {},
+    {
+      vertex = vertSrc,
+      fragment = fragSrc,
+      textures = {},
+      options = {},
+      context = {},
+      onContextLost = null,
+      onContextRestored = null,
+    } = {},
   ) {
     this.canvas = canvas;
-    this.gl = canvas.getContext("webgl");
-    if (!this.gl) {
-      console.error("WebGL not supported or context lost.");
-      return;
-    }
     this.vertexSrc = vertex;
     this.fragmentSrc = fragment;
-    this.program = createProgram(this.gl, this.vertexSrc, this.fragmentSrc);
+    this.textureSources = { ...textures };
+    this.uniformValues = { ...options };
+    this.textures = {};
+    this.uniforms = {};
+    this.program = null;
+    this.vbo = null;
+    this.contextLost = false;
+    this.running = false;
+    this.destroyed = false;
+    this.onContextLost = onContextLost;
+    this.onContextRestored = onContextRestored;
+
+    this._handleContextLost = this._handleContextLost.bind(this);
+    this._handleContextRestored = this._handleContextRestored.bind(this);
+    canvas.addEventListener("webglcontextlost", this._handleContextLost, false);
+    canvas.addEventListener(
+      "webglcontextrestored",
+      this._handleContextRestored,
+      false,
+    );
+
+    this.gl = createGLContext(canvas, {
+      ...context,
+      attributes: {
+        alpha: true,
+        premultipliedAlpha: true,
+        antialias: false,
+        powerPreference: "high-performance",
+        failIfMajorPerformanceCaveat: false,
+        preserveDrawingBuffer: false,
+        ...context.attributes,
+      },
+      label: context.label ?? `RainLayer#${canvas.id || "canvas"}`,
+    });
+
+    if (!this.gl) {
+      console.error("[RainLayer] WebGL is unavailable.");
+      return;
+    }
+
+    this.contextInfo = getGLContextInfo(this.gl);
+    this._initializeResources();
+    this.running = true;
+  }
+
+  _initializeResources() {
+    const gl = this.gl;
+    if (!gl) return;
+
+    this.program = createProgram(
+      gl,
+      this.contextInfo?.api ?? "webgl1",
+      this.vertexSrc,
+      this.fragmentSrc,
+    );
     this._initBuffers();
     this.textures = {};
     this._setupDefaultUniforms();
-    Object.keys(textures).forEach((k, i) => {
-      this.bindTexture(k, textures[k]);
-    });
-    Object.keys(options).forEach((k) => {
-      this.setUniform(k, options[k]);
-    });
-    this.running = false;
+
+    for (const [name, source] of Object.entries(this.textureSources)) {
+      this._uploadTexture(name, source);
+    }
+    for (const [name, value] of Object.entries(this.uniformValues)) {
+      this._applyUniform(name, value);
+    }
   }
+
   _initBuffers() {
     const gl = this.gl;
     if (!gl) return;
-    const vbo = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-    const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-    this.vbo = vbo;
+    this.vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+      gl.STATIC_DRAW,
+    );
   }
+
   _setupDefaultUniforms() {
     const gl = this.gl;
     if (!gl) return;
     gl.useProgram(this.program);
-    this.uniforms = {};
-    const getU = (name) => gl.getUniformLocation(this.program, name);
-    this.uniforms.u_resolution = getU("u_resolution");
-    this.uniforms.u_parallax = getU("u_parallax");
-    this.uniforms.u_brightness = getU("u_brightness");
-    this.uniforms.u_textureFg = getU("u_textureFg");
-    this.uniforms.u_textureBg = getU("u_textureBg");
-    this.uniforms.u_waterMap = getU("u_waterMap");
+    const getUniform = (name) => gl.getUniformLocation(this.program, name);
+    this.uniforms = {
+      u_resolution: getUniform("u_resolution"),
+      u_parallax: getUniform("u_parallax"),
+      u_brightness: getUniform("u_brightness"),
+      u_textureFg: getUniform("u_textureFg"),
+      u_textureBg: getUniform("u_textureBg"),
+      u_waterMap: getUniform("u_waterMap"),
+      u_renderShine: getUniform("u_renderShine"),
+      u_renderShadow: getUniform("u_renderShadow"),
+      u_minRefraction: getUniform("u_minRefraction"),
+      u_refractionDelta: getUniform("u_refractionDelta"),
+      u_alphaMultiply: getUniform("u_alphaMultiply"),
+      u_alphaSubtract: getUniform("u_alphaSubtract"),
+      u_parallaxFg: getUniform("u_parallaxFg"),
+      u_parallaxBg: getUniform("u_parallaxBg"),
+      u_textureRatio: getUniform("u_textureRatio"),
+      u_textureShine: getUniform("u_textureShine"),
+    };
+  }
 
-    this.uniforms.u_renderShine = getU("u_renderShine");
-    this.uniforms.u_renderShadow = getU("u_renderShadow");
-    this.uniforms.u_minRefraction = getU("u_minRefraction");
-    this.uniforms.u_refractionDelta = getU("u_refractionDelta");
-    this.uniforms.u_alphaMultiply = getU("u_alphaMultiply");
-    this.uniforms.u_alphaSubtract = getU("u_alphaSubtract");
-    this.uniforms.u_parallaxFg = getU("u_parallaxFg");
-    this.uniforms.u_parallaxBg = getU("u_parallaxBg");
-    this.uniforms.u_textureRatio = getU("u_textureRatio");
-    this.uniforms.u_textureShine = getU("u_textureShine");
+  _handleContextLost(event) {
+    event.preventDefault();
+    if (this.destroyed || this.contextLost) return;
+    this.contextLost = true;
+    this.running = false;
+    this.onContextLost?.(this, event);
   }
-  setSize(w, h) {
-    this.canvas.width = w;
-    this.canvas.height = h;
-    this.canvas.style.width = w / (window.devicePixelRatio || 1) + "px";
-    this.canvas.style.height = h / (window.devicePixelRatio || 1) + "px";
-  }
-  setParallax(x, y) {
-    const gl = this.gl;
-    if (!gl) return;
-    gl.useProgram(this.program);
-    gl.uniform2f(this.uniforms.u_parallax, x, y);
-  }
-  setUniform(name, value) {
-    const gl = this.gl;
-    if (!gl) return;
-    const u = this.uniforms[name];
-    if (!u) return;
-    gl.useProgram(this.program);
-    if (typeof value === "boolean") gl.uniform1i(u, value ? 1 : 0);
-    else if (typeof value === "number") gl.uniform1f(u, value);
-    else if (Array.isArray(value) && value.length === 2)
-      gl.uniform2f(u, value[0], value[1]);
-  }
-  bindTexture(uniformName, image) {
-    const gl = this.gl;
-    if (!gl) return;
-    // create or update texture object
-    let tex = this.textures[uniformName];
-    if (!tex) {
-      tex = gl.createTexture();
-      this.textures[uniformName] = tex;
+
+  _handleContextRestored(event) {
+    if (this.destroyed) return;
+    try {
+      this.contextInfo = getGLContextInfo(this.gl) ?? this.contextInfo;
+      this._initializeResources();
+      this.contextLost = false;
+      this.running = true;
+      this.onContextRestored?.(this, event);
+    } catch (error) {
+      console.error("[RainLayer] Failed to rebuild restored context.", error);
     }
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+  }
+
+  setSize(cssWidth, cssHeight, dpr = globalThis.devicePixelRatio || 1) {
+    return resizeCanvasToDisplaySize(
+      this.canvas,
+      cssWidth,
+      cssHeight,
+      dpr,
+    );
+  }
+
+  setParallax(x, y) {
+    this.setUniform("u_parallax", [x, y]);
+  }
+
+  setUniform(name, value) {
+    this.uniformValues[name] = value;
+    this._applyUniform(name, value);
+  }
+
+  _applyUniform(name, value) {
+    const gl = this.gl;
+    if (!gl || this.contextLost || !this.program) return;
+    const uniform = this.uniforms[name];
+    if (uniform === null || uniform === undefined) return;
+    gl.useProgram(this.program);
+    if (typeof value === "boolean") gl.uniform1i(uniform, value ? 1 : 0);
+    else if (typeof value === "number") gl.uniform1f(uniform, value);
+    else if (Array.isArray(value) && value.length === 2) {
+      gl.uniform2f(uniform, value[0], value[1]);
+    }
+  }
+
+  bindTexture(uniformName, source) {
+    this.textureSources[uniformName] = source;
+    return this._uploadTexture(uniformName, source);
+  }
+
+  _uploadTexture(uniformName, source) {
+    const gl = this.gl;
+    if (!gl || this.contextLost || !source) return false;
+
+    let texture = this.textures[uniformName];
+    if (!texture) {
+      texture = gl.createTexture();
+      this.textures[uniformName] = texture;
+    }
+    gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -131,28 +271,31 @@ export default class RainLayer {
         gl.RGBA,
         gl.RGBA,
         gl.UNSIGNED_BYTE,
-        image,
+        source,
       );
-    } catch (e) {
-      // image might be a canvas sized differently or not ready yet
+      return true;
+    } catch {
+      return false;
     }
   }
+
   _bindTexturesForDraw() {
     const gl = this.gl;
     if (!gl) return;
     gl.useProgram(this.program);
-    let i = 0;
-    for (const name in this.textures) {
-      gl.activeTexture(gl.TEXTURE0 + i);
-      gl.bindTexture(gl.TEXTURE_2D, this.textures[name]);
-      const loc = gl.getUniformLocation(this.program, name);
-      if (loc) gl.uniform1i(loc, i);
-      i++;
+    let textureUnit = 0;
+    for (const [name, texture] of Object.entries(this.textures)) {
+      gl.activeTexture(gl.TEXTURE0 + textureUnit);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      const location = gl.getUniformLocation(this.program, name);
+      if (location !== null) gl.uniform1i(location, textureUnit);
+      textureUnit += 1;
     }
   }
+
   render() {
     const gl = this.gl;
-    if (!gl) return;
+    if (!gl || !this.running || this.contextLost || !this.program) return;
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -160,20 +303,50 @@ export default class RainLayer {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    if (this.uniforms.u_resolution)
+    if (this.uniforms.u_resolution) {
       gl.uniform2f(
         this.uniforms.u_resolution,
         this.canvas.width,
         this.canvas.height,
       );
+    }
     this._bindTexturesForDraw();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
-  setVisible(v) {
-    this.canvas.style.display = v ? "block" : "none";
+
+  setVisible(visible) {
+    this.canvas.style.display = visible ? "block" : "none";
   }
+
+  getDiagnostics() {
+    return {
+      ...this.contextInfo,
+      contextLost: this.contextLost,
+      running: this.running,
+      drawingBuffer: {
+        width: this.canvas.width,
+        height: this.canvas.height,
+      },
+      displaySize: {
+        width: this.canvas.clientWidth,
+        height: this.canvas.clientHeight,
+      },
+    };
+  }
+
   destroy() {
+    this.destroyed = true;
+    this.running = false;
+    this.canvas.removeEventListener("webglcontextlost", this._handleContextLost);
+    this.canvas.removeEventListener(
+      "webglcontextrestored",
+      this._handleContextRestored,
+    );
+
     const gl = this.gl;
-    if (gl) gl.deleteProgram(this.program);
+    if (!gl || this.contextLost) return;
+    Object.values(this.textures).forEach((texture) => gl.deleteTexture(texture));
+    if (this.vbo) gl.deleteBuffer(this.vbo);
+    if (this.program) gl.deleteProgram(this.program);
   }
 }

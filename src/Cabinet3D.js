@@ -97,10 +97,23 @@ export class Cabinet3D {
    * @param {import('./StorageAPI.js').StorageAPI} storageAPI
    * @param {import('./TabManager.js').TabManager}  tabManager
    */
-  constructor(storageAPI, tabManager, monacoApi = null) {
+  constructor(
+    storageAPI,
+    tabManager,
+    monacoApi = null,
+    { preserveDrawingBuffer = false } = {},
+  ) {
     this.storageAPI = storageAPI;
     this.tabManager = tabManager;
     this._monacoApi = monacoApi;
+    this._preserveDrawingBuffer = preserveDrawingBuffer;
+    this._contextInfo = null;
+    this._rainTextureUploadStats = {
+      samples: 0,
+      totalMs: 0,
+      maxMs: 0,
+      lastMs: 0,
+    };
     this.visible = false;
 
     // Overlay DOM element

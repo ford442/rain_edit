@@ -48,8 +48,8 @@ body.stack-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       calc(var(--tz, 0px) + 50px)
     )
     scale(1.05) !important;
@@ -76,8 +76,8 @@ body.timeline-active .echo-document {
     grayscale(calc(var(--index, 0) * 15%));
   cursor: pointer;
   transform: translate3d(
-    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+    calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
     var(--tz, 0px)
   );
   transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -87,8 +87,8 @@ body.timeline-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) grayscale(0%) !important;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       calc(var(--tz, 0px) + 150px)
     )
     scale(1.1) !important;
@@ -99,8 +99,8 @@ body.timeline-active .echo-document:hover {
 @keyframes shockwave {
   0% {
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       rotateZ(var(--rot-z, 0deg)) scale(1);
@@ -109,8 +109,8 @@ body.timeline-active .echo-document:hover {
   }
   20% {
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         calc(var(--tz, 0px) - 250px)
       )
       rotateZ(var(--rot-z, 0deg)) scale(0.9);
@@ -122,8 +122,8 @@ body.timeline-active .echo-document:hover {
   }
   100% {
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       rotateZ(var(--rot-z, 0deg)) scale(1);
@@ -143,8 +143,8 @@ body.x-ray-active {
 }
 body.x-ray-active .echo-document:hover {
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       250px
     )
     scale(1.1) !important;
@@ -161,11 +161,11 @@ body.x-ray-active .echo-document:hover {
   --base-blur: 2px !important;
   transform: translate3d(
       calc(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)) *
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)) *
           0.9 + var(--wormhole-tx, 0px)
       ),
       calc(
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) -
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)) -
           (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) +
           var(--wormhole-ty, 0px)
       ),
@@ -209,10 +209,10 @@ body.siphon-mode-active .echo-document {
   filter: none !important;
   transform: translate3d(
       calc(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)) * 2
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)) * 2
       ),
       calc(
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) * 2
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)) * 2
       ),
       calc(var(--tz, 0px) + 200px)
     )
@@ -357,11 +357,11 @@ body.siphon-mode-active .echo-document *::selection {
     opacity: 1;
     transform: translate3d(
         calc(
-          calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)) *
+          calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)) *
             1.05
         ),
         calc(
-          calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)) *
+          calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)) *
             1.05
         ),
         calc(var(--tz, 0px) + 50px)
@@ -394,8 +394,8 @@ body.siphon-mode-active .echo-document *::selection {
 @keyframes z-depth-wave {
   0% {
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       scale(1);
@@ -404,8 +404,8 @@ body.siphon-mode-active .echo-document *::selection {
   }
   30% {
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         calc(var(--tz, 0px) + 150px)
       )
       scale(1.15);
@@ -417,8 +417,8 @@ body.siphon-mode-active .echo-document *::selection {
   }
   100% {
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       scale(1);
@@ -438,8 +438,8 @@ body.siphon-mode-active .echo-document *::selection {
     box-shadow: 0 0 0 0 hsla(var(--echo-tint, 180deg), 100%, 60%, 0.7);
     border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 1);
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       scale(1.05);
@@ -448,8 +448,8 @@ body.siphon-mode-active .echo-document *::selection {
     box-shadow: 0 0 0 50px hsla(var(--echo-tint, 180deg), 100%, 60%, 0);
     border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.2);
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       scale(1);
@@ -458,8 +458,8 @@ body.siphon-mode-active .echo-document *::selection {
     box-shadow: 0 0 0 0 hsla(var(--echo-tint, 180deg), 100%, 60%, 0);
     border-color: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.5);
     transform: translate3d(
-        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+        calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+        calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
         var(--tz, 0px)
       )
       scale(1);
@@ -558,8 +558,8 @@ body.sphere-active .echo-document {
   filter: blur(1px);
   cursor: pointer;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       var(--tz, 0px)
     )
     rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
@@ -574,8 +574,8 @@ body.sphere-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
   transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px)),
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
       calc(var(--tz, 0px) + 200px)
     )
     rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(0deg)

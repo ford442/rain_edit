@@ -3,7 +3,7 @@
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 34px;
+  border-radius: 14px;
   background: linear-gradient(
     90deg,
     rgba(0, 229, 255, 0.6),
@@ -65,6 +65,12 @@
   white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 1.5px;
+}
+.tab-item.dirty .tab-name {
+  color: #ffe08a;
+}
+.tab-item.dirty {
+  border-color: rgba(255, 200, 80, 0.35);
 }
 .tab-item:hover {
   background: rgba(30, 30, 35, 0.8);
@@ -162,33 +168,26 @@
 .depth-controls {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 4px;
-  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .depth-controls button {
-  padding: 8px 14px;
-  font-size: 12px;
-  font-weight: 800;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
   font-family: var(--font-primary);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.05)
-  );
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  color: #c0d0e0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  box-shadow: none;
+  color: #fff;
   cursor: pointer;
   white-space: nowrap;
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    transform 0.15s;
+  transition: all 0.3s ease;
 }
 .depth-controls button:hover {
   background: rgba(0, 229, 255, 0.3);
@@ -201,6 +200,35 @@
   border-color: rgba(0, 229, 255, 0.6);
   color: #fff;
   box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+}
+
+#view-mode-select {
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-primary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+#view-mode-select:hover {
+  background: rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.65);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+#view-mode-select option {
+  background: #101520;
+  color: #c0d0e0;
 }
 
 .tab-layer-controls {
@@ -296,6 +324,7 @@ body.x-ray-active #echo-layer {
   left: 10%;
   width: 80%;
   height: 80%;
+  border-radius: 12px;
   pointer-events: auto; /* Allow hovering to peek */
   cursor: pointer;
   font-family: var(--font-mono);
@@ -318,11 +347,11 @@ body.x-ray-active #echo-layer {
 
   transform: translate3d(
       calc(
-        var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) +
+        var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px) +
           var(--edge-fan-tx, 0px)
       ),
       calc(
-        var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) +
+        var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px) +
           var(--edge-fan-ty, 0px) + (var(--scroll-vel, 0) * 0.5px)
       ),
       calc(
@@ -332,7 +361,7 @@ body.x-ray-active #echo-layer {
     )
     rotateX(calc(var(--rot-x, 0deg) + (var(--mouse-ny, 0) * -10deg)))
     rotateY(calc(var(--rot-y, 0deg) + (var(--mouse-nx, 0) * 10deg)))
-    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg))) skewY(calc(var(--scroll-vel, 0) * 0.05deg));
+    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg) + var(--repulse-rot, 0deg))) skewY(calc(var(--scroll-vel, 0) * 0.05deg));
 
   will-change: transform, opacity, filter, text-shadow;
   transition:
@@ -343,19 +372,22 @@ body.x-ray-active #echo-layer {
   /* Look & Feel Upgrades: Holographic Glass & Aurora Border */
   background-image:
     url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.25'/%3E%3C/svg%3E"),
-    linear-gradient(135deg, rgba(15, 20, 35, 0.7), rgba(5, 8, 15, 0.9));
+    linear-gradient(135deg, rgba(20, 25, 45, 0.75), rgba(5, 10, 20, 0.95));
   background-blend-mode: overlay;
-  backdrop-filter: blur(50px) saturate(250%) brightness(1.1);
-  -webkit-backdrop-filter: blur(50px) saturate(250%) brightness(1.1);
+  backdrop-filter: blur(60px) saturate(280%) brightness(1.15);
+  -webkit-backdrop-filter: blur(60px) saturate(280%) brightness(1.15);
 
-  border: 1px solid hsla(var(--echo-tint, 0deg), 100%, 70%, 0.5);
-  border-radius: 20px;
+  border: 1px solid hsla(var(--echo-tint, 0deg), 100%, 80%, 0.6);
+  border-top: 1px solid hsla(var(--echo-tint, 0deg), 100%, 90%, 0.8);
+  border-left: 1px solid hsla(var(--echo-tint, 0deg), 100%, 80%, 0.6);
+  border-radius: 22px;
   padding: 24px;
   box-sizing: border-box;
   box-shadow:
-    0 20px 80px rgba(0, 0, 0, 0.9),
-    0 0 40px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.2),
-    inset 0 0 30px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.2);
+    0 30px 90px rgba(0, 0, 0, 0.95),
+    inset 0 2px 3px rgba(255, 255, 255, 0.4),
+    0 0 50px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.25),
+    inset 0 0 40px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.25);
 }
 
 .echo-document::before {
@@ -620,13 +652,13 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
       calc(
         calc(var(--tx, 0px) + var(--part-tx, 0px)) +
           var(--glitch-offset-x, 0px) + var(--wormhole-tx, 0px) +
-          var(--repel-tx, 0px) + var(--edge-fan-tx, 0px)
+          var(--repel-tx, 0px) + var(--repulse-tx, 0px) + var(--edge-fan-tx, 0px)
       ),
       calc(
         calc(var(--ty, 0px) + var(--part-ty, 0px)) -
           (var(--editor-scroll-y, 0px) * var(--parallax-factor, 0)) +
           var(--glitch-offset-y, 0px) + var(--wormhole-ty, 0px) +
-          var(--repel-ty, 0px) + var(--edge-fan-ty, 0px)
+          var(--repel-ty, 0px) + var(--repulse-ty, 0px) + var(--edge-fan-ty, 0px)
       ),
       calc(var(--tz, 0px) + (var(--wake) * 60px) + var(--wormhole-tz, 0px))
     )
@@ -637,7 +669,7 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
           (var(--hover-rot-y, 0deg) * var(--wake))
       )
     )
-    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg)))
+    rotateZ(calc(var(--rot-z, 0deg) + var(--edge-fan-rot, 0deg) + var(--repulse-rot, 0deg)))
     scale(calc((1 + (var(--wake) * 0.08)) * var(--wormhole-scale, 1)));
 
   /* Visual depth masking */

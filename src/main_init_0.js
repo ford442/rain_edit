@@ -1,49 +1,11 @@
-import * as monaco from "monaco-editor";
-import "monaco-editor/esm/vs/basic-languages/javascript/javascript.js";
-import "monaco-editor/esm/vs/basic-languages/typescript/typescript.js";
-import "monaco-editor/esm/vs/language/json/monaco.contribution";
-import "monaco-editor/esm/vs/basic-languages/html/html.js";
-import "monaco-editor/esm/vs/basic-languages/css/css.js";
-import "monaco-editor/esm/vs/basic-languages/markdown/markdown.js";
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
-import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
-import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
-import RainLayer from "./RainLayer";
-import Raindrops from "./vendor/raindrops.js";
-import { ReferenceManager } from "./ReferenceManager.js";
-import { ConnectionManager } from "./ConnectionManager.js";
-import { FogManager } from "./FogManager.js";
-import { HoloManager } from "./HoloManager.js";
-import { TabManager } from "./TabManager.js";
-import { StorageAPI } from "./StorageAPI.js";
-import { Cabinet3D } from "./Cabinet3D.js";
-import { VPSFileBrowser } from "./VPSFileBrowser.js";
-import DataSiphon from "./DataSiphon.js";
-import { VeilExcavator } from "./VeilExcavator.js";
+import { monaco } from "./editor/setupMonaco.js";
 import { HolographicMinimap } from "./HolographicMinimap.js";
-import backFrag from "./shaders/water-back.frag?glslify";
-import frontFrag from "./shaders/water.frag?glslify";
-import vertSrc from "./shaders/simple.vert?glslify";
-
-self.MonacoEnvironment = {
-  getWorker(_, label) {
-    if (label === "json") {
-      return new jsonWorker();
-    }
-    if (label === "css" || label === "scss" || label === "less") {
-      return new cssWorker();
-    }
-    if (label === "html" || label === "handlebars" || label === "razor") {
-      return new htmlWorker();
-    }
-    if (label === "typescript" || label === "javascript") {
-      return new tsWorker();
-    }
-    return new editorWorker();
-  },
-};
+import { inputManager as im } from "./interactions/InputManager.js";
+import {
+  WorkspaceSession,
+  setWorkspaceSession,
+} from "./workspace/WorkspaceSession.js";
+import { LocalProject } from "./workspace/LocalProject.js";
 
 portalLayer.id = "portal-visuals";
 
@@ -82,11 +44,30 @@ monaco.editor.defineTheme("transparent-vs-dark", {
   },
 });
 
+const workspaceSession = setWorkspaceSession(
+  new WorkspaceSession({
+    tabManager,
+    referenceManager,
+    referenceInput: document.getElementById("reference-input"),
+    viewModeSelect: document.getElementById("view-mode-select"),
+    storageAPI,
+  }),
+);
+window.workspaceSession = workspaceSession;
+workspaceSession.bindDockControls();
+workspaceSession.installUnloadGuard();
+
+const localProject = new LocalProject({ tabManager, workspaceSession });
+window.localProject = localProject;
+localProject.bindUi();
+
 (async () => {
-  await tabManager.loadTabsFromStorage();
+  const restored = await workspaceSession.restore({
+    preferRemote: workspaceSession.remoteSync,
+  });
 
   // If no tabs were restored, add the initial demo file
-  if (tabManager.files.length === 0) {
+  if (!restored && tabManager.files.length === 0) {
     const INITIAL_CODE = [
       "// rain-2 demo",
       "function hello(){",
@@ -278,39 +259,58 @@ document.addEventListener("mouseup", (e) => {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.altKey) {
+// Wormhole (hold Ctrl+Alt)
+im.register({
+  id: "wormhole",
+  category: "depth",
+  description: "Wormhole warp (hold Ctrl+Alt)",
+  combo: { ctrl: true, alt: true },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onDown: () => {
     isWormholeActive = true;
-  }
-
-  if (e.altKey && e.code === "KeyZ") {
-    document.body.classList.toggle("gravity-well-active");
-  }
+  },
+  onUp: () => {
+    isWormholeActive = false;
+    if (echoLayerEl) {
+      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
+        echo.style.removeProperty("--wormhole-tx");
+        echo.style.removeProperty("--wormhole-ty");
+        echo.style.removeProperty("--wormhole-tz");
+        echo.style.removeProperty("--wormhole-scale");
+      });
+    }
+  },
 });
 
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Escape") {
-    if (document.body.classList.contains("tesseract-active")) {
-      const viewSelect = document.getElementById("view-mode-select");
-      if (viewSelect) viewSelect.value = "";
-      tabManager._deactivateAllViews();
-    }
-  }
+// Gravity Well — reassigned Alt+Z -> Alt+Shift+Z (Alt+Z is the depth x-ray scan).
+im.register({
+  id: "gravity-well",
+  category: "depth",
+  description: "Gravity well (Alt+Shift+Z)",
+  combo: { alt: true, shift: true, code: "KeyZ" },
+  type: "toggle",
+  preventDefault: false,
+  onDown: () => document.body.classList.add("gravity-well-active"),
+  onUp: () => document.body.classList.remove("gravity-well-active"),
+});
 
-  if (e.key === "Control" || e.key === "Alt") {
-    if (!e.ctrlKey || !e.altKey) {
-      isWormholeActive = false;
-      if (echoLayerEl) {
-        const echoes = echoLayerEl.querySelectorAll(".echo-document");
-        echoes.forEach((echo) => {
-          echo.style.removeProperty("--wormhole-tx");
-          echo.style.removeProperty("--wormhole-ty");
-          echo.style.removeProperty("--wormhole-tz");
-          echo.style.removeProperty("--wormhole-scale");
-        });
-      }
-    }
-  }
+// Tesseract exit (Escape)
+im.register({
+  id: "tesseract-exit",
+  category: "navigation",
+  description: "Exit tesseract view (Esc)",
+  combo: { key: "Escape" },
+  type: "action",
+  preventDefault: false,
+  allowInEditor: true,
+  when: () => document.body.classList.contains("tesseract-active"),
+  onDown: () => {
+    const viewSelect = document.getElementById("view-mode-select");
+    if (viewSelect) viewSelect.value = "";
+    tabManager._deactivateAllViews();
+  },
 });
 
 if (document.getElementById("radar-canvas")) {

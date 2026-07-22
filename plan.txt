@@ -1,0 +1,4 @@
+1. We need to create a new cool layout feature. I will add a `stack-deck` (Stack Deck / Card Shuffle) view mode where the background files overlap each other vertically, resembling a deck of cards or layered papers.
+2. It looks like many features use CSS transforms heavily based on their view layout mode, managed via a combination of CSS classes (e.g. `stack-deck-active`) and Javascript toggle logic in `TabManager` and `main.js`.
+3. I'll search where to implement this view, such as `src/TabManager.js` (or rather `src/TabManager_0.js`, `_3.js`, etc as they are split up).
+4. Add CSS styles in `src/styles_14.css`.

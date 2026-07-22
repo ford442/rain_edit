@@ -353,3 +353,7 @@ import { TabManagerMixin4 } from './TabManager_4.js';
 Object.assign(TabManager.prototype, TabManagerMixin4);
 import { TabManagerMixin5 } from './TabManager_5.js';
 Object.assign(TabManager.prototype, TabManagerMixin5);
+import { TabManagerMixin6 } from './TabManager_6.js';
+Object.assign(TabManager.prototype, TabManagerMixin6);
+import { TabManagerMixin7 } from './TabManager_7.js';
+Object.assign(TabManager.prototype, TabManagerMixin7);
