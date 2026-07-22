@@ -399,7 +399,11 @@ document.addEventListener("keyup", (e) => {
       echoes.forEach((echo) => {
         echo.style.setProperty("--lens-pull", 0);
         echo.classList.remove("shift-lens-hit");
-        
+      });
+    }
+  }
+});
+
 // Peel (reassigned from the old Alt+Shift catch-all to Alt+Shift+Q to end the
 // collision with every other Alt+Shift combo).
 im.register({
