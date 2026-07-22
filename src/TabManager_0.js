@@ -62,7 +62,8 @@ export const TabManagerMixin0 = {
     this.isInfinityMirrorView = false;
     this.isChronoRingView = false;
     this.isArchwayView = false;
-    this.isArchwayView = false;
+    this.isCityscapeView = false;
+    this.isHouseOfCardsView = false;
     this.isKaleidoscopeView = false;
     this.isBookshelfView = false;
     this.isCarouselView = false;
@@ -89,6 +90,8 @@ export const TabManagerMixin0 = {
 
     document.body.classList.remove(
       "waterfall-active",
+      "cityscape-active",
+      "house-of-cards-active",
       "cascade-active",
       "orbit-active",
       "scattered-active",
@@ -502,7 +505,142 @@ export const TabManagerMixin0 = {
     document.body.classList.add("kaleidoscope-active");
     this._renderEchoes();
   },
+  toggleFractalView() {
+    const wasActive = this.isFractalView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isFractalView = true;
+      document.body.classList.add("fractal-active");
+      const btn = document.getElementById("btn-fractal-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCrystalView() {
+    const wasActive = this.isCrystalView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCrystalView = true;
+      document.body.classList.add("crystal-active");
+      const btn = document.getElementById("btn-crystal-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCityscapeView() {
+    const wasActive = this.isCityscapeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCityscapeView = true;
+      document.body.classList.add("cityscape-active");
+    }
+    this._renderEchoes();
+  },
+  toggleHouseOfCardsView() {
+    const wasActive = this.isHouseOfCardsView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHouseOfCardsView = true;
+      document.body.classList.add("house-of-cards-active");
+    }
+    this._renderEchoes();
+  },
+  toggleMatrixRainView() {
+    const wasActive = this.isMatrixRainView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isMatrixRainView = true;
+      document.body.classList.add("matrix-rain-active");
+      const btn = document.getElementById("btn-matrix-rain-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleOrigamiView() {
+    const wasActive = this.isOrigamiView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isOrigamiView = true;
+      document.body.classList.add("origami-active");
+    }
+    this._renderEchoes();
+  },
+  toggleDataHiveView() {
+    const wasActive = this.isDataHiveView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isDataHiveView = true;
+      document.body.classList.add("data-hive-active");
+    }
+    this._renderEchoes();
+  },
+  toggleGalaxyView() {
+    const wasActive = this.isGalaxyView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isGalaxyView = true;
+      document.body.classList.add("galaxy-active");
+    }
+    this._renderEchoes();
+  },
+  toggleBlackHoleView() {
+    const wasActive = this.isBlackHoleView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isBlackHoleView = true;
+      document.body.classList.add("black-hole-active");
+      const btn = document.getElementById("btn-black-hole-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleRolodexView() {
+    const wasActive = this.isRolodexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isRolodexView = true;
+      document.body.classList.add("rolodex-active");
+      const btn = document.getElementById("btn-rolodex-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCylinderView() {
+    const wasActive = this.isCylinderView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCylinderView = true;
+      document.body.classList.add("cylinder-active");
+      const btn = document.getElementById("btn-cylinder-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleSphereView() {
+    const wasActive = this.isSphereView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isSphereView = true;
+      document.body.classList.add("sphere-active");
+      const btn = document.getElementById("btn-sphere-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleWaveView() {
+    const wasActive = this.isWaveView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isWaveView = true;
+      document.body.classList.add("wave-active");
+      const btn = document.getElementById("btn-wave-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+
 };
+
 
 
 TabManagerMixin0.toggleAuroraView = function() {

@@ -2,82 +2,37 @@ import StorageAPI from "./StorageAPI.js";
 import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
 export const TabManagerMixin3 = {
   _applyLayoutChunk2(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isCityscapeView) {
+        // Cityscape View: buildings of varying heights jutting out from a flat grid
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const row = Math.floor(index / cols);
+        const col = index % cols;
 
-      if (this.isDnaHelixView) {
-        const theta = index * Math.PI / 4;
-        const yOffset = (index - totalEchoes / 2) * 60;
+        const spacingX = 400;
+        const spacingZ = 300;
 
-        // Alternate strands
-        const strandOffset = index % 2 === 0 ? 0 : Math.PI;
+        const offsetX = -((cols - 1) * spacingX) / 2;
+        const offsetZ = -((Math.ceil(totalEchoes / cols) - 1) * spacingZ) / 2;
 
-        const radius = 300;
+        const tx = offsetX + col * spacingX;
+        // Pseudo-random height (tz) variation based on index to look like buildings
+        const pseudoRandom = Math.sin(index * 13.37) * 0.5 + 0.5; // value between 0 and 1
+        const buildingHeight = 100 + pseudoRandom * 600;
 
-        const tx = radius * Math.cos(theta + strandOffset);
-        const ty = yOffset;
-        const tz = radius * Math.sin(theta + strandOffset) - 200;
-
-        const rotY = -(theta + strandOffset) * (180 / Math.PI) + 90;
-
-        el.style.setProperty("--tx", `${tx}px`);
-        el.style.setProperty("--ty", `${ty}px`);
-        el.style.setProperty("--tz", `${tz}px`);
-        el.style.setProperty("--rot-x", `0deg`);
-        el.style.setProperty("--rot-y", `${rotY}deg`);
-        el.style.setProperty("--rot-z", `0deg`);
-        return true;
-      }
-
-      if (this.isStackDeckView) {
-        // Stack Deck View: vertically overlapping cards like a deck
-        const yOffset = index * 40;
-        const zOffset = -index * 5;
-
-        el.style.setProperty("--tx", `0px`);
-        el.style.setProperty("--ty", `${yOffset}px`);
-        el.style.setProperty("--tz", `${zOffset}px`);
-        el.style.setProperty("--rot-x", `0deg`);
-        el.style.setProperty("--rot-y", `0deg`);
-        el.style.setProperty("--rot-z", `0deg`);
-      }
-      if (this.isCardSpreadView) {
-        // Card Spread View: arched overlapping cards
-        const total = totalEchoes || 1;
-        // Center the spread
-        const offsetIndex = index - (total - 1) / 2;
-
-        // Spread angle (total span ~60 degrees)
-        const angleDeg = offsetIndex * (60 / total);
-        const angleRad = (angleDeg * Math.PI) / 180;
-
-        const radius = 600;
-
-        const tx = Math.sin(angleRad) * radius;
-        const ty = radius - Math.cos(angleRad) * radius + (index * 5); // Slight vertical drop
-        const tz = -index * 20 - 50; // Push back slightly to show overlap
-        const rotZ = angleDeg;
+        const tz = offsetZ - row * spacingZ - 400; // push everything back a bit
+        // Tilt the documents so they stand up from the floor
+        const ty = 300 - buildingHeight / 2;
 
         el.style.setProperty("--tx", `${tx}px`);
         el.style.setProperty("--ty", `${ty}px`);
-        el.style.setProperty("--tz", `${tz}px`);
-        el.style.setProperty("--rot-x", `5deg`); // Slight tilt back
-        el.style.setProperty("--rot-y", `0deg`);
-        el.style.setProperty("--rot-z", `${rotZ}deg`);
-        return true;
-      }
-      if (this.isAuroraView) {
-        // Aurora View: undulating sine wave in 3D space
-        const spreadX = 250;
-        const spreadY = 100;
-        const tx = Math.sin(index * 0.6) * spreadX;
-        const ty = Math.cos(index * 0.4) * spreadY - 50;
-        const tz = -index * 120;
-
-        el.style.setProperty("--tx", `${tx}px`);
-        el.style.setProperty("--ty", `${ty}px`);
-        el.style.setProperty("--tz", `${tz}px`);
-        el.style.setProperty("--rot-x", `${Math.sin(index * 0.3) * 15}deg`);
-        el.style.setProperty("--rot-y", `${Math.cos(index * 0.5) * 20}deg`);
+        el.style.setProperty("--tz", `${tz + buildingHeight}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
         el.style.setProperty("--rot-z", "0deg");
+        // add some minor scale to vary thickness visually
+        el.style.transform = `translate3d(var(--tx), var(--ty), var(--tz)) rotateX(var(--rot-x)) rotateY(var(--rot-y)) rotateZ(var(--rot-z)) scale(${1 - pseudoRandom * 0.2})`;
+
+        return;
       }
       if (this.isStaircaseView) {
         // Staircase View: cascading step-like arrangement
@@ -464,6 +419,533 @@ export const TabManagerMixin3 = {
         el.style.setProperty("--rot-x", `${rX}deg`);
         el.style.setProperty("--rot-y", `${rY}deg`);
         el.style.setProperty("--rot-z", `${rZ}deg`);
+        return true;
+      }
+
+      if (this.isHouseOfCardsView) {
+        // House of Cards View: stacked structure
+        let _totalEchoes = inactiveFiles.length;
+
+        // Build rows starting from bottom
+        // Row 0 has max items, Row 1 has max-1, etc.
+        let row = 0;
+        let col = 0;
+        let itemsInRow = 4; // Start with 4 items at the base
+        let itemsCounted = 0;
+
+        for (let i = 0; i < index; i++) {
+          col++;
+          if (col >= itemsInRow) {
+            row++;
+            col = 0;
+            itemsInRow = Math.max(1, itemsInRow - 1);
+          }
+        }
+
+        // Random slight offsets for realism
+        const randomSeed = index * 9876.54321;
+        const jitterX = (Math.sin(randomSeed) - 0.5) * 20;
+        const jitterY = (Math.cos(randomSeed * 1.5) - 0.5) * 20;
+        const jitterZ = (Math.sin(randomSeed * 2.5) - 0.5) * 10;
+        const jitterRotZ = (Math.cos(randomSeed * 3.5) - 0.5) * 10;
+
+        const spacingX = 220;
+        const spacingY = 180;
+
+        // Center the rows
+        const startX = -((itemsInRow - 1) * spacingX) / 2;
+
+        // Ty goes UP (negative) as row increases
+        const tx = startX + col * spacingX + jitterX;
+        const ty = 200 - row * spacingY + jitterY;
+        const tz = -150 - row * 50 + jitterZ; // Push higher rows further back slightly
+
+        // Slight leaning inward for stability illusion
+        const rotY = tx > 0 ? -10 : tx < 0 ? 10 : 0;
+        const rotX = -5; // Tilt slightly up
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${jitterRotZ}deg`);
+        return true;
+      }
+    return false;
+  },
+  _applyLayoutChunk3(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isCyberCortexView) {
+        // Brain-like cluster / spherical node map
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * (index + 0.5);
+
+        const radius = 500;
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200;
+
+        // Add some organic jitter
+        const rotX = Math.sin(index * 13) * 30;
+        const rotY = Math.cos(index * 17) * 30;
+        const rotZ = Math.sin(index * 19) * 30;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        return true;
+      }
+      if (this.isOrigamiView) {
+        // Origami spatial view calculation
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const foldAngle = 35; // degrees for each fold
+        const spacing = 180;
+
+        // Alternating folds
+        const direction = index % 2 === 0 ? 1 : -1;
+        const tx = (index - totalEchoes / 2) * spacing;
+        const ty = (index % 3) * 60 - 60; // stagger y
+        const tz = Math.abs(index - totalEchoes / 2) * -150 - 200; // V-shape depth
+        const rotY = direction * foldAngle;
+        const rotZ = direction * 5;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+        return true;
+      }
+      if (this.isDataHiveView) {
+        // Data Hive View: Hexagonal grid arrangement
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const cols = Math.ceil(Math.sqrt(totalEchoes));
+        const hexWidth = 240;
+        const hexHeight = 200;
+
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        // Stagger rows for hexagonal tiling
+        const xOffset = row % 2 === 1 ? hexWidth / 2 : 0;
+        const tx = (col - cols / 2) * hexWidth + xOffset;
+        const ty = (row - cols / 2) * hexHeight;
+        const tz = -400 - row * 50; // Slight slant backward
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        return true;
+      }
+      if (this.isCrystalView) {
+        // Crystal Lattice View: 3D Grid Arrangement
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const size = Math.ceil(Math.cbrt(totalEchoes)); // Cube root for 3D grid
+        const spacing = 350; // Spacing between nodes
+
+        const zLayer = Math.floor(index / (size * size));
+        const rem = index % (size * size);
+        const yLayer = Math.floor(rem / size);
+        const xLayer = rem % size;
+
+        const tx = (xLayer - size / 2) * spacing;
+        const ty = (yLayer - size / 2) * spacing;
+        const tz = -600 - zLayer * spacing;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+        return true;
+      }
+      if (this.isNeonSynthView) {
+        // Neon Synth View: Retro-futuristic grid highway stretching backwards
+        const laneWidth = 400;
+        const zSpacing = 300;
+        // Alternate between left and right lanes
+        const isLeftLane = index % 2 === 0;
+        const tx = isLeftLane ? -laneWidth / 2 : laneWidth / 2;
+        // Position at the bottom to form the 'highway' feel
+        const ty = 300;
+        const tz = -index * zSpacing;
+
+        // Tilt backwards to lay flat like a road
+        const rotX = 70;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+        return true;
+      }
+      if (this.isCycloneView) {
+        // Cyclone View: Funnel-like spiral with decreasing radius based on depth index
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const angleStep = 45; // Degrees per document
+
+        const angleDeg = index * angleStep;
+        const angleRad = (angleDeg * Math.PI) / 180;
+
+        // Base radius is wide at top (index 0), narrow at bottom
+        const radius = 600 - index * (400 / totalEchoes);
+
+        const tx = Math.sin(angleRad) * radius;
+        const tz = Math.cos(angleRad) * radius - 400; // Push back slightly
+        const ty = index * 80 - totalEchoes * 40; // Spiral vertically
+
+        // Tilt elements slightly upwards to face the viewer from the funnel
+        const rotX = 15;
+        const rotY = angleDeg; // Face inward
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+        return true;
+      }
+      if (this.isGalaxyView) {
+        // Galaxy Spiral View: Logarithmic spiral arrangement on X-Z plane
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const spiralRotations = 3; // How many times the arms wrap
+        const maxRadius = 1500;
+
+        // Progress along the spiral (0 at center, 1 at edge)
+        const t = index / totalEchoes;
+
+        // Logarithmic scaling for tighter clustering at the core
+        const r = maxRadius * Math.pow(t, 0.7);
+        const theta = t * Math.PI * 2 * spiralRotations;
+
+        // Two spiral arms offset by PI
+        const armOffset = index % 2 === 0 ? 0 : Math.PI;
+
+        const tx = r * Math.cos(theta + armOffset);
+        // Add slight vertical variation
+        const ty = (Math.random() - 0.5) * 200 * t;
+        const tz = r * Math.sin(theta + armOffset) - 600; // Shift galaxy backwards
+
+        // Tilt elements slightly inwards towards the core, rotate to face camera somewhat
+        const rotX = 15 * Math.cos(theta);
+        const rotY = 25 * Math.sin(theta);
+        const rotZ = 0;
+
+        // Core elements are smaller and brighter
+        const scale = 0.5 + 0.5 * (1 - t);
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+        el.style.setProperty("--scale", scale.toFixed(2));
+        return true;
+      }
+      if (this.isCoverflowView) {
+        // Coverflow View positions
+        let _totalEchoes = inactiveFiles.length;
+        const middleIndex = Math.floor(totalEchoes / 2);
+        const diff = index - middleIndex;
+
+        const spacingX = 150;
+        const tx = diff * spacingX;
+
+        // Push back non-center items, scale them down, rotate them inwards
+        const absDiff = Math.abs(diff);
+        const tz = absDiff === 0 ? 0 : -200 - absDiff * 50;
+        const rotY = diff === 0 ? 0 : diff < 0 ? 45 : -45; // Left items face right, right items face left
+        const scale = 1 - absDiff * 0.1;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `0px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--scale", `${Math.max(0.3, scale)}`);
+        el.style.setProperty("--z-index", `${100 - absDiff}`);
+
+        // Reset others
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+        return true;
+      }
+      if (this.isWaveView) {
+        // Wave View positions (Sine wave floating)
+        let _totalEchoes = inactiveFiles.length;
+        const spreadW = window.innerWidth * 1.2;
+        const startX = -spreadW / 2;
+
+        const stepX = totalEchoes > 1 ? spreadW / (totalEchoes - 1) : 0;
+        const tx = startX + index * stepX;
+
+        // Sine wave for Y
+        const frequency = 2; // Number of full waves
+        const amplitude = 300; // Height of wave
+        const phase =
+          (index / Math.max(1, totalEchoes - 1)) * Math.PI * 2 * frequency;
+        const ty = Math.sin(phase) * amplitude;
+
+        const tz = -150; // Constant depth
+
+        // Derivative of sine is cosine, use for tangent rotation
+        const rotZ = Math.cos(phase) * 30; // Max tilt 30deg
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+
+        // Reset others
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        return true;
+      }
+
+      if (this.isPrismSplitView) {
+        // V-shape split logic
+        const side = index % 2 === 0 ? 1 : -1;
+        const row = Math.floor(index / 2);
+
+        const tx = side * (300 + row * 50);
+        const ty = row * 20 - 50;
+        const tz = -200 - row * 150;
+
+        // Tilt them to face inwards
+        const rotY = side * -35;
+        const rotX = 10;
+        const rotZ = 0;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        return true;
+      }
+      if (this.isPrismView) {
+        // Prism View positions (Polyhedron shape)
+        let _totalEchoes = inactiveFiles.length;
+
+        // Calculate spherical coordinates for an even distribution
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+
+        const radius = 450;
+
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200; // Offset back
+
+        // Orient planes to face outward from center
+        const rotX = -phi * (180 / Math.PI) + 90;
+        const rotY = theta * (180 / Math.PI);
+        const rotZ = 0;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        return true;
+      }
+
+      if (this.isHouseOfCardsView) {
+        // House of Cards View: stacked structure
+        let _totalEchoes = inactiveFiles.length;
+
+        // Build rows starting from bottom
+        // Row 0 has max items, Row 1 has max-1, etc.
+        let row = 0;
+        let col = 0;
+        let itemsInRow = 4; // Start with 4 items at the base
+        let itemsCounted = 0;
+
+        for (let i = 0; i < index; i++) {
+          col++;
+          if (col >= itemsInRow) {
+            row++;
+            col = 0;
+            itemsInRow = Math.max(1, itemsInRow - 1);
+          }
+        }
+
+        // Random slight offsets for realism
+        const randomSeed = index * 9876.54321;
+        const jitterX = (Math.sin(randomSeed) - 0.5) * 20;
+        const jitterY = (Math.cos(randomSeed * 1.5) - 0.5) * 20;
+        const jitterZ = (Math.sin(randomSeed * 2.5) - 0.5) * 10;
+        const jitterRotZ = (Math.cos(randomSeed * 3.5) - 0.5) * 10;
+
+        const spacingX = 220;
+        const spacingY = 180;
+
+        // Center the rows
+        const startX = -((itemsInRow - 1) * spacingX) / 2;
+
+        // Ty goes UP (negative) as row increases
+        const tx = startX + col * spacingX + jitterX;
+        const ty = 200 - row * spacingY + jitterY;
+        const tz = -150 - row * 50 + jitterZ; // Push higher rows further back slightly
+
+        // Slight leaning inward for stability illusion
+        const rotY = tx > 0 ? -10 : tx < 0 ? 10 : 0;
+        const rotX = -5; // Tilt slightly up
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${jitterRotZ}deg`);
+        return true;
+      }
+    return false;
+  },
+  _applyLayoutChunk4(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isScatteredView) {
+        // Scattered View positions
+        let _totalEchoes = inactiveFiles.length;
+
+        // Use a simple pseudo-random function based on index
+        const randomSeed = index * 12345.6789;
+        const randX = Math.sin(randomSeed) * 0.5 + 0.5; // 0 to 1
+        const randY = Math.cos(randomSeed * 1.5) * 0.5 + 0.5; // 0 to 1
+
+        const spreadW = window.innerWidth * 0.8;
+        const spreadH = window.innerHeight * 0.8;
+
+        const sx = randX * spreadW - spreadW / 2;
+        const sy = randY * spreadH - spreadH / 2;
+
+        // Further back ones are smaller/further
+        const sz = -100 - index * 80;
+        const rotZ = Math.sin(randomSeed * 2) * 20; // -20deg to 20deg
+
+        el.style.setProperty("--scatter-x", `${sx}px`);
+        el.style.setProperty("--scatter-y", `${sy}px`);
+        el.style.setProperty("--scatter-z", `${sz}px`);
+        el.style.setProperty("--scatter-rot", `${rotZ}deg`);
+
+        // Remove standard offsets
+        el.style.setProperty("--tx", `0px`);
+        el.style.setProperty("--ty", `0px`);
+        el.style.setProperty("--tz", `0px`);
+        return true;
+      }
+      if (this.isBlackHoleView) {
+        // Black Hole View positions
+        const angle = (index * Math.PI) / 4;
+        const radius = Math.max(0, 200 - index * 20);
+
+        el.style.setProperty("--tx", `${Math.cos(angle) * radius}px`);
+        el.style.setProperty("--ty", `${Math.sin(angle) * radius}px`);
+        el.style.setProperty("--tz", `${-100 - index * 50}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", `${index * 15}deg`);
+        return true;
+      }
+      if (this.isRolodexView) {
+        // Rolodex View: revolving file cabinet cylinder
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const angle = (index / totalEchoes) * Math.PI * 2;
+        const radius = 600;
+
+        const tx = 0;
+        const ty = Math.sin(angle) * radius;
+        const tz = Math.cos(angle) * radius - 200; // offset back
+
+        // Orient planes facing outward
+        const rotX = -((angle * 180) / Math.PI);
+        const rotY = 0;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+        return true;
+      }
+
+      if (this.isHouseOfCardsView) {
+        // House of Cards View: stacked structure
+        let _totalEchoes = inactiveFiles.length;
+
+        // Build rows starting from bottom
+        // Row 0 has max items, Row 1 has max-1, etc.
+        let row = 0;
+        let col = 0;
+        let itemsInRow = 4; // Start with 4 items at the base
+        let itemsCounted = 0;
+
+        for (let i = 0; i < index; i++) {
+          col++;
+          if (col >= itemsInRow) {
+            row++;
+            col = 0;
+            itemsInRow = Math.max(1, itemsInRow - 1);
+          }
+        }
+
+        // Random slight offsets for realism
+        const randomSeed = index * 9876.54321;
+        const jitterX = (Math.sin(randomSeed) - 0.5) * 20;
+        const jitterY = (Math.cos(randomSeed * 1.5) - 0.5) * 20;
+        const jitterZ = (Math.sin(randomSeed * 2.5) - 0.5) * 10;
+        const jitterRotZ = (Math.cos(randomSeed * 3.5) - 0.5) * 10;
+
+        const spacingX = 220;
+        const spacingY = 180;
+
+        // Center the rows
+        const startX = -((itemsInRow - 1) * spacingX) / 2;
+
+        // Ty goes UP (negative) as row increases
+        const tx = startX + col * spacingX + jitterX;
+        const ty = 200 - row * spacingY + jitterY;
+        const tz = -150 - row * 50 + jitterZ; // Push higher rows further back slightly
+
+        // Slight leaning inward for stability illusion
+        const rotY = tx > 0 ? -10 : tx < 0 ? 10 : 0;
+        const rotX = -5; // Tilt slightly up
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${jitterRotZ}deg`);
         return true;
       }
     return false;
