@@ -325,6 +325,81 @@ im.register({
   },
 });
 
+/* ─── Improvise: Depth Peel Feature (Alt + Q) ─────────────────────────────── */
+// Fanning out all partially obscured echo-document layers sideways based on cursor pos.
+window.isDepthPeelActive = false;
+
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && !e.shiftKey && e.code === "KeyQ" && !window.isDepthPeelActive) {
+    e.preventDefault();
+    window.isDepthPeelActive = true;
+    document.body.classList.add("depth-peel-active");
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if ((e.key === "Alt" || e.code === "KeyQ") && window.isDepthPeelActive) {
+    if (!e.altKey || e.code === "KeyQ") {
+      window.isDepthPeelActive = false;
+      document.body.classList.remove("depth-peel-active");
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          doc.style.setProperty("--peel-offset", "0px");
+        });
+      }
+    }
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (window.isDepthPeelActive && window.echoLayerEl) {
+    const peelAmount = (e.clientX - window.innerWidth / 2) * 0.5;
+    window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc, idx) => {
+      // Fan out more deeply buried layers further
+      doc.style.setProperty("--peel-offset", `${peelAmount * (idx + 1)}px`);
+    });
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  // Innovate: Focus Pull Interaction (Alt + F)
+  if (e.key === "f" || e.key === "F" || e.key === "Alt") {
+    document.body.classList.remove("focus-pull-active");
+  }
+
+  // Innovate: Sonar Pulse Reveal (Alt + O)
+  if (e.key === "o" || e.key === "O" || e.key === "Alt") {
+    document.body.classList.remove("sonar-pulse-active");
+  }
+
+  // Innovate: Prismatic Depth Separation (Alt + U)
+  if (e.key === "u" || e.key === "U" || e.key === "Alt") {
+    document.body.classList.remove("prism-depth-active");
+  }
+
+  if (e.key === "c" || e.key === "C" || e.key === "Alt") {
+    if (isFanningActive && (!e.altKey || (e.code === "KeyC" && !e.altKey))) {
+      isFanningActive = false;
+      document.body.classList.remove("fanning-active");
+      if (echoLayerEl) {
+        const echoes = echoLayerEl.querySelectorAll(".echo-document");
+        echoes.forEach((echo) => {
+          echo.style.removeProperty("--fan-tx");
+          echo.style.removeProperty("--fan-ty");
+          echo.style.removeProperty("--fan-tz");
+          echo.style.removeProperty("--fan-rot-z");
+        });
+      }
+    }
+  }
+
+  if (e.key === "Shift") {
+    if (echoLayerEl && window.__lensActive) {
+      const echoes = echoLayerEl.querySelectorAll(".echo-document");
+      echoes.forEach((echo) => {
+        echo.style.setProperty("--lens-pull", 0);
+        echo.classList.remove("shift-lens-hit");
+        
 // Peel (reassigned from the old Alt+Shift catch-all to Alt+Shift+Q to end the
 // collision with every other Alt+Shift combo).
 im.register({
@@ -1332,6 +1407,39 @@ document.addEventListener("mousemove", (e) => {
   }
 });
 
+/* ─── Improvise: Kinetic Typography Echo (Alt + T) ─────────────────────────────── */
+// When triggered, extracts visible text from the editor, scales it up, and overlays it
+// across echo documents with varying delays and opacity to create a kinetic echo effect.
+window.isKineticEchoActive = false;
+
+document.addEventListener("keydown", (e) => {
+  if (e.altKey && !e.shiftKey && e.code === "KeyT" && !window.isKineticEchoActive) {
+    e.preventDefault();
+    window.isKineticEchoActive = true;
+    document.body.classList.add("kinetic-echo-active");
+
+    if (window.editor) {
+      const code = window.editor.getValue();
+      const words = code.split(/\s+/).filter(w => w.length > 3).slice(0, 10);
+
+      if (window.echoLayerEl) {
+         window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc, idx) => {
+             const word = words[idx % words.length] || "ECHO";
+             doc.setAttribute("data-kinetic-word", word);
+         });
+      }
+    }
+  }
+});
+
+document.addEventListener("keyup", (e) => {
+  if ((e.key === "Alt" || e.code === "KeyT") && window.isKineticEchoActive) {
+    if (!e.altKey || e.code === "KeyT") {
+      window.isKineticEchoActive = false;
+      document.body.classList.remove("kinetic-echo-active");
+    }
+  }
+});
 // Start the unified keyboard dispatcher after every feature (across all
 // main_init_* shards) has registered its bindings.
 initInteractions(im);
