@@ -505,7 +505,6 @@ export const TabManagerMixin0 = {
     document.body.classList.add("kaleidoscope-active");
     this._renderEchoes();
   },
-<<<<<<< HEAD
   toggleFractalView() {
     const wasActive = this.isFractalView;
     this._deactivateAllViews();
@@ -639,9 +638,9 @@ export const TabManagerMixin0 = {
     }
     this._renderEchoes();
   },
-=======
+
 };
->>>>>>> origin/main
+
 
 
 TabManagerMixin0.toggleAuroraView = function() {
