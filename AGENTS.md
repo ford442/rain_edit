@@ -81,8 +81,11 @@ root/
       random.js
       times.js
     rain/                 # Off-main-thread water-map (WaterMapSim, worker, wasm)
+    workspace/            # Session persist/restore, local project, export/import
   crates/
     rain-sim/             # Rust wasm32 droplet sim → src/rain/wasm/rain_sim.wasm
+  docs/
+    workspace-session.md  # Session schema, StorageAPI sync, local project mode
   public/img/             # Local texture assets (drop-alpha, drop-color, textures, backgrounds)
   tests/                  # Focused Node tests for extracted domain modules
   Kimi_Agent/             # Agent workspace: patches and alternate file versions (not part of main build)
@@ -103,6 +106,7 @@ root/
 - `RainLayer` caches texture sources and uniform values, pauses the shared rain RAF on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy.
 - `window.tabManager` is intentionally exposed on the global object for manual/debug automation.
 - Water-map simulation lives behind `src/rain/WaterMapSim.js`. It prefers an off-main-thread worker (`js` OffscreenCanvas or `wasm` Rust pixel sim in `crates/rain-sim`), and falls back to `src/vendor/raindrops.js` on the main thread. Toggle with the dock **Rain Sim** control, `?rainSim=wasm|js|main|auto`, or `localStorage['rain-edit:rainSimBackend']`. Rebuild the wasm artifact with `npm run build:wasm` (Vite imports `src/rain/wasm/rain_sim.wasm` via `?url` — no public/ copy).
+- Workspace sessions live in `src/workspace/` (`WorkspaceSession`, `LocalProject`). Refresh restores tabs (content + depth), view mode, and reference layouts from IndexedDB (localStorage fallback). Dirty tabs show `*`; `beforeunload` confirms. Optional remote sync writes note `__rain_workspace_session__.json` via StorageAPI. See `docs/workspace-session.md`.
 
 ---
 

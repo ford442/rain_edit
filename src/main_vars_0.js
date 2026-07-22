@@ -12,6 +12,29 @@ window._triggerVpsSave = async function _triggerVpsSave() {
   const activeFile = tabManager.files.find((f) => f.id === tabManager.activeId);
   if (!activeFile) return;
 
+  // Prefer local File System Access / OPFS handles when the tab is already local.
+  if (
+    window.localProject &&
+    (activeFile.fileHandle || activeFile.opfsPath || activeFile.localPath)
+  ) {
+    try {
+      const savedLocal = await window.localProject.saveActiveLocal();
+      if (savedLocal) {
+        if (vpsSaveBtn) {
+          const orig = vpsSaveBtn.textContent;
+          vpsSaveBtn.textContent = "✅ Local";
+          setTimeout(() => {
+            vpsSaveBtn.textContent = orig;
+          }, 1500);
+        }
+        tabManager._showToast?.(`Saved ${activeFile.name} locally`);
+        return;
+      }
+    } catch (err) {
+      console.warn("[localProject] save failed, trying VPS path", err);
+    }
+  }
+
   if (activeFile.vpsPath) {
     // Direct save — re-upload to the same VPS path
     const content = activeFile.model
@@ -22,6 +45,7 @@ window._triggerVpsSave = async function _triggerVpsSave() {
     try {
       const result = await storageAPI.saveVPSFile(activeFile.vpsPath, content);
       if (result) {
+        window.workspaceSession?.markClean(activeFile.id);
         // Invalidate Cabinet3D preview cache for this file so next hover is fresh
         window.dispatchEvent(
           new CustomEvent("cabinet-cache-invalidate", {

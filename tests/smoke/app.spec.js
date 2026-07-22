@@ -48,6 +48,52 @@ test("initializes Monaco and both rain canvases", async ({ page }) => {
   expect(pageErrors).toEqual([]);
 });
 
+test("workspace session restores tabs, depth, and view mode after reload", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.waitForFunction(() => Boolean(window.workspaceSession));
+
+  await page.evaluate(async () => {
+    const tm = window.tabManager;
+    // Clear demo tabs
+    while (tm.files.length) tm.removeFile(tm.files[0].id);
+    const id = tm.addFile("persist-me.js", "// session\n", "javascript");
+    const file = tm.files.find((f) => f.id === id);
+    file.depth = 2;
+    file.dirty = true;
+    file.savedContent = "";
+    tm.setActive(id);
+    tm.toggleOrbitView();
+    const sel = document.getElementById("view-mode-select");
+    if (sel) sel.value = "orbit";
+    await window.workspaceSession.persistNow();
+  });
+
+  await page.reload();
+  await page.waitForFunction(
+    () =>
+      window.workspaceSession &&
+      window.tabManager?.files?.some((f) => f.name === "persist-me.js"),
+  );
+
+  const restored = await page.evaluate(() => {
+    const file = window.tabManager.files.find((f) => f.name === "persist-me.js");
+    return {
+      name: file?.name,
+      depth: file?.depth,
+      content: file?.model?.getValue?.() ?? null,
+      viewMode: document.getElementById("view-mode-select")?.value || "",
+      dirtyTab: Boolean(document.querySelector(".tab-item.dirty")),
+    };
+  });
+
+  expect(restored.name).toBe("persist-me.js");
+  expect(restored.depth).toBe(2);
+  expect(restored.content).toContain("session");
+  expect(restored.viewMode).toBe("orbit");
+});
+
 test("rain sim backend toggle can switch js and wasm workers", async ({
   page,
 }) => {

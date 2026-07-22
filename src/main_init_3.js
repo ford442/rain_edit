@@ -556,6 +556,7 @@ im.register({
         .saveNote(noteName, content)
         .then((result) => {
           if (result && result.success) {
+            window.workspaceSession?.markClean(activeFile.id);
             tabManager._showToast(`✅ Note "${noteName}" saved!`);
           } else {
             tabManager._showToast(`❌ Failed to save note "${noteName}"`, true);
