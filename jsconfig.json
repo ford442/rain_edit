@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": [],
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "exactOptionalPropertyTypes": false,
+    "maxNodeModuleJsDepth": 1,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "//": "Incremental JSDoc typing. `include` lists the seams that are fully type-checked today; add a file here once it is annotated and passes `npm run typecheck`. Authored *.d.ts siblings (RainLayer/TabManager/Cabinet3D) describe the mixin-composed managers' public APIs without checking their bodies. See AGENTS.md > TypeScript adoption.",
+  "include": [
+    "src/StorageAPI.js",
+    "src/types/**/*.d.ts",
+    "src/**/*.d.ts"
+  ]
+}

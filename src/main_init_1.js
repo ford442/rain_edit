@@ -1,4 +1,5 @@
 import { monaco } from "./editor/setupMonaco.js";
+import { inputManager as im } from "./interactions/InputManager.js";
 
 document.addEventListener("mousemove", (e) => {
   if (isAutofocusActive) {
@@ -534,17 +535,41 @@ document.addEventListener("dblclick", (e) => {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Control" || e.key === "Meta") {
+// X-Ray (hold Ctrl/Cmd)
+im.register({
+  id: "x-ray",
+  category: "lens",
+  description: "Editor x-ray (hold Ctrl/Cmd)",
+  combo: { ctrlOrMeta: true },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onDown: () => {
     editorEl.classList.add("x-ray-active");
     document.body.classList.add("x-ray-active");
-  }
+  },
+  onUp: () => {
+    editorEl.classList.remove("x-ray-active");
+    document.body.classList.remove("x-ray-active");
+  },
+});
 
-  // Semantic X-Ray toggle (Alt + Shift) -> CHANGED TO HOLOGRAPHIC SIPHON MODE
-  if (e.altKey && e.shiftKey) {
+// Holographic Siphon — reassigned from the old bare Alt+Shift catch-all (which
+// collided with every Alt+Shift+letter combo) to a dedicated Alt+Shift+W.
+im.register({
+  id: "siphon-mode",
+  category: "reveal",
+  description: "Holographic siphon mode (Alt+Shift+W)",
+  combo: { alt: true, shift: true, code: "KeyW" },
+  type: "hold",
+  onDown: () => {
     document.body.classList.add("siphon-mode-active");
-    document.body.classList.remove("semantic-xray-active"); // Ensure old behavior is overridden or merged
-  }
+    document.body.classList.remove("semantic-xray-active");
+  },
+  onUp: () => {
+    document.body.classList.remove("semantic-xray-active");
+    document.body.classList.remove("siphon-mode-active");
+  },
 });
 
 editorEl.addEventListener("dragover", (e) => {

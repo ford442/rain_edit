@@ -1,3 +1,5 @@
+import { inputManager } from "./interactions/InputManager.js";
+
 export class VeilExcavator {
   constructor(tabManager) {
     this.tabManager = tabManager;
@@ -41,7 +43,20 @@ export class VeilExcavator {
     this.handlePointerUp = this.handlePointerUp.bind(this);
     this.handlePointerLeave = this.handlePointerLeave.bind(this);
 
-    window.addEventListener("keydown", this.handleKeyDown);
+    // Toggle registered through the shared dispatcher; requires a bare "v" (no
+    // modifiers) so it no longer collides with Alt+Shift+V peel reveal, and is
+    // guarded so it never fires while typing.
+    if (inputManager && !inputManager.bindings.has("veil-excavator")) {
+      inputManager.register({
+        id: "veil-excavator",
+        category: "reveal",
+        description: "Veil excavator brush (V)",
+        combo: { key: "v" },
+        type: "action",
+        preventDefault: false,
+        onDown: () => this.toggle(),
+      });
+    }
     window.addEventListener("pointerdown", this.handlePointerDown);
     window.addEventListener("pointermove", this.handlePointerMove);
     window.addEventListener("pointerup", this.handlePointerUp);

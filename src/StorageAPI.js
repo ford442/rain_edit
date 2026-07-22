@@ -1,8 +1,18 @@
+// @ts-check
 /**
  * StorageAPI — thin client for the FastAPI storage backend.
  *
  * Base URL resolves from the VITE_STORAGE_BASE_URL env var at build-time
  * (populated via import.meta.env) or falls back to a configurable constant.
+ *
+ * @typedef {import('./types/storage').CategoryItem} CategoryItem
+ * @typedef {import('./types/storage').CabinetFile} CabinetFile
+ * @typedef {import('./types/storage').FileContent} FileContent
+ * @typedef {import('./types/storage').VpsEntry} VpsEntry
+ * @typedef {import('./types/storage').VpsWriteResult} VpsWriteResult
+ * @typedef {import('./types/storage').NoteMeta} NoteMeta
+ * @typedef {import('./types/storage').NoteContent} NoteContent
+ * @typedef {import('./types/storage').NoteSaveResult} NoteSaveResult
  */
 
 const DEFAULT_BASE_URL =
@@ -37,7 +47,7 @@ export class StorageAPI {
   /**
    * Generic fetch wrapper with error handling.
    * @param {string} endpoint - API endpoint (without base URL).
-   * @returns {Promise<object>}
+   * @returns {Promise<any>}
    */
   async _fetch(endpoint) {
     try {
@@ -54,7 +64,7 @@ export class StorageAPI {
    * Fetch the list of items for a given category.
    * Hits `GET /api/songs?type={type}`.
    * @param {string} type - One of the STORAGE_CATEGORIES values.
-   * @returns {Promise<Array>}
+   * @returns {Promise<CategoryItem[]>}
    */
   async fetchCategory(type) {
     const url = `${this.baseUrl}/api/songs?type=${encodeURIComponent(type)}`;
@@ -70,7 +80,7 @@ export class StorageAPI {
    * Fetch category files with sorting support for the 3D Cabinet.
    * For shaders: uses coordinate sorting to map positions in 3D space.
    * @param {string} type - Category type ('shader' for shaders, or standard categories).
-   * @returns {Promise<Array>}
+   * @returns {Promise<Array<CabinetFile | CategoryItem>>}
    */
   async getCategoryFiles(type) {
     // Map 'shaders' category to 'shader' type for API
@@ -102,11 +112,11 @@ export class StorageAPI {
    * For everything else: hits `GET /api/songs/{id}`.
    * @param {string|number} id
    * @param {string} type - Category type, used to route to the correct endpoint.
-   * @returns {Promise<object>}
+   * @returns {Promise<NoteContent | Record<string, unknown> | null>}
    */
   async fetchFileContent(id, type) {
     if (type === "notes") {
-      return this.loadNote(id);
+      return this.loadNote(String(id));
     }
     let url;
     // Handle both 'shader' and 'shaders' type names
@@ -134,7 +144,7 @@ export class StorageAPI {
     const apiType = type === "shaders" ? "shader" : type;
 
     if (apiType === "notes") {
-      const data = await this.loadNote(id);
+      const data = await this.loadNote(String(id));
       if (!data)
         throw new Error(
           `StorageAPI getFileContent(${id}, ${type}) failed: note not found`,
@@ -195,7 +205,7 @@ export class StorageAPI {
   /**
    * List the contents of a directory on the Contabo VPS.
    * @param {string} path - Relative path under files_dir (e.g. 'audio/flac')
-   * @returns {Promise<Array<{name,path,type,size,modified,mime}>>}
+   * @returns {Promise<VpsEntry[]>}
    */
   async browseVPS(path = "") {
     const url = `${this.baseUrl}/api/vps/browse?path=${encodeURIComponent(path)}`;
@@ -212,7 +222,7 @@ export class StorageAPI {
   /**
    * Fetch the text content of a file on the VPS.
    * @param {string} path - Relative file path (e.g. 'sequencer/songs/foo.json')
-   * @returns {Promise<string>} file text content
+   * @returns {Promise<string | null>} file text content
    */
   async getVPSFile(path) {
     const url = `${this.baseUrl}/api/vps/file?path=${encodeURIComponent(path)}`;
@@ -239,8 +249,8 @@ export class StorageAPI {
    * Upload a File object to a directory on the VPS.
    * @param {File} file - The File to upload
    * @param {string} dirPath - Target directory relative path
-   * @param {Function} [onProgress] - Optional progress callback (0-100)
-   * @returns {Promise<{success,path,size}|null>}
+   * @param {((pct: number) => void) | null} [onProgress] - Optional progress callback (0-100)
+   * @returns {Promise<VpsWriteResult | null>}
    */
   async uploadVPSFile(file, dirPath = "", onProgress = null) {
     return new Promise((resolve) => {
@@ -289,7 +299,7 @@ export class StorageAPI {
    * Hits `POST /api/vps/save`.
    * @param {string} path - Relative file path
    * @param {string} content - New text content
-   * @returns {Promise<{success,path,size}|null>}
+   * @returns {Promise<VpsWriteResult | null>}
    */
   async saveVPSFile(path, content) {
     const url = `${this.baseUrl}/api/vps/save`;
@@ -312,7 +322,7 @@ export class StorageAPI {
    * Create a directory on the VPS.
    * Hits `POST /api/vps/mkdir`.
    * @param {string} path - Relative directory path to create
-   * @returns {Promise<{success,path}|null>}
+   * @returns {Promise<VpsWriteResult | null>}
    */
   async mkdirVPS(path) {
     const url = `${this.baseUrl}/api/vps/mkdir`;
@@ -336,7 +346,7 @@ export class StorageAPI {
    * Hits `POST /api/vps/rename`.
    * @param {string} path - Current relative path
    * @param {string} newPath - New relative path
-   * @returns {Promise<{success}|null>}
+   * @returns {Promise<VpsWriteResult | null>}
    */
   async renameVPSFile(path, newPath) {
     const url = `${this.baseUrl}/api/vps/rename`;
@@ -375,7 +385,7 @@ export class StorageAPI {
 
   /**
    * List all named notes on the backend.
-   * @returns {Promise<Array<{name: string, updated_at: string, size: number}>>}
+   * @returns {Promise<NoteMeta[]>}
    */
   async listNotes() {
     const url = `${this.baseUrl}/api/notes/list`;
@@ -392,7 +402,7 @@ export class StorageAPI {
   /**
    * Load a named note's content from the backend.
    * @param {string} noteName - The note name (no extension)
-   * @returns {Promise<{name: string, content: string, updated_at: string}|null>}
+   * @returns {Promise<NoteContent | null>}
    */
   async loadNote(noteName) {
     const url = `${this.baseUrl}/api/notes/read/${encodeURIComponent(noteName)}`;
@@ -411,7 +421,7 @@ export class StorageAPI {
    * Save (create or overwrite) a named note on the backend.
    * @param {string} noteName - The note name (no extension)
    * @param {string} content - The text content to save
-   * @returns {Promise<{success: boolean, name: string, size: number, updated_at: string}|null>}
+   * @returns {Promise<NoteSaveResult | null>}
    */
   async saveNote(noteName, content) {
     const url = `${this.baseUrl}/api/notes/write/${encodeURIComponent(noteName)}`;

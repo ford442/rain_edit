@@ -1,6 +1,9 @@
 import { monaco } from "./editor/setupMonaco.js";
-import { initMagneticRepulsion } from "./interactions/MagneticRepulsion.js";
-import { initMagnifierLens } from "./interactions/MagnifierLens.js";
+import { inputManager } from "./interactions/InputManager.js";
+import { initInteractions } from "./interactions/initInteractions.js";
+import { registerLensBindings } from "./interactions/lensBindings.js";
+
+const im = inputManager;
 
 
 // Holographic Depth Cursor Logic
@@ -78,16 +81,26 @@ document.addEventListener("mousemove", (e) => {
   }
 });
 
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Alt") {
+// Depth cursor is created by the Alt+wheel handler above; this binding tears it
+// down when Alt is released. allowInEditor so it still cleans up if focus moved.
+im.register({
+  id: "depth-cursor",
+  category: "depth",
+  description: "Alt + scroll depth cursor",
+  combo: { key: "Alt" },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onUp: () => {
     if (depthCursorEl) {
       depthCursorEl.remove();
       depthCursorEl = null;
     }
     document.body.classList.remove("depth-cursor-active");
-    const echoes = document.querySelectorAll(".echo-document");
-    echoes.forEach(doc => doc.classList.remove("depth-cursor-hit"));
-  }
+    document
+      .querySelectorAll(".echo-document")
+      .forEach((doc) => doc.classList.remove("depth-cursor-hit"));
+  },
 });
 
 window.addEventListener("blur", () => {
@@ -106,255 +119,254 @@ window.isCardShuffleActive = false;
 window.isDepthScanActive = false;
 window.__depthScanTarget = 0;
 
-document.addEventListener("keydown", (e) => {
-  // Card Shuffle Spread (Alt + Shift + D)
-  if (e.altKey && e.shiftKey && e.code === "KeyD") {
-    e.preventDefault();
+// Card Shuffle Spread (Alt + Shift + D)
+im.register({
+  id: "card-shuffle",
+  category: "reveal",
+  description: "Card shuffle spread (Alt+Shift+D)",
+  combo: { alt: true, shift: true, code: "KeyD" },
+  type: "hold",
+  onDown: () => {
     if (!window.isCardShuffleActive) {
       window.isCardShuffleActive = true;
       document.body.classList.add("card-shuffle-active");
     }
-  }
+  },
+  onUp: () => {
+    window.isCardShuffleActive = false;
+    document.body.classList.remove("card-shuffle-active");
+  },
+});
 
-  // Explode View (Ctrl + Alt + E)
-  if ((e.ctrlKey || e.metaKey) && e.altKey && e.code === "KeyE") {
-    e.preventDefault();
-    triggerExplodeView();
-    return;
-  }
+// Explode View (Ctrl/Cmd + Alt + E)
+im.register({
+  id: "explode-view",
+  category: "reveal",
+  description: "Explode view (Ctrl+Alt+E)",
+  combo: { ctrlOrMeta: true, alt: true, code: "KeyE" },
+  type: "action",
+  onDown: () => window.triggerExplodeView(),
+});
 
-  // Innovate: Focus Pull Interaction (Alt + F)
-  if (e.altKey && e.code === "KeyF" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-    e.preventDefault();
-    if (!document.body.classList.contains("focus-pull-active")) {
-      document.body.classList.add("focus-pull-active");
-    }
-  }
+// Focus Pull Interaction (Alt + F)
+im.register({
+  id: "focus-pull",
+  category: "depth",
+  description: "Focus pull (Alt+F)",
+  combo: { alt: true, code: "KeyF" },
+  type: "hold",
+  group: "reveal",
+  onDown: () => document.body.classList.add("focus-pull-active"),
+  onUp: () => document.body.classList.remove("focus-pull-active"),
+});
 
-  // Innovate: Sonar Pulse Reveal (Alt + O)
-  if (e.altKey && e.code === "KeyO" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-    e.preventDefault();
-    if (!document.body.classList.contains("sonar-pulse-active")) {
-      document.body.classList.add("sonar-pulse-active");
-    }
-  }
+// Sonar Pulse Reveal (Alt + O)
+im.register({
+  id: "sonar-pulse",
+  category: "reveal",
+  description: "Sonar pulse reveal (Alt+O)",
+  combo: { alt: true, code: "KeyO" },
+  type: "hold",
+  onDown: () => document.body.classList.add("sonar-pulse-active"),
+  onUp: () => document.body.classList.remove("sonar-pulse-active"),
+});
 
-  // Innovate: Prismatic Depth Separation (Alt + U)
-  if (e.altKey && e.code === "KeyU" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-    e.preventDefault();
-    if (!document.body.classList.contains("prism-depth-active")) {
-      document.body.classList.add("prism-depth-active");
-    }
-  }
+// Prismatic Depth Separation (Alt + U)
+im.register({
+  id: "prism-depth",
+  category: "depth",
+  description: "Prismatic depth separation (Alt+U)",
+  combo: { alt: true, code: "KeyU" },
+  type: "hold",
+  onDown: () => document.body.classList.add("prism-depth-active"),
+  onUp: () => document.body.classList.remove("prism-depth-active"),
+});
 
-  // Depth X-Ray Scan (Alt + Z)
-  if (e.altKey && e.code === "KeyZ" && !e.ctrlKey && !e.shiftKey) {
-    e.preventDefault();
-    if (!window.isDepthScanActive) {
-      window.isDepthScanActive = true;
-      document.body.classList.add("depth-scan-active");
-
-      // Start scanning animation
-      window.__depthScanTarget = 0;
-      const animateScan = () => {
-        if (!window.isDepthScanActive) return;
-
-        window.__depthScanTarget = (window.__depthScanTarget + 0.1) % 15; // Assuming max depth ~15
-        document.body.style.setProperty("--scan-depth", window.__depthScanTarget);
-
-        if (window.echoLayerEl) {
-          const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
-          echoes.forEach((doc) => {
-            const idx = parseInt(doc.dataset.index || 0, 10);
-            const dist = Math.abs(idx - window.__depthScanTarget);
-
-            if (dist < 1.5) {
-              doc.classList.add("scan-highlight");
-            } else {
-              doc.classList.remove("scan-highlight");
-            }
-          });
-        }
-
-        requestAnimationFrame(animateScan);
-      };
+// Depth X-Ray Scan (Alt + Z)
+im.register({
+  id: "depth-scan",
+  category: "depth",
+  description: "Depth x-ray scan (Alt+Z)",
+  combo: { alt: true, code: "KeyZ" },
+  type: "hold",
+  onDown: () => {
+    if (window.isDepthScanActive) return;
+    window.isDepthScanActive = true;
+    document.body.classList.add("depth-scan-active");
+    window.__depthScanTarget = 0;
+    const animateScan = () => {
+      if (!window.isDepthScanActive) return;
+      window.__depthScanTarget = (window.__depthScanTarget + 0.1) % 15;
+      document.body.style.setProperty("--scan-depth", window.__depthScanTarget);
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          const idx = parseInt(doc.dataset.index || 0, 10);
+          const dist = Math.abs(idx - window.__depthScanTarget);
+          if (dist < 1.5) doc.classList.add("scan-highlight");
+          else doc.classList.remove("scan-highlight");
+        });
+      }
       requestAnimationFrame(animateScan);
+    };
+    requestAnimationFrame(animateScan);
+  },
+  onUp: () => {
+    window.isDepthScanActive = false;
+    document.body.classList.remove("depth-scan-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl
+        .querySelectorAll(".echo-document")
+        .forEach((doc) => doc.classList.remove("scan-highlight"));
     }
-    return;
-  }
+  },
+});
 
-  // Depth Lens (Ctrl + Alt + Z)
-  if (e.ctrlKey && e.altKey && e.code === "KeyZ") {
-    e.preventDefault();
-    document.body.classList.toggle("depth-lens-active");
-
-    // Create lens element if it doesn't exist
+// Depth Lens (Ctrl + Alt + Z)
+im.register({
+  id: "depth-lens",
+  category: "lens",
+  description: "Depth lens (Ctrl+Alt+Z)",
+  combo: { ctrl: true, alt: true, code: "KeyZ" },
+  type: "toggle",
+  onDown: () => {
+    document.body.classList.add("depth-lens-active");
     if (!document.getElementById("depth-lens-element")) {
       const lens = document.createElement("div");
       lens.id = "depth-lens-element";
       document.body.appendChild(lens);
     }
-
-    // Clean up focus state if deactivating
-    if (!document.body.classList.contains("depth-lens-active")) {
-      document.querySelectorAll(".depth-lens-focus").forEach(el => el.classList.remove("depth-lens-focus"));
-    }
-    return;
-  }
-
-  // Document Fanning (Alt + C)
-  if (e.altKey && e.code === "KeyC") {
-    if (!isFanningActive) {
-      isFanningActive = true;
-      document.body.classList.add("fanning-active");
-
-      if (echoLayerEl) {
-        const echoes = echoLayerEl.querySelectorAll(
-          ".echo-document:not(.peek)",
-        );
-        const total = echoes.length;
-        if (total > 0) {
-          const maxAngle = Math.min(120, total * 15); // max spread 120deg
-          const startAngle = -maxAngle / 2;
-          const angleStep = total > 1 ? maxAngle / (total - 1) : 0;
-          const radius = 600; // Radius of the fanning arc
-
-          echoes.forEach((echo, index) => {
-            const angleDeg = startAngle + index * angleStep;
-            const angleRad = (angleDeg * Math.PI) / 180;
-            const tx = Math.sin(angleRad) * radius;
-            // Negative ty to push them slightly upwards forming an arch
-            const ty = -Math.cos(angleRad) * radius + radius * 0.8;
-
-            // Optional: push them a bit forward to pop them
-            const tz = 100 + index * 5;
-
-            echo.style.setProperty("--fan-tx", `${tx}px`);
-            echo.style.setProperty("--fan-ty", `${ty}px`);
-            echo.style.setProperty("--fan-tz", `${tz}px`);
-            echo.style.setProperty("--fan-rot-z", `${angleDeg}deg`);
-          });
-        }
-      }
-    }
-    e.preventDefault();
-    return;
-  }
-
-  // Holographic Portal Mode (Alt + P)
-  if (e.altKey && e.code === "KeyP") {
-    isPortalModeActive = !isPortalModeActive;
-    if (portalToggle) portalToggle.checked = isPortalModeActive;
-    if (isPortalModeActive) {
-      document.body.classList.add("portal-mode-active");
-    } else {
-      document.body.classList.remove("portal-mode-active");
-    }
-    e.preventDefault();
-    return;
-  }
-
-  // Hyper-Jump
-  if (e.altKey && e.shiftKey && e.key === "J") {
-    if (!document.body.classList.contains("hyper-jump-active")) {
-      document.body.classList.add("hyper-jump-active");
-      setTimeout(
-        () => document.body.classList.remove("hyper-jump-active"),
-        1000,
-      );
-    }
-    e.preventDefault();
-    return;
-  }
-
-  if (e.altKey && e.shiftKey) {
-    if (!isPeelActive) {
-      isPeelActive = true;
-      document.body.classList.add("peel-active");
-    }
-  }
+  },
+  onUp: () => {
+    document.body.classList.remove("depth-lens-active");
+    document
+      .querySelectorAll(".depth-lens-focus")
+      .forEach((el) => el.classList.remove("depth-lens-focus"));
+  },
 });
 
-document.addEventListener("keyup", (e) => {
-  // Innovate: Focus Pull Interaction (Alt + F)
-  if (e.key === "f" || e.key === "F" || e.key === "Alt") {
-    document.body.classList.remove("focus-pull-active");
-  }
-
-  // Innovate: Sonar Pulse Reveal (Alt + O)
-  if (e.key === "o" || e.key === "O" || e.key === "Alt") {
-    document.body.classList.remove("sonar-pulse-active");
-  }
-
-  // Innovate: Prismatic Depth Separation (Alt + U)
-  if (e.key === "u" || e.key === "U" || e.key === "Alt") {
-    document.body.classList.remove("prism-depth-active");
-  }
-
-  if (e.key === "c" || e.key === "C" || e.key === "Alt") {
-    if (isFanningActive && (!e.altKey || (e.code === "KeyC" && !e.altKey))) {
-      isFanningActive = false;
-      document.body.classList.remove("fanning-active");
-      if (echoLayerEl) {
-        const echoes = echoLayerEl.querySelectorAll(".echo-document");
-        echoes.forEach((echo) => {
-          echo.style.removeProperty("--fan-tx");
-          echo.style.removeProperty("--fan-ty");
-          echo.style.removeProperty("--fan-tz");
-          echo.style.removeProperty("--fan-rot-z");
+// Document Fanning (Alt + C)
+im.register({
+  id: "fanning",
+  category: "reveal",
+  description: "Document fanning (Alt+C)",
+  combo: { alt: true, code: "KeyC" },
+  type: "hold",
+  onDown: () => {
+    if (window.isFanningActive) return;
+    window.isFanningActive = true;
+    document.body.classList.add("fanning-active");
+    if (echoLayerEl) {
+      const echoes = echoLayerEl.querySelectorAll(".echo-document:not(.peek)");
+      const total = echoes.length;
+      if (total > 0) {
+        const maxAngle = Math.min(120, total * 15);
+        const startAngle = -maxAngle / 2;
+        const angleStep = total > 1 ? maxAngle / (total - 1) : 0;
+        const radius = 600;
+        echoes.forEach((echo, index) => {
+          const angleDeg = startAngle + index * angleStep;
+          const angleRad = (angleDeg * Math.PI) / 180;
+          const tx = Math.sin(angleRad) * radius;
+          const ty = -Math.cos(angleRad) * radius + radius * 0.8;
+          const tz = 100 + index * 5;
+          echo.style.setProperty("--fan-tx", `${tx}px`);
+          echo.style.setProperty("--fan-ty", `${ty}px`);
+          echo.style.setProperty("--fan-tz", `${tz}px`);
+          echo.style.setProperty("--fan-rot-z", `${angleDeg}deg`);
         });
       }
     }
-  }
-
-  if (e.key === "Shift") {
-    if (echoLayerEl && window.__lensActive) {
-      const echoes = echoLayerEl.querySelectorAll(".echo-document");
-      echoes.forEach((echo) => {
-        echo.style.setProperty("--lens-pull", 0);
-        echo.classList.remove("shift-lens-hit");
+  },
+  onUp: () => {
+    window.isFanningActive = false;
+    document.body.classList.remove("fanning-active");
+    if (echoLayerEl) {
+      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
+        echo.style.removeProperty("--fan-tx");
+        echo.style.removeProperty("--fan-ty");
+        echo.style.removeProperty("--fan-tz");
+        echo.style.removeProperty("--fan-rot-z");
       });
-      window.__lensActive = false;
     }
-  }
+  },
+});
 
-  if (e.key === "Alt" || e.key === "Shift") {
-    if (!e.altKey || !e.shiftKey) {
-      isPeelActive = false;
-      document.body.classList.remove("peel-active");
+// Holographic Portal Mode (Alt + P)
+im.register({
+  id: "portal-mode",
+  category: "reveal",
+  description: "Holographic portal mode (Alt+P)",
+  combo: { alt: true, code: "KeyP" },
+  type: "toggle",
+  onDown: () => {
+    window.isPortalModeActive = true;
+    if (portalToggle) portalToggle.checked = true;
+    document.body.classList.add("portal-mode-active");
+  },
+  onUp: () => {
+    window.isPortalModeActive = false;
+    if (portalToggle) portalToggle.checked = false;
+    document.body.classList.remove("portal-mode-active");
+  },
+});
 
-      if (
-        echoLayerEl &&
-        typeof tabManager !== "undefined" &&
-        !tabManager.isCascadeView &&
-        !tabManager.isOrbitView &&
-        !tabManager.isSolarSystemView &&
-        !tabManager.isScatteredView &&
-        !tabManager.isIsometricView &&
-        !tabManager.isStackView &&
-        !tabManager.isTunnelView &&
-        !tabManager.isGridView &&
-        !tabManager.isHelixView &&
-        !tabManager.isPinboardView &&
-        !tabManager.isVortexView &&
-        !tabManager.isConstellationView &&
-        !tabManager.isPrismView &&
-        !tabManager.isCoverflowView &&
-        !tabManager.isWaveView &&
-        !tabManager.isSphereView &&
-        !tabManager.isMatrixRainView
-      ) {
-        const echoes = echoLayerEl.querySelectorAll(".echo-document");
-        echoes.forEach((echo) => {
-          echo.style.removeProperty("transform");
-          echo.style.setProperty(
-            "--tz-val",
-            echo.style.getPropertyValue("--tz"),
-          );
-        });
-      }
+// Hyper-Jump (Alt + Shift + J)
+im.register({
+  id: "hyper-jump",
+  category: "effects",
+  description: "Hyper jump (Alt+Shift+J)",
+  combo: { alt: true, shift: true, code: "KeyJ" },
+  type: "action",
+  onDown: () => {
+    if (!document.body.classList.contains("hyper-jump-active")) {
+      document.body.classList.add("hyper-jump-active");
+      setTimeout(() => document.body.classList.remove("hyper-jump-active"), 1000);
     }
-  }
+  },
+});
+
+// Peel (reassigned from the old Alt+Shift catch-all to Alt+Shift+Q to end the
+// collision with every other Alt+Shift combo).
+im.register({
+  id: "peel",
+  category: "reveal",
+  description: "Peel layers (Alt+Shift+Q)",
+  combo: { alt: true, shift: true, code: "KeyQ" },
+  type: "hold",
+  onDown: () => {
+    window.isPeelActive = true;
+    document.body.classList.add("peel-active");
+  },
+  onUp: () => {
+    window.isPeelActive = false;
+    document.body.classList.remove("peel-active");
+    if (
+      echoLayerEl &&
+      typeof tabManager !== "undefined" &&
+      !tabManager.isCascadeView &&
+      !tabManager.isOrbitView &&
+      !tabManager.isSolarSystemView &&
+      !tabManager.isScatteredView &&
+      !tabManager.isIsometricView &&
+      !tabManager.isStackView &&
+      !tabManager.isTunnelView &&
+      !tabManager.isGridView &&
+      !tabManager.isHelixView &&
+      !tabManager.isPinboardView &&
+      !tabManager.isVortexView &&
+      !tabManager.isConstellationView &&
+      !tabManager.isPrismView &&
+      !tabManager.isCoverflowView &&
+      !tabManager.isWaveView &&
+      !tabManager.isSphereView &&
+      !tabManager.isMatrixRainView
+    ) {
+      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
+        echo.style.removeProperty("transform");
+        echo.style.setProperty("--tz-val", echo.style.getPropertyValue("--tz"));
+      });
+    }
+  },
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -380,18 +392,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Ripple Wave Hover Interaction (Alt + R)
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.key.toLowerCase() === "r" && !e.shiftKey && !e.ctrlKey) {
-    if (!document.body.classList.contains("ripple-wave-active")) {
-      document.body.classList.add("ripple-wave-active");
-    }
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key.toLowerCase() === "r" || !e.altKey) {
-    document.body.classList.remove("ripple-wave-active");
-  }
+im.register({
+  id: "ripple-wave",
+  category: "effects",
+  description: "Ripple wave hover (Alt+R)",
+  combo: { alt: true, code: "KeyR" },
+  type: "hold",
+  preventDefault: false,
+  onDown: () => document.body.classList.add("ripple-wave-active"),
+  onUp: () => document.body.classList.remove("ripple-wave-active"),
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -401,182 +410,177 @@ document.addEventListener("mousemove", (e) => {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  if (
-    e.altKey &&
-    e.code === "KeyT" &&
-    !e.shiftKey &&
-    !e.ctrlKey &&
-    !e.metaKey
-  ) {
+// Fabric Tear (Alt + T) — merges the old class toggle with the tear sound that
+// lived in a duplicate Alt+T listener in main_init_3.
+im.register({
+  id: "fabric-tear",
+  category: "reveal",
+  description: "Fabric tear (Alt+T)",
+  combo: { alt: true, code: "KeyT" },
+  type: "hold",
+  preventDefault: false,
+  onDown: () => {
     if (!document.body.classList.contains("fabric-tear-active")) {
       document.body.classList.add("fabric-tear-active");
+      if (typeof window.playTearSound === "function") window.playTearSound();
     }
-  }
+  },
+  onUp: () => {
+    document.body.classList.remove("fabric-tear-active");
+    if (editorEl) editorEl.style.removeProperty("--tear-mask");
+  },
+});
 
-  if (e.altKey && e.shiftKey && e.code === "KeyS") {
-    e.preventDefault();
-    document.body.classList.toggle("depth-spotlight-active");
-  }
-  if (e.altKey && e.shiftKey && e.code === "KeyH") {
-    e.preventDefault();
-    document.body.classList.toggle("hologram-preview-active");
-  }
-  if (e.altKey && e.shiftKey && e.code === "KeyF") {
-    e.preventDefault();
-    document.body.classList.add("focus-torch-active");
-  }
+// Depth Spotlight (Alt + Shift + S)
+im.register({
+  id: "depth-spotlight",
+  category: "reveal",
+  description: "Depth spotlight (Alt+Shift+S)",
+  combo: { alt: true, shift: true, code: "KeyS" },
+  type: "toggle",
+  onDown: () => document.body.classList.add("depth-spotlight-active"),
+  onUp: () => document.body.classList.remove("depth-spotlight-active"),
+});
 
-  // Venetian Blinds Interaction (Alt + Shift + B)
-  if (e.altKey && e.shiftKey && e.code === "KeyB") {
-    e.preventDefault();
+// Hologram Preview (Alt + Shift + H)
+im.register({
+  id: "hologram-preview",
+  category: "reveal",
+  description: "Hologram preview (Alt+Shift+H)",
+  combo: { alt: true, shift: true, code: "KeyH" },
+  type: "toggle",
+  onDown: () => document.body.classList.add("hologram-preview-active"),
+  onUp: () => document.body.classList.remove("hologram-preview-active"),
+});
+
+// Focus Torch (Alt + Shift + F)
+im.register({
+  id: "focus-torch",
+  category: "reveal",
+  description: "Focus torch (Alt+Shift+F)",
+  combo: { alt: true, shift: true, code: "KeyF" },
+  type: "hold",
+  onDown: () => document.body.classList.add("focus-torch-active"),
+  onUp: () => document.body.classList.remove("focus-torch-active"),
+});
+
+// Venetian Blinds (Alt + Shift + B)
+im.register({
+  id: "venetian-blinds",
+  category: "reveal",
+  description: "Venetian blinds (Alt+Shift+B)",
+  combo: { alt: true, shift: true, code: "KeyB" },
+  type: "hold",
+  onDown: () => {
     if (!window.isVenetianBlindsActive) {
       window.isVenetianBlindsActive = true;
       document.body.classList.add("venetian-blinds-interaction-active");
     }
-  }
+  },
+  onUp: () => {
+    window.isVenetianBlindsActive = false;
+    document.body.classList.remove("venetian-blinds-interaction-active");
+  },
+});
 
-  // Stepped Crater Reveal (Alt + Shift + C)
-  if (e.altKey && e.shiftKey && e.code === "KeyC") {
-    e.preventDefault();
+// Stepped Crater Reveal (Alt + Shift + C)
+im.register({
+  id: "stepped-crater",
+  category: "reveal",
+  description: "Stepped crater reveal (Alt+Shift+C)",
+  combo: { alt: true, shift: true, code: "KeyC" },
+  type: "hold",
+  onDown: () => {
     if (!window.isSteppedCraterActive) {
       window.isSteppedCraterActive = true;
       document.body.classList.add("stepped-crater-active");
     }
-  }
-
-  // Fold-out Gallery Interaction (Alt + Shift + G)
-  if (e.altKey && e.shiftKey && e.code === "KeyG") {
-    e.preventDefault();
-    if (!window.isFoldOutGalleryActive) {
-      window.isFoldOutGalleryActive = true;
-      document.body.classList.add("fold-out-gallery-active");
-
-      if (window.echoLayerEl) {
-        const echoes = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
-        const total = echoes.length;
-        echoes.forEach((doc, i) => {
-          // Spread logic: even indices go right, odd indices go left
-          const isRight = i % 2 === 0;
-          const spreadIndex = Math.floor(i / 2) + 1;
-          const xOffset = spreadIndex * 350; // Horizontal spacing
-
-          const tx = isRight ? xOffset : -xOffset;
-          const ty = (i * 10) - (total * 5); // Slight vertical arc
-          const tz = -100 - (spreadIndex * 50); // Push further ones back slightly
-          const ry = isRight ? -15 : 15; // Angle them inwards
-
-          doc.style.setProperty("--fold-tx", `${tx}px`);
-          doc.style.setProperty("--fold-ty", `${ty}px`);
-          doc.style.setProperty("--fold-tz", `${tz}px`);
-          doc.style.setProperty("--fold-ry", `${ry}deg`);
-        });
-      }
+  },
+  onUp: () => {
+    window.isSteppedCraterActive = false;
+    document.body.classList.remove("stepped-crater-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl
+        .querySelectorAll(".echo-document")
+        .forEach((doc) => doc.style.removeProperty("--crater-radius"));
     }
-  }
-  // Matrix Dissolve Reveal (Alt+Y)
-  if (e.altKey && e.code === "KeyY" && !e.shiftKey) {
-    e.preventDefault();
-    document.body.classList.add("matrix-dissolve-active");
-  }
-
-  // Holographic Document Dispersion (Alt+X)
-  if (e.altKey && e.code === "KeyX" && !e.shiftKey) {
-    e.preventDefault();
-    document.body.classList.add("dispersion-active");
-  }
-
-  // Holographic Curtain Pull (Alt+P)
-  if (e.altKey && e.code === "KeyP" && !e.shiftKey) {
-    e.preventDefault();
-    document.body.classList.add("curtain-pull-active");
-  }
+  },
 });
 
-document.addEventListener("keyup", (e) => {
-  // Matrix Dissolve Reveal (Alt+Y)
-  if (e.key === "y" || e.key === "Y" || e.key === "Alt") {
-    document.body.classList.remove("matrix-dissolve-active");
-  }
-
-  // Depth X-Ray Scan (Alt + Z)
-  if (e.key === "z" || e.key === "Z" || e.key === "Alt") {
-    if (window.isDepthScanActive && (!e.altKey || e.code === "KeyZ")) {
-      window.isDepthScanActive = false;
-      document.body.classList.remove("depth-scan-active");
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
-          doc.classList.remove("scan-highlight");
-        });
-      }
+// Fold-out Gallery (Alt + Shift + G)
+im.register({
+  id: "fold-out-gallery",
+  category: "reveal",
+  description: "Fold-out gallery (Alt+Shift+G)",
+  combo: { alt: true, shift: true, code: "KeyG" },
+  type: "hold",
+  onDown: () => {
+    if (window.isFoldOutGalleryActive) return;
+    window.isFoldOutGalleryActive = true;
+    document.body.classList.add("fold-out-gallery-active");
+    if (window.echoLayerEl) {
+      const echoes = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
+      const total = echoes.length;
+      echoes.forEach((doc, i) => {
+        const isRight = i % 2 === 0;
+        const spreadIndex = Math.floor(i / 2) + 1;
+        const xOffset = spreadIndex * 350;
+        const tx = isRight ? xOffset : -xOffset;
+        const ty = i * 10 - total * 5;
+        const tz = -100 - spreadIndex * 50;
+        const ry = isRight ? -15 : 15;
+        doc.style.setProperty("--fold-tx", `${tx}px`);
+        doc.style.setProperty("--fold-ty", `${ty}px`);
+        doc.style.setProperty("--fold-tz", `${tz}px`);
+        doc.style.setProperty("--fold-ry", `${ry}deg`);
+      });
     }
-  }
-
-  // Holographic Document Dispersion (Alt+X)
-  if (e.key === "x" || e.key === "X" || e.key === "Alt") {
-    document.body.classList.remove("dispersion-active");
-  }
-
-  // Holographic Curtain Pull (Alt+P)
-  if (e.key === "p" || e.key === "P" || e.key === "Alt") {
-    document.body.classList.remove("curtain-pull-active");
-  }
-
-  if (e.key === "t" || e.key === "T" || e.key === "Alt") {
-    document.body.classList.remove("fabric-tear-active");
-    if (editorEl) {
-      editorEl.style.removeProperty("--tear-mask");
+  },
+  onUp: () => {
+    window.isFoldOutGalleryActive = false;
+    document.body.classList.remove("fold-out-gallery-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+        doc.style.removeProperty("--fold-tx");
+        doc.style.removeProperty("--fold-ty");
+        doc.style.removeProperty("--fold-tz");
+        doc.style.removeProperty("--fold-ry");
+      });
     }
-  }
+  },
+});
 
-  if (e.key === "f" || e.key === "F" || e.key === "Alt" || e.key === "Shift") {
-    document.body.classList.remove("focus-torch-active");
-  }
+// Matrix Dissolve Reveal (Alt + Y)
+im.register({
+  id: "matrix-dissolve",
+  category: "reveal",
+  description: "Matrix dissolve reveal (Alt+Y)",
+  combo: { alt: true, code: "KeyY" },
+  type: "hold",
+  onDown: () => document.body.classList.add("matrix-dissolve-active"),
+  onUp: () => document.body.classList.remove("matrix-dissolve-active"),
+});
 
-  if (e.key === "b" || e.key === "B" || e.key === "Alt" || e.key === "Shift") {
-    if (window.isVenetianBlindsActive && (!e.altKey || !e.shiftKey || e.code === "KeyB")) {
-      window.isVenetianBlindsActive = false;
-      document.body.classList.remove("venetian-blinds-interaction-active");
-    }
-  }
+// Holographic Document Dispersion (Alt + X)
+im.register({
+  id: "dispersion",
+  category: "reveal",
+  description: "Holographic dispersion (Alt+X)",
+  combo: { alt: true, code: "KeyX" },
+  type: "hold",
+  onDown: () => document.body.classList.add("dispersion-active"),
+  onUp: () => document.body.classList.remove("dispersion-active"),
+});
 
-  if (e.key === "c" || e.key === "C" || e.key === "Alt" || e.key === "Shift") {
-    if (window.isSteppedCraterActive && (!e.altKey || !e.shiftKey || e.code === "KeyC")) {
-      window.isSteppedCraterActive = false;
-      document.body.classList.remove("stepped-crater-active");
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
-          doc.style.removeProperty("--crater-radius");
-        });
-      }
-    }
-  }
-
-  if (e.key === "g" || e.key === "G" || e.key === "Alt" || e.key === "Shift") {
-    if (window.isFoldOutGalleryActive && (!e.altKey || !e.shiftKey || e.code === "KeyG")) {
-      window.isFoldOutGalleryActive = false;
-      document.body.classList.remove("fold-out-gallery-active");
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
-          doc.style.removeProperty("--fold-tx");
-          doc.style.removeProperty("--fold-ty");
-          doc.style.removeProperty("--fold-tz");
-          doc.style.removeProperty("--fold-ry");
-        });
-      }
-    }
-  }
-
-  if (e.key === "d" || e.key === "D" || e.key === "Alt" || e.key === "Shift") {
-    if (window.isCardShuffleActive && (!e.altKey || !e.shiftKey || e.code === "KeyD")) {
-      window.isCardShuffleActive = false;
-      document.body.classList.remove("card-shuffle-active");
-    }
-  }
-
-  if (e.key === "s" || e.key === "S" || e.key === "Alt" || e.key === "Shift") {
-    document.body.classList.remove("holographic-slice-active");
-  }
+// Holographic Curtain Pull — reassigned Alt+P -> Alt+Shift+P (Alt+P is portal mode).
+im.register({
+  id: "curtain-pull",
+  category: "reveal",
+  description: "Holographic curtain pull (Alt+Shift+P)",
+  combo: { alt: true, shift: true, code: "KeyP" },
+  type: "hold",
+  onDown: () => document.body.classList.add("curtain-pull-active"),
+  onUp: () => document.body.classList.remove("curtain-pull-active"),
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -702,29 +706,41 @@ document.addEventListener("mousemove", (e) => {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Shift" && !document.body.classList.contains("x-ray-active")) {
-    document.body.classList.add("quantum-depth-active");
-  }
+// Quantum Depth (hold Shift, unless x-ray lens is up)
+im.register({
+  id: "quantum-depth",
+  category: "depth",
+  description: "Quantum depth inspect (hold Shift)",
+  combo: { key: "Shift" },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  when: () => !document.body.classList.contains("x-ray-active"),
+  onDown: () => document.body.classList.add("quantum-depth-active"),
+  onUp: () => {
+    document.body.classList.remove("quantum-depth-active");
+    document.body.removeAttribute("data-active-depth");
+  },
 });
 
 // Peel Reveal logic
 let isPeeling = false;
 
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.shiftKey && e.key.toLowerCase() === "v" && !e.ctrlKey && !e.metaKey) {
-    e.preventDefault();
+im.register({
+  id: "peel-reveal",
+  category: "reveal",
+  description: "Peel reveal (Alt+Shift+V, then drag)",
+  combo: { alt: true, shift: true, code: "KeyV" },
+  type: "hold",
+  onDown: () => {
     document.body.classList.add("peel-reveal-active");
     document.body.style.setProperty("--peel-x", `100vw`);
     document.body.style.setProperty("--peel-y", `0px`);
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key.toLowerCase() === "v" || e.key === "Alt" || e.key === "Shift") {
+  },
+  onUp: () => {
     document.body.classList.remove("peel-reveal-active");
     isPeeling = false;
-  }
+  },
 });
 
 document.addEventListener("mousedown", (e) => {
@@ -750,24 +766,8 @@ document.addEventListener("mouseup", () => {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.key.toLowerCase() === "m") {
-    e.preventDefault();
-    document.body.classList.add("magnetic-pulse-active");
-
-    // Play a ripple effect or sound if available, otherwise just remove class after animation
-    setTimeout(() => {
-      document.body.classList.remove("magnetic-pulse-active");
-    }, 600); // 600ms matching CSS transition/animation
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Shift") {
-    document.body.classList.remove("quantum-depth-active");
-    document.body.removeAttribute("data-active-depth");
-  }
-});
+// (Removed duplicate Alt+M "magnetic pulse" — Alt+M is the magnifier lens.
+// quantum-depth release is handled by the quantum-depth binding's onUp above.)
 
 document.addEventListener("mousemove", (e) => {
   if (document.body.classList.contains("quantum-depth-active")) {
@@ -789,28 +789,23 @@ document.addEventListener("mousemove", (e) => {
   }
 });
 
-document.addEventListener("keydown", (e) => {
-  if (
-    e.key.toLowerCase() === "b" &&
-    !e.ctrlKey &&
-    !e.metaKey &&
-    !e.altKey &&
-    document.activeElement.tagName !== "TEXTAREA" &&
-    document.activeElement.tagName !== "INPUT"
-  ) {
-    document.body.classList.add("depth-beam-active");
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key.toLowerCase() === "b") {
+// Depth Beam (hold B) — guarded so it never fires while typing.
+im.register({
+  id: "depth-beam",
+  category: "depth",
+  description: "Depth beam (hold B)",
+  combo: { key: "b" },
+  type: "hold",
+  preventDefault: false,
+  onDown: () => document.body.classList.add("depth-beam-active"),
+  onUp: () => {
     document.body.classList.remove("depth-beam-active");
     if (echoLayerEl) {
-      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
-        echo.classList.remove("depth-beam-intersect");
-      });
+      echoLayerEl
+        .querySelectorAll(".echo-document")
+        .forEach((echo) => echo.classList.remove("depth-beam-intersect"));
     }
-  }
+  },
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -861,14 +856,19 @@ document.addEventListener("wheel", (e) => {
 
 // Depth Slicer Logic (Alt + Scroll)
 window.__depthSliceIndex = 0;
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Alt") {
+im.register({
+  id: "depth-slice",
+  category: "depth",
+  description: "Depth slicer (hold Alt + scroll)",
+  combo: { key: "Alt" },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onDown: () => {
     document.body.classList.add("depth-slice-active");
     updateDepthSlicer();
-  }
-});
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Alt") {
+  },
+  onUp: () => {
     document.body.classList.remove("depth-slice-active");
     if (window.echoLayerEl) {
       window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
@@ -876,7 +876,7 @@ document.addEventListener("keyup", (e) => {
         doc.classList.remove("depth-slice-focus");
       });
     }
-  }
+  },
 });
 
 document.addEventListener("wheel", (e) => {
@@ -909,9 +909,14 @@ function updateDepthSlicer() {
   }
 }
 
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.code === "KeyJ" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-    e.preventDefault();
+// Pulse Wave (Alt + J)
+im.register({
+  id: "pulse-wave",
+  category: "effects",
+  description: "Pulse wave (Alt+J)",
+  combo: { alt: true, code: "KeyJ" },
+  type: "action",
+  onDown: () => {
     document.body.classList.add("pulse-wave-active");
     if (window.echoLayerEl) {
       window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
@@ -919,39 +924,33 @@ document.addEventListener("keydown", (e) => {
         doc.style.setProperty("--pulse-delay", `${index * 0.1}s`);
       });
     }
-
-    // Remove class after animation finishes
-    setTimeout(() => {
-      document.body.classList.remove("pulse-wave-active");
-    }, 1500); // Wait long enough for wave to pass through layers
-  }
+    setTimeout(() => document.body.classList.remove("pulse-wave-active"), 1500);
+  },
 });
 
-// Interactive Drawer Peek logic
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Shift") {
-    document.body.classList.add("drawer-peek-ready");
-  }
+// Interactive Drawer Peek (hold Shift)
+im.register({
+  id: "drawer-peek",
+  category: "navigation",
+  description: "Drawer peek (hold Shift)",
+  combo: { key: "Shift" },
+  type: "hold",
+  preventDefault: false,
+  allowInEditor: true,
+  onDown: () => document.body.classList.add("drawer-peek-ready"),
+  onUp: () => document.body.classList.remove("drawer-peek-ready"),
 });
 
-document.addEventListener("keyup", (e) => {
-  if (e.key === "Shift") {
-    document.body.classList.remove("drawer-peek-ready");
-  }
-});
-
-// Layer Isolate Logic (Hold 'I')
-document.addEventListener("keydown", (e) => {
-  if (e.key === "i" || e.key === "I") {
-    // Only trigger if not typing in an input or textarea
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.classList.contains("monaco-editor")) return;
-    document.body.classList.add("layer-isolate-active");
-  }
-});
-document.addEventListener("keyup", (e) => {
-  if (e.key === "i" || e.key === "I") {
-    document.body.classList.remove("layer-isolate-active");
-  }
+// Layer Isolate (hold I) — guarded against editor typing.
+im.register({
+  id: "layer-isolate",
+  category: "depth",
+  description: "Layer isolate (hold I)",
+  combo: { key: "i" },
+  type: "hold",
+  preventDefault: false,
+  onDown: () => document.body.classList.add("layer-isolate-active"),
+  onUp: () => document.body.classList.remove("layer-isolate-active"),
 });
 
 // Echo Typing Ripple
@@ -972,27 +971,27 @@ document.addEventListener("keydown", (e) => {
 });
 
 // Obscured Layer Magnifier (Alt+M) / Magnetic Separation (Alt+Shift+M)
-initMagnifierLens({ eventTarget: document, body: document.body });
-initMagneticRepulsion({ eventTarget: document, body: document.body });
+registerLensBindings(im);
 
 // X-Ray Lens Interaction (Ctrl+Alt+X toggle)
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.altKey && e.code === "KeyX" && !e.shiftKey && !e.metaKey) {
-    e.preventDefault();
-    document.body.classList.toggle("xray-lens-active");
-
-    // Set initial local coordinates if activating
-    if (document.body.classList.contains("xray-lens-active")) {
-       const echoLayer = document.getElementById("echo-layer");
-       if (echoLayer) {
-         echoLayer.querySelectorAll(".echo-document").forEach((doc) => {
-             const rect = doc.getBoundingClientRect();
-             doc.style.setProperty("--xray-local-x", `${e.clientX - rect.left}px`);
-             doc.style.setProperty("--xray-local-y", `${e.clientY - rect.top}px`);
-         });
-       }
+im.register({
+  id: "xray-lens",
+  category: "lens",
+  description: "X-ray lens (Ctrl+Alt+X)",
+  combo: { ctrl: true, alt: true, code: "KeyX" },
+  type: "toggle",
+  onDown: (e) => {
+    document.body.classList.add("xray-lens-active");
+    const echoLayer = document.getElementById("echo-layer");
+    if (echoLayer) {
+      echoLayer.querySelectorAll(".echo-document").forEach((doc) => {
+        const rect = doc.getBoundingClientRect();
+        doc.style.setProperty("--xray-local-x", `${e.clientX - rect.left}px`);
+        doc.style.setProperty("--xray-local-y", `${e.clientY - rect.top}px`);
+      });
     }
-  }
+  },
+  onUp: () => document.body.classList.remove("xray-lens-active"),
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -1015,10 +1014,14 @@ let traceScannerY = 0;
 let traceScannerVelocity = 15;
 let traceScannerEl = null;
 
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && (e.key === "s" || e.key === "S") && !e.shiftKey && !e.ctrlKey && !e.metaKey && !isTraceScannerActive) {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-    e.preventDefault();
+im.register({
+  id: "neon-trace",
+  category: "effects",
+  description: "Neon trace scanner (Alt+S)",
+  combo: { alt: true, code: "KeyS" },
+  type: "action",
+  onDown: () => {
+    if (isTraceScannerActive) return;
     isTraceScannerActive = true;
     document.body.classList.add("trace-scanner-active");
 
@@ -1067,33 +1070,35 @@ document.addEventListener("keydown", (e) => {
     };
 
     traceScannerRaf = requestAnimationFrame(scanLoop);
-  }
+  },
 });
 
-// Magnetic Repulsion Field (Hold M)
+// Magnetic Repulsion Field (Hold M) — guarded against editor typing.
 let isMagneticRepulsionActive = false;
-document.addEventListener("keydown", (e) => {
-  if ((e.key === "m" || e.key === "M") && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+im.register({
+  id: "magnetic-repulsion",
+  category: "effects",
+  description: "Magnetic repulsion field (hold M)",
+  combo: { key: "m" },
+  type: "hold",
+  preventDefault: false,
+  onDown: () => {
     if (!isMagneticRepulsionActive) {
       isMagneticRepulsionActive = true;
       document.body.classList.add("magnetic-repulsion-active");
     }
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key === "m" || e.key === "M") {
+  },
+  onUp: () => {
     isMagneticRepulsionActive = false;
     document.body.classList.remove("magnetic-repulsion-active");
     if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.style.removeProperty("--repulse-tx");
         doc.style.removeProperty("--repulse-ty");
         doc.style.removeProperty("--repulse-rot");
       });
     }
-  }
+  },
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -1127,24 +1132,23 @@ document.addEventListener("mousemove", (e) => {
 });
 
 // Layer Peek Glass (Alt+K)
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.code === "KeyK" && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
-    e.preventDefault();
-    document.body.classList.add("layer-peek-glass-active");
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key.toLowerCase() === "k" || e.key === "Alt") {
+im.register({
+  id: "layer-peek-glass",
+  category: "lens",
+  description: "Layer peek glass (Alt+K)",
+  combo: { alt: true, code: "KeyK" },
+  type: "hold",
+  onDown: () => document.body.classList.add("layer-peek-glass-active"),
+  onUp: () => {
     document.body.classList.remove("layer-peek-glass-active");
     if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.classList.remove("peek-focus");
         doc.style.removeProperty("--peek-x");
         doc.style.removeProperty("--peek-y");
       });
     }
-  }
+  },
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -1168,35 +1172,33 @@ document.addEventListener("mousemove", (e) => {
   }
 });
 
-// Interactive Layer Dispersion (Alt+D)
+// Interactive Layer Dispersion (Alt+D) — guarded against editor typing.
 let isLayerDispersionActive = false;
-
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && (e.key === "d" || e.key === "D") && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-    e.preventDefault();
+im.register({
+  id: "layer-dispersion",
+  category: "depth",
+  description: "Layer dispersion (Alt+D)",
+  combo: { alt: true, code: "KeyD" },
+  type: "hold",
+  onDown: () => {
     if (!isLayerDispersionActive) {
       isLayerDispersionActive = true;
       document.body.classList.add("layer-dispersion-active");
     }
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if (e.key === "d" || e.key === "D" || e.key === "Alt") {
-    if (isLayerDispersionActive) {
-      isLayerDispersionActive = false;
-      document.body.classList.remove("layer-dispersion-active");
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
-          doc.style.removeProperty("--disperse-x");
-          doc.style.removeProperty("--disperse-y");
-          doc.style.removeProperty("--disperse-z");
-          doc.style.removeProperty("--disperse-rot");
-        });
-      }
+  },
+  onUp: () => {
+    if (!isLayerDispersionActive) return;
+    isLayerDispersionActive = false;
+    document.body.classList.remove("layer-dispersion-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+        doc.style.removeProperty("--disperse-x");
+        doc.style.removeProperty("--disperse-y");
+        doc.style.removeProperty("--disperse-z");
+        doc.style.removeProperty("--disperse-rot");
+      });
     }
-  }
+  },
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -1229,87 +1231,79 @@ document.addEventListener("mousemove", (e) => {
 });
 
 // Holographic Explode View (Alt+Shift+E)
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && e.shiftKey && e.code === "KeyE" && !e.ctrlKey && !e.metaKey) {
-    e.preventDefault();
-    if (!window.isHolographicExplodeActive) {
-      window.isHolographicExplodeActive = true;
-      document.body.classList.add("holographic-explode-active");
-
-      if (window.echoLayerEl) {
-        const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
-        const total = echoes.length;
-        if (total > 0) {
-          echoes.forEach((doc, index) => {
-            // Golden spiral distribution in 3D
-            const phi = Math.acos(1 - 2 * (index + 0.5) / total);
-            const theta = Math.PI * (1 + Math.sqrt(5)) * index;
-
-            const radius = 800 + Math.random() * 400; // Explode outward
-
-            const tx = radius * Math.sin(phi) * Math.cos(theta);
-            const ty = radius * Math.sin(phi) * Math.sin(theta);
-            const tz = radius * Math.cos(phi) * 0.5; // flatten z slightly
-
-            const rx = (Math.random() - 0.5) * 60; // random tilt
-            const ry = (Math.random() - 0.5) * 60;
-
-            doc.style.setProperty("--explode-tx", `${tx}px`);
-            doc.style.setProperty("--explode-ty", `${ty}px`);
-            doc.style.setProperty("--explode-tz", `${tz}px`);
-            doc.style.setProperty("--explode-rx", `${rx}deg`);
-            doc.style.setProperty("--explode-ry", `${ry}deg`);
-          });
-        }
-      }
-    }
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if ((e.key.toLowerCase() === "e" || e.key === "Alt" || e.key === "Shift") && window.isHolographicExplodeActive) {
-    if (!e.altKey || !e.shiftKey || e.code === "KeyE") {
-      window.isHolographicExplodeActive = false;
-      document.body.classList.remove("holographic-explode-active");
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
-          doc.style.removeProperty("--explode-tx");
-          doc.style.removeProperty("--explode-ty");
-          doc.style.removeProperty("--explode-tz");
-          doc.style.removeProperty("--explode-rx");
-          doc.style.removeProperty("--explode-ry");
+im.register({
+  id: "holographic-explode",
+  category: "reveal",
+  description: "Holographic explode view (Alt+Shift+E)",
+  combo: { alt: true, shift: true, code: "KeyE" },
+  type: "hold",
+  onDown: () => {
+    if (window.isHolographicExplodeActive) return;
+    window.isHolographicExplodeActive = true;
+    document.body.classList.add("holographic-explode-active");
+    if (window.echoLayerEl) {
+      const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+      const total = echoes.length;
+      if (total > 0) {
+        echoes.forEach((doc, index) => {
+          const phi = Math.acos(1 - (2 * (index + 0.5)) / total);
+          const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+          const radius = 800 + Math.random() * 400;
+          const tx = radius * Math.sin(phi) * Math.cos(theta);
+          const ty = radius * Math.sin(phi) * Math.sin(theta);
+          const tz = radius * Math.cos(phi) * 0.5;
+          const rx = (Math.random() - 0.5) * 60;
+          const ry = (Math.random() - 0.5) * 60;
+          doc.style.setProperty("--explode-tx", `${tx}px`);
+          doc.style.setProperty("--explode-ty", `${ty}px`);
+          doc.style.setProperty("--explode-tz", `${tz}px`);
+          doc.style.setProperty("--explode-rx", `${rx}deg`);
+          doc.style.setProperty("--explode-ry", `${ry}deg`);
         });
       }
     }
-  }
+  },
+  onUp: () => {
+    window.isHolographicExplodeActive = false;
+    document.body.classList.remove("holographic-explode-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+        doc.style.removeProperty("--explode-tx");
+        doc.style.removeProperty("--explode-ty");
+        doc.style.removeProperty("--explode-tz");
+        doc.style.removeProperty("--explode-rx");
+        doc.style.removeProperty("--explode-ry");
+      });
+    }
+  },
 });
 
 
-/* ─── Orbital Focus Scrubber (Alt + D + Mousemove) ───────────────────────────────── */
+/* ─── Orbital Focus Scrubber ─── reassigned Alt+D -> Alt+Shift+O to end the
+   collision with Layer Dispersion (Alt+D). */
 window.isOrbitalScrubberActive = false;
-
-document.addEventListener("keydown", (e) => {
-  if (e.altKey && !e.shiftKey && e.code === "KeyD" && !window.isOrbitalScrubberActive) {
-    e.preventDefault();
+im.register({
+  id: "orbital-scrubber",
+  category: "navigation",
+  description: "Orbital focus scrubber (Alt+Shift+O)",
+  combo: { alt: true, shift: true, code: "KeyO" },
+  type: "hold",
+  onDown: () => {
+    if (window.isOrbitalScrubberActive) return;
     window.isOrbitalScrubberActive = true;
     document.body.classList.add("orbital-scrubber-active");
-  }
-});
-
-document.addEventListener("keyup", (e) => {
-  if ((e.key === "Alt" || e.code === "KeyD") && window.isOrbitalScrubberActive) {
-    if (!e.altKey || e.code === "KeyD") {
-      window.isOrbitalScrubberActive = false;
-      document.body.classList.remove("orbital-scrubber-active");
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
-          doc.style.removeProperty("--orbital-scrub-scale");
-          doc.style.removeProperty("--orbital-scrub-angle");
-          doc.style.removeProperty("--orbital-scrub-z");
-        });
-      }
+  },
+  onUp: () => {
+    window.isOrbitalScrubberActive = false;
+    document.body.classList.remove("orbital-scrubber-active");
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+        doc.style.removeProperty("--orbital-scrub-scale");
+        doc.style.removeProperty("--orbital-scrub-angle");
+        doc.style.removeProperty("--orbital-scrub-z");
+      });
     }
-  }
+  },
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -1337,3 +1331,7 @@ document.addEventListener("mousemove", (e) => {
     });
   }
 });
+
+// Start the unified keyboard dispatcher after every feature (across all
+// main_init_* shards) has registered its bindings.
+initInteractions(im);

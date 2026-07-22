@@ -159,6 +159,39 @@ Focused unit tests use the built-in Node test runner and live in `tests/*.test.j
 
 ---
 
+## TypeScript adoption (incremental, JSDoc-first)
+
+This project stays vanilla ES modules; there is **no big-bang TS conversion**. Types
+are added incrementally at stable seams and enforced by `npm run typecheck`
+(`tsc --noEmit -p jsconfig.json`), which is part of `npm run ci`.
+
+How it works:
+
+- **`jsconfig.json`** is strict with `checkJs: true`, but its `include` list is
+  curated: only files that are fully annotated and pass today are type-checked.
+  `src/StorageAPI.js` is the first fully-typed seam (its response shapes live in
+  `src/types/storage.d.ts`; no `any`/loose `object` leaks from its public methods).
+- **Mixin-composed managers** (`TabManager`, `Cabinet3D`) and the WebGL-heavy
+  `RainLayer` have **authored sibling `.d.ts` files** (`TabManager.d.ts`,
+  `Cabinet3D.d.ts`, `RainLayer.d.ts`) describing their trusted public APIs.
+  TypeScript resolves imports of `./TabManager.js` to the `.d.ts` for types, so
+  agents get a reliable surface without type-checking the mixin bodies. Keep these
+  declarations in sync when you change a public method.
+- **Ambient shims** live in `src/types/globals.d.ts` (`*?glslify` shader imports,
+  `import.meta.env`).
+
+To type another seam:
+
+1. Add JSDoc types (and `// @ts-check`) to the `.js` file, reusing shapes from
+   `src/types/*.d.ts`.
+2. Add the file to the `include` list in `jsconfig.json`.
+3. Run `npm run typecheck` and fix until green.
+
+Optionally, a fully-typed seam can later be renamed to `.ts` (Vite compiles it
+transparently); prefer this only once its JSDoc types are stable. Interaction
+one-offs stay untyped JS until they move into managers. Non-goals: rewriting
+shaders in TS, introducing a UI framework.
+
 ## Deployment
 
 Production builds are emitted to `dist/` via `npm run build`. Deploy them through the storage service with a token supplied only through the process environment:
