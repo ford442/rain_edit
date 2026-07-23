@@ -613,10 +613,12 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
   /* Enhanced glowing edge and deepened shadow */
   box-shadow:
     0 100px 200px rgba(0, 0, 0, 0.98),
+    0 40px 80px rgba(0, 0, 0, 0.6),
     inset 0 2px 5px rgba(255, 255, 255, 0.7),
     inset 0 0 150px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.25),
     inset 0 0 45px rgba(255, 255, 255, 0.15),
-    0 0 75px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.5);
+    0 0 75px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.5),
+    0 0 15px rgba(0, 229, 255, 0.1); /* Subtle outer glow to emphasize edges */
 
   /* Glitch animation property for distant echo documents */
   --glitch-offset-x: 0px;
