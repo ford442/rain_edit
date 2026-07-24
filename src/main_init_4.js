@@ -1042,10 +1042,23 @@ document.addEventListener("keydown", (e) => {
 
     document.body.classList.add("typing-pulse");
 
+    if (window.echoLayerEl) {
+      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+        doc.classList.remove("typing-ripple");
+        void doc.offsetWidth; // trigger reflow
+        doc.classList.add("typing-ripple");
+      });
+    }
+
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
       document.body.classList.remove("typing-pulse");
-    }, 150); // Remove quickly for a snappy ripple
+      if (window.echoLayerEl) {
+        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+          doc.classList.remove("typing-ripple");
+        });
+      }
+    }, 300); // Wait for the animation to finish
   }
 });
 

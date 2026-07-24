@@ -2,6 +2,29 @@ import StorageAPI from "./StorageAPI.js";
 import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
 export const TabManagerMixin3 = {
   _applyLayoutChunk2(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isShatteredGlassView) {
+        // Shattered Glass View: random sharp translations and rotations
+        const pseudoRandomX = Math.sin(index * 11.23);
+        const pseudoRandomY = Math.cos(index * 13.37);
+        const pseudoRandomZ = Math.sin(index * 17.59);
+
+        const tx = pseudoRandomX * 800;
+        const ty = pseudoRandomY * 800;
+        const tz = pseudoRandomZ * 1000 - 400; // slightly pushed back
+
+        const rotX = pseudoRandomY * 180;
+        const rotY = pseudoRandomX * 180;
+        const rotZ = pseudoRandomZ * 90;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        return true;
+      }
+
       if (this.isCityscapeView) {
         // Cityscape View: buildings of varying heights jutting out from a flat grid
         const cols = Math.ceil(Math.sqrt(totalEchoes));
