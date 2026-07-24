@@ -78,6 +78,7 @@ export const TabManagerMixin0 = {
     this.isLotusView = false;
     this.isFibonacciSpiralView = false;
     this.isHypercubeView = false;
+    this.isShatteredGlassView = false;
     this.isTheaterView = false;
     this.isTornadoView = false;
     this.isVenetianView = false;
@@ -89,6 +90,7 @@ export const TabManagerMixin0 = {
     this.isFloatingNexusView = false;
 
     document.body.classList.remove(
+      "shattered-glass-active",
       "waterfall-active",
       "cityscape-active",
       "house-of-cards-active",
@@ -297,6 +299,15 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isHypercubeView = true;
       document.body.classList.add("hypercube-active");
+    }
+    this._renderEchoes();
+  },
+  toggleShatteredGlassView() {
+    const wasActive = this.isShatteredGlassView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isShatteredGlassView = true;
+      document.body.classList.add("shattered-glass-active");
     }
     this._renderEchoes();
   },
