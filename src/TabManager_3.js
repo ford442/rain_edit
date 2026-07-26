@@ -851,6 +851,19 @@ export const TabManagerMixin3 = {
     return false;
   },
   _applyLayoutChunk4(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+      if (this.isStackDeckView) {
+        // Stack Deck View positions
+        const spacingY = 40;
+        const spacingZ = 15;
+
+        el.style.setProperty("--tx", `0px`);
+        el.style.setProperty("--ty", `${index * spacingY}px`);
+        el.style.setProperty("--tz", `${-index * spacingZ}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+        return true;
+      }
       if (this.isScatteredView) {
         // Scattered View positions
         let _totalEchoes = inactiveFiles.length;

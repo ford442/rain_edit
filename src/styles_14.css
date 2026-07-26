@@ -916,3 +916,27 @@ body.shattered-glass-active .echo-document:hover {
     50% { transform: scale(1.05) translateZ(calc(var(--tz) + 50px)); filter: brightness(1.5) drop-shadow(0 0 20px cyan); }
     100% { transform: scale(1) translateZ(var(--tz)); filter: brightness(1); }
 }
+/* Stack Deck View styles */
+body.stack-deck-active .echo-document {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+             rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(10px);
+}
+
+body.stack-deck-active .echo-document:hover {
+  transform: translate3d(var(--tx, 0), calc(var(--ty, 0) - 20px), calc(var(--tz, 0) + 10px))
+             rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+  box-shadow: 0 15px 40px rgba(0, 255, 200, 0.3);
+  border-color: rgba(0, 255, 200, 0.5);
+  z-index: 1000 !important;
+}
+
+body.stack-deck-active #editor {
+  z-index: 100;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 200, 0.3);
+}

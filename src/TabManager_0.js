@@ -200,6 +200,15 @@ export const TabManagerMixin0 = {
     }
     this._renderEchoes();
   },
+  toggleStackDeckView() {
+    const wasActive = this.isStackDeckView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isStackDeckView = true;
+      document.body.classList.add("stack-deck-active");
+    }
+    this._renderEchoes();
+  },
   toggleFibonacciSpiralView() {
     const wasActive = this.isFibonacciSpiralView;
     this._deactivateAllViews();
