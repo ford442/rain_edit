@@ -19,6 +19,17 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   });
 
   manager.register({
+    id: "quantum-scanner",
+    category: "lens",
+    description: "Quantum Scanner Lens (Alt+N)",
+    combo: { alt: true, code: "KeyN" },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("magnifier-active", "quantum-scanner-active"),
+    onUp: () => body.classList.remove("magnifier-active", "quantum-scanner-active"),
+  });
+
+  manager.register({
     id: "magnetic-separation",
     category: "lens",
     description: "Magnetic layer separation (Alt+Shift+M)",
