@@ -281,15 +281,7 @@ body.fanning-active .echo-document:hover {
     url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E") !important;
 }
 
-#dock {
-  box-shadow:
-    0 25px 70px rgba(0, 0, 0, 0.8),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    inset 0 -1px 5px rgba(0, 0, 0, 0.5),
-    inset calc(cos(var(--highlight-angle, 0deg)) * 10px)
-      calc(sin(var(--highlight-angle, 0deg)) * 10px) 20px
-      rgba(0, 229, 255, 0.05) !important;
-}
+
 
 #tabs-container {
   display: flex;
@@ -645,17 +637,7 @@ body.pulse-wave-active .echo-document {
   border-radius: 40px !important;
 }
 
-#dock {
-  background: linear-gradient(135deg, rgba(20, 25, 35, 0.85), rgba(10, 15, 20, 0.95)) !important;
-  backdrop-filter: blur(60px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
-  border: 1px solid rgba(0, 229, 255, 0.25) !important;
-  box-shadow:
-    0 40px 100px rgba(0, 0, 0, 0.9),
-    0 0 60px rgba(0, 229, 255, 0.15),
-    inset 0 2px 5px rgba(255, 255, 255, 0.1) !important;
-  border-radius: 24px !important;
-}
+
 
 /* 2. Editor Aurora Border Spin */
 #editor {
@@ -939,4 +921,28 @@ body.stack-deck-active #editor {
   z-index: 100;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(0, 255, 200, 0.3);
+}
+
+/* Prismatic Unfold Lens (Alt+Shift+U) */
+body.prismatic-unfold-active .echo-document {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease, opacity 0.4s ease !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + ((var(--item-index, 0) - 1) * 80px)),
+    var(--ty, 0px),
+    calc(var(--tz, 0px) + 200px - (var(--item-index, 0) * 20px))
+  ) rotateY(calc((var(--item-index, 0) - 1) * -5deg)) scale(0.95) !important;
+  opacity: 0.9 !important;
+  filter: blur(0px) brightness(1.2) drop-shadow(0 15px 30px rgba(0, 229, 255, 0.4)) !important;
+  z-index: calc(100 - var(--item-index, 0)) !important;
+}
+
+body.prismatic-unfold-active .echo-document:hover {
+  transform: translate3d(
+    calc(var(--tx, 0px) + ((var(--item-index, 0) - 1) * 80px)),
+    calc(var(--ty, 0px) - 20px),
+    calc(var(--tz, 0px) + 250px)
+  ) scale(1.05) !important;
+  z-index: 200 !important;
+  opacity: 1 !important;
+  filter: brightness(1.4) drop-shadow(0 20px 40px rgba(0, 229, 255, 0.6)) !important;
 }

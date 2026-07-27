@@ -334,7 +334,10 @@ body.x-ray-active #echo-layer {
   ); /* Slightly larger base font size for legibility */
   line-height: 1.6;
   color: #d8f5ff; /* Slightly brighter text color */
-  opacity: 0.15; /* Slightly higher base opacity */
+  opacity: 0.15;
+  background: rgba(15, 25, 35, 0.55);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%); /* Slightly higher base opacity */
   filter: blur(4px) hue-rotate(var(--echo-tint, 0deg));
 
   /* Scroll-Linked Kinetic Chromatic Aberration */
@@ -612,12 +615,9 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
 .echo-document {
   /* Enhanced glowing edge and deepened shadow */
   box-shadow:
-    0 100px 200px rgba(0, 0, 0, 0.98),
     0 40px 80px rgba(0, 0, 0, 0.6),
-    inset 0 2px 5px rgba(255, 255, 255, 0.7),
-    inset 0 0 150px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.25),
-    inset 0 0 45px rgba(255, 255, 255, 0.15),
-    0 0 75px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.5),
+    inset 0 2px 5px rgba(255, 255, 255, 0.2),
+    inset 0 0 15px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.1),
     0 0 15px rgba(0, 229, 255, 0.1); /* Subtle outer glow to emphasize edges */
 
   /* Glitch animation property for distant echo documents */
