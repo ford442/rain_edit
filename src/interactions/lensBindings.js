@@ -29,6 +29,27 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("magnifier-active", "magnetic-sep-active"),
   });
 
+
+  manager.register({
+    id: "prismatic-unfold",
+    category: "lens",
+    description: "Prismatic unfold / fan (Alt+Shift+U)",
+    combo: { alt: true, shift: true, code: "KeyU" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("prismatic-unfold-active");
+      // Set an item-index variable for each document so we can fan them out in CSS
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
+          doc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("prismatic-unfold-active"),
+  });
+
   // Pointer tracking for the lens center (was MagnifierLens.handlePointerMove).
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
