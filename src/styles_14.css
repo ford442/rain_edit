@@ -974,3 +974,60 @@ body.quantum-scanner-active .echo-document {
   border: 2px solid rgba(0, 255, 128, 0.9);
   transition: opacity 0.3s, transform 0.3s, filter 0.3s;
 }
+
+/* ─── X-Ray Core Lens (Alt+C) ─────────────────────────────────────────────── */
+body.xray-core-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease;
+  mask-image: radial-gradient(
+    circle 150px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 150px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+}
+
+body.xray-core-active #editor {
+  mask-image: radial-gradient(
+    circle 150px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 150px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+body.xray-core-active .echo-document::before {
+  content: "";
+  position: absolute;
+  inset: -100%;
+  background: radial-gradient(
+    circle 150px at var(--mouse-local-x, 50%) var(--mouse-local-y, 50%),
+    rgba(255, 0, 128, 0.4) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 100;
+  mix-blend-mode: color-dodge;
+}
+
+body.xray-core-active #editor::before {
+  content: "";
+  position: absolute;
+  inset: -100%;
+  background: radial-gradient(
+    circle 150px at var(--mouse-local-x, 50%) var(--mouse-local-y, 50%),
+    rgba(0, 255, 255, 0.4) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 100;
+  mix-blend-mode: screen;
+}
