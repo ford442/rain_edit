@@ -19,6 +19,17 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   });
 
   manager.register({
+    id: "xray-core",
+    category: "lens",
+    description: "X-Ray Core Lens (Alt+C)",
+    combo: { alt: true, code: "KeyC" },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("magnifier-active", "xray-core-active"),
+    onUp: () => body.classList.remove("magnifier-active", "xray-core-active"),
+  });
+
+  manager.register({
     id: "quantum-scanner",
     category: "lens",
     description: "Quantum Scanner Lens (Alt+N)",
