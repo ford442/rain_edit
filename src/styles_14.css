@@ -1031,3 +1031,91 @@ body.xray-core-active #editor::before {
   z-index: 100;
   mix-blend-mode: screen;
 }
+
+/* ─── Chrono-Ghost Wireframe Lens (Alt+F) ───────────────────────────────── */
+body.chrono-ghost-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease, border-color 0.3s ease;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid rgba(0, 229, 255, 0.4) !important;
+  box-shadow:
+    0 0 15px rgba(0, 229, 255, 0.2),
+    inset 0 0 15px rgba(0, 229, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 0.8 !important;
+}
+
+body.chrono-ghost-active .echo-document::before {
+  display: none !important;
+}
+
+body.chrono-ghost-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+body.chrono-ghost-active #editor::before {
+  content: "";
+  position: absolute;
+  inset: -100%;
+  background: radial-gradient(
+    circle 250px at var(--mouse-local-x, 50%) var(--mouse-local-y, 50%),
+    rgba(0, 229, 255, 0.2) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 100;
+  mix-blend-mode: screen;
+}
+
+/* ─── Kaleidoscope Split Lens (Alt+Shift+K) ─────────────────────────────── */
+body.kaleidoscope-active #editor {
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+body.kaleidoscope-active .echo-document {
+  transition: clip-path 0.3s ease, filter 0.3s ease, transform 0.4s ease;
+  opacity: 0.9 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) drop-shadow(0 0 10px rgba(255,255,255,0.2)) !important;
+  z-index: 300 !important;
+}
+
+/* Quadrant 1 (Top-Left) */
+body.kaleidoscope-active .echo-document:nth-child(4n+1) {
+  clip-path: polygon(0 0, var(--lens-x, 50%) 0, var(--lens-x, 50%) var(--lens-y, 50%), 0 var(--lens-y, 50%));
+}
+
+/* Quadrant 2 (Top-Right) */
+body.kaleidoscope-active .echo-document:nth-child(4n+2) {
+  clip-path: polygon(var(--lens-x, 50%) 0, 100% 0, 100% var(--lens-y, 50%), var(--lens-x, 50%) var(--lens-y, 50%));
+}
+
+/* Quadrant 3 (Bottom-Left) */
+body.kaleidoscope-active .echo-document:nth-child(4n+3) {
+  clip-path: polygon(0 var(--lens-y, 50%), var(--lens-x, 50%) var(--lens-y, 50%), var(--lens-x, 50%) 100%, 0 100%);
+}
+
+/* Quadrant 4 (Bottom-Right) */
+body.kaleidoscope-active .echo-document:nth-child(4n+4) {
+  clip-path: polygon(var(--lens-x, 50%) var(--lens-y, 50%), 100% var(--lens-y, 50%), 100% 100%, var(--lens-x, 50%) 100%);
+}
