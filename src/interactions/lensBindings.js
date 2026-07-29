@@ -51,6 +51,36 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("magnifier-active", "magnetic-sep-active"),
   });
 
+  manager.register({
+    id: "chrono-ghost",
+    category: "lens",
+    description: "Chrono-Ghost Wireframe Lens (Alt+F)",
+    combo: { alt: true, code: "KeyF" },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("magnifier-active", "chrono-ghost-active"),
+    onUp: () => body.classList.remove("magnifier-active", "chrono-ghost-active"),
+  });
+
+  manager.register({
+    id: "kaleidoscope-split",
+    category: "lens",
+    description: "Kaleidoscope Split Lens (Alt+Shift+K)",
+    combo: { alt: true, shift: true, code: "KeyK" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "kaleidoscope-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
+          doc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "kaleidoscope-active"),
+  });
+
 
   manager.register({
     id: "prismatic-unfold",
