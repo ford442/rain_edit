@@ -1119,3 +1119,108 @@ body.kaleidoscope-active .echo-document:nth-child(4n+3) {
 body.kaleidoscope-active .echo-document:nth-child(4n+4) {
   clip-path: polygon(var(--lens-x, 50%) var(--lens-y, 50%), 100% var(--lens-y, 50%), 100% 100%, var(--lens-x, 50%) 100%);
 }
+
+/* ─── Blacklight Reveal Lens (Alt+Shift+L) ─────────────────────────────── */
+body.blacklight-reveal-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease, box-shadow 0.3s ease;
+  opacity: 0.95 !important;
+  /* Apply blacklight effect to layers underneath */
+  filter: invert(1) hue-rotate(180deg) brightness(1.2) contrast(1.5) drop-shadow(0 0 15px rgba(255, 0, 255, 0.8)) !important;
+  box-shadow: 0 0 40px rgba(255, 0, 255, 0.6), inset 0 0 20px rgba(255, 0, 255, 0.4) !important;
+  border-color: rgba(255, 0, 255, 0.8) !important;
+  z-index: 100 !important;
+}
+
+body.blacklight-reveal-active #editor {
+  /* Create a spotlight hole in the editor */
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+body.blacklight-reveal-active #editor::before {
+  content: "";
+  position: absolute;
+  inset: -100%;
+  background: radial-gradient(
+    circle 250px at var(--mouse-local-x, 50%) var(--mouse-local-y, 50%),
+    rgba(200, 0, 255, 0.2) 0%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 100;
+  mix-blend-mode: screen;
+}
+
+/* ─── Geometric Shatter Lens (Alt+Shift+G) ──────────────────────────────── */
+body.geometric-shatter-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  transition: opacity 0.3s ease;
+}
+
+body.geometric-shatter-active .echo-document {
+  transition: clip-path 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  opacity: 0.95 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 30deg)) drop-shadow(0 0 15px rgba(255, 255, 255, 0.3)) !important;
+  z-index: 300 !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Base positions relative to the cursor (lens-x/lens-y) */
+body.geometric-shatter-active .echo-document:nth-child(6n+1) {
+  clip-path: polygon(var(--lens-x, 50%) var(--lens-y, 50%), 0 0, 50% 0);
+  transform: translate3d(calc(var(--tx, 0) - 50px), calc(var(--ty, 0) - 100px), calc(var(--tz, 0) + 100px)) rotateZ(-15deg) scale(1.1) !important;
+}
+
+body.geometric-shatter-active .echo-document:nth-child(6n+2) {
+  clip-path: polygon(var(--lens-x, 50%) var(--lens-y, 50%), 50% 0, 100% 0);
+  transform: translate3d(calc(var(--tx, 0) + 50px), calc(var(--ty, 0) - 100px), calc(var(--tz, 0) + 120px)) rotateZ(15deg) scale(1.1) !important;
+}
+
+body.geometric-shatter-active .echo-document:nth-child(6n+3) {
+  clip-path: polygon(var(--lens-x, 50%) var(--lens-y, 50%), 100% 0, 100% 100%);
+  transform: translate3d(calc(var(--tx, 0) + 150px), calc(var(--ty, 0) + 50px), calc(var(--tz, 0) + 150px)) rotateZ(25deg) scale(1.15) !important;
+}
+
+body.geometric-shatter-active .echo-document:nth-child(6n+4) {
+  clip-path: polygon(var(--lens-x, 50%) var(--lens-y, 50%), 100% 100%, 50% 100%);
+  transform: translate3d(calc(var(--tx, 0) + 50px), calc(var(--ty, 0) + 150px), calc(var(--tz, 0) + 80px)) rotateZ(10deg) scale(1.1) !important;
+}
+
+body.geometric-shatter-active .echo-document:nth-child(6n+5) {
+  clip-path: polygon(var(--lens-x, 50%) var(--lens-y, 50%), 50% 100%, 0 100%);
+  transform: translate3d(calc(var(--tx, 0) - 100px), calc(var(--ty, 0) + 100px), calc(var(--tz, 0) + 110px)) rotateZ(-20deg) scale(1.1) !important;
+}
+
+body.geometric-shatter-active .echo-document:nth-child(6n+6) {
+  clip-path: polygon(var(--lens-x, 50%) var(--lens-y, 50%), 0 100%, 0 0);
+  transform: translate3d(calc(var(--tx, 0) - 150px), calc(var(--ty, 0) - 20px), calc(var(--tz, 0) + 130px)) rotateZ(-10deg) scale(1.15) !important;
+}
+
+/* Inner glow for the shards */
+body.geometric-shatter-active .echo-document::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mouse-local-x, 50%) var(--mouse-local-y, 50%), rgba(255, 255, 255, 0.4) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: overlay;
+}

@@ -63,6 +63,36 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   });
 
   manager.register({
+    id: "blacklight-reveal",
+    category: "lens",
+    description: "Blacklight Reveal Lens (Alt+Shift+L)",
+    combo: { alt: true, shift: true, code: "KeyL" },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("magnifier-active", "blacklight-reveal-active"),
+    onUp: () => body.classList.remove("magnifier-active", "blacklight-reveal-active"),
+  });
+
+  manager.register({
+    id: "geometric-shatter",
+    category: "lens",
+    description: "Geometric Shatter Lens (Alt+Shift+G)",
+    combo: { alt: true, shift: true, code: "KeyG" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "geometric-shatter-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
+          doc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "geometric-shatter-active"),
+  });
+
+  manager.register({
     id: "kaleidoscope-split",
     category: "lens",
     description: "Kaleidoscope Split Lens (Alt+Shift+K)",
