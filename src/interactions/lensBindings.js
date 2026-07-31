@@ -132,6 +132,25 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("prismatic-unfold-active"),
   });
 
+  manager.register({
+    id: "thermal-vision",
+    category: "lens",
+    description: "Thermal Vision Lens (Alt+B)",
+    combo: { alt: true, code: "KeyB" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "thermal-vision-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
+          doc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "thermal-vision-active"),
+  });
+
   // Pointer tracking for the lens center (was MagnifierLens.handlePointerMove).
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
