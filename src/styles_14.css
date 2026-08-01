@@ -1257,3 +1257,25 @@ body.geometric-shatter-active .echo-document::after {
   z-index: 2;
   mix-blend-mode: overlay;
 }
+
+/* ─── Chromatic Aberration Lens (Alt+Shift+C) ─────────────────────────────── */
+body.chromatic-aberration-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease;
+  opacity: 0.95 !important;
+  filter: brightness(1.2) drop-shadow(calc(var(--item-index, 0) * 2px) 0 0 rgba(255, 0, 0, 0.8)) drop-shadow(calc(var(--item-index, 0) * -2px) 0 0 rgba(0, 255, 255, 0.8)) !important;
+  z-index: calc(200 - var(--item-index, 0)) !important;
+}
+
+body.chromatic-aberration-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  transition: mask-image 0.3s ease;
+}
