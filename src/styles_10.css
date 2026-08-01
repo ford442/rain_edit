@@ -692,3 +692,52 @@ body.fractal-active .echo-document {
   box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.6), inset 0 0 5px rgba(0, 229, 255, 0.1);
   transform: scale(0.98) translateY(1px);
 }
+
+#radar-canvas {
+  background: rgba(10, 15, 25, 0.4);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
+  width: 100%;
+  display: block;
+  backdrop-filter: blur(8px);
+}
+
+#global-search, #theme-select, #rain-sim-backend {
+  background: rgba(10, 15, 25, 0.5);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 8px;
+  color: #c0c0d0;
+  padding: 6px;
+  font-family: inherit;
+  font-size: 11px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5), 0 0 8px rgba(0, 229, 255, 0.1);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#theme-select {
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+#rain-sim-backend {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #0ff;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#global-search:focus, #theme-select:focus, #rain-sim-backend:focus {
+  border-color: rgba(0, 229, 255, 0.6);
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5), 0 0 12px rgba(0, 229, 255, 0.3);
+}
+
+.dock-btn-sonar, .dock-btn-zscan {
+   margin-top: 5px;
+}

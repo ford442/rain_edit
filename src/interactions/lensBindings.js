@@ -151,6 +151,25 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("magnifier-active", "thermal-vision-active"),
   });
 
+  manager.register({
+    id: "chromatic-aberration",
+    category: "lens",
+    description: "Chromatic Aberration Lens (Alt+Shift+C)",
+    combo: { alt: true, shift: true, code: "KeyC" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "chromatic-aberration-active");
+      const echoLayer = doc.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "chromatic-aberration-active"),
+  });
+
   // Pointer tracking for the lens center (was MagnifierLens.handlePointerMove).
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
