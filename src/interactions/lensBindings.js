@@ -170,6 +170,38 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("magnifier-active", "chromatic-aberration-active"),
   });
 
+
+  manager.register({
+    id: "aurora-layer-shift",
+    category: "lens",
+    description: "Aurora Layer Shift (Alt+Shift+A)",
+    combo: { alt: true, shift: true, code: "KeyA" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "aurora-shift-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
+          doc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "aurora-shift-active"),
+  });
+
+
+  manager.register({
+    id: "ripple-displacement",
+    category: "lens",
+    description: "Ripple Displacement (Alt+Shift+R)",
+    combo: { alt: true, shift: true, code: "KeyR" },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("magnifier-active", "ripple-displacement-active"),
+    onUp: () => body.classList.remove("magnifier-active", "ripple-displacement-active"),
+  });
+
   // Pointer tracking for the lens center (was MagnifierLens.handlePointerMove).
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
