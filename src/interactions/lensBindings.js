@@ -202,6 +202,28 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("magnifier-active", "ripple-displacement-active"),
   });
 
+  manager.register({
+    id: "neon-pulse",
+    category: "lens",
+    description: "Neon Pulse Lens (Alt+Shift+N)",
+    combo: { alt: true, shift: true, code: "KeyN" },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("magnifier-active", "neon-pulse-active"),
+    onUp: () => body.classList.remove("magnifier-active", "neon-pulse-active"),
+  });
+
+  manager.register({
+    id: "ethereal-glitch",
+    category: "lens",
+    description: "Ethereal Glitch Lens (Alt+Shift+J)",
+    combo: { alt: true, shift: true, code: "KeyJ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("magnifier-active", "ethereal-glitch-active"),
+    onUp: () => body.classList.remove("magnifier-active", "ethereal-glitch-active"),
+  });
+
   // Pointer tracking for the lens center (was MagnifierLens.handlePointerMove).
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
