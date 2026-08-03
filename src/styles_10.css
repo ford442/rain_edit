@@ -40,12 +40,7 @@
 }
 
 
-#tabs-container {
-  transition:
-    transform 0.2s ease-out,
-    box-shadow 0.2s ease-out;
-  border-radius: 12px;
-}
+
 
 /* ─── Z-Axis Slicer UI ────────────────────────────────────────────────────── */
 #z-slicer-ui {
@@ -267,28 +262,9 @@ body.origami-active .echo-document:hover {
 }
 
 /* Glassmorphism UI */
-#tabs-container {
-  background: linear-gradient(135deg, rgba(25, 30, 45, 0.85), rgba(15, 20, 30, 0.95));
-  backdrop-filter: blur(80px) saturate(250%);
-  -webkit-backdrop-filter: blur(80px) saturate(250%);
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow:
-    0 50px 120px rgba(0, 0, 0, 0.95),
-    0 0 75px rgba(0, 229, 255, 0.2),
-    inset 0 2px 8px rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  margin: 5px;
-  transition: all 0.3s ease-in-out;
-}
 
-#tabs-container:hover {
-  background: linear-gradient(135deg, rgba(35, 40, 55, 0.9), rgba(25, 30, 40, 0.98));
-  box-shadow:
-    0 60px 130px rgba(0, 0, 0, 0.98),
-    0 0 90px rgba(0, 229, 255, 0.3),
-    inset 0 2px 8px rgba(255, 255, 255, 0.2);
-}
+
+
 
 #dock button {
   background: rgba(255, 255, 255, 0.05);
@@ -478,17 +454,7 @@ body.data-hive-active .echo-document:hover {
 }
 
 /* Glassmorphism UI (Overrides) */
-#tabs-container {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)) !important;
-  backdrop-filter: blur(24px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.4),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
-  border-radius: 12px;
-}
+
 
 .echo-header {
   background: linear-gradient(

@@ -283,24 +283,7 @@ body.fanning-active .echo-document:hover {
 
 
 
-#tabs-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  padding: 10px 16px;
-  background: rgba(15, 20, 25, 0.7);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1);
-  margin-bottom: 20px;
-  z-index: 1000;
-}
+
 
 /* Venetian Blinds View active styles */
 .venetian-active .echo-document {
@@ -321,14 +304,7 @@ body.fanning-active .echo-document:hover {
 }
 
 /* Enhancing Custom Scrollbars and Tabs Gradient */
-#tabs-container {
-  background: linear-gradient(
-    to right,
-    rgba(20, 20, 30, 0.9),
-    rgba(10, 10, 15, 0.95)
-  ) !important;
-  box-shadow: inset 0 -2px 10px rgba(0, 255, 255, 0.1) !important;
-}
+
 
 ::-webkit-scrollbar {
   width: 12px;
@@ -625,17 +601,7 @@ body.pulse-wave-active .echo-document {
 }
 
 /* 1. Premium Glassmorphism for Dock and Tabs */
-#tabs-container {
-  background: linear-gradient(135deg, rgba(20, 25, 35, 0.85), rgba(10, 15, 20, 0.95)) !important;
-  backdrop-filter: blur(60px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(60px) saturate(200%) !important;
-  border: 1px solid rgba(0, 229, 255, 0.25) !important;
-  box-shadow:
-    0 40px 100px rgba(0, 0, 0, 0.9),
-    0 0 60px rgba(0, 229, 255, 0.15),
-    inset 0 2px 5px rgba(255, 255, 255, 0.1) !important;
-  border-radius: 40px !important;
-}
+
 
 
 
@@ -1145,6 +1111,16 @@ body.thermal-vision-active .echo-document {
 body.thermal-vision-active #editor {
   mask-image: radial-gradient(
     circle 200px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 200px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+}
+
 /* ─── Blacklight Reveal Lens (Alt+Shift+L) ─────────────────────────────── */
 body.blacklight-reveal-active .echo-document {
   transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease, box-shadow 0.3s ease;
@@ -1171,13 +1147,7 @@ body.blacklight-reveal-active #editor {
   transition: mask-image 0.3s ease;
 }
 
-body.thermal-vision-active .echo-document::before {
-    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
-    transparent 0%,
-    black 100%
-  );
-  transition: opacity 0.3s ease;
-}
+
 
 body.blacklight-reveal-active #editor::before {
   content: "";
@@ -1278,4 +1248,87 @@ body.chromatic-aberration-active #editor {
     black 100%
   );
   transition: mask-image 0.3s ease;
+}
+
+/* ─── Aurora Layer Shift (Alt+Shift+A) ─────────────────────────────────────── */
+body.aurora-shift-active #editor {
+  mask-image: radial-gradient(
+    ellipse 400px 200px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 400px 200px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    black 100%
+  );
+  transition: opacity 0.4s ease, filter 0.4s ease;
+  filter: hue-rotate(45deg) saturate(150%);
+}
+
+body.aurora-shift-active .echo-document {
+  transition: opacity 0.5s ease, filter 0.5s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  opacity: 0.9 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) saturate(200%) brightness(1.2) drop-shadow(0 0 20px rgba(0, 255, 128, 0.4)) !important;
+  z-index: calc(200 - var(--item-index, 0)) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px) + (var(--item-index, 0) * 10px)),
+      calc(var(--tz, 0px) + (var(--item-index, 0) * 20px) + 50px)
+    )
+    rotateX(calc(var(--rot-x, 0deg) + (var(--item-index, 0) * 5deg)))
+    rotateY(calc(var(--rot-y, 0deg) + (var(--item-index, 0) * -5deg)))
+    rotateZ(var(--rot-z, 0deg)) scale(calc(1.05 + (var(--item-index, 0) * 0.02))) !important;
+}
+
+body.aurora-shift-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--lens-x, 50%) var(--lens-y, 50%), rgba(0, 255, 128, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: screen;
+}
+
+/* ─── Ripple Displacement (Alt+Shift+R) ────────────────────────────────── */
+body.ripple-displacement-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--ripple-cx, 50%) var(--ripple-cy, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 30%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--ripple-cx, 50%) var(--ripple-cy, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 30%,
+    black 100%
+  );
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  filter: blur(2px) contrast(1.2);
+}
+
+body.ripple-displacement-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.1s linear;
+  opacity: 0.95 !important;
+  /* We use CSS variables to calculate the distance and wave effect */
+  --dx: calc(var(--tx, 0px) - var(--ripple-cx, 0px));
+  --dy: calc(var(--ty, 0px) - var(--ripple-cy, 0px));
+  /* Basic simulated distance logic */
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateX(calc(var(--rot-x, 0deg) + (var(--ty, 0px) * 0.02deg)))
+    rotateY(calc(var(--rot-y, 0deg) + (var(--tx, 0px) * 0.02deg)))
+    rotateZ(calc(var(--rot-z, 0deg) + 5deg)) scale(1.1) !important;
+
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.4), inset 0 0 15px rgba(0, 191, 255, 0.2) !important;
+  border-color: rgba(0, 191, 255, 0.6) !important;
+  filter: hue-rotate(calc(var(--tx, 0px) * 0.1deg)) saturate(200%) brightness(1.2) !important;
+  z-index: 250 !important;
 }

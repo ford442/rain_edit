@@ -1460,3 +1460,11 @@ document.addEventListener("keyup", (e) => {
 // Start the unified keyboard dispatcher after every feature (across all
 // main_init_* shards) has registered its bindings.
 initInteractions(im);
+
+// Ripple Displacement Mouse Tracking (Alt+Shift+R)
+document.addEventListener("mousemove", (e) => {
+  if (document.body.classList.contains("ripple-displacement-active")) {
+    document.body.style.setProperty("--ripple-cx", `${e.clientX}px`);
+    document.body.style.setProperty("--ripple-cy", `${e.clientY}px`);
+  }
+});
