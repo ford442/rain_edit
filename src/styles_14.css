@@ -1332,3 +1332,137 @@ body.ripple-displacement-active .echo-document {
   filter: hue-rotate(calc(var(--tx, 0px) * 0.1deg)) saturate(200%) brightness(1.2) !important;
   z-index: 250 !important;
 }
+
+/* ─── Neon Pulse Lens (Alt+Shift+N) ─────────────────────────────────────── */
+body.neon-pulse-active #editor {
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    black 100%
+  );
+  transition: mask-image 0.3s ease;
+}
+
+body.neon-pulse-active .echo-document {
+  opacity: 0.95 !important;
+  z-index: 250 !important;
+  animation: neon-pulse-anim 2s infinite alternate ease-in-out;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
+}
+
+@keyframes neon-pulse-anim {
+  0% {
+    filter: hue-rotate(0deg) brightness(1.2) saturate(150%);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.6), inset 0 0 10px rgba(0, 229, 255, 0.4) !important;
+    border-color: rgba(0, 229, 255, 0.8) !important;
+  }
+  100% {
+    filter: hue-rotate(90deg) brightness(1.5) saturate(200%);
+    box-shadow: 0 0 50px rgba(255, 0, 128, 0.8), inset 0 0 20px rgba(255, 0, 128, 0.6) !important;
+    border-color: rgba(255, 0, 128, 1) !important;
+  }
+}
+
+/* ─── Ethereal Glitch Lens (Alt+Shift+J) ────────────────────────────────── */
+body.ethereal-glitch-active #editor {
+  mask-image: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    black 3px,
+    black 6px
+  );
+  -webkit-mask-image: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    black 3px,
+    black 6px
+  );
+  transition: mask-image 0.3s ease;
+}
+
+body.ethereal-glitch-active .echo-document {
+  opacity: 0.9 !important;
+  z-index: 260 !important;
+  animation: glitch-slice 0.4s infinite linear alternate-reverse;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 100px)
+    )
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg)) scale(1.05) !important;
+}
+
+@keyframes glitch-slice {
+  0% {
+    clip-path: polygon(0 0, 100% 0, 100% 10%, 0 10%);
+    filter: hue-rotate(0deg) contrast(1.5);
+    transform: translate3d(
+        calc(var(--tx, 0px) - 5px),
+        calc(var(--ty, 0px) + 2px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  20% {
+    clip-path: polygon(0 15%, 100% 15%, 100% 30%, 0 30%);
+    filter: hue-rotate(90deg) contrast(2);
+    transform: translate3d(
+        calc(var(--tx, 0px) + 5px),
+        calc(var(--ty, 0px) - 2px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  40% {
+    clip-path: polygon(0 35%, 100% 35%, 100% 50%, 0 50%);
+    filter: hue-rotate(180deg) contrast(1.5);
+    transform: translate3d(
+        calc(var(--tx, 0px) - 3px),
+        calc(var(--ty, 0px) + 4px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  60% {
+    clip-path: polygon(0 55%, 100% 55%, 100% 70%, 0 70%);
+    filter: hue-rotate(270deg) contrast(2.5);
+    transform: translate3d(
+        calc(var(--tx, 0px) + 6px),
+        calc(var(--ty, 0px) - 5px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  80% {
+    clip-path: polygon(0 75%, 100% 75%, 100% 90%, 0 90%);
+    filter: hue-rotate(360deg) contrast(1.5);
+    transform: translate3d(
+        calc(var(--tx, 0px) - 2px),
+        calc(var(--ty, 0px) + 2px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  100% {
+    clip-path: polygon(0 95%, 100% 95%, 100% 100%, 0 100%);
+    filter: hue-rotate(90deg) contrast(3);
+    transform: translate3d(
+        calc(var(--tx, 0px) + 4px),
+        calc(var(--ty, 0px) - 3px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+}
