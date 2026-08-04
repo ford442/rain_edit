@@ -1466,3 +1466,84 @@ body.ethereal-glitch-active .echo-document {
       ) scale(1.05);
   }
 }
+
+/* ─── Innovate: Spectral Refraction Lens (Alt+Shift+W) ──────────────────── */
+body.spectral-refraction-active .echo-document {
+  opacity: 0.9 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px)),
+    calc(var(--tz, 0px) + 150px - (var(--item-index, 0) * 10px))
+  ) rotateZ(calc((var(--item-index, 0) - 2) * 5deg)) scale(1.05) !important;
+  z-index: calc(200 - var(--item-index, 0)) !important;
+  mix-blend-mode: color-dodge;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) contrast(1.5) saturate(200%) drop-shadow(0 0 20px rgba(255, 255, 255, 0.2)) !important;
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.6) 40%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.6) 40%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ─── Innovate: Topographic Contour Lens (Alt+Shift+Z) ────────────────── */
+body.topographic-contour-active .echo-document {
+  opacity: 0.8 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px)),
+    calc(var(--tz, 0px) + 50px)
+  ) scale(1.1) !important;
+  z-index: 150 !important;
+  filter: invert(1) hue-rotate(180deg) contrast(2) brightness(1.5) drop-shadow(0 0 15px rgba(0, 255, 255, 0.8)) !important;
+  mask-image: repeating-radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    rgba(0, 0, 0, 1) 0px,
+    rgba(0, 0, 0, 1) 5px,
+    rgba(0, 0, 0, 0.1) 10px,
+    rgba(0, 0, 0, 0.1) 15px
+  );
+  -webkit-mask-image: repeating-radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    rgba(0, 0, 0, 1) 0px,
+    rgba(0, 0, 0, 1) 5px,
+    rgba(0, 0, 0, 0.1) 10px,
+    rgba(0, 0, 0, 0.1) 15px
+  );
+  border: 2px solid rgba(0, 255, 255, 0.9) !important;
+  box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.5) !important;
+}
+
+/* ─── Innovate: Ectoplasmic Ooze Lens (Alt+Shift+Y) ───────────────────── */
+body.ectoplasmic-ooze-active .echo-document {
+  opacity: 0.85 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + (var(--item-index, 0) * 40px)),
+    calc(var(--tz, 0px) + 100px)
+  ) scale(1.1) !important;
+  z-index: 250 !important;
+  filter: hue-rotate(270deg) contrast(2.5) saturate(300%) blur(2px) drop-shadow(0 20px 30px rgba(128, 255, 0, 0.6)) !important;
+  mix-blend-mode: screen;
+  mask-image: radial-gradient(
+    ellipse 200px 400px at var(--lens-x, 50%) calc(var(--lens-y, 50%) - 100px),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 200px 400px at var(--lens-x, 50%) calc(var(--lens-y, 50%) - 100px),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  border-bottom: 5px solid rgba(128, 255, 0, 0.8) !important;
+  border-radius: 10px 10px 40% 40% !important;
+}

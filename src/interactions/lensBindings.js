@@ -225,6 +225,62 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   });
 
   // Pointer tracking for the lens center (was MagnifierLens.handlePointerMove).
+  manager.register({
+    id: "spectral-refraction",
+    category: "lens",
+    description: "Spectral Refraction Lens (Alt+Shift+W)",
+    combo: { alt: true, shift: true, code: "KeyW" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "spectral-refraction-active");
+      const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "spectral-refraction-active"),
+  });
+
+  manager.register({
+    id: "topographic-contour",
+    category: "lens",
+    description: "Topographic Contour Lens (Alt+Shift+Z)",
+    combo: { alt: true, shift: true, code: "KeyZ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "topographic-contour-active");
+      const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "topographic-contour-active"),
+  });
+
+  manager.register({
+    id: "ectoplasmic-ooze",
+    category: "lens",
+    description: "Ectoplasmic Ooze Lens (Alt+Shift+Y)",
+    combo: { alt: true, shift: true, code: "KeyY" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "ectoplasmic-ooze-active");
+      const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "ectoplasmic-ooze-active"),
+  });
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("magnifier-active")) return;
