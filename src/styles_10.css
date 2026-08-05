@@ -52,16 +52,16 @@
   height: 350px;
   background: linear-gradient(
     180deg,
-    rgba(5, 10, 15, 0.75),
-    rgba(2, 5, 10, 0.55)
+    rgba(10, 15, 30, 0.55),
+    rgba(2, 5, 15, 0.45)
   );
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border: 1px solid rgba(0, 229, 255, 0.4);
+  backdrop-filter: blur(48px) saturate(250%);
+  -webkit-backdrop-filter: blur(48px) saturate(250%);
+  border: 1px solid rgba(0, 255, 255, 0.5);
   border-radius: 16px;
   box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.8),
-    inset 0 0 15px rgba(0, 229, 255, 0.25),
+    0 25px 60px rgba(0, 0, 0, 0.9),
+    inset 0 0 25px rgba(0, 255, 255, 0.35),
     inset 0 1px 1px rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
@@ -74,15 +74,15 @@
 #z-slicer-ui:hover {
   background: linear-gradient(
     180deg,
-    rgba(10, 15, 25, 0.85),
-    rgba(5, 10, 20, 0.65)
+    rgba(15, 25, 40, 0.75),
+    rgba(10, 15, 30, 0.55)
   );
   box-shadow:
-    0 25px 50px rgba(0, 0, 0, 0.9),
-    0 0 20px rgba(0, 229, 255, 0.2),
-    inset 0 0 0 1px rgba(0, 255, 200, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2);
-  transform: translateY(-50%) translateX(4px);
+    0 35px 70px rgba(0, 0, 0, 0.95),
+    0 0 35px rgba(0, 255, 255, 0.35),
+    inset 0 0 0 1px rgba(0, 255, 255, 0.5),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) translateX(6px) scale(1.02);
 }
 
 .slicer-label {
@@ -274,7 +274,7 @@ body.origami-active .echo-document:hover {
   transition: all 0.3s ease;
   padding: 8px 12px;
   margin: 0 4px;
-  font-family: inherit;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
 }
 
@@ -630,33 +630,33 @@ body.fractal-active .echo-document {
 }
 
 .vps-action-btn {
-  background: rgba(10, 15, 40, 0.6);
-  border: 1px solid rgba(140, 200, 255, 0.3);
-  color: #e0f0ff;
-  font-family: inherit;
+  background: linear-gradient(135deg, rgba(15, 25, 50, 0.75), rgba(5, 10, 25, 0.65));
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
-  font-weight: 500;
-  padding: 12px 24px;
-  border-radius: 20px;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 24px;
   cursor: pointer;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(140, 200, 255, 0.1);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.15);
   transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.5), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .vps-action-btn:hover {
-  background: rgba(10, 15, 40, 0.8);
-  border: 1px solid rgba(0, 229, 255, 0.6);
-  box-shadow: 0 6px 20px rgba(0, 229, 255, 0.3), inset 0 0 25px rgba(0, 229, 255, 0.2);
-  backdrop-filter: blur(20px);
-  transform: scale(1.05) translateY(-2px);
+  background: linear-gradient(135deg, rgba(20, 35, 70, 0.85), rgba(10, 20, 45, 0.75));
+  border: 1px solid rgba(0, 255, 255, 0.8);
+  box-shadow: 0 12px 35px rgba(0, 255, 255, 0.4), inset 0 0 35px rgba(0, 255, 255, 0.3);
+  backdrop-filter: blur(48px) saturate(250%);
+  transform: scale(1.06) translateY(-4px);
 }
 
 .vps-action-btn:active {
-  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.6), inset 0 0 5px rgba(0, 229, 255, 0.1);
-  transform: scale(0.98) translateY(1px);
+  box-shadow: inset 0 6px 15px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 255, 255, 0.2);
+  transform: scale(0.96) translateY(2px);
 }
 
 #radar-canvas {
@@ -675,7 +675,7 @@ body.fractal-active .echo-document {
   border-radius: 8px;
   color: #c0c0d0;
   padding: 6px;
-  font-family: inherit;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   width: 100%;
   box-sizing: border-box;
