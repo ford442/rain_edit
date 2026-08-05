@@ -281,6 +281,26 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     },
     onUp: () => body.classList.remove("magnifier-active", "ectoplasmic-ooze-active"),
   });
+
+  manager.register({
+    id: "cosmic-void",
+    category: "lens",
+    description: "Cosmic Void Lens (Alt+Shift+V)",
+    combo: { alt: true, shift: true, code: "KeyV" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "cosmic-void-active");
+      const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "cosmic-void-active"),
+  });
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("magnifier-active")) return;
