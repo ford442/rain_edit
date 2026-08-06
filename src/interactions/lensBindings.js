@@ -283,6 +283,44 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   });
 
   manager.register({
+    id: "zenith-halo",
+    category: "lens",
+    description: "Zenith Halo Lens (Alt+Shift+H)",
+    combo: { alt: true, shift: true, code: "KeyH" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "zenith-halo-active");
+      const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "zenith-halo-active"),
+  });
+
+  manager.register({
+    id: "quantum-fracture",
+    category: "lens",
+    description: "Quantum Fracture Lens (Alt+Shift+Q)",
+    combo: { alt: true, shift: true, code: "KeyQ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "quantum-fracture-active");
+      const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "quantum-fracture-active"),
+  });
+
+  manager.register({
     id: "cosmic-void",
     category: "lens",
     description: "Cosmic Void Lens (Alt+Shift+V)",

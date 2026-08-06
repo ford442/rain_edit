@@ -1592,3 +1592,92 @@ body.cosmic-void-active .echo-document::before {
   0% { transform: scale(0.9); opacity: 0.5; }
   100% { transform: scale(1.2); opacity: 1; }
 }
+
+/* Zenith Halo Lens */
+body.zenith-halo-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 30%,
+    rgba(0, 0, 0, 0.8) 70%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 30%,
+    rgba(0, 0, 0, 0.8) 70%,
+    black 100%
+  );
+}
+
+body.zenith-halo-active .echo-document {
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
+  transform: translate3d(
+    calc(var(--tx, 0px) + cos(var(--item-index, 0) * 36deg) * 200px),
+    calc(var(--ty, 0px) + sin(var(--item-index, 0) * 36deg) * 200px),
+    calc(var(--tz, 0px) + 50px)
+  ) rotateZ(calc(var(--item-index, 0) * 36deg)) scale(0.6) !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 36deg)) saturate(200%) drop-shadow(0 0 30px rgba(0, 255, 255, 0.6)) !important;
+  z-index: calc(100 - var(--item-index, 0)) !important;
+  border-radius: 50% !important;
+  opacity: 0.9 !important;
+}
+
+body.zenith-halo-active .echo-document::before {
+  content: '';
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: radial-gradient(circle at center, transparent 30%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
+  animation: zenith-halo-pulse 3s infinite ease-in-out alternate;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes zenith-halo-pulse {
+  0% { transform: scale(0.95); opacity: 0.5; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); }
+  100% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 40px rgba(0, 255, 255, 0.8); }
+}
+
+/* Quantum Fracture Lens */
+body.quantum-fracture-active #editor {
+  mask-image: conic-gradient(
+    from 45deg at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    rgba(0, 0, 0, 0.9) 0deg,
+    rgba(0, 0, 0, 0.2) 60deg,
+    rgba(0, 0, 0, 0.9) 120deg,
+    rgba(0, 0, 0, 0.2) 180deg,
+    rgba(0, 0, 0, 0.9) 240deg,
+    rgba(0, 0, 0, 0.2) 300deg,
+    rgba(0, 0, 0, 0.9) 360deg
+  );
+  -webkit-mask-image: conic-gradient(
+    from 45deg at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    rgba(0, 0, 0, 0.9) 0deg,
+    rgba(0, 0, 0, 0.2) 60deg,
+    rgba(0, 0, 0, 0.9) 120deg,
+    rgba(0, 0, 0, 0.2) 180deg,
+    rgba(0, 0, 0, 0.9) 240deg,
+    rgba(0, 0, 0, 0.2) 300deg,
+    rgba(0, 0, 0, 0.9) 360deg
+  );
+}
+
+body.quantum-fracture-active .echo-document {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), clip-path 0.4s ease;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) - 1) * 150px),
+    calc(var(--ty, 0px) + (var(--item-index, 0) - 1) * -100px),
+    calc(var(--tz, 0px) + (var(--item-index, 0) * 40px))
+  ) rotateX(calc(var(--item-index, 0) * 15deg)) rotateY(calc(var(--item-index, 0) * 25deg)) scale(calc(1 - (var(--item-index, 0) * 0.05))) !important;
+  mix-blend-mode: color-dodge !important;
+  filter: contrast(1.5) brightness(1.2) drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) !important;
+  opacity: 0.85 !important;
+}
+
+body.quantum-fracture-active .echo-document:nth-child(4n+1) { clip-path: polygon(0 0, 50% 0, 100% 100%, 0 100%); }
+body.quantum-fracture-active .echo-document:nth-child(4n+2) { clip-path: polygon(50% 0, 100% 0, 100% 100%, 0 50%); }
+body.quantum-fracture-active .echo-document:nth-child(4n+3) { clip-path: polygon(0 50%, 100% 0, 100% 100%, 50% 100%); }
+body.quantum-fracture-active .echo-document:nth-child(4n+4) { clip-path: polygon(0 0, 100% 50%, 50% 100%, 0 100%); }
