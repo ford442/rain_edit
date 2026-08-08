@@ -264,6 +264,25 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   });
 
   manager.register({
+    id: "magma-core",
+    category: "lens",
+    description: "Magma Core Lens (Alt+Shift+I)",
+    combo: { alt: true, shift: true, code: "KeyI" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "magma-core-active");
+      const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "magma-core-active"),
+  });
+
+  manager.register({
     id: "ectoplasmic-ooze",
     category: "lens",
     description: "Ectoplasmic Ooze Lens (Alt+Shift+Y)",
