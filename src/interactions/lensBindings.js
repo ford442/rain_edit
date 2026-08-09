@@ -358,6 +358,44 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("magnifier-active", "cosmic-void-active"),
   });
 
+  manager.register({
+    id: "bioluminescent-trace",
+    category: "lens",
+    description: "Bioluminescent Trace Lens (Alt+Shift+T)",
+    combo: { alt: true, shift: true, code: "KeyT" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "bioluminescent-trace-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "bioluminescent-trace-active"),
+  });
+
+  manager.register({
+    id: "digital-matrix-decode",
+    category: "lens",
+    description: "Digital Matrix Decode Lens (Alt+Shift+O)",
+    combo: { alt: true, shift: true, code: "KeyO" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "digital-matrix-decode-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "digital-matrix-decode-active"),
+  });
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("magnifier-active")) return;
