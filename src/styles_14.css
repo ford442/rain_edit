@@ -1854,3 +1854,62 @@ body.digital-matrix-decode-active .echo-document::after {
     from { transform: translateY(0); }
     to { transform: translateY(100%); }
 }
+
+/* ─── Cyber-Grid Hologram Lens ─────────────────────────────────────────────────── */
+body.cyber-grid-hologram-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease;
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8)) drop-shadow(0 0 20px rgba(0, 200, 255, 0.5));
+  mix-blend-mode: screen;
+  transform: scale(calc(1 - (var(--item-index, 0) * 0.05)))
+             translateZ(calc(var(--item-index, 0) * -50px))
+             translateY(calc(var(--item-index, 0) * 10px))
+             rotateX(15deg);
+  border: 1px solid rgba(0, 255, 255, 0.5) !important;
+  background: rgba(0, 10, 20, 0.8) !important;
+  z-index: calc(100 - var(--item-index, 0)) !important;
+}
+
+body.cyber-grid-hologram-active .echo-document::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 5;
+  animation: hologram-flicker 2s infinite alternate;
+  border-radius: inherit;
+}
+
+@keyframes hologram-flicker {
+  0% { opacity: 0.7; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.9; }
+}
+
+body.cyber-grid-hologram-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  opacity: 0.2;
+  transition: opacity 0.3s ease;
+}

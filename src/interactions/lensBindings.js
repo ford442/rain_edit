@@ -224,6 +224,26 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("magnifier-active", "ethereal-glitch-active"),
   });
 
+  manager.register({
+    id: "cyber-grid-hologram",
+    category: "lens",
+    description: "Cyber-Grid Hologram Lens (Alt+Shift+F)",
+    combo: { alt: true, shift: true, code: "KeyF" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("magnifier-active", "cyber-grid-hologram-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("magnifier-active", "cyber-grid-hologram-active"),
+  });
+
+
   // Pointer tracking for the lens center (was MagnifierLens.handlePointerMove).
   manager.register({
     id: "spectral-refraction",
