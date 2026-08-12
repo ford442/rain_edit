@@ -1,4 +1,3 @@
-import StorageAPI from "./StorageAPI.js";
 import {
   storageAPI,
   TOAST_DISPLAY_DURATION,
@@ -7,9 +6,10 @@ import {
   DEPTH_TITLES,
   _extractSymbols,
   _symbolKindIcon,
-} from "./TabManager.js";
-export const TabManagerMixin0 = {
+} from "../TabManager.js";
 
+/** 3D view-mode flags, toggles, and addFile entry point. */
+export const TabManagerViewModesMixin = {
   _deactivateAllViews() {
     this.isFloatingNexusView = false;
 
@@ -260,15 +260,6 @@ export const TabManagerMixin0 = {
     }
     this._renderEchoes();
   },
-  toggleStackDeckView() {
-    const wasActive = this.isStackDeckView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isStackDeckView = true;
-      document.body.classList.add("stack-deck-active");
-    }
-    this._renderEchoes();
-  },
   toggleStaircaseView() {
     const wasActive = this.isStaircaseView;
     this._deactivateAllViews();
@@ -326,6 +317,8 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isTheaterView = true;
       document.body.classList.add("theater-active");
+      const btn = document.getElementById("btn-theater-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   },
@@ -344,6 +337,8 @@ export const TabManagerMixin0 = {
     if (!wasActive) {
       this.isTornadoView = true;
       document.body.classList.add("tornado-active");
+      const btn = document.getElementById("btn-tornado-view");
+      if (btn) btn.classList.add("active");
     }
     this._renderEchoes();
   },
@@ -658,12 +653,7 @@ export const TabManagerMixin0 = {
     }
     this._renderEchoes();
   },
-
-};
-
-
-
-TabManagerMixin0.toggleAuroraView = function() {
+  toggleAuroraView() {
   const wasActive = this.isAuroraView;
   this._deactivateAllViews();
   if (!wasActive) {
@@ -671,9 +661,8 @@ TabManagerMixin0.toggleAuroraView = function() {
     document.body.classList.add("aurora-active");
   }
   this._renderEchoes();
-};
-
-TabManagerMixin0.toggleFloatingNexusView = function() {
+},
+  toggleFloatingNexusView() {
   const wasActive = this.isFloatingNexusView;
   this._deactivateAllViews();
   if (!wasActive) {
@@ -681,4 +670,222 @@ TabManagerMixin0.toggleFloatingNexusView = function() {
     document.body.classList.add("floating-nexus-active");
   }
   this._renderEchoes();
+},
+  togglePrismSplitView() {
+    const wasActive = this.isPrismSplitView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isPrismSplitView = true;
+      document.body.classList.add("prism-split-active");
+    }
+    this._renderEchoes();
+  },
+  togglePrismView() {
+    const wasActive = this.isPrismView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isPrismView = true;
+      document.body.classList.add("prism-active");
+      const btn = document.getElementById("btn-prism-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleTimeTunnelView() {
+    const wasActive = this.isTimeTunnelView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTimeTunnelView = true;
+      document.body.classList.add("time-tunnel-active");
+    }
+    this._renderEchoes();
+  },
+  toggleHelixView() {
+    const wasActive = this.isHelixView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHelixView = true;
+      document.body.classList.add("helix-active");
+      const btn = document.getElementById("btn-helix-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleConstellationView() {
+    const wasActive = this.isConstellationView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isConstellationView = true;
+      document.body.classList.add("constellation-active");
+      const btn = document.getElementById("btn-constellation-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  togglePinboardView() {
+    const wasActive = this.isPinboardView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isPinboardView = true;
+      document.body.classList.add("pinboard-active");
+      const btn = document.getElementById("btn-pinboard-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleVortexView() {
+    const wasActive = this.isVortexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isVortexView = true;
+      document.body.classList.add("vortex-active");
+      const btn = document.getElementById("btn-vortex-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleStackView() {
+    const wasActive = this.isStackView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isStackView = true;
+      document.body.classList.add("stack-active");
+      const btn = document.getElementById("btn-stack-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleTimelineView() {
+    const wasActive = this.isTimelineView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTimelineView = true;
+      document.body.classList.add("timeline-active");
+      const btn = document.getElementById("btn-timeline-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleTunnelView() {
+    const wasActive = this.isTunnelView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTunnelView = true;
+      document.body.classList.add("tunnel-active");
+      const btn = document.getElementById("btn-tunnel-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleGridView() {
+    const wasActive = this.isGridView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isGridView = true;
+      document.body.classList.add("grid-active");
+      const btn = document.getElementById("btn-grid-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleIsometricView() {
+    const wasActive = this.isIsometricView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isIsometricView = true;
+      document.body.classList.add("isometric-active");
+      const btn = document.getElementById("btn-isometric-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleScatteredView() {
+    const wasActive = this.isScatteredView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isScatteredView = true;
+      document.body.classList.add("scattered-active");
+      const btn = document.getElementById("btn-scattered-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleLuminescenceView() {
+    const wasActive = this.isLuminescenceView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isLuminescenceView = true;
+      document.body.classList.add("luminescence-active");
+    }
+    this._renderEchoes();
+  },
+  toggleTorusView() {
+    const wasActive = this.isTorusView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isTorusView = true;
+      document.body.classList.add("torus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleWaterfallView() {
+    const wasActive = this.isWaterfallView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isWaterfallView = true;
+      document.body.classList.add("waterfall-active");
+      const btn = document.getElementById("btn-waterfall-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleCascadeView() {
+    const wasActive = this.isCascadeView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCascadeView = true;
+      document.body.classList.add("cascade-active");
+      const btn = document.getElementById("btn-cascade-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleOrbitView() {
+    const wasActive = this.isOrbitView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isOrbitView = true;
+      document.body.classList.add("orbit-active");
+      const btn = document.getElementById("btn-orbit-view");
+      if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  addFile(name, content = "", language = "javascript") {
+    const id = this._nextId++;
+    const isImage = language === "image";
+
+    let model = null;
+    if (!isImage) {
+      model = this.monaco.editor.createModel(content, language);
+    }
+
+    this.files.push({
+      id,
+      name,
+      model,
+      depth: 1,
+      isImage,
+      language,
+      url: isImage ? content : null,
+      dirty: false,
+      savedContent: isImage ? undefined : content,
+    });
+    this.workspaceSession?.watchFile?.(
+      this.files[this.files.length - 1],
+    );
+    this._renderTabs();
+    this._saveTabsToStorage();
+    return id;
+  },
 };
