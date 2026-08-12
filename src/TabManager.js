@@ -340,20 +340,13 @@ export class TabManager {
 
 }
 
-// --- Mixins ---
-import { TabManagerMixin0 } from './TabManager_0.js';
-Object.assign(TabManager.prototype, TabManagerMixin0);
-import { TabManagerMixin1 } from './TabManager_1.js';
-Object.assign(TabManager.prototype, TabManagerMixin1);
-import { TabManagerMixin2 } from './TabManager_2.js';
-Object.assign(TabManager.prototype, TabManagerMixin2);
-import { TabManagerMixin3 } from './TabManager_3.js';
-Object.assign(TabManager.prototype, TabManagerMixin3);
-import { TabManagerMixin4 } from './TabManager_4.js';
-Object.assign(TabManager.prototype, TabManagerMixin4);
-import { TabManagerMixin5 } from './TabManager_5.js';
-Object.assign(TabManager.prototype, TabManagerMixin5);
-import { TabManagerMixin6 } from './TabManager_6.js';
-Object.assign(TabManager.prototype, TabManagerMixin6);
-import { TabManagerMixin7 } from './TabManager_7.js';
-Object.assign(TabManager.prototype, TabManagerMixin7);
+// --- Mixins (core / view modes / echo layouts / echo render) ---
+import { TabManagerCoreMixin } from "./tabManager/core.js";
+import { TabManagerViewModesMixin } from "./tabManager/viewModes.js";
+import { TabManagerEchoLayoutsMixin } from "./tabManager/echoLayouts.js";
+import { TabManagerEchoRenderMixin } from "./tabManager/echoRender.js";
+
+Object.assign(TabManager.prototype, TabManagerCoreMixin);
+Object.assign(TabManager.prototype, TabManagerViewModesMixin);
+Object.assign(TabManager.prototype, TabManagerEchoLayoutsMixin);
+Object.assign(TabManager.prototype, TabManagerEchoRenderMixin);

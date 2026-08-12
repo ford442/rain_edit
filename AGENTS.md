@@ -33,7 +33,7 @@ Key product features:
 | Editor         | `monaco-editor` v0.43.0 (workers configured in `src/editor/setupMonaco.js`)                  |
 | 3D graphics    | `three` v0.183.2 (used only in `Cabinet3D.js`)                                                |
 | Shaders        | Custom WebGL in `RainLayer.js`; GLSL source files compiled via a custom `glslify` Vite plugin |
-| Styling        | Sequential `src/styles_1.css`–`styles_14.css` shards, heavy use of CSS variables             |
+| Styling        | `src/styles_{base,views,echo,ui}.css` (merged from legacy shards), heavy use of CSS variables |
 | Backend client | `StorageAPI.js` talks to a FastAPI backend at `https://storage.noahcohn.com`                  |
 | Dev server     | Vite (port 5173); configured to allow FS access to parent directory (`'..'`)                  |
 
@@ -49,27 +49,39 @@ root/
   git.sh                  # Simple helper: git add/commit/push
   src/
     main.js               # Thin entry point; loads Monaco setup, state shards, then init shards
-    main_vars_0.js - main_vars_2.js # Transitional global state/function shards
-    main_init_0.js - main_init_4.js # Transitional side-effect initialization shards
+    appContext.js         # Shared runtime refs (tabManager, editors, managers); prefer over window.*
+    main_vars_0.js - main_vars_2.js # Transitional global state/function shards (migrating to appContext)
+    main_init_0.js - main_init_3.js # Transitional side-effect initialization shards
+    main_init_4.js        # Boots echo-document interactions + InputManager dispatcher
     editor/
       setupMonaco.js      # Sole Monaco language/worker registration point
     interactions/
+      InputManager.js     # Unified keyboard registry + cheatsheet
       InputRegistry.js    # Listener lifecycle/disposal helper
-      MagnifierLens.js    # Alt+M obscured-layer magnifier
-      MagneticRepulsion.js # Alt+Shift+M magnetic separation
+      EchoDocumentInteractions.js # Echo depth gestures, peel/fan/portal modes (from legacy main_init_4)
+      lensBindings.js     # Lens-family shortcuts (magnifier, x-ray, magnetic separation, …)
+      initInteractions.js # Starts InputManager after all bindings register
+    tabManager/
+      core.js             # Tab lifecycle (active file, depth, persistence)
+      viewModes.js        # 3D view-mode toggles and addFile
+      echoLayouts.js      # Per-view echo layout chunks
+      echoRender.js       # Echo DOM build + event binding
     rendering/
       createGLContext.js  # Shared WebGL2-first context policy + DPR sizing
-    TabManager.js         # File tabs/depth shell composed with TabManager_0.js - TabManager_7.js mixins
+    TabManager.js         # File tabs/depth shell composed with tabManager/* mixins
     ConnectionManager.js  # Radar/minimap canvas drawing (echo blips + reference cards)
     ReferenceManager.js   # Markdown note cards + visual effects (lantern, spotlight, frost, drag)
     FogManager.js         # Canvas fog that regenerates and is cleared by mouse
     HoloManager.js        # Scans editor for // TODO/FIXME/etc. and renders badges
     RainLayer.js          # Recoverable WebGL rain pass; rebuilds resources after context loss
     StorageAPI.js         # HTTP client for categories, notes, and VPS file operations
-    Cabinet3D.js          # Three.js modal file browser (split into Cabinet3D_0.js - Cabinet3D_1.js mixins)
+    Cabinet3D.js          # Three.js modal file browser (methods in cabinet3d/methods.js)
     VPSFileBrowser.js     # Slide-in panel to browse/open/save VPS remote files
     UploadProgressUI.js   # Small toast UI for drag-and-drop uploads
-    styles_1.css - styles_14.css # Split CSS files imported in index.html (~600 lines each)
+    styles_base.css       # Base layout, shell, editor chrome
+    styles_views.css      # 3D view-mode body classes
+    styles_echo.css       # Echo documents and depth effects
+    styles_ui.css         # Dock, overlays, cheatsheet
     shaders/
       simple.vert         # Basic fullscreen vertex shader
       water.frag          # Front rain fragment shader
@@ -94,9 +106,9 @@ root/
 
 ### Module relationships
 
-- `main.js` is the build entry point. It loads `editor/setupMonaco.js` once, then the transitional `main_vars_*` state shards followed by `main_init_*` initialization shards. Do not recreate deleted `main_0.js`–`main_6.js` files or add another full Monaco import block.
+- `main.js` is the build entry point. It loads `editor/setupMonaco.js` once, then the transitional `main_vars_*` state shards followed by `main_init_*` initialization shards. Prefer `appContext.js` for shared manager references; `window.tabManager` remains for debug automation only.
 - New or extracted interactions belong in `src/interactions/` as named classes/functions with explicit DOM or manager dependencies, an `init()`/`destroy()` lifecycle, and focused tests. Do not add new `window.*` globals.
-- `main_vars_*` and `main_init_*` remain legacy migration surfaces. When touching a self-contained feature there, prefer extracting it into a domain module rather than appending another listener block.
+- `main_vars_*` and `main_init_0`–`main_init_3` remain legacy migration surfaces. Echo-document keyboard/mouse interactions live in `interactions/EchoDocumentInteractions.js`.
 - `TabManager` owns the list of open files, switches active models in Monaco, manages per-file depth (0/1/2), and renders background echoes in `#echo-layer`. It implements 25+ CSS-driven 3D view modes.
 - `ReferenceManager` owns `#reference-layer` and `#reference-overlay`. It parses markdown into floating cards and handles lantern/spotlight/frost interactions, drag-and-drop, and rain-shield clearing.
 - `ConnectionManager` draws on the radar canvas (`#radar-canvas`) using 2D canvas. It receives reference card data from `ReferenceManager` and echo targets from the DOM.

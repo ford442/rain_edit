@@ -1,6 +1,16 @@
-import StorageAPI from "./StorageAPI.js";
-import { storageAPI, TOAST_DISPLAY_DURATION, DEPTH_Z_INDEX, DEPTH_ICONS, DEPTH_TITLES, _extractSymbols, _symbolKindIcon } from './TabManager.js';
-export const TabManagerMixin1 = {
+import {
+  storageAPI,
+  TOAST_DISPLAY_DURATION,
+  DEPTH_Z_INDEX,
+  DEPTH_ICONS,
+  DEPTH_TITLES,
+  _extractSymbols,
+  _symbolKindIcon,
+} from "../TabManager.js";
+
+/** Tab lifecycle: active file, depth, tabs UI, persistence, notes. */
+export const TabManagerCoreMixin = {
+
   setActive(id) {
     const file = this.files.find((f) => f.id === id);
     if (!file) return;
@@ -384,7 +394,7 @@ Drag to change depth`;
       const tabData = JSON.parse(stored);
       if (!Array.isArray(tabData) || tabData.length === 0) return false;
 
-      const { StorageAPI } = await import("./StorageAPI.js");
+      const { StorageAPI } = await import("../StorageAPI.js");
       const storageAPI = new StorageAPI();
 
       for (const tab of tabData) {

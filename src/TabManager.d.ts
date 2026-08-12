@@ -1,5 +1,5 @@
 // Public type surface for the tab/depth manager. Authored declaration: the
-// runtime class is composed from TabManager_0..7 mixins at load time, which
+// runtime class is composed from tabManager/* mixins at load time, which
 // TypeScript cannot infer, so the trusted public API is declared here.
 
 import type * as monaco from "monaco-editor";

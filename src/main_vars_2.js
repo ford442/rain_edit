@@ -9,6 +9,7 @@ import { Cabinet3D } from "./Cabinet3D.js";
 import { VPSFileBrowser } from "./VPSFileBrowser.js";
 import DataSiphon from "./DataSiphon.js";
 import { VeilExcavator } from "./VeilExcavator.js";
+import { setAppContext } from "./appContext.js";
 
 window.scanPortals = function scanPortals() {
   const model = editor.getModel();
@@ -301,6 +302,14 @@ window.tabManager = new TabManager(
   imageViewerEl,
   echoLayerEl,
 );
+setAppContext({
+  tabManager,
+  referenceManager,
+  connectionManager,
+  fogManager,
+  editor,
+  echoLayerEl,
+});
 window._urlNote = new URLSearchParams(window.location.search).get("note");
 window.holoManager = new HoloManager(editor, holoLayerEl);
 window.storageAPI = new StorageAPI();

@@ -336,19 +336,6 @@ export class Cabinet3D {
 
 }
 
-// --- Mixins ---
-import { Cabinet3DMixin0 } from './Cabinet3D_0.js';
-Object.assign(Cabinet3D.prototype, Cabinet3DMixin0);
-import { Cabinet3DMixin1 } from './Cabinet3D_1.js';
-Object.assign(Cabinet3D.prototype, Cabinet3DMixin1);
-
-// --- Mixins ---
-
-
-// --- Mixins ---
-
-
-// --- Mixins ---
-
-
-// --- Mixins ---
+// --- Methods mixin ---
+import { Cabinet3DMethodsMixin } from "./cabinet3d/methods.js";
+Object.assign(Cabinet3D.prototype, Cabinet3DMethodsMixin);

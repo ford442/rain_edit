@@ -6,6 +6,7 @@ import {
   setWorkspaceSession,
 } from "./workspace/WorkspaceSession.js";
 import { LocalProject } from "./workspace/LocalProject.js";
+import { setAppContext } from "./appContext.js";
 
 portalLayer.id = "portal-visuals";
 
@@ -59,6 +60,7 @@ workspaceSession.installUnloadGuard();
 
 const localProject = new LocalProject({ tabManager, workspaceSession });
 window.localProject = localProject;
+setAppContext({ tabManager, workspaceSession, localProject });
 localProject.bindUi();
 
 (async () => {

@@ -1,5 +1,5 @@
 // Public type surface for the Three.js 3D file cabinet. Authored declaration:
-// the runtime class is composed from Cabinet3D_0..1 mixins at load time.
+// the runtime class is composed from cabinet3d/methods.js mixin at load time.
 
 import type { StorageAPI } from "./StorageAPI.js";
 import type { TabManager } from "./TabManager.js";
