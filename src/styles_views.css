@@ -374,38 +374,6 @@
   z-index: 1;
 }
 
-.echo-document.magnifier-active {
-  opacity: 1 !important;
-  filter: blur(0px) brightness(1.3) !important;
-  color: #fff;
-  border-color: rgba(0, 229, 255, 0.9);
-  box-shadow:
-    0 0 60px rgba(0, 229, 255, 0.6),
-    inset 0 0 30px rgba(0, 229, 255, 0.3);
-  transform: translate3d(
-      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
-      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
-      100px
-    )
-    scale(1.1) !important;
-  z-index: 100;
-  mask-image: radial-gradient(
-    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    black 0%,
-    black 150px,
-    rgba(0, 0, 0, 0.1) 200px
-  );
-  -webkit-mask-image: radial-gradient(
-    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    black 0%,
-    black 150px,
-    rgba(0, 0, 0, 0.1) 200px
-  );
-  transition:
-    opacity 0.2s,
-    transform 0.2s;
-}
-
 /* Improvised Focus Lens Logic */
 .echo-document.loupe-active {
   opacity: 1 !important;
@@ -3824,4 +3792,68 @@ body.neon-matrix-wireframe-active {
 }
 .astral-projection-active .echo-document {
   animation: astral-float 4s ease-in-out infinite alternate;
+}
+
+/* Prismatic Array View */
+body.prismatic-array-active .echo-document {
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, filter 0.5s ease;
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+             rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 200, 0.3);
+  background: rgba(10, 15, 25, 0.8);
+  backdrop-filter: blur(8px);
+  opacity: 0.8;
+  filter: hue-rotate(calc(var(--item-index) * 25deg)) brightness(1.2);
+}
+
+body.prismatic-array-active .echo-document:hover {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 150px))
+             rotateX(0) rotateY(0) rotateZ(0) scale(1.1);
+  box-shadow: 0 20px 60px rgba(0, 255, 200, 0.6);
+  border-color: rgba(0, 255, 200, 0.8);
+  z-index: 1000 !important;
+  opacity: 1;
+  filter: hue-rotate(calc(var(--item-index) * 25deg)) brightness(1.5);
+}
+
+body.prismatic-array-active #editor {
+  transform: scale(0.85) translateZ(100px);
+  opacity: 0.9;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  transition: all 0.5s ease;
+}
+
+/* X-Ray Grid Lens */
+.xray-grid-active #editor {
+  opacity: 0.15;
+  filter: blur(4px) grayscale(100%);
+  transform: scale(0.95);
+  transition: all 0.3s ease;
+}
+
+.xray-grid-active .echo-document {
+  opacity: 1 !important;
+  filter: none !important;
+  background: rgba(10, 20, 15, 0.9) !important;
+  border: 1px solid rgba(57, 255, 20, 0.6) !important;
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.3), inset 0 0 10px rgba(57, 255, 20, 0.2) !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) * 100px) - 100px),
+    calc(var(--ty, 0px) + (var(--item-index, 0) * 150px) - 150px),
+    calc(var(--tz, 0px) + 200px)
+  ) scale(0.9) !important;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  z-index: calc(100 + var(--item-index, 0)) !important;
+}
+
+.xray-grid-active .echo-document:hover {
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) * 100px) - 100px),
+    calc(var(--ty, 0px) + (var(--item-index, 0) * 150px) - 150px),
+    calc(var(--tz, 0px) + 300px)
+  ) scale(1.1) !important;
+  border-color: rgba(57, 255, 20, 1) !important;
+  box-shadow: 0 0 40px rgba(57, 255, 20, 0.6), inset 0 0 20px rgba(57, 255, 20, 0.4) !important;
+  z-index: 999 !important;
 }

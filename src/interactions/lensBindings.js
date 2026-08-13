@@ -14,8 +14,8 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     combo: { alt: true, code: "KeyM" },
     type: "hold",
     group: "lens",
-    onDown: () => body.classList.add("magnifier-active", "obscured-magnifier-active"),
-    onUp: () => body.classList.remove("magnifier-active", "obscured-magnifier-active"),
+    onDown: () => body.classList.add("loupe-active"),
+    onUp: () => body.classList.remove("loupe-active"),
   });
 
   manager.register({
@@ -25,8 +25,8 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     combo: { alt: true, code: "KeyC" },
     type: "hold",
     group: "lens",
-    onDown: () => body.classList.add("magnifier-active", "xray-core-active"),
-    onUp: () => body.classList.remove("magnifier-active", "xray-core-active"),
+    onDown: () => body.classList.add("loupe-active", "xray-core-active"),
+    onUp: () => body.classList.remove("loupe-active", "xray-core-active"),
   });
 
   manager.register({
@@ -36,8 +36,8 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     combo: { alt: true, code: "KeyN" },
     type: "hold",
     group: "lens",
-    onDown: () => body.classList.add("magnifier-active", "quantum-scanner-active"),
-    onUp: () => body.classList.remove("magnifier-active", "quantum-scanner-active"),
+    onDown: () => body.classList.add("loupe-active", "quantum-scanner-active"),
+    onUp: () => body.classList.remove("loupe-active", "quantum-scanner-active"),
   });
 
   manager.register({
@@ -47,8 +47,8 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     combo: { alt: true, shift: true, code: "KeyM" },
     type: "hold",
     group: "lens",
-    onDown: () => body.classList.add("magnifier-active", "magnetic-sep-active"),
-    onUp: () => body.classList.remove("magnifier-active", "magnetic-sep-active"),
+    onDown: () => body.classList.add("loupe-active", "magnetic-sep-active"),
+    onUp: () => body.classList.remove("loupe-active", "magnetic-sep-active"),
   });
 
   manager.register({
@@ -58,8 +58,8 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     combo: { alt: true, code: "KeyF" },
     type: "hold",
     group: "lens",
-    onDown: () => body.classList.add("magnifier-active", "chrono-ghost-active"),
-    onUp: () => body.classList.remove("magnifier-active", "chrono-ghost-active"),
+    onDown: () => body.classList.add("loupe-active", "chrono-ghost-active"),
+    onUp: () => body.classList.remove("loupe-active", "chrono-ghost-active"),
   });
 
   manager.register({
@@ -69,8 +69,8 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     combo: { alt: true, shift: true, code: "KeyL" },
     type: "hold",
     group: "lens",
-    onDown: () => body.classList.add("magnifier-active", "blacklight-reveal-active"),
-    onUp: () => body.classList.remove("magnifier-active", "blacklight-reveal-active"),
+    onDown: () => body.classList.add("loupe-active", "blacklight-reveal-active"),
+    onUp: () => body.classList.remove("loupe-active", "blacklight-reveal-active"),
   });
 
   manager.register({
@@ -81,7 +81,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "geometric-shatter-active");
+      body.classList.add("loupe-active", "geometric-shatter-active");
       const echoLayer = document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
@@ -89,7 +89,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "geometric-shatter-active"),
+    onUp: () => body.classList.remove("loupe-active", "geometric-shatter-active"),
   });
 
   manager.register({
@@ -100,7 +100,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "kaleidoscope-active");
+      body.classList.add("loupe-active", "kaleidoscope-active");
       const echoLayer = document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
@@ -108,7 +108,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "kaleidoscope-active"),
+    onUp: () => body.classList.remove("loupe-active", "kaleidoscope-active"),
   });
 
 
@@ -140,7 +140,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "thermal-vision-active");
+      body.classList.add("loupe-active", "thermal-vision-active");
       const echoLayer = document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
@@ -148,7 +148,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "thermal-vision-active"),
+    onUp: () => body.classList.remove("loupe-active", "thermal-vision-active"),
   });
 
   manager.register({
@@ -159,7 +159,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "chromatic-aberration-active");
+      body.classList.add("loupe-active", "chromatic-aberration-active");
       const echoLayer = doc.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -167,7 +167,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "chromatic-aberration-active"),
+    onUp: () => body.classList.remove("loupe-active", "chromatic-aberration-active"),
   });
 
 
@@ -179,7 +179,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "aurora-shift-active");
+      body.classList.add("loupe-active", "aurora-shift-active");
       const echoLayer = document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
@@ -187,7 +187,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "aurora-shift-active"),
+    onUp: () => body.classList.remove("loupe-active", "aurora-shift-active"),
   });
 
 
@@ -198,8 +198,8 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     combo: { alt: true, shift: true, code: "KeyR" },
     type: "hold",
     group: "lens",
-    onDown: () => body.classList.add("magnifier-active", "ripple-displacement-active"),
-    onUp: () => body.classList.remove("magnifier-active", "ripple-displacement-active"),
+    onDown: () => body.classList.add("loupe-active", "ripple-displacement-active"),
+    onUp: () => body.classList.remove("loupe-active", "ripple-displacement-active"),
   });
 
   manager.register({
@@ -209,8 +209,8 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     combo: { alt: true, shift: true, code: "KeyN" },
     type: "hold",
     group: "lens",
-    onDown: () => body.classList.add("magnifier-active", "neon-pulse-active"),
-    onUp: () => body.classList.remove("magnifier-active", "neon-pulse-active"),
+    onDown: () => body.classList.add("loupe-active", "neon-pulse-active"),
+    onUp: () => body.classList.remove("loupe-active", "neon-pulse-active"),
   });
 
   manager.register({
@@ -220,8 +220,8 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     combo: { alt: true, shift: true, code: "KeyJ" },
     type: "hold",
     group: "lens",
-    onDown: () => body.classList.add("magnifier-active", "ethereal-glitch-active"),
-    onUp: () => body.classList.remove("magnifier-active", "ethereal-glitch-active"),
+    onDown: () => body.classList.add("loupe-active", "ethereal-glitch-active"),
+    onUp: () => body.classList.remove("loupe-active", "ethereal-glitch-active"),
   });
 
   manager.register({
@@ -232,7 +232,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "cyber-grid-hologram-active");
+      body.classList.add("loupe-active", "cyber-grid-hologram-active");
       const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -240,7 +240,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "cyber-grid-hologram-active"),
+    onUp: () => body.classList.remove("loupe-active", "cyber-grid-hologram-active"),
   });
 
 
@@ -253,7 +253,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "spectral-refraction-active");
+      body.classList.add("loupe-active", "spectral-refraction-active");
       const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -261,7 +261,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "spectral-refraction-active"),
+    onUp: () => body.classList.remove("loupe-active", "spectral-refraction-active"),
   });
 
   manager.register({
@@ -272,7 +272,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "topographic-contour-active");
+      body.classList.add("loupe-active", "topographic-contour-active");
       const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -280,7 +280,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "topographic-contour-active"),
+    onUp: () => body.classList.remove("loupe-active", "topographic-contour-active"),
   });
 
   manager.register({
@@ -291,7 +291,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "magma-core-active");
+      body.classList.add("loupe-active", "magma-core-active");
       const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -299,7 +299,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "magma-core-active"),
+    onUp: () => body.classList.remove("loupe-active", "magma-core-active"),
   });
 
   manager.register({
@@ -310,7 +310,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "ectoplasmic-ooze-active");
+      body.classList.add("loupe-active", "ectoplasmic-ooze-active");
       const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -318,7 +318,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "ectoplasmic-ooze-active"),
+    onUp: () => body.classList.remove("loupe-active", "ectoplasmic-ooze-active"),
   });
 
   manager.register({
@@ -329,7 +329,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "zenith-halo-active");
+      body.classList.add("loupe-active", "zenith-halo-active");
       const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -337,7 +337,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "zenith-halo-active"),
+    onUp: () => body.classList.remove("loupe-active", "zenith-halo-active"),
   });
 
   manager.register({
@@ -348,7 +348,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "quantum-fracture-active");
+      body.classList.add("loupe-active", "quantum-fracture-active");
       const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -356,7 +356,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "quantum-fracture-active"),
+    onUp: () => body.classList.remove("loupe-active", "quantum-fracture-active"),
   });
 
   manager.register({
@@ -367,7 +367,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "cosmic-void-active");
+      body.classList.add("loupe-active", "cosmic-void-active");
       const echoLayer = doc.getElementById("echo-layer") || document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -375,7 +375,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "cosmic-void-active"),
+    onUp: () => body.classList.remove("loupe-active", "cosmic-void-active"),
   });
 
   manager.register({
@@ -386,7 +386,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "bioluminescent-trace-active");
+      body.classList.add("loupe-active", "bioluminescent-trace-active");
       const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -394,7 +394,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "bioluminescent-trace-active"),
+    onUp: () => body.classList.remove("loupe-active", "bioluminescent-trace-active"),
   });
 
   manager.register({
@@ -405,7 +405,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "digital-matrix-decode-active");
+      body.classList.add("loupe-active", "digital-matrix-decode-active");
       const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -413,7 +413,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "digital-matrix-decode-active"),
+    onUp: () => body.classList.remove("loupe-active", "digital-matrix-decode-active"),
   });
 
   manager.register({
@@ -424,7 +424,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "starlight-fracture-active");
+      body.classList.add("loupe-active", "starlight-fracture-active");
       const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -432,7 +432,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "starlight-fracture-active"),
+    onUp: () => body.classList.remove("loupe-active", "starlight-fracture-active"),
   });
 
   manager.register({
@@ -443,7 +443,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "time-lapse-echo-active");
+      body.classList.add("loupe-active", "time-lapse-echo-active");
       const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -451,7 +451,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "time-lapse-echo-active"),
+    onUp: () => body.classList.remove("loupe-active", "time-lapse-echo-active"),
   });
 
 
@@ -463,7 +463,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "neon-matrix-wireframe-active");
+      body.classList.add("loupe-active", "neon-matrix-wireframe-active");
       const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -471,7 +471,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "neon-matrix-wireframe-active"),
+    onUp: () => body.classList.remove("loupe-active", "neon-matrix-wireframe-active"),
   });
 
   manager.register({
@@ -482,7 +482,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "fractal-dimension-active");
+      body.classList.add("loupe-active", "fractal-dimension-active");
       const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -490,7 +490,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "fractal-dimension-active"),
+    onUp: () => body.classList.remove("loupe-active", "fractal-dimension-active"),
   });
 
   manager.register({
@@ -501,7 +501,7 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     type: "hold",
     group: "lens",
     onDown: () => {
-      body.classList.add("magnifier-active", "astral-projection-active");
+      body.classList.add("loupe-active", "astral-projection-active");
       const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
       if (echoLayer) {
         echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
@@ -509,12 +509,32 @@ export function registerLensBindings(manager, { doc = document } = {}) {
         });
       }
     },
-    onUp: () => body.classList.remove("magnifier-active", "astral-projection-active"),
+    onUp: () => body.classList.remove("loupe-active", "astral-projection-active"),
+  });
+
+
+  manager.register({
+    id: "xray-grid-lens",
+    category: "lens",
+    description: "X-Ray Grid Lens (Alt+Shift+X)",
+    combo: { alt: true, shift: true, code: "KeyX" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "xray-grid-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "xray-grid-active"),
   });
 
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
-      if (!body.classList.contains("magnifier-active")) return;
+      if (!body.classList.contains("loupe-active")) return;
       body.style.setProperty("--lens-x", `${e.clientX}px`);
       body.style.setProperty("--lens-y", `${e.clientY}px`);
     });

@@ -12,6 +12,7 @@ import {
 export const TabManagerViewModesMixin = {
   _deactivateAllViews() {
     this.isFloatingNexusView = false;
+    this.isPrismaticArrayView = false;
 
     // Clear inline styles that could freeze layouts
     const echoes = document.querySelectorAll('.echo-document');
@@ -88,6 +89,7 @@ export const TabManagerViewModesMixin = {
     this.isPyramidView = false;
     this.isTorusView = false;
     this.isFloatingNexusView = false;
+    this.isPrismaticArrayView = false;
 
     document.body.classList.remove(
       "shattered-glass-active",
@@ -677,6 +679,15 @@ export const TabManagerViewModesMixin = {
     if (!wasActive) {
       this.isPrismSplitView = true;
       document.body.classList.add("prism-split-active");
+    }
+    this._renderEchoes();
+  },
+    togglePrismaticArrayView() {
+    const wasActive = this.isPrismaticArrayView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isPrismaticArrayView = true;
+      document.body.classList.add("prismatic-array-active");
     }
     this._renderEchoes();
   },
