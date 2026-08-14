@@ -114,7 +114,7 @@ im.register({
     editorEl.classList.remove("x-ray-active");
     if (echoLayerEl) {
       echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
-        echo.classList.remove("magnifier-active");
+
         echo.classList.remove("loupe-active");
       });
     }

@@ -1849,7 +1849,39 @@ if (this.isChronoRingView) {
     return false;
   },
   _applyLayoutChunk4(el, index, totalEchoes, file, inactiveFiles, activeFile) {
-if (this.isStackDeckView) {
+if (this.isPrismaticArrayView) {
+        // Prismatic Array View positions
+        const total = inactiveFiles.length;
+        const columns = Math.ceil(Math.sqrt(total));
+        const row = Math.floor(index / columns);
+        const col = index % columns;
+
+        const spacingX = 250;
+        const spacingY = 200;
+
+        const offsetX = (columns * spacingX) / 2 - (spacingX / 2);
+        const offsetY = (Math.ceil(total / columns) * spacingY) / 2 - (spacingY / 2);
+
+        const tx = (col * spacingX) - offsetX;
+        const ty = (row * spacingY) - offsetY;
+        const tz = -300 - (index * 20); // Push back and stagger depth slightly
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+
+        // Add a slight tilt based on position
+        const rotY = (col - (columns / 2)) * 5;
+        const rotX = (row - (total / columns / 2)) * -5;
+
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+
+        el.style.setProperty("--item-index", index);
+        return true;
+      }
+      if (this.isStackDeckView) {
         // Stack Deck View positions
         const spacingY = 40;
         const spacingZ = 15;

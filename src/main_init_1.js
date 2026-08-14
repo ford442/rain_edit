@@ -415,7 +415,7 @@ document.addEventListener("mousemove", (e) => {
         if (dist < 300) {
           // Add the improved 'loupe-active' feature instead of the old 'magnifier-active'
           echo.classList.add("loupe-active");
-          echo.classList.remove("magnifier-active");
+
 
           // Because 'loupe-active' centers the element perfectly on the screen (-50%, -50% transform on left: 50%, top: 50%),
           // we must calculate mouse coordinates relative to the center of the viewport for the mask-image
@@ -425,7 +425,7 @@ document.addEventListener("mousemove", (e) => {
           echo.style.setProperty("--mouse-y", `${y}px`);
         } else {
           echo.classList.remove("loupe-active");
-          echo.classList.remove("magnifier-active");
+
         }
       });
     }
@@ -434,7 +434,7 @@ document.addEventListener("mousemove", (e) => {
       // Skip if peeking or magnifier is active, let CSS handle it completely
       if (
         echo.classList.contains("peek") ||
-        echo.classList.contains("magnifier-active") ||
+
         echo.classList.contains("is-peeking")
       ) {
         echo.style.removeProperty("--wake-dist");

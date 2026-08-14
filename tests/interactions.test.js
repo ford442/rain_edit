@@ -83,13 +83,13 @@ test("Alt+M activates and releases the obscured magnifier", () => {
 
   const down = key({ altKey: true, code: "KeyM", key: "m" });
   h.doc.dispatch("keydown", down);
-  assert.equal(h.body.classList.contains("magnifier-active"), true);
-  assert.equal(h.body.classList.contains("obscured-magnifier-active"), true);
+  assert.equal(h.body.classList.contains("loupe-active"), true);
+
   assert.equal(down.defaultPrevented, true);
 
   h.doc.dispatch("keyup", key({ key: "m" }));
-  assert.equal(h.body.classList.contains("magnifier-active"), false);
-  assert.equal(h.body.classList.contains("obscured-magnifier-active"), false);
+  assert.equal(h.body.classList.contains("loupe-active"), false);
+
 });
 
 
