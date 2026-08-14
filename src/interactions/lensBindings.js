@@ -512,6 +512,65 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("loupe-active", "astral-projection-active"),
   });
 
+  manager.register({
+    id: "pixelate-lens",
+    category: "lens",
+    description: "Pixelate Lens (Alt+Shift+4)",
+    combo: { alt: true, shift: true, code: "Digit4" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "pixelate-lens-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "pixelate-lens-active"),
+  });
+
+  manager.register({
+    id: "vortex-warp",
+    category: "lens",
+    description: "Vortex Warp Lens (Alt+Shift+5)",
+    combo: { alt: true, shift: true, code: "Digit5" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "vortex-warp-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "vortex-warp-active"),
+  });
+
+  manager.register({
+    id: "echo-trails",
+    category: "lens",
+    description: "Echo Trails Lens (Alt+Shift+6)",
+    combo: { alt: true, shift: true, code: "Digit6" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "echo-trails-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "echo-trails-active"),
+  });
+
+
+
 
   manager.register({
     id: "xray-grid-lens",
