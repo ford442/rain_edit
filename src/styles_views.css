@@ -3065,12 +3065,12 @@ body.peel-active #editor {
   transform: translateY(-50%);
   width: 48px;
   height: 350px;
-  background: linear-gradient(180deg, rgba(20, 30, 50, 0.75), rgba(5, 10, 20, 0.65));
-  backdrop-filter: blur(48px) saturate(250%);
+  background: linear-gradient(180deg, rgba(25, 40, 65, 0.8), rgba(10, 15, 30, 0.7));
+  backdrop-filter: blur(60px) saturate(300%);
   -webkit-backdrop-filter: blur(48px) saturate(250%);
   border: 1px solid rgba(0, 255, 255, 0.5);
   border-radius: 16px;
-  box-shadow:0 25px 60px rgba(0, 0, 0, 0.9), inset 0 0 35px rgba(0, 255, 255, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.2), 0 0 15px rgba(0, 255, 255, 0.2);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95), inset 0 0 45px rgba(0, 255, 255, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.3), 0 0 25px rgba(0, 255, 255, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3856,4 +3856,113 @@ body.prismatic-array-active #editor {
   border-color: rgba(57, 255, 20, 1) !important;
   box-shadow: 0 0 40px rgba(57, 255, 20, 0.6), inset 0 0 20px rgba(57, 255, 20, 0.4) !important;
   z-index: 999 !important;
+}
+
+/* ─── Pixelate Lens ─────────────────────────────────────────────────── */
+body.pixelate-lens-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease;
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  opacity: 0.9 !important;
+  /* Basic CSS pixelation technique uses crisp-edges and blur/contrast */
+  image-rendering: pixelated;
+  filter: blur(2px) contrast(2) drop-shadow(0 0 15px rgba(0, 255, 100, 0.5)) !important;
+  z-index: 300 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) * 1.05),
+    calc(var(--ty, 0px) * 1.05),
+    calc(var(--tz, -200px) + 50px)
+  ) rotateX(calc(var(--item-index, 0) * 2deg)) !important;
+}
+body.pixelate-lens-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+}
+
+
+/* ─── Vortex Warp Lens ─────────────────────────────────────────────────── */
+body.vortex-warp-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease;
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  opacity: 0.9 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 20deg)) brightness(1.2) drop-shadow(0 0 20px rgba(200, 50, 255, 0.4)) !important;
+  z-index: 300 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (sin(calc(var(--item-index, 0) * 0.5)) * 100px)),
+    calc(var(--ty, 0px) + (cos(calc(var(--item-index, 0) * 0.5)) * 100px)),
+    calc(var(--tz, -200px) + 100px)
+  ) rotateZ(calc(var(--item-index, 0) * 15deg)) !important;
+}
+body.vortex-warp-active #editor {
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+}
+
+
+/* ─── Echo Trails Lens ─────────────────────────────────────────────────── */
+body.echo-trails-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.8s cubic-bezier(0.1, 0.9, 0.2, 1);
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  opacity: calc(0.9 - (var(--item-index, 0) * 0.05)) !important;
+  filter: blur(calc(var(--item-index, 0) * 1px)) drop-shadow(0 0 10px rgba(0, 200, 255, 0.3)) !important;
+  z-index: 300 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) * 20px)),
+    calc(var(--ty, 0px) - (var(--item-index, 0) * 10px)),
+    calc(var(--tz, -200px) - (var(--item-index, 0) * 50px))
+  ) scale(calc(1 - (var(--item-index, 0) * 0.05))) !important;
+}
+body.echo-trails-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
 }
