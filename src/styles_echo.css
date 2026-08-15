@@ -103,7 +103,7 @@ body.solar-system-active #echo-layer::before {
   /* Golden/Warning glow to indicate a search match */
   border: 1px solid rgba(0, 255, 204, 1) !important;
   box-shadow:
-    0 20px 50px rgba(0, 255, 204, 0.6),
+    0 4px 12px rgba(0, 255, 204, 0.6),
     0 0 60px rgba(0, 255, 204, 0.8),
     inset 0 0 40px rgba(0, 255, 204, 0.4) !important;
 
@@ -138,11 +138,11 @@ body.solar-system-active #echo-layer::before {
   /* Enhanced Neon border styling */
   border: 1px solid rgba(0, 255, 255, 0.5);
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.6),
     0 0 25px rgba(0, 229, 255, 0.3),
     inset 0 0 20px rgba(0, 229, 255, 0.15),
     inset 0 2px 2px rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  border-radius: 4px;
   position: relative;
   overflow: hidden;
 }
@@ -209,9 +209,9 @@ body.solar-system-active #echo-layer::before {
   backdrop-filter: blur(32px) saturate(200%);
   -webkit-backdrop-filter: blur(32px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 16px;
+  border-radius: 4px;
   box-shadow:
-    0 15px 45px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     inset 0 1px 2px rgba(255, 255, 255, 0.5),
     0 0 30px rgba(0, 229, 255, 0.2);
   color: #aaddff;
@@ -232,7 +232,7 @@ body.solar-system-active #echo-layer::before {
     rgba(15, 25, 35, 0.8) 100%
   );
   box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.95),
+    0 4px 12px rgba(0, 0, 0, 0.95),
     inset 0 1px 3px rgba(255, 255, 255, 0.6),
     0 0 30px rgba(0, 229, 255, 0.5);
   transform: translateX(-50%) translateY(-2px);
@@ -252,7 +252,7 @@ body.solar-system-active #echo-layer::before {
 
   /* Apply our dynamic Bioluminescent glow from earlier */
   box-shadow:
-    0 10px 30px var(--bio-glow-color, rgba(0, 229, 255, 0.6)),
+    0 4px 12px var(--bio-glow-color, rgba(0, 229, 255, 0.6)),
     0 0 15px var(--bio-glow-strong, rgba(0, 229, 255, 0.9)),
     inset 0 0 10px rgba(255, 255, 255, 0.2);
 
@@ -443,14 +443,14 @@ body.infinity-mirror-active .echo-document:hover {
     opacity 0.8s ease-out,
     filter 0.8s;
   box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.8),
+    0 4px 12px rgba(0, 0, 0, 0.8),
     0 0 20px rgba(0, 255, 255, 0.2);
   border: 1px solid rgba(0, 255, 255, 0.3);
   backdrop-filter: blur(10px);
 }
 .carousel-active .echo-document:hover {
   box-shadow:
-    0 15px 50px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     0 0 30px rgba(0, 255, 255, 0.5);
   border-color: rgba(0, 255, 255, 0.6);
 }
@@ -564,7 +564,7 @@ body.cyber-cortex-active .echo-document {
 body.cyber-cortex-active .echo-document:hover {
   opacity: 1 !important;
   filter: blur(0px) !important;
-  border-radius: 12px; /* Morph back to a readable rectangle */
+  border-radius: 4px; /* Morph back to a readable rectangle */
   width: 600px;
   height: 800px;
   transform: translate3d(
@@ -761,7 +761,7 @@ body.hologram-preview-active #echo-layer .echo-document.hologram-target {
   backdrop-filter: blur(10px) sepia(50%) hue-rotate(180deg) !important;
   border: 2px solid rgba(0, 255, 255, 0.8) !important;
   box-shadow:
-    0 20px 60px rgba(0, 255, 255, 0.5),
+    0 4px 12px rgba(0, 255, 255, 0.5),
     inset 0 0 30px rgba(0, 255, 255, 0.3) !important;
 }
 body.hologram-preview-active #echo-layer .echo-document.hologram-target::after {
@@ -807,7 +807,7 @@ body.outline-active .tab-depth-badge.depth-2 {
 body.outline-active .echo-document {
   border: 1px solid hsla(var(--echo-tint, 180deg), 100%, 70%, 0.65);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.5),
     0 0 0 1px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.35),
     inset 0 0 30px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.15);
   opacity: calc(var(--base-opacity, 0.4) + 0.2);
@@ -815,7 +815,7 @@ body.outline-active .echo-document {
     hue-rotate(var(--echo-tint, 0deg));
   backdrop-filter: blur(10px) saturate(160%);
   background: linear-gradient(135deg, rgba(15, 20, 25, 0.6), rgba(5, 10, 15, 0.8));
-  border-radius: 12px;
+  border-radius: 4px;
   transform: scale(0.95);
   transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -823,7 +823,7 @@ body.outline-active .echo-document {
 body.outline-active .echo-document:hover {
   border-color: hsla(var(--echo-tint, 180deg), 100%, 80%, 1) !important;
   box-shadow:
-    0 15px 45px rgba(0, 0, 0, 0.6),
+    0 4px 12px rgba(0, 0, 0, 0.6),
     0 0 0 2px hsla(var(--echo-tint, 180deg), 100%, 80%, 0.6),
     0 0 40px hsla(var(--echo-tint, 180deg), 100%, 70%, 0.3),
     inset 0 0 40px hsla(var(--echo-tint, 180deg), 100%, 70%, 0.2) !important;
@@ -878,7 +878,7 @@ body.outline-active .echo-header::before {
 .echo-focus-outline-btn {
   background: transparent;
   border: 1px solid hsla(var(--echo-tint, 180deg), 100%, 60%, 0.4);
-  border-radius: 6px;
+  border-radius: 4px;
   color: hsla(var(--echo-tint, 180deg), 100%, 70%, 0.8);
   cursor: pointer;
   font-size: 14px;
@@ -907,7 +907,7 @@ body.outline-active .echo-header::before {
 .echo-symbol-outline {
   margin: 8px 0 6px;
   border: 1px solid hsla(var(--echo-tint, 180deg), 90%, 65%, 0.4);
-  border-radius: 12px;
+  border-radius: 4px;
   background: rgba(10, 15, 25, 0.65);
   backdrop-filter: blur(8px) saturate(120%);
   overflow: hidden;
@@ -918,11 +918,11 @@ body.outline-active .echo-header::before {
     box-shadow 0.4s ease;
   max-height: 300px;
   opacity: 1;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .echo-symbol-outline:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 15px hsla(var(--echo-tint, 180deg), 70%, 50%, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 15px hsla(var(--echo-tint, 180deg), 70%, 50%, 0.2);
   border-color: hsla(var(--echo-tint, 180deg), 100%, 75%, 0.6);
 }
 
@@ -1000,7 +1000,7 @@ body.outline-active .echo-header::before {
 
 .echo-outline-list::-webkit-scrollbar-thumb {
   background: hsla(var(--echo-tint, 180deg), 100%, 60%, 0.3);
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 .echo-outline-item {
@@ -1128,7 +1128,7 @@ body.veil-excavator-active #echo-layer .echo-document {
   box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
   color: #00e5ff;
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 4px;
   z-index: 9999;
   text-align: center;
   font-family: var(--font-mono);
@@ -1288,7 +1288,7 @@ body.cyclone-active .echo-document {
      We will make the documents glow and have a wind-like distortion. */
   border: 1px solid rgba(0, 229, 255, 0.3);
   box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.8),
+    0 4px 12px rgba(0, 0, 0, 0.8),
     0 0 30px rgba(0, 255, 255, 0.2);
   backdrop-filter: blur(10px);
 }
@@ -1298,7 +1298,7 @@ body.cyclone-active .echo-document:hover {
   filter: blur(0px) brightness(1.5) !important;
   border-color: rgba(0, 255, 255, 0.8);
   box-shadow:
-    0 15px 50px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     0 0 50px rgba(0, 255, 255, 0.6);
   transform: translate3d(
       calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
@@ -1728,7 +1728,7 @@ body.luminescence-active .echo-document:hover {
     )
     rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
   z-index: 50 !important;
-  border-radius: 12px; /* Return to readable shape on hover */
+  border-radius: 4px; /* Return to readable shape on hover */
   box-shadow:
     0 0 60px var(--glow-color, rgba(255, 255, 255, 0.8)),
     inset 0 0 30px var(--glow-color, rgba(255, 255, 255, 0.4)) !important;
@@ -1821,13 +1821,13 @@ body.depth-beam-active #depth-beam {
   position: absolute;
   transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
   transform-style: preserve-3d;
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+  box-shadow: 0 4px 12px -12px rgb(0 0 0 / 0.4);
   backdrop-filter: blur(16px);
 
   /* Neon glassmorphism base */
   background: rgba(15, 23, 42, 0.65);
   border: 1px solid rgba(0, 229, 255, 0.3);
-  border-radius: 12px;
+  border-radius: 4px;
 
   /* Neon glow */
   box-shadow:
