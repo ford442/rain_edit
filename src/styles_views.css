@@ -136,7 +136,7 @@
 
 .echo-document.echo-recent {
   box-shadow:
-    0 25px 70px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     inset 0 1px 2px rgba(255, 255, 255, 0.2),
     inset 0 0 50px rgba(0, 229, 255, 0.15),
     0 0 30px rgba(0, 229, 255, 0.25);
@@ -206,7 +206,7 @@
     rgba(0, 0, 0, 0.8) 0%,
     rgba(10, 15, 30, 0.4) 100%
   ) !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .echo-header::after {
@@ -257,7 +257,7 @@
   font-size: 11px;
   background: hsla(var(--echo-tint, 0deg), 100%, 15%, 0.6);
   padding: 3px 10px;
-  border-radius: 12px;
+  border-radius: 4px;
   border: 1px solid hsla(var(--echo-tint, 0deg), 100%, 50%, 0.3);
   color: hsla(var(--echo-tint, 0deg), 100%, 80%, 1);
   box-shadow: inset 0 0 8px hsla(var(--echo-tint, 0deg), 100%, 50%, 0.2);
@@ -271,7 +271,7 @@
   font-size: 11px;
   background: rgba(0, 0, 0, 0.4);
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   color: hsla(var(--echo-tint, 0deg), 100%, 70%, 0.9);
   margin-left: auto;
@@ -320,7 +320,7 @@
   user-select: none;
   line-height: 1.6;
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px 0 0 12px;
+  border-radius: 4px 0 0 4px;
   margin: 20px 0;
 }
 
@@ -328,7 +328,7 @@
   width: 40px;
   background: rgba(0, 0, 0, 0.15);
   margin: 20px 0 20px 10px;
-  border-radius: 6px;
+  border-radius: 4px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -368,7 +368,7 @@
 .minimap-block {
   height: 4px;
   background: hsla(var(--echo-tint, 0deg), 100%, 70%, 1);
-  border-radius: 2px;
+  border-radius: 4px;
   box-shadow: 0 0 4px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.4);
   position: relative;
   z-index: 1;
@@ -429,7 +429,7 @@
   word-wrap: break-word;
   background: transparent;
   padding: 16px 20px;
-  border-radius: 0 12px 12px 0;
+  border-radius: 0 4px 4px 0;
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-left: none;
   font-family: var(--font-mono);
@@ -509,7 +509,7 @@
 .echo-peek-btn {
   background: rgba(0, 229, 255, 0.1);
   border: 1px solid rgba(0, 229, 255, 0.3);
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   width: 28px;
   height: 28px;
@@ -549,7 +549,7 @@
   height: 80vh !important;
   transform: translate3d(0, 0, 400px) scale(1) !important;
   box-shadow:
-    0 50px 100px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     0 0 100px rgba(0, 229, 255, 0.4),
     inset 0 0 50px rgba(0, 229, 255, 0.2) !important;
   border-color: #00e5ff !important;
@@ -882,7 +882,7 @@ body.fanning-active .echo-document:not(.peek) {
     )
     rotateZ(var(--fan-rot-z, 0deg)) !important;
   box-shadow:
-    0 30px 60px rgba(0, 0, 0, 0.8),
+    0 4px 12px rgba(0, 0, 0, 0.8),
     0 0 20px rgba(0, 229, 255, 0.3),
     inset 0 0 10px rgba(255, 255, 255, 0.1) !important;
   border-color: rgba(0, 229, 255, 0.5) !important;
@@ -906,7 +906,7 @@ body.fanning-active .echo-document:not(.peek):hover {
     )
     rotateZ(0deg) scale(1.15) !important;
   box-shadow:
-    0 40px 80px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     0 0 40px rgba(0, 229, 255, 0.8),
     inset 0 0 20px rgba(255, 255, 255, 0.4) !important;
   border-color: rgba(0, 229, 255, 1) !important;
@@ -1721,7 +1721,7 @@ body.isometric-active #container > * {
   border: 2px solid rgba(0, 229, 255, 0.4) !important;
   background-color: rgba(10, 15, 25, 0.4) !important;
   box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.5),
     inset 0 0 30px rgba(0, 229, 255, 0.1) !important;
   backdrop-filter: blur(4px);
   overflow: visible !important;
@@ -1892,7 +1892,7 @@ body.timeline-active .echo-document:hover {
       )
       rotateZ(var(--rot-z, 0deg)) scale(1);
     filter: blur(var(--base-blur, 4px)) brightness(1);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
   20% {
     transform: translate3d(
@@ -1915,7 +1915,7 @@ body.timeline-active .echo-document:hover {
       )
       rotateZ(var(--rot-z, 0deg)) scale(1);
     filter: blur(var(--base-blur, 4px)) brightness(1);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -1967,7 +1967,7 @@ body.x-ray-active .echo-document:hover {
     )
     scale(calc((1.05 + (var(--wake) * 0.08)) * var(--wormhole-scale, 1)));
   box-shadow:
-    0 40px 100px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     inset 0 1px 3px rgba(255, 255, 255, 0.3),
     inset 0 0 50px rgba(255, 255, 255, 0.1),
     0 0 35px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.3);
@@ -2642,7 +2642,7 @@ body.galaxy-active .echo-document:hover {
     )
     rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.5) !important;
   z-index: 100 !important;
-  border-radius: 8px; /* Return to document shape on hover */
+  border-radius: 4px; /* Return to document shape on hover */
 }
 
 @keyframes galaxy-spin {
@@ -2747,7 +2747,7 @@ body.theater-active #editor {
   z-index: 1000 !important;
   transform: scale(1.05) translateZ(50px) !important;
   box-shadow:
-    0 50px 150px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     0 0 50px rgba(0, 229, 255, 0.3) !important;
   opacity: 1 !important;
   filter: none !important;
@@ -2844,7 +2844,7 @@ body.peel-active .echo-document {
   opacity: 0.8 !important;
   filter: blur(2px) !important;
   box-shadow:
-    0 40px 100px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     inset 0 1px 3px rgba(255, 255, 255, 0.5),
     0 0 40px rgba(0, 229, 255, 0.4);
   border-color: rgba(0, 229, 255, 0.7);
@@ -2926,7 +2926,7 @@ body.peel-active #editor {
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 26px;
+  border-radius: 4px;
   padding: 2px;
   background: conic-gradient(
     from var(--neon-angle),
@@ -3069,8 +3069,8 @@ body.peel-active #editor {
   backdrop-filter: blur(60px) saturate(300%);
   -webkit-backdrop-filter: blur(48px) saturate(250%);
   border: 1px solid rgba(0, 255, 255, 0.5);
-  border-radius: 16px;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95), inset 0 0 45px rgba(0, 255, 255, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.3), 0 0 25px rgba(0, 255, 255, 0.4);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 45px rgba(0, 255, 255, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.3), 0 0 25px rgba(0, 255, 255, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3086,7 +3086,7 @@ body.peel-active #editor {
     rgba(10, 15, 30, 0.55)
   );
   box-shadow:
-    0 35px 70px rgba(0, 0, 0, 0.95),
+    0 4px 12px rgba(0, 0, 0, 0.95),
     0 0 35px rgba(0, 255, 255, 0.35),
     inset 0 0 0 1px rgba(0, 255, 255, 0.5),
     inset 0 1px 3px rgba(255, 255, 255, 0.3);
@@ -3113,7 +3113,7 @@ body.peel-active #editor {
   width: 6px;
   height: 100%;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 3px;
+  border-radius: 4px;
   outline: none;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -3152,7 +3152,7 @@ body.peel-active #editor {
     scale(1.2) !important;
   z-index: 100 !important;
   box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.9),
+    0 4px 12px rgba(0, 0, 0, 0.9),
     0 0 40px rgba(0, 229, 255, 0.8),
     inset 0 0 30px rgba(0, 229, 255, 0.4) !important;
   border: 2px solid rgba(0, 229, 255, 0.9) !important;
@@ -3203,14 +3203,14 @@ body:has(.slicer-highlight) .echo-document:not(.slicer-highlight) {
 /* Elevated Peeking State */
 .echo-document.is-peeking {
   box-shadow:
-    0 100px 300px rgba(0, 0, 0, 0.95),
+    0 4px 12px rgba(0, 0, 0, 0.95),
     0 0 100px rgba(0, 229, 255, 0.3),
     inset 0 0 20px rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(0, 229, 255, 0.6) !important;
   background: rgba(10, 15, 25, 0.95) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border-radius: 16px !important;
+  border-radius: 4px !important;
   opacity: 1 !important;
   z-index: 9999 !important;
 }
@@ -3232,7 +3232,7 @@ body.origami-active .echo-document:hover {
   filter: none;
   z-index: 9999 !important;
   box-shadow:
-    0 20px 40px rgba(0, 255, 200, 0.3),
+    0 4px 12px rgba(0, 255, 200, 0.3),
     inset 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
@@ -3277,7 +3277,7 @@ body.origami-active .echo-document:hover {
 #dock button {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 4px;
   color: #fff;
   transition: all 0.3s ease;
   padding: 8px 12px;
@@ -3296,7 +3296,7 @@ body.origami-active .echo-document:hover {
 .tab {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 4px;
   margin: 0 2px;
   transition: all 0.3s ease;
 }
@@ -3472,7 +3472,7 @@ body.data-hive-active .echo-document:hover {
   ) !important;
   backdrop-filter: blur(4px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px 8px 0 0;
+  border-radius: 4px 4px 0 0;
 }
 
 /* Crystal Lattice View Specifics */
@@ -3624,7 +3624,7 @@ body.fractal-active .echo-document {
   box-shadow:
     0 0 30px rgba(100, 255, 100, 0.2),
     inset 0 0 15px rgba(100, 255, 100, 0.1);
-  border-radius: 12px;
+  border-radius: 4px;
 }
 /* ─── VPS Action Panel ────────────────────────────────────────────────────── */
 .vps-action-panel {
@@ -3645,11 +3645,11 @@ body.fractal-active .echo-document {
   font-size: 13px;
   font-weight: 700;
   padding: 12px 24px;
-  border-radius: 16px; /* Sharper UI corners */
+  border-radius: 4px; /* Sharper UI corners */
   cursor: pointer;
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  box-shadow:0 10px 30px rgba(0, 0, 0, 0.7), inset 0 0 25px rgba(0, 255, 255, 0.3), 0 0 12px rgba(0, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 25px rgba(0, 255, 255, 0.3), 0 0 12px rgba(0, 255, 255, 0.2);
   transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   text-shadow: 0 0 5px rgba(0, 255, 255, 0.5), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
@@ -3657,7 +3657,7 @@ body.fractal-active .echo-document {
 .vps-action-btn:hover {
   background: linear-gradient(135deg, rgba(40, 60, 100, 0.95), rgba(20, 30, 60, 0.9));
   border: 1px solid rgba(0, 255, 255, 0.8);
-  box-shadow: 0 12px 35px rgba(0, 255, 255, 0.4), inset 0 0 35px rgba(0, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.4), inset 0 0 35px rgba(0, 255, 255, 0.3);
   backdrop-filter: blur(48px) saturate(250%);
   transform: scale(1.06) translateY(-4px);
 }
@@ -3669,7 +3669,7 @@ body.fractal-active .echo-document {
 
 #radar-canvas {
   background: rgba(10, 15, 25, 0.4);
-  border-radius: 8px;
+  border-radius: 4px;
   border: 1px solid rgba(0, 229, 255, 0.2);
   box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
   width: 100%;
@@ -3680,7 +3680,7 @@ body.fractal-active .echo-document {
 #global-search, #theme-select, #rain-sim-backend {
   background: rgba(10, 15, 25, 0.5);
   border: 1px solid rgba(0, 229, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 4px;
   color: #c0c0d0;
   padding: 6px;
   font-family: 'JetBrains Mono', monospace;
@@ -3799,7 +3799,7 @@ body.prismatic-array-active .echo-document {
   transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, filter 0.5s ease;
   transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
              rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(0, 255, 200, 0.3);
   background: rgba(10, 15, 25, 0.8);
   backdrop-filter: blur(8px);
@@ -3810,7 +3810,7 @@ body.prismatic-array-active .echo-document {
 body.prismatic-array-active .echo-document:hover {
   transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 150px))
              rotateX(0) rotateY(0) rotateZ(0) scale(1.1);
-  box-shadow: 0 20px 60px rgba(0, 255, 200, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 255, 200, 0.4);
   border-color: rgba(0, 255, 200, 0.8);
   z-index: 1000 !important;
   opacity: 1;
@@ -3820,7 +3820,7 @@ body.prismatic-array-active .echo-document:hover {
 body.prismatic-array-active #editor {
   transform: scale(0.85) translateZ(100px);
   opacity: 0.9;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   transition: all 0.5s ease;
 }
 

@@ -591,6 +591,64 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("loupe-active", "xray-grid-active"),
   });
 
+
+  manager.register({
+    id: "synapse-connect",
+    category: "lens",
+    description: "Synapse Connect Lens (Alt+Shift+7)",
+    combo: { alt: true, shift: true, code: "Digit7" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "synapse-connect-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "synapse-connect-active"),
+  });
+
+  manager.register({
+    id: "ethereal-ghost",
+    category: "lens",
+    description: "Ethereal Ghost Lens (Alt+Shift+8)",
+    combo: { alt: true, shift: true, code: "Digit8" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "ethereal-ghost-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "ethereal-ghost-active"),
+  });
+
+  manager.register({
+    id: "holographic-distortion",
+    category: "lens",
+    description: "Holographic Distortion Lens (Alt+Shift+9)",
+    combo: { alt: true, shift: true, code: "Digit9" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "holo-distortion-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "holo-distortion-active"),
+  });
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("loupe-active")) return;
