@@ -19,6 +19,19 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   });
 
   manager.register({
+    id: "nebula-core",
+    category: "lens",
+    description: "Nebula Core Lens (Alt+Shift+M)",
+    combo: { alt: true, shift: true, code: "KeyM" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "nebula-core-active");
+    },
+    onUp: () => body.classList.remove("loupe-active", "nebula-core-active"),
+  });
+
+  manager.register({
     id: "xray-core",
     category: "lens",
     description: "X-Ray Core Lens (Alt+C)",
@@ -40,16 +53,6 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("loupe-active", "quantum-scanner-active"),
   });
 
-  manager.register({
-    id: "magnetic-separation",
-    category: "lens",
-    description: "Magnetic layer separation (Alt+Shift+M)",
-    combo: { alt: true, shift: true, code: "KeyM" },
-    type: "hold",
-    group: "lens",
-    onDown: () => body.classList.add("loupe-active", "magnetic-sep-active"),
-    onUp: () => body.classList.remove("loupe-active", "magnetic-sep-active"),
-  });
 
   manager.register({
     id: "chrono-ghost",

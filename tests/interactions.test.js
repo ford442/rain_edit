@@ -97,12 +97,12 @@ test("lens group is mutually exclusive", () => {
   const h = harness();
   registerLensBindings(h.manager, { doc: { body: h.body, addEventListener() {} } });
 
-  // Activate magnifier, then magnetic separation (same "lens" group).
+  // Activate magnifier, then nebula core (same "lens" group).
   h.doc.dispatch("keydown", key({ altKey: true, code: "KeyM", key: "m" }));
   h.doc.dispatch("keydown", key({ altKey: true, shiftKey: true, code: "KeyM", key: "m" }));
 
   assert.equal(h.body.classList.contains("obscured-magnifier-active"), false, "magnifier released");
-  assert.equal(h.body.classList.contains("magnetic-sep-active"), true, "separation active");
+  assert.equal(h.body.classList.contains("nebula-core-active"), true, "nebula core active");
 });
 
 

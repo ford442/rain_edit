@@ -2387,3 +2387,68 @@ body.abyssal-depth-active .echo-document::after {
   mix-blend-mode: overlay;
   pointer-events: none;
 }
+
+/* ─── Nebula Core Lens (Alt+Shift+M) ────────────────────────────────── */
+body.nebula-core-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 40%,
+    black 80%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 40%,
+    black 80%
+  );
+  transition: mask-image 0.4s ease;
+}
+
+body.nebula-core-active .echo-document {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s ease;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) - 2) * 20px),
+    calc(var(--ty, 0px) + (var(--item-index, 0) - 2) * -15px),
+    calc(var(--tz, 0px) + 80px - (var(--item-index, 0) * 30px))
+  ) rotateZ(calc((var(--item-index, 0) * 10deg) - 20deg)) scale(calc(1.1 - (var(--item-index, 0) * 0.05))) !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) saturate(200%) brightness(1.4) drop-shadow(0 0 30px rgba(0, 255, 200, 0.6)) blur(calc(var(--item-index, 0) * 1px)) !important;
+  z-index: calc(200 - var(--item-index, 0)) !important;
+  opacity: 0.9 !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(0, 255, 200, 0.4) !important;
+  mix-blend-mode: screen;
+  animation: nebula-swirl 6s infinite alternate ease-in-out;
+}
+
+@keyframes nebula-swirl {
+  0% {
+    transform: translate3d(
+      calc(var(--tx, 0px) + (var(--item-index, 0) - 2) * 20px),
+      calc(var(--ty, 0px) + (var(--item-index, 0) - 2) * -15px),
+      calc(var(--tz, 0px) + 80px - (var(--item-index, 0) * 30px))
+    ) rotateZ(calc((var(--item-index, 0) * 10deg) - 20deg)) scale(calc(1.1 - (var(--item-index, 0) * 0.05)));
+  }
+  100% {
+    transform: translate3d(
+      calc(var(--tx, 0px) + (var(--item-index, 0) - 2) * 30px),
+      calc(var(--ty, 0px) + (var(--item-index, 0) - 2) * -5px),
+      calc(var(--tz, 0px) + 120px - (var(--item-index, 0) * 30px))
+    ) rotateZ(calc((var(--item-index, 0) * 10deg) + 10deg)) scale(calc(1.15 - (var(--item-index, 0) * 0.05)));
+  }
+}
+
+body.nebula-core-active .echo-document::before {
+  content: '';
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent, rgba(0, 255, 200, 0.1), transparent);
+  animation: nebula-core-spin 8s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes nebula-core-spin {
+  100% { transform: rotate(360deg); }
+}
