@@ -2423,10 +2423,10 @@ body.x-ray-active #echo-layer {
   padding: 24px;
   box-sizing: border-box;
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.95),
+    0 4px 12px rgba(0, 0, 0, 0.6),
     inset 0 2px 3px rgba(255, 255, 255, 0.4),
-    0 0 50px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.25),
-    inset 0 0 40px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.25);
+    0 0 30px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.2),
+    inset 0 0 20px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.2);
 }
 
 .echo-document::before {
@@ -2651,7 +2651,7 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
 .echo-document {
   /* Enhanced glowing edge and deepened shadow */
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.85),
+    0 4px 12px rgba(0, 0, 0, 0.6),
     inset 0 2px 5px rgba(255, 255, 255, 0.3),
     inset 0 0 25px hsla(var(--echo-tint, 0deg), 100%, 60%, 0.15),
     0 0 20px rgba(0, 229, 255, 0.2),
