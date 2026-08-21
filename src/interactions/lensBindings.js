@@ -767,6 +767,64 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("loupe-active", "abyssal-depth-active"),
   });
 
+
+  manager.register({
+    id: "prismatic-lattice",
+    category: "lens",
+    description: "Prismatic Lattice Lens (Alt+Shift+[)",
+    combo: { alt: true, shift: true, code: "BracketLeft" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "prismatic-lattice-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "prismatic-lattice-active"),
+  });
+
+  manager.register({
+    id: "chronos-pulse",
+    category: "lens",
+    description: "Chronos Pulse Lens (Alt+Shift+])",
+    combo: { alt: true, shift: true, code: "BracketRight" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "chronos-pulse-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "chronos-pulse-active"),
+  });
+
+  manager.register({
+    id: "ethereal-cascade",
+    category: "lens",
+    description: "Ethereal Cascade Lens (Alt+Shift+')",
+    combo: { alt: true, shift: true, code: "Quote" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "ethereal-cascade-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "ethereal-cascade-active"),
+  });
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("loupe-active")) return;
