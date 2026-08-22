@@ -8,6 +8,44 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   const body = doc.body;
 
   manager.register({
+    id: "dimensional-rift",
+    category: "lens",
+    description: "Dimensional Rift Lens (Alt+Shift+E)",
+    combo: { alt: true, shift: true, code: "KeyE" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "dimensional-rift-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "dimensional-rift-active"),
+  });
+
+  manager.register({
+    id: "cyber-matrix",
+    category: "lens",
+    description: "Cyber-Matrix Scanner (Alt+Shift+Semicolon)",
+    combo: { alt: true, shift: true, code: "Semicolon" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "cyber-matrix-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "cyber-matrix-active"),
+  });
+
+  manager.register({
     id: "magnifier",
     category: "lens",
     description: "Obscured-layer magnifier lens (Alt+M)",

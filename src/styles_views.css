@@ -257,7 +257,7 @@
   font-size: 11px;
   background: hsla(var(--echo-tint, 0deg), 100%, 15%, 0.6);
   padding: 3px 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid hsla(var(--echo-tint, 0deg), 100%, 50%, 0.3);
   color: hsla(var(--echo-tint, 0deg), 100%, 80%, 1);
   box-shadow: inset 0 0 8px hsla(var(--echo-tint, 0deg), 100%, 50%, 0.2);
@@ -271,7 +271,7 @@
   font-size: 11px;
   background: rgba(0, 0, 0, 0.4);
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   color: hsla(var(--echo-tint, 0deg), 100%, 70%, 0.9);
   margin-left: auto;
@@ -320,7 +320,7 @@
   user-select: none;
   line-height: 1.6;
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px 0 0 4px;
+  border-radius: 8px 0 0 4px;
   margin: 20px 0;
 }
 
@@ -328,7 +328,7 @@
   width: 40px;
   background: rgba(0, 0, 0, 0.15);
   margin: 20px 0 20px 10px;
-  border-radius: 4px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -368,7 +368,7 @@
 .minimap-block {
   height: 4px;
   background: hsla(var(--echo-tint, 0deg), 100%, 70%, 1);
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 0 4px hsla(var(--echo-tint, 0deg), 100%, 70%, 0.4);
   position: relative;
   z-index: 1;
@@ -509,7 +509,7 @@
 .echo-peek-btn {
   background: rgba(0, 229, 255, 0.1);
   border: 1px solid rgba(0, 229, 255, 0.3);
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   width: 28px;
   height: 28px;
@@ -1805,7 +1805,7 @@ body.isometric-active #container > *::after {
   text-transform: uppercase;
   background: rgba(0, 0, 0, 0.6);
   padding: 4px 12px;
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid rgba(0, 229, 255, 0.5);
   transform: rotateX(-90deg) translateY(30px);
   transform-origin: bottom right;
@@ -2061,7 +2061,7 @@ body.siphon-mode-active .echo-document *::selection {
   background: rgba(0, 229, 255, 0.1);
   border: 1px solid rgba(0, 229, 255, 0.8);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 0 15px rgba(0, 229, 255, 0.8);
   text-shadow: 0 0 8px rgba(0, 229, 255, 1);
   transform-origin: center;
@@ -2642,7 +2642,7 @@ body.galaxy-active .echo-document:hover {
     )
     rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.5) !important;
   z-index: 100 !important;
-  border-radius: 4px; /* Return to document shape on hover */
+  border-radius: 8px; /* Return to document shape on hover */
 }
 
 @keyframes galaxy-spin {
@@ -2926,7 +2926,7 @@ body.peel-active #editor {
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 4px;
+  border-radius: 8px;
   padding: 2px;
   background: conic-gradient(
     from var(--neon-angle),
@@ -3069,7 +3069,7 @@ body.peel-active #editor {
   backdrop-filter: blur(60px) saturate(300%);
   -webkit-backdrop-filter: blur(48px) saturate(250%);
   border: 1px solid rgba(0, 255, 255, 0.5);
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), inset 0 0 45px rgba(0, 255, 255, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.3), 0 0 25px rgba(0, 255, 255, 0.4);
   display: flex;
   flex-direction: column;
@@ -3113,7 +3113,7 @@ body.peel-active #editor {
   width: 6px;
   height: 100%;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  border-radius: 8px;
   outline: none;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -3128,7 +3128,7 @@ body.peel-active #editor {
   width: 24px;
   height: 8px;
   background: linear-gradient(135deg, #00ffff, #0088ff);
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.9), 0 0 25px rgba(0, 136, 255, 0.6), inset 0 0 8px #fff;
   cursor: pointer;
   margin-left: -9px;
@@ -3210,7 +3210,7 @@ body:has(.slicer-highlight) .echo-document:not(.slicer-highlight) {
   background: rgba(10, 15, 25, 0.95) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   opacity: 1 !important;
   z-index: 9999 !important;
 }
@@ -3224,7 +3224,7 @@ body.origami-active .echo-document {
   transform-style: preserve-3d;
   opacity: 0.8;
   filter: sepia(0.3) hue-rotate(-10deg) brightness(0.9);
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 body.origami-active .echo-document:hover {
@@ -3277,7 +3277,7 @@ body.origami-active .echo-document:hover {
 #dock button {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 8px;
   color: #fff;
   transition: all 0.3s ease;
   padding: 8px 12px;
@@ -3296,7 +3296,7 @@ body.origami-active .echo-document:hover {
 .tab {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  border-radius: 8px;
   margin: 0 2px;
   transition: all 0.3s ease;
 }
@@ -3313,7 +3313,7 @@ input[type="range"] {
   background: rgba(10, 15, 25, 0.6);
   border: 1px solid rgba(0, 229, 255, 0.3);
   color: #fff;
-  border-radius: 4px;
+  border-radius: 8px;
   padding: 4px 8px;
 }
 
@@ -3472,7 +3472,7 @@ body.data-hive-active .echo-document:hover {
   ) !important;
   backdrop-filter: blur(4px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 4px 4px 0 0;
+  border-radius: 8px 4px 0 0;
 }
 
 /* Crystal Lattice View Specifics */
@@ -3624,7 +3624,7 @@ body.fractal-active .echo-document {
   box-shadow:
     0 0 30px rgba(100, 255, 100, 0.2),
     inset 0 0 15px rgba(100, 255, 100, 0.1);
-  border-radius: 4px;
+  border-radius: 8px;
 }
 /* ─── VPS Action Panel ────────────────────────────────────────────────────── */
 .vps-action-panel {
@@ -3645,7 +3645,7 @@ body.fractal-active .echo-document {
   font-size: 13px;
   font-weight: 700;
   padding: 12px 24px;
-  border-radius: 4px; /* Sharper UI corners */
+  border-radius: 8px; /* Sharper UI corners */
   cursor: pointer;
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -3669,7 +3669,7 @@ body.fractal-active .echo-document {
 
 #radar-canvas {
   background: rgba(10, 15, 25, 0.4);
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid rgba(0, 229, 255, 0.2);
   box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1);
   width: 100%;
@@ -3680,7 +3680,7 @@ body.fractal-active .echo-document {
 #global-search, #theme-select, #rain-sim-backend {
   background: rgba(10, 15, 25, 0.5);
   border: 1px solid rgba(0, 229, 255, 0.2);
-  border-radius: 4px;
+  border-radius: 8px;
   color: #c0c0d0;
   padding: 6px;
   font-family: 'JetBrains Mono', monospace;
@@ -3703,7 +3703,7 @@ body.fractal-active .echo-document {
   font-size: 0.7rem;
   color: #0ff;
   padding: 2px 4px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
 }
 

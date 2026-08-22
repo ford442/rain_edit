@@ -86,7 +86,7 @@ body.tornado-active .echo-document {
   transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   opacity: 0.6;
   filter: blur(3px) sepia(0.3) hue-rotate(-20deg);
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 body.tornado-active .echo-document:hover {
@@ -315,11 +315,11 @@ body.fanning-active .echo-document:hover {
 }
 ::-webkit-scrollbar-track {
   background: rgba(10, 10, 15, 0.8);
-  border-radius: 4px;
+  border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #00f0ff, #ff003c);
-  border-radius: 4px;
+  border-radius: 8px;
   border: 2px solid rgba(10, 10, 15, 0.8);
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -611,13 +611,13 @@ body.pulse-wave-active .echo-document {
 /* 2. Editor Aurora Border Spin */
 #editor {
   position: relative;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 #editor::before {
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 4px;
+  border-radius: 8px;
   background: linear-gradient(
     45deg,
     rgba(0, 229, 255, 0.8),
@@ -1548,7 +1548,7 @@ body.ectoplasmic-ooze-active .echo-document {
     rgba(0, 0, 0, 0) 100%
   );
   border-bottom: 5px solid rgba(128, 255, 0, 0.8) !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
 }
 
 /* Cosmic Void Lens (Alt+Shift+V) */
@@ -1781,7 +1781,7 @@ body.bioluminescent-trace-active .echo-document::before {
   position: absolute;
   inset: -10px;
   border: 2px dashed rgba(0, 255, 200, 0.5);
-  border-radius: 4px;
+  border-radius: 8px;
   animation: bioluminescent-pulse 2s infinite ease-in-out alternate;
   pointer-events: none;
   z-index: -1;
@@ -1996,7 +1996,7 @@ body.time-lapse-echo-active #editor {
   max-height: 86vh;
   overflow-y: auto;
   padding: 28px 32px;
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid rgba(90, 200, 250, 0.35);
   background: linear-gradient(160deg, rgba(10, 18, 34, 0.96), rgba(6, 10, 22, 0.96));
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(90, 200, 250, 0.08);
@@ -2044,7 +2044,7 @@ body.time-lapse-echo-active #editor {
   flex: 0 0 auto;
   min-width: 92px;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid rgba(90, 200, 250, 0.35);
   background: rgba(90, 200, 250, 0.1);
   color: #bfe9ff;
@@ -2576,4 +2576,37 @@ body.ethereal-cascade-active .echo-document {
   opacity: calc(1 - (var(--item-index, 0) * 0.15)) !important;
   border-bottom: 3px solid rgba(0, 150, 255, 0.6) !important;
   border-radius: 0 0 8px 8px !important;
+}
+
+/* Dimensional Rift Lens */
+body.dimensional-rift-active #editor {
+  -webkit-mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  opacity: 0.2;
+}
+
+body.dimensional-rift-active .echo-document {
+  transform: translateZ(calc(var(--item-index, 0) * -40px)) rotate(calc(var(--item-index, 0) * 3deg)) scale(calc(1 - (var(--item-index, 0) * 0.05)));
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) drop-shadow(0 0 15px rgba(255, 0, 255, 0.5));
+  border: 1px solid rgba(255, 0, 255, 0.3);
+  box-shadow: inset 0 0 15px rgba(255, 0, 255, 0.2);
+}
+
+/* Cyber-Matrix Scanner */
+body.cyber-matrix-active #editor {
+  -webkit-mask-image: repeating-linear-gradient(0deg, rgba(0,0,0,1) 0px, rgba(0,0,0,1) 2px, transparent 3px, transparent 5px);
+  mask-image: repeating-linear-gradient(0deg, rgba(0,0,0,1) 0px, rgba(0,0,0,1) 2px, transparent 3px, transparent 5px);
+  opacity: 0.4;
+}
+
+body.cyber-matrix-active .echo-document {
+  filter: sepia(1) hue-rotate(80deg) saturate(300%) brightness(1.2);
+  transform: translateZ(calc(var(--item-index, 0) * -20px));
+  border: 1px solid #0f0;
+  box-shadow: inset 0 0 10px #0f0, 0 0 15px rgba(0, 255, 0, 0.5);
+}
+
+body.cyber-matrix-active .echo-document * {
+  color: #0f0 !important;
+  text-shadow: 0 0 5px #0f0;
 }
