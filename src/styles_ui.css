@@ -2610,3 +2610,57 @@ body.cyber-matrix-active .echo-document * {
   color: #0f0 !important;
   text-shadow: 0 0 5px #0f0;
 }
+
+
+/* Dimensional Singularity Lens */
+body.dimensional-singularity-active #editor {
+  -webkit-mask-image: radial-gradient(circle 200px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 200px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,1) 100%);
+  opacity: 0.1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+body.dimensional-singularity-active .echo-document {
+  transition: transform 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55), filter 1s ease;
+  transform: translate3d(
+    calc(var(--tx, 0px) - (var(--item-index, 0) * 10px)),
+    calc(var(--ty, 0px) - (var(--item-index, 0) * 10px)),
+    calc(var(--tz, 0px) - 200px - (var(--item-index, 0) * 80px))
+  ) rotateZ(calc(var(--item-index, 0) * 45deg)) scale(calc(0.5 + (1 / (var(--item-index, 0) + 1)))) !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 90deg)) contrast(2) brightness(0.8) drop-shadow(0 0 30px rgba(0, 0, 0, 0.9)) !important;
+  border-radius: 50% !important;
+  border: 4px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8) !important;
+  animation: singularity-spin 10s linear infinite;
+}
+
+@keyframes singularity-spin {
+  0% { rotate: 0deg; }
+  100% { rotate: 360deg; }
+}
+
+/* Prismatic Topography Lens */
+body.prismatic-topography-active #editor {
+  -webkit-mask-image: radial-gradient(circle 350px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 350px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,1) 100%);
+  opacity: 0.3;
+}
+
+body.prismatic-topography-active .echo-document {
+  transition: transform 0.5s ease-out, filter 0.5s ease;
+  background: repeating-radial-gradient(
+    circle at 50% 50%,
+    rgba(0, 255, 128, 0.1),
+    rgba(0, 255, 128, 0.1) 10px,
+    transparent 10px,
+    transparent 20px
+  ) !important;
+  transform: translate3d(
+    var(--tx, 0px),
+    var(--ty, 0px),
+    calc(var(--tz, 0px) - (var(--item-index, 0) * 30px))
+  ) scale(calc(1 - (var(--item-index, 0) * 0.05))) !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 20deg)) brightness(1.5) drop-shadow(0 10px 20px rgba(0, 255, 128, 0.4)) !important;
+  border: 1px solid rgba(0, 255, 128, 0.5) !important;
+  box-shadow: inset 0 0 20px rgba(0, 255, 128, 0.2) !important;
+}
