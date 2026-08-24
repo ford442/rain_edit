@@ -2664,3 +2664,31 @@ body.prismatic-topography-active .echo-document {
   border: 1px solid rgba(0, 255, 128, 0.5) !important;
   box-shadow: inset 0 0 20px rgba(0, 255, 128, 0.2) !important;
 }
+
+/* Time Dilation Lens */
+body.time-dilation-lens-active .echo-document {
+  -webkit-mask-image: radial-gradient(circle at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, black 70%);
+  mask-image: radial-gradient(circle at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, black 70%);
+  transform: scale(calc(1 + (var(--item-index, 0) * 0.1))) rotate3d(1, 1, 0, calc(var(--item-index, 0) * 15deg)) translateZ(calc(var(--item-index, 0) * -50px));
+  filter: invert(1) hue-rotate(calc(var(--item-index, 0) * -20deg)) opacity(calc(1 - (var(--item-index, 0) * 0.1)));
+}
+
+/* Holographic Ripple Lens */
+body.holo-ripple-lens-active .echo-document {
+  -webkit-mask-image: repeating-radial-gradient(circle at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0, transparent 20px, black 20px, black 40px);
+  mask-image: repeating-radial-gradient(circle at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0, transparent 20px, black 20px, black 40px);
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5)) drop-shadow(0 0 20px rgba(255, 0, 255, 0.5));
+  transform: translateZ(calc(var(--item-index, 0) * -30px)) scale(1.05);
+}
+
+/* Crystalline Shatter Lens */
+body.crystal-shatter-lens-active .echo-document:nth-child(even) {
+  clip-path: polygon(0 0, var(--lens-x, 50%) var(--lens-y, 50%), 100% 0, 100% 100%, 0 100%);
+  transform: rotateZ(calc(var(--item-index, 0) * 5deg)) translateZ(calc(var(--item-index, 0) * -20px));
+  filter: hue-rotate(45deg);
+}
+body.crystal-shatter-lens-active .echo-document:nth-child(odd) {
+  clip-path: polygon(var(--lens-x, 50%) var(--lens-y, 50%), 100% 0, 100% 100%, 0 100%, 0 0);
+  transform: rotateZ(calc(var(--item-index, 0) * -5deg)) translateZ(calc(var(--item-index, 0) * -40px));
+  filter: hue-rotate(-45deg);
+}

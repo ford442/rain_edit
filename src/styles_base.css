@@ -7,12 +7,12 @@
   --text-primary: #c0d0e0;
   --text-heading: #ffffff;
   --font-primary:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    "Fira Code", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --dynamic-hue: 180; /* Default Cyan hue */
   /* Base Bioluminescent Green */
   --bio-glow-color: rgba(57, 255, 20, 0.6);
-  --bio-glow-strong: rgba(57, 255, 20, 0.9);
+  --bio-glow-strong: rgba(57, 255, 20, 1.0);
 }
 
 * {
