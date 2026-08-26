@@ -920,6 +920,45 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("loupe-active", "crystal-shatter-lens-active"),
   });
 
+
+  manager.register({
+    id: "abyssal-glitch",
+    category: "lens",
+    description: "Abyssal Glitch Lens (Alt+A)",
+    combo: { alt: true, code: "KeyA" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "abyssal-glitch-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "abyssal-glitch-active"),
+  });
+
+  manager.register({
+    id: "solar-flare",
+    category: "lens",
+    description: "Solar Flare Lens (Alt+S)",
+    combo: { alt: true, code: "KeyS" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "solar-flare-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "solar-flare-active"),
+  });
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("loupe-active")) return;
