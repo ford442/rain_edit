@@ -81,6 +81,25 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   });
 
   manager.register({
+    id: "cosmic-singularity",
+    category: "lens",
+    description: "Cosmic Singularity Lens (Alt+Q)",
+    combo: { alt: true, code: "KeyQ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "cosmic-singularity-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "cosmic-singularity-active"),
+  });
+
+  manager.register({
     id: "quantum-scanner",
     category: "lens",
     description: "Quantum Scanner Lens (Alt+N)",
