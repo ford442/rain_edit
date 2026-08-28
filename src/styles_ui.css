@@ -2909,3 +2909,58 @@ body.cosmic-singularity-active #editor {
 body.cosmic-singularity-active {
   background: radial-gradient(circle at var(--lens-x, 50%) var(--lens-y, 50%), rgba(20, 0, 40, 0.8) 0%, rgba(0, 0, 0, 1) 100%);
 }
+/* Aetherial Echoes Lens (Alt+W) */
+body.aetherial-echoes-active #editor {
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    black 100%
+  );
+  transition: mask-image 0.4s ease, -webkit-mask-image 0.4s ease;
+  filter: blur(1px) contrast(1.1);
+}
+
+body.aetherial-echoes-active .echo-document {
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.8s ease, opacity 0.8s ease;
+
+  /* Fan out dynamically based on --item-index */
+  transform: translate3d(
+    calc(var(--tx, 0px) + (sin(calc(var(--item-index, 0) * 45deg)) * 60px)),
+    calc(var(--ty, 0px) + (cos(calc(var(--item-index, 0) * 45deg)) * 60px)),
+    calc(var(--tz, 0px) + 120px - (var(--item-index, 0) * 30px))
+  ) rotateZ(calc(var(--item-index, 0) * 15deg)) scale(calc(1 + (var(--item-index, 0) * 0.05))) !important;
+
+  /* Aetherial glow & hue rotation */
+  filter: hue-rotate(calc(var(--item-index, 0) * 50deg)) contrast(1.4) brightness(1.2) drop-shadow(0 0 20px rgba(0, 255, 255, 0.6)) blur(calc(var(--item-index, 0) * 0.5px)) !important;
+  opacity: calc(0.95 - (var(--item-index, 0) * 0.1)) !important;
+  z-index: calc(250 - var(--item-index, 0)) !important;
+
+  /* Cosmic/Aetherial border and inner glow */
+  border: 1px solid rgba(0, 255, 255, 0.5) !important;
+  box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.3), 0 0 30px rgba(0, 255, 255, 0.5) !important;
+  border-radius: 12px !important;
+  mix-blend-mode: screen;
+}
+
+/* Pulsing effect in aetherial void */
+body.aetherial-echoes-active .echo-document::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 16px;
+  background: conic-gradient(from 0deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+  animation: aetherial-spin 6s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes aetherial-spin {
+  100% { transform: rotate(360deg); }
+}
