@@ -997,6 +997,64 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("loupe-active", "prismatic-void-active"),
   });
 
+  manager.register({
+    id: "fractal-kaleidoscope",
+    category: "lens",
+    description: "Fractal Kaleidoscope Lens (Alt+J)",
+    combo: { alt: true, code: "KeyJ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "fractal-kaleidoscope-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "fractal-kaleidoscope-active"),
+  });
+
+  manager.register({
+    id: "quantum-bubble",
+    category: "lens",
+    description: "Quantum Bubble Lens (Alt+L)",
+    combo: { alt: true, code: "KeyL" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "quantum-bubble-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "quantum-bubble-active"),
+  });
+
+  manager.register({
+    id: "ember-flow",
+    category: "lens",
+    description: "Ember Flow Lens (Alt+Y)",
+    combo: { alt: true, code: "KeyY" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "ember-flow-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "ember-flow-active"),
+  });
+
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("loupe-active")) return;
