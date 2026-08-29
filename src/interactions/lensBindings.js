@@ -997,6 +997,25 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("loupe-active", "prismatic-void-active"),
   });
 
+  manager.register({
+    id: "aetherial-echoes",
+    category: "lens",
+    description: "Aetherial Echoes Lens (Alt+W)",
+    combo: { alt: true, code: "KeyW" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "aetherial-echoes-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "aetherial-echoes-active"),
+  });
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("loupe-active")) return;
