@@ -2794,3 +2794,31 @@ body::after {
   50% { transform: translateX(-50%) translateY(-4px); }
   100% { transform: translateX(-50%) translateY(0); }
 }
+/* Global font enhancement: Fira Code/JetBrains Mono with neon text shadow for dock titles */
+.dock-title, .vps-action-btn, #z-slicer-ui .slicer-label {
+  font-family: var(--font-primary, "JetBrains Mono", "Fira Code", monospace);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.4), 0 0 10px rgba(0, 229, 255, 0.2);
+  letter-spacing: 0.5px;
+}
+
+/* Enhanced scrollbars for holographic theme */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 15, 25, 0.6);
+  border-left: 1px solid rgba(0, 229, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.3);
+  border-radius: 5px;
+  border: 1px solid rgba(0, 229, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.6);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+}
