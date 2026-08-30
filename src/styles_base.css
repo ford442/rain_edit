@@ -34,7 +34,7 @@ body,
   width: 100%;
   height: 100%;
   border: none;
-  background: radial-gradient(circle at 50% 30%, #101520 0%, #050505 80%);
+  background: radial-gradient(circle at 50% 30%, #0c121e 0%, #030408 80%);
 }
 
 #container::before {
@@ -598,7 +598,7 @@ textarea:focus {
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 8px;
+  border-radius: 12px;
   background: linear-gradient(
     45deg,
     rgba(255, 0, 128, 0.5),
@@ -662,7 +662,7 @@ textarea:focus {
   align-items: center !important;
   gap: 12px !important;
   padding: 8px 16px !important;
-  border-radius: 8px !important;
+  border-radius: 12px !important;
 }
 
 .dock-group label {
@@ -2042,7 +2042,7 @@ body.theme-blueprint #rain-front {
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 8px;
+  border-radius: 12px;
   background: linear-gradient(
     90deg,
     rgba(0, 229, 255, 0.6),
@@ -2363,7 +2363,7 @@ body.x-ray-active #echo-layer {
   left: 10%;
   width: 80%;
   height: 80%;
-  border-radius: 8px;
+  border-radius: 12px;
   pointer-events: auto; /* Allow hovering to peek */
   cursor: pointer;
   font-family: var(--font-mono);
@@ -2436,7 +2436,7 @@ body.x-ray-active #echo-layer {
   content: "";
   position: absolute;
   inset: -1px;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1px;
   background: linear-gradient(
     45deg,
