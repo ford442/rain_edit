@@ -1131,6 +1131,54 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("loupe-active", "glacier-shard-active"),
   });
 
+
+  manager.register({
+    id: "ethereal-echoes-v2",
+    category: "lens",
+    description: "Ethereal Echoes v2 Lens (Alt+I)",
+    combo: { alt: true, code: "KeyI" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "ethereal-echoes-v2-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => doc.style.setProperty("--item-index", idx));
+    },
+    onUp: () => body.classList.remove("loupe-active", "ethereal-echoes-v2-active"),
+  });
+
+
+  manager.register({
+    id: "cybernetic-core",
+    category: "lens",
+    description: "Cybernetic Core Lens (Alt+X)",
+    combo: { alt: true, code: "KeyX" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "cybernetic-core-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => doc.style.setProperty("--item-index", idx));
+    },
+    onUp: () => body.classList.remove("loupe-active", "cybernetic-core-active"),
+  });
+
+
+  manager.register({
+    id: "fractal-disintegration",
+    category: "lens",
+    description: "Fractal Disintegration Lens (Alt+K)",
+    combo: { alt: true, code: "KeyK" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "fractal-disintegration-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => doc.style.setProperty("--item-index", idx));
+    },
+    onUp: () => body.classList.remove("loupe-active", "fractal-disintegration-active"),
+  });
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("loupe-active")) return;

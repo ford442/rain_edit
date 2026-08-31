@@ -3246,3 +3246,53 @@ body.glacier-shard-active .echo-document:nth-child(even) {
   transform: scale(1.2);
   box-shadow: 0 0 20px rgba(0, 229, 255, 1), 0 0 40px rgba(0, 229, 255, 0.6);
 }
+
+/* Ethereal Echoes v2 Lens */
+body.ethereal-echoes-v2-active #editor {
+  -webkit-mask-image: radial-gradient(circle 300px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 300px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+}
+body.ethereal-echoes-v2-active .echo-document {
+  opacity: calc(1 - (var(--item-index, 0) * 0.15));
+  filter: blur(calc(var(--item-index, 0) * 1px));
+  transform: scale(calc(1 + (var(--item-index, 0) * 0.05)));
+}
+
+/* Cybernetic Core Lens */
+body.cybernetic-core-active #editor {
+  -webkit-mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+}
+body.cybernetic-core-active .echo-document {
+  border: 2px solid rgba(0, 255, 0, 0.8) !important;
+  background: rgba(0, 20, 0, 0.5) !important;
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.5), inset 0 0 10px rgba(0, 255, 0, 0.3) !important;
+  color: rgba(0, 255, 0, 0.9) !important;
+  transform: rotateY(calc(var(--item-index, 0) * 10deg)) rotateZ(calc(var(--item-index, 0) * -5deg)) translateZ(calc(var(--item-index, 0) * -30px)) !important;
+}
+body.cybernetic-core-active .echo-document pre,
+body.cybernetic-core-active .echo-document .echo-header {
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.8) !important;
+  color: rgba(0, 255, 0, 0.9) !important;
+}
+
+/* Fractal Disintegration Lens */
+body.fractal-disintegration-active #editor {
+  -webkit-mask-image: radial-gradient(circle 200px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 200px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+}
+body.fractal-disintegration-active .echo-document:nth-child(3n+1) {
+  clip-path: polygon(0 0, 50% 100%, 100% 0);
+  transform: translate3d(calc(var(--item-index, 0) * 20px), calc(var(--item-index, 0) * -20px), calc(var(--item-index, 0) * -50px)) !important;
+  opacity: 0.8 !important;
+}
+body.fractal-disintegration-active .echo-document:nth-child(3n+2) {
+  clip-path: polygon(0 100%, 50% 0, 100% 100%);
+  transform: translate3d(calc(var(--item-index, 0) * -20px), calc(var(--item-index, 0) * 20px), calc(var(--item-index, 0) * -40px)) !important;
+  opacity: 0.7 !important;
+}
+body.fractal-disintegration-active .echo-document:nth-child(3n) {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  transform: translate3d(0, 0, calc(var(--item-index, 0) * -60px)) scale(0.9) !important;
+  opacity: 0.6 !important;
+}
