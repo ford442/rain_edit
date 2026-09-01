@@ -3296,3 +3296,23 @@ body.fractal-disintegration-active .echo-document:nth-child(3n) {
   transform: translate3d(0, 0, calc(var(--item-index, 0) * -60px)) scale(0.9) !important;
   opacity: 0.6 !important;
 }
+
+/* Aurora Glitch Lens */
+body.aurora-glitch-active #editor {
+  -webkit-mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+}
+
+body.aurora-glitch-active .echo-document:nth-child(even) {
+  clip-path: polygon(0 10%, 100% 0, 100% 90%, 0 100%);
+  transform: translate3d(calc(var(--item-index, 0) * 15px), calc(var(--item-index, 0) * -15px), calc(var(--item-index, 0) * -40px)) rotateZ(calc(var(--item-index, 0) * 2deg)) !important;
+  opacity: 0.8 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) drop-shadow(0 0 10px rgba(255, 0, 255, 0.6)) !important;
+}
+
+body.aurora-glitch-active .echo-document:nth-child(odd) {
+  clip-path: polygon(0 0, 100% 10%, 100% 100%, 0 90%);
+  transform: translate3d(calc(var(--item-index, 0) * -15px), calc(var(--item-index, 0) * 15px), calc(var(--item-index, 0) * -40px)) rotateZ(calc(var(--item-index, 0) * -2deg)) !important;
+  opacity: 0.7 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * -45deg)) drop-shadow(0 0 10px rgba(0, 255, 255, 0.6)) !important;
+}
