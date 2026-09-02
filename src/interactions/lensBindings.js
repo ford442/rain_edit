@@ -1194,6 +1194,40 @@ export function registerLensBindings(manager, { doc = document } = {}) {
     onUp: () => body.classList.remove("loupe-active", "aurora-glitch-active"),
   });
 
+  manager.register({
+    id: "zenith-mirage",
+    category: "lens",
+    description: "Zenith Mirage Lens (Alt+Z)",
+    combo: { alt: true, code: "KeyZ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "zenith-mirage-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => doc.style.setProperty("--item-index", idx));
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "zenith-mirage-active"),
+  });
+
+  manager.register({
+    id: "plasma-web",
+    category: "lens",
+    description: "Plasma Web Lens (Alt+P)",
+    combo: { alt: true, code: "KeyP" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "plasma-web-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => doc.style.setProperty("--item-index", idx));
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "plasma-web-active"),
+  });
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("loupe-active")) return;
