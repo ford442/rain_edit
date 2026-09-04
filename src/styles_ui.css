@@ -3384,3 +3384,85 @@ body.plasma-web-active .echo-document:not(.loupe-active) {
   filter: brightness(1.5) contrast(1.2) drop-shadow(0 0 10px rgba(0,255,255,0.8)) !important;
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), clip-path 0.3s;
 }
+
+/* --- Nebula Cascade Lens (Alt+1) --- */
+body.nebula-cascade-active #editor {
+  mask-image: radial-gradient(
+    ellipse 400px 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.1) 30%,
+    black 70%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 400px 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.1) 30%,
+    black 70%
+  );
+}
+
+body.nebula-cascade-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.9 - (var(--item-index) * 0.05)) !important;
+  filter: blur(calc(var(--item-index) * 0.5px)) drop-shadow(0 0 20px rgba(0, 255, 200, 0.6)) hue-rotate(calc(var(--item-index) * 60deg)) !important;
+  transform: translate3d(
+    calc(var(--tx, 0) + (var(--item-index) * 35px)),
+    calc(var(--ty, 0) + (var(--item-index) * 25px)),
+    calc(var(--tz, 0) + (var(--item-index) * -40px))
+  ) rotateX(calc(var(--item-index) * 5deg)) rotateY(calc(var(--item-index) * -5deg)) scale(calc(1 + (var(--item-index) * 0.05))) !important;
+  border: 1px solid rgba(0, 255, 200, 0.5);
+  box-shadow:
+    0 0 40px rgba(0, 255, 200, 0.4),
+    inset 0 0 20px rgba(0, 150, 255, 0.3);
+  background: rgba(0, 15, 30, 0.6);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease-out;
+}
+
+/* --- Quantum Mirror Lens (Alt+2) --- */
+body.quantum-mirror-active #editor {
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(var(--lens-y, 50%) - 100px),
+    transparent calc(var(--lens-y, 50%) - 80px),
+    transparent calc(var(--lens-y, 50%) + 80px),
+    black calc(var(--lens-y, 50%) + 100px),
+    black 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(var(--lens-y, 50%) - 100px),
+    transparent calc(var(--lens-y, 50%) - 80px),
+    transparent calc(var(--lens-y, 50%) + 80px),
+    black calc(var(--lens-y, 50%) + 100px),
+    black 100%
+  );
+}
+
+body.quantum-mirror-active .echo-document:not(.loupe-active) {
+  opacity: 0.8 !important;
+  border: 1px solid rgba(200, 100, 255, 0.5);
+  box-shadow: 0 0 30px rgba(150, 50, 255, 0.4);
+  transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1), clip-path 0.4s ease;
+}
+
+body.quantum-mirror-active .echo-document:nth-child(even):not(.loupe-active) {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%);
+  transform: translate3d(
+    calc(var(--tx, 0)),
+    calc(var(--ty, 0) - (var(--item-index) * 20px) - 50px),
+    calc(var(--tz, 0) - (var(--item-index) * 30px))
+  ) rotateX(calc(var(--item-index) * 10deg)) !important;
+  filter: hue-rotate(90deg) brightness(1.2) drop-shadow(0 10px 15px rgba(200, 100, 255, 0.5)) !important;
+}
+
+body.quantum-mirror-active .echo-document:nth-child(odd):not(.loupe-active) {
+  clip-path: polygon(0% 50%, 100% 50%, 100% 100%, 0% 100%);
+  /* The odd ones are mirrored over the X axis */
+  transform: translate3d(
+    calc(var(--tx, 0)),
+    calc(var(--ty, 0) + (var(--item-index) * 20px) + 50px),
+    calc(var(--tz, 0) - (var(--item-index) * 30px))
+  ) rotateX(calc(180deg - (var(--item-index) * 10deg))) !important;
+  filter: hue-rotate(-90deg) brightness(0.8) drop-shadow(0 -10px 15px rgba(100, 200, 255, 0.5)) !important;
+}
