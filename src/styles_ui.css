@@ -99,6 +99,78 @@ body.tornado-active .echo-document:hover {
   border-color: rgba(200, 100, 255, 0.8);
 }
 
+/* ─── Hyper-Spatial Fold Lens (Ctrl+Alt+H) ────────────────────────────── */
+body.hyper-spatial-fold-active #editor {
+  mask-image: radial-gradient(circle 350px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.4) 40%, black 80%);
+  -webkit-mask-image: radial-gradient(circle 350px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.4) 40%, black 80%);
+}
+
+body.hyper-spatial-fold-active .echo-document:not(.loupe-active) {
+  opacity: 0.85 !important;
+  border: 1px solid rgba(255, 0, 255, 0.6);
+  box-shadow: 0 0 25px rgba(255, 0, 255, 0.4), inset 0 0 15px rgba(0, 255, 255, 0.3);
+  filter: brightness(1.2) contrast(1.4) hue-rotate(calc(var(--item-index) * 25deg)) !important;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body.hyper-spatial-fold-active .echo-document:nth-child(even):not(.loupe-active) {
+  transform: translate3d(
+    calc(sin(var(--item-index)) * 60px),
+    calc(cos(var(--item-index)) * 60px),
+    calc(var(--item-index) * -80px)
+  ) rotateX(calc(var(--item-index) * 8deg)) rotateY(calc(var(--item-index) * -15deg)) scale(calc(1 - (var(--item-index) * 0.04))) !important;
+}
+
+body.hyper-spatial-fold-active .echo-document:nth-child(odd):not(.loupe-active) {
+  transform: translate3d(
+    calc(cos(var(--item-index)) * -60px),
+    calc(sin(var(--item-index)) * 60px),
+    calc(var(--item-index) * -80px)
+  ) rotateX(calc(var(--item-index) * -8deg)) rotateY(calc(var(--item-index) * 15deg)) scale(calc(1 - (var(--item-index) * 0.04))) !important;
+}
+
+/* ─── Luminous Fracture Lens (Ctrl+Alt+F) ────────────────────────────── */
+body.luminous-fracture-active #editor {
+  mask-image: radial-gradient(circle 400px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 10%, rgba(0,0,0,0.3) 30%, black 75%);
+  -webkit-mask-image: radial-gradient(circle 400px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 10%, rgba(0,0,0,0.3) 30%, black 75%);
+}
+
+body.luminous-fracture-active .echo-document:not(.loupe-active) {
+  opacity: 0.9 !important;
+  border: 2px solid hsla(calc(var(--item-index) * 40deg), 100%, 60%, 0.8);
+  box-shadow: 0 0 30px hsla(calc(var(--item-index) * 40deg), 100%, 50%, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.4);
+  filter: brightness(1.3) contrast(1.5) saturate(1.5) !important;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), clip-path 0.4s ease;
+}
+
+body.luminous-fracture-active .echo-document:nth-child(3n):not(.loupe-active) {
+  clip-path: polygon(10% 0%, 100% 15%, 90% 100%, 0% 85%);
+  transform: translate3d(
+    calc(var(--item-index) * 45px),
+    calc(var(--item-index) * 15px),
+    calc(var(--item-index) * -50px)
+  ) rotateZ(calc(var(--item-index) * 5deg)) !important;
+}
+
+body.luminous-fracture-active .echo-document:nth-child(3n+1):not(.loupe-active) {
+  clip-path: polygon(0% 15%, 90% 0%, 100% 85%, 10% 100%);
+  transform: translate3d(
+    calc(var(--item-index) * -45px),
+    calc(var(--item-index) * -15px),
+    calc(var(--item-index) * -50px)
+  ) rotateZ(calc(var(--item-index) * -5deg)) !important;
+}
+
+body.luminous-fracture-active .echo-document:nth-child(3n+2):not(.loupe-active) {
+  clip-path: polygon(5% 5%, 95% 5%, 95% 95%, 5% 95%);
+  transform: translate3d(
+    0,
+    calc(var(--item-index) * 30px),
+    calc(var(--item-index) * -60px)
+  ) scale(1.1) rotateX(calc(var(--item-index) * 10deg)) !important;
+}
+
+
 /* Repulsor Field (Moses Effect) */
 body.repulsor-active .echo-document {
   transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -3479,6 +3551,7 @@ body.neon-fractal-rift-active .echo-document:nth-child(3n+2):not(.loupe-active) 
     calc(var(--item-index) * -40px),
     calc(var(--item-index) * -80px)
   ) rotateZ(calc(var(--item-index) * 8deg)) scale(calc(1 - (var(--item-index) * 0.03))) !important;
+}
 /* --- Nebula Cascade Lens (Alt+1) --- */
 body.nebula-cascade-active #editor {
   mask-image: radial-gradient(
