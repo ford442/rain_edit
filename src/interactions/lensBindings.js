@@ -27,6 +27,44 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   });
 
   manager.register({
+    id: "hyper-spatial-fold",
+    category: "lens",
+    description: "Hyper-Spatial Fold Lens (Ctrl+Alt+H)",
+    combo: { ctrl: true, alt: true, code: "KeyH" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "hyper-spatial-fold-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "hyper-spatial-fold-active"),
+  });
+
+  manager.register({
+    id: "luminous-fracture",
+    category: "lens",
+    description: "Luminous Fracture Lens (Ctrl+Alt+F)",
+    combo: { ctrl: true, alt: true, code: "KeyF" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "luminous-fracture-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "luminous-fracture-active"),
+  });
+
+  manager.register({
     id: "celestial-resonance",
     category: "lens",
     description: "Celestial Resonance Lens (Ctrl+Alt+W)",
