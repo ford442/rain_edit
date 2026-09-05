@@ -54,8 +54,8 @@ body,
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -70,7 +70,7 @@ body,
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 229, 255, 0.6);
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.8), inset 0 0 5px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 1), inset 0 0 5px rgba(255, 255, 255, 0.5);
 }
 
 #editor {
@@ -2169,18 +2169,23 @@ body.theme-blueprint #rain-front {
 .tab-item.active::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 200%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(0, 229, 255, 0.4),
-    transparent
-  );
-  animation: tab-scan 2s linear infinite;
+  inset: 0;
+  border-radius: 8px;
+  padding: 2px;
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.8), rgba(255, 0, 128, 0.8), rgba(0, 255, 128, 0.8), rgba(0, 229, 255, 0.8));
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: tab-scan-border 4s linear infinite;
   pointer-events: none;
+}
+
+@keyframes tab-scan-border {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* Depth badge — small indicator inside each tab */
@@ -2827,5 +2832,5 @@ body::after {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 229, 255, 0.6);
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 1), inset 0 0 5px rgba(255, 255, 255, 0.5);
 }
