@@ -8,6 +8,64 @@ export function registerLensBindings(manager, { doc = document } = {}) {
   const body = doc.body;
 
   manager.register({
+    id: "quantum-weaver",
+    category: "lens",
+    description: "Quantum Weaver Lens (Ctrl+Alt+Q)",
+    combo: { ctrl: true, alt: true, code: "KeyQ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "quantum-weaver-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "quantum-weaver-active"),
+  });
+
+  manager.register({
+    id: "celestial-resonance",
+    category: "lens",
+    description: "Celestial Resonance Lens (Ctrl+Alt+W)",
+    combo: { ctrl: true, alt: true, code: "KeyW" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "celestial-resonance-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "celestial-resonance-active"),
+  });
+
+  manager.register({
+    id: "neon-fractal-rift",
+    category: "lens",
+    description: "Neon Fractal Rift Lens (Ctrl+Alt+R)",
+    combo: { ctrl: true, alt: true, code: "KeyR" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "neon-fractal-rift-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "neon-fractal-rift-active"),
+  });
+
+
+  manager.register({
     id: "dimensional-rift",
     category: "lens",
     description: "Dimensional Rift Lens (Alt+Shift+E)",
