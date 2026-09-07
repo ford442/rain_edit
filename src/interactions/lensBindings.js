@@ -7,7 +7,64 @@
 export function registerLensBindings(manager, { doc = document } = {}) {
   const body = doc.body;
 
+
   manager.register({
+    id: "chrono-pulse",
+    category: "lens",
+    description: "Chrono-Pulse Lens (Ctrl+Alt+D)",
+    combo: { ctrl: true, alt: true, code: "KeyD" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "chrono-pulse-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "chrono-pulse-active"),
+  });
+
+  manager.register({
+    id: "nebula-void",
+    category: "lens",
+    description: "Nebula Void Lens (Alt+Shift+V)",
+    combo: { alt: true, shift: true, code: "NumpadAdd" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "nebula-void-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "nebula-void-active"),
+  });
+
+  manager.register({
+    id: "void-echoes",
+    category: "lens",
+    description: "Void Echoes Lens (Ctrl+Alt+P)",
+    combo: { ctrl: true, alt: true, code: "KeyP" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "void-echoes-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "void-echoes-active"),
+  });
+manager.register({
     id: "quantum-weaver",
     category: "lens",
     description: "Quantum Weaver Lens (Ctrl+Alt+Q)",
