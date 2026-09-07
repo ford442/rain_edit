@@ -3633,3 +3633,72 @@ body.quantum-mirror-active .echo-document:nth-child(odd):not(.loupe-active) {
   ) rotateX(calc(180deg - (var(--item-index) * 10deg))) !important;
   filter: hue-rotate(-90deg) brightness(0.8) drop-shadow(0 -10px 15px rgba(100, 200, 255, 0.5)) !important;
 }
+
+/* --- Chrono-Pulse Lens (Ctrl+Alt+D) --- */
+body.chrono-pulse-active #editor {
+  mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 150px,
+    black 300px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 150px,
+    black 300px
+  );
+}
+body.chrono-pulse-active .echo-document {
+  transition: all 0.3s ease-out;
+}
+body.chrono-pulse-active .echo-document:not(.loupe-active) {
+  transform: translateZ(calc(var(--item-index, 0) * -100px)) scale(calc(1 - var(--item-index, 0) * 0.1)) rotate(calc(var(--item-index, 0) * 5deg));
+  filter: hue-rotate(calc(var(--item-index, 0) * 60deg)) brightness(1.5) blur(calc(var(--item-index, 0) * 1px));
+  opacity: 0.8;
+}
+
+/* --- Nebula Void Lens (Alt+Shift+V) --- */
+body.nebula-void-active #editor {
+  mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 100px,
+    black 250px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 100px,
+    black 250px
+  );
+}
+body.nebula-void-active .echo-document {
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+body.nebula-void-active .echo-document:not(.loupe-active) {
+  transform: translateZ(calc(var(--item-index, 0) * -150px)) scale(1.1) rotateX(calc(var(--item-index, 0) * 10deg));
+  filter: invert(0.8) hue-rotate(calc(var(--item-index, 0) * 45deg)) drop-shadow(0 0 20px rgba(128, 0, 255, 0.6));
+  opacity: 0.9;
+}
+
+/* --- Void Echoes Lens (Ctrl+Alt+P) --- */
+body.void-echoes-active #editor {
+  mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 180px,
+    black 350px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 180px,
+    black 350px
+  );
+}
+body.void-echoes-active .echo-document {
+  transition: transform 0.5s ease-out, filter 0.5s ease-out;
+}
+body.void-echoes-active .echo-document:not(.loupe-active) {
+  clip-path: polygon(
+    10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%
+  );
+  transform: translateZ(calc(var(--item-index, 0) * -80px)) translateX(calc(sin(var(--item-index, 0) * 1.5) * 150px)) translateY(calc(cos(var(--item-index, 0) * 1.5) * 100px));
+  filter: sepia(0.8) hue-rotate(calc(var(--item-index, 0) * -30deg)) contrast(1.2);
+  opacity: 0.7;
+}
