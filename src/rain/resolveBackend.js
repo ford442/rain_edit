@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Resolve which water-map simulation backend to use.
  *
@@ -40,6 +41,10 @@ export function readRainSimOverride(
   return "auto";
 }
 
+/**
+ * @param {unknown} value
+ * @returns {'main' | 'js' | 'wasm' | 'auto'}
+ */
 export function normalizeBackend(value) {
   const v = String(value || "")
     .trim()
@@ -48,6 +53,11 @@ export function normalizeBackend(value) {
   return "auto";
 }
 
+/**
+ * @param {unknown} value
+ * @param {Storage | null} [storage]
+ * @returns {'main' | 'js' | 'wasm' | 'auto'}
+ */
 export function persistRainSimBackend(
   value,
   storage = typeof localStorage !== "undefined" ? localStorage : null,

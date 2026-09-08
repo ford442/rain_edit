@@ -1,3 +1,24 @@
+// @ts-check
+
+/** @typedef {WebGL2RenderingContext | WebGLRenderingContext} GLContext */
+
+/**
+ * @typedef {object} GLContextMetadata
+ * @property {'webgl2' | 'webgl1'} api
+ * @property {WebGLContextAttributes} attributes
+ * @property {Record<string, unknown>} extensions
+ */
+
+/**
+ * @typedef {object} CreateGLContextOptions
+ * @property {WebGLContextAttributes} [attributes]
+ * @property {boolean} [preferWebGL2]
+ * @property {boolean} [webgl1Fallback]
+ * @property {string[]} [requiredExtensions]
+ * @property {string[]} [optionalExtensions]
+ * @property {string} [label]
+ */
+
 export const DEFAULT_GL_ATTRIBUTES = Object.freeze({
   alpha: true,
   premultipliedAlpha: true,
@@ -13,9 +34,15 @@ const WEBGL1_OPTIONAL_EXTENSIONS = [
   "OES_standard_derivatives",
 ];
 
+/** @type {WeakMap<GLContext, GLContextMetadata>} */
 const contextMetadata = new WeakMap();
 
 
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {CreateGLContextOptions} [options]
+ * @returns {GLContext | null}
+ */
 export function createGLContext(
   canvas,
   {
@@ -28,15 +55,19 @@ export function createGLContext(
   } = {},
 ) {
   const contextAttributes = { ...DEFAULT_GL_ATTRIBUTES, ...attributes };
+  /** @type {string[]} */
   const contextNames = [];
   if (preferWebGL2) contextNames.push("webgl2");
   if (webgl1Fallback) contextNames.push("webgl", "experimental-webgl");
 
+  /** @type {GLContext | null} */
   let gl = null;
+  /** @type {'webgl2' | 'webgl1' | null} */
   let api = null;
   for (const contextName of contextNames) {
     try {
-      gl = canvas.getContext(contextName, contextAttributes);
+      const raw = canvas.getContext(contextName, contextAttributes);
+      gl = /** @type {GLContext | null} */ (raw);
     } catch (error) {
       console.warn(`[${label}] ${contextName} context creation failed.`, error);
     }
@@ -46,8 +77,9 @@ export function createGLContext(
     }
   }
 
-  if (!gl) return null;
+  if (!gl || !api) return null;
 
+  /** @type {Record<string, unknown>} */
   const extensions = {};
   const extensionNames = new Set(requiredExtensions);
   if (api === "webgl1") {
@@ -77,11 +109,21 @@ export function createGLContext(
 }
 
 
+/**
+ * @param {GLContext} gl
+ * @returns {GLContextMetadata | null}
+ */
 export function getGLContextInfo(gl) {
   return contextMetadata.get(gl) ?? null;
 }
 
 
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {number} cssWidth
+ * @param {number} cssHeight
+ * @param {number} [dpr]
+ */
 export function resizeCanvasToDisplaySize(
   canvas,
   cssWidth,
