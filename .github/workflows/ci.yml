@@ -47,6 +47,8 @@ jobs:
         run: npm ci
       - name: Parse JavaScript sources
         run: npm run check
+      - name: Type-check annotated seams
+        run: npm run typecheck
 
   smoke:
     name: smoke

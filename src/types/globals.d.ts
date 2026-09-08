@@ -6,6 +6,13 @@ declare module "*?glslify" {
   export default source;
 }
 
+// Vite's `?worker` suffix imports a Worker constructor for the target module.
+declare module "*?worker" {
+  export default class extends Worker {
+    constructor();
+  }
+}
+
 // Vite injects typed build-time env. Only the vars this app reads are declared;
 // extend as needed.
 interface ImportMetaEnv {

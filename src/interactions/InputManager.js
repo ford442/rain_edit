@@ -1,4 +1,59 @@
+// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
+
+/**
+ * @typedef {object} Combo
+ * @property {boolean} alt
+ * @property {boolean} shift
+ * @property {boolean} ctrl
+ * @property {boolean} meta
+ * @property {boolean} ctrlOrMeta
+ * @property {string | null} code
+ * @property {string | null} key
+ */
+
+/**
+ * @typedef {object} InputContext
+ * @property {boolean} isTyping
+ * @property {HTMLElement | null} body
+ * @property {AppWindow | null} win
+ * @property {InputManager} modes
+ * @property {HTMLElement | undefined} editorEl
+ * @property {HTMLElement | undefined} echoLayerEl
+ * @property {unknown} tabManager
+ * @property {unknown} referenceManager
+ */
+
+/**
+ * @typedef {object} BindingSpec
+ * @property {string} id
+ * @property {string} [category]
+ * @property {string} [description]
+ * @property {'action' | 'toggle' | 'hold'} [type]
+ * @property {string | null} [group]
+ * @property {Partial<Combo>} combo
+ * @property {(ctx: InputContext) => boolean} [when]
+ * @property {(event: KeyboardEvent | null, ctx: InputContext) => void} [onDown]
+ * @property {(event: KeyboardEvent | null, ctx: InputContext) => void} [onUp]
+ * @property {boolean} [allowInEditor]
+ * @property {boolean} [preventDefault]
+ */
+
+/**
+ * @typedef {object} Binding
+ * @property {string} id
+ * @property {string} category
+ * @property {string} description
+ * @property {'action' | 'toggle' | 'hold'} type
+ * @property {string | null} group
+ * @property {Combo} combo
+ * @property {Set<string>} releaseKeys
+ * @property {((ctx: InputContext) => boolean) | null} when
+ * @property {((event: KeyboardEvent | null, ctx: InputContext) => void) | null} onDown
+ * @property {((event: KeyboardEvent | null, ctx: InputContext) => void) | null} onUp
+ * @property {boolean} allowInEditor
+ * @property {boolean} preventDefault
+ */
 
 /**
  * Single declarative keyboard registry for all world-interaction shortcuts.
@@ -24,6 +79,10 @@ import { InputRegistry } from "./InputRegistry.js";
 
 const STORAGE_KEY = "rain2.keybinds";
 
+/**
+ * @param {Partial<Combo>} [combo]
+ * @returns {Combo}
+ */
 function normalizeCombo(combo = {}) {
   return {
     alt: !!combo.alt,
@@ -37,8 +96,13 @@ function normalizeCombo(combo = {}) {
   };
 }
 
-// Letters that a `code` like "KeyF" should also release on ("f"/"F").
+/**
+ * Letters that a `code` like "KeyF" should also release on ("f"/"F").
+ * @param {Combo} combo
+ * @returns {Set<string>}
+ */
 function releaseKeysFor(combo) {
+  /** @type {Set<string>} */
   const keys = new Set();
   if (combo.key) keys.add(combo.key);
   if (combo.code && /^Key[A-Z]$/.test(combo.code)) {
@@ -60,19 +124,44 @@ function releaseKeysFor(combo) {
   return keys;
 }
 
+/**
+ * @param {EventTarget | null} [target]
+ * @returns {boolean}
+ */
 export function isTypingTarget(target) {
   if (!target || typeof target !== "object") return false;
-  const tag = target.tagName;
+  const el = /** @type {Partial<HTMLElement>} */ (target);
+  const tag = el.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA") return true;
-  if (target.isContentEditable) return true;
-  if (typeof target.closest === "function" && target.closest(".monaco-editor")) return true;
-  if (target.classList && typeof target.classList.contains === "function" && target.classList.contains("monaco-editor")) {
+  if (el.isContentEditable) return true;
+  if (typeof el.closest === "function" && el.closest(".monaco-editor")) return true;
+  if (el.classList && typeof el.classList.contains === "function" && el.classList.contains("monaco-editor")) {
     return true;
   }
   return false;
 }
 
+/**
+ * `window`, plus the ad hoc globals this project attaches to it for the
+ * interaction bindings to read (see `appContext.js`).
+ * @typedef {Window & {
+ *   editorEl?: HTMLElement,
+ *   echoLayerEl?: HTMLElement,
+ *   tabManager?: unknown,
+ *   referenceManager?: unknown,
+ * }} AppWindow
+ */
+
+/**
+ * @typedef {object} InputManagerOptions
+ * @property {Document | null} [eventTarget]
+ * @property {HTMLElement | null} [body]
+ * @property {Storage | null} [storage]
+ * @property {AppWindow | null} [win]
+ */
+
 export class InputManager {
+  /** @param {InputManagerOptions} [options] */
   constructor({
     eventTarget = typeof document !== "undefined" ? document : null,
     body = typeof document !== "undefined" ? document.body : null,
@@ -84,7 +173,9 @@ export class InputManager {
     this.storage = storage;
     this.win = win;
     this.inputs = new InputRegistry();
+    /** @type {Map<string, Binding>} */
     this.bindings = new Map();
+    /** @type {Map<string, Binding>} */
     this.active = new Map(); // id -> binding currently held/toggled on
     this.overrides = this._loadOverrides();
     this.started = false;
@@ -93,6 +184,7 @@ export class InputManager {
     this.handleKeyUp = this.handleKeyUp.bind(this);
   }
 
+  /** @returns {Record<string, Partial<Combo>>} */
   _loadOverrides() {
     if (!this.storage) return {};
     try {
@@ -102,6 +194,7 @@ export class InputManager {
     }
   }
 
+  /** @param {BindingSpec} spec */
   register(spec) {
     if (!spec || !spec.id) throw new Error("InputManager.register requires an id");
     if (this.bindings.has(spec.id)) {
@@ -129,8 +222,18 @@ export class InputManager {
   start() {
     if (this.started || !this.eventTarget) return this;
     // Capture phase so we see keys before feature-local widgets/monaco.
-    this.inputs.listen(this.eventTarget, "keydown", this.handleKeyDown, true);
-    this.inputs.listen(this.eventTarget, "keyup", this.handleKeyUp, true);
+    this.inputs.listen(
+      this.eventTarget,
+      "keydown",
+      /** @type {EventListener} */ (this.handleKeyDown),
+      true,
+    );
+    this.inputs.listen(
+      this.eventTarget,
+      "keyup",
+      /** @type {EventListener} */ (this.handleKeyUp),
+      true,
+    );
     if (this.win && typeof this.win.addEventListener === "function") {
       this.inputs.listen(this.win, "blur", () => this._releaseAll(), false);
     }
@@ -144,6 +247,10 @@ export class InputManager {
     this.started = false;
   }
 
+  /**
+   * @param {Partial<KeyboardEvent>} event
+   * @returns {InputContext}
+   */
   buildContext(event) {
     const target = event && event.target;
     return {
@@ -158,6 +265,7 @@ export class InputManager {
     };
   }
 
+  /** @returns {Element | null} */
   _activeElement() {
     try {
       return this.eventTarget && this.eventTarget.activeElement;
@@ -166,6 +274,11 @@ export class InputManager {
     }
   }
 
+  /**
+   * @param {Combo} combo
+   * @param {KeyboardEvent} event
+   * @returns {boolean}
+   */
   _matches(combo, event) {
     if (combo.ctrlOrMeta) {
       if (!(event.ctrlKey || event.metaKey)) return false;
@@ -187,6 +300,7 @@ export class InputManager {
     return true;
   }
 
+  /** @param {KeyboardEvent} event */
   handleKeyDown(event) {
     const ctx = this.buildContext(event);
     for (const binding of this.bindings.values()) {
@@ -218,6 +332,7 @@ export class InputManager {
     }
   }
 
+  /** @param {KeyboardEvent} event */
   handleKeyUp(event) {
     const ctx = this.buildContext(event);
     for (const binding of [...this.active.values()]) {
@@ -231,11 +346,19 @@ export class InputManager {
     }
   }
 
+  /**
+   * @param {Binding} binding
+   * @returns {boolean}
+   */
   _isTypingBinding(binding) {
     // Bindings that intentionally only fire while typing (e.g. typing ripple).
     return binding.category === "editor-feedback";
   }
 
+  /**
+   * @param {Binding} binding
+   * @param {InputContext} ctx
+   */
   _activateGroup(binding, ctx) {
     if (!binding.group) return;
     for (const other of [...this.active.values()]) {
@@ -245,6 +368,11 @@ export class InputManager {
     }
   }
 
+  /**
+   * @param {Binding} binding
+   * @param {KeyboardEvent | null} event
+   * @param {InputContext} [ctx]
+   */
   _deactivate(binding, event, ctx) {
     if (!this.active.has(binding.id)) return;
     this.active.delete(binding.id);
@@ -258,8 +386,12 @@ export class InputManager {
     }
   }
 
-  /** Programmatic access for the cheatsheet. */
+  /**
+   * Programmatic access for the cheatsheet.
+   * @returns {Record<string, Array<{ id: string, description: string, combo: string }>>}
+   */
   list() {
+    /** @type {Record<string, Array<{ id: string, description: string, combo: string }>>} */
     const groups = {};
     for (const b of this.bindings.values()) {
       (groups[b.category] ||= []).push({
@@ -271,7 +403,12 @@ export class InputManager {
     return groups;
   }
 
+  /**
+   * @param {Combo} combo
+   * @returns {string}
+   */
   formatCombo(combo) {
+    /** @type {string[]} */
     const parts = [];
     if (combo.ctrlOrMeta) parts.push("Ctrl/⌘");
     else {
@@ -287,6 +424,10 @@ export class InputManager {
     return parts.join("+");
   }
 
+  /**
+   * @param {string} id
+   * @param {Partial<Combo>} combo
+   */
   rebind(id, combo) {
     const binding = this.bindings.get(id);
     if (!binding) return;

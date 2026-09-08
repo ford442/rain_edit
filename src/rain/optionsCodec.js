@@ -1,5 +1,30 @@
+// @ts-check
 /** Shared rain-sim option defaults and WASM f32 packing. */
 
+/**
+ * @typedef {object} RainOptions
+ * @property {number} minR
+ * @property {number} maxR
+ * @property {number} maxDrops
+ * @property {number} rainChance
+ * @property {number} rainLimit
+ * @property {number} dropletsRate
+ * @property {[number, number]} dropletsSize
+ * @property {number} dropletsCleaningRadiusMultiplier
+ * @property {boolean} raining
+ * @property {number} globalTimeScale
+ * @property {number} trailRate
+ * @property {boolean} autoShrink
+ * @property {[number, number]} spawnArea
+ * @property {[number, number]} trailScaleRange
+ * @property {number} collisionRadius
+ * @property {number} collisionRadiusIncrease
+ * @property {number} dropFallMultiplier
+ * @property {number} collisionBoostMultiplier
+ * @property {number} collisionBoost
+ */
+
+/** @type {RainOptions} */
 export const DEFAULT_RAIN_OPTIONS = {
   minR: 10,
   maxR: 40,
@@ -22,7 +47,11 @@ export const DEFAULT_RAIN_OPTIONS = {
   collisionBoost: 1,
 };
 
-/** Pack options into the f32 layout expected by rain_sim_set_options. */
+/**
+ * Pack options into the f32 layout expected by rain_sim_set_options.
+ * @param {Partial<RainOptions>} options
+ * @returns {Float32Array}
+ */
 export function packOptionsForWasm(options) {
   const o = { ...DEFAULT_RAIN_OPTIONS, ...options };
   const dropletsSize = o.dropletsSize || DEFAULT_RAIN_OPTIONS.dropletsSize;

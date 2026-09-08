@@ -1,3 +1,4 @@
+// @ts-check
 import Raindrops from "../vendor/raindrops.js";
 import { DEFAULT_RAIN_OPTIONS } from "./optionsCodec.js";
 import RainSimWorker from "./rainSimWorker.js?worker";
@@ -7,6 +8,19 @@ import {
   resolveRainSimBackend,
   workerSimSupported,
 } from "./resolveBackend.js";
+
+/** @typedef {import('./optionsCodec.js').RainOptions} RainOptions */
+/** @typedef {'main' | 'js' | 'wasm'} RainSimBackend */
+/** @typedef {'auto' | RainSimBackend} RainSimPreference */
+
+/**
+ * @typedef {
+ *   | { type: 'ready', backend: RainSimBackend }
+ *   | { type: 'frame', bitmap: ImageBitmap, backend: RainSimBackend }
+ *   | { type: 'error', message?: string }
+ *   | { type: 'stopped' }
+ * } WorkerOutMessage
+ */
 
 /**
  * Drop-in replacement for vendor Raindrops.
@@ -20,8 +34,8 @@ export class WaterMapSim {
    * @param {number} scale
    * @param {CanvasImageSource} dropAlpha
    * @param {CanvasImageSource} dropColor
-   * @param {object} [options]
-   * @param {{ preference?: string }} [config]
+   * @param {Partial<RainOptions>} [options]
+   * @param {{ preference?: RainSimPreference }} [config]
    */
   static async create(
     width,
@@ -49,6 +63,16 @@ export class WaterMapSim {
     return sim;
   }
 
+  /**
+   * @param {number} width
+   * @param {number} height
+   * @param {number} scale
+   * @param {CanvasImageSource} dropAlpha
+   * @param {CanvasImageSource} dropColor
+   * @param {Partial<RainOptions>} [options]
+   * @param {RainSimBackend} [backend]
+   * @param {RainSimPreference} [preference]
+   */
   constructor(
     width,
     height,
@@ -66,8 +90,11 @@ export class WaterMapSim {
     this.dropColor = dropColor;
     this.backend = backend;
     this.preference = preference;
+    /** @type {Raindrops | null} */
     this._mainEngine = null;
+    /** @type {Worker | null} */
     this._worker = null;
+    /** @type {ImageBitmap | null} */
     this._frame = null;
     this._placeholder = document.createElement("canvas");
     this._placeholder.width = Math.max(1, width | 0);
@@ -78,15 +105,20 @@ export class WaterMapSim {
     this._frameCount = 0;
 
     const opts = { ...DEFAULT_RAIN_OPTIONS, ...options };
+    /** @type {RainOptions} */
     this._optionsTarget = opts;
     this.options = this._makeOptionsProxy(opts);
   }
 
+  /**
+   * @param {RainOptions} target
+   * @returns {RainOptions}
+   */
   _makeOptionsProxy(target) {
     this._optionsTarget = target;
     return new Proxy(target, {
       set: (obj, prop, value) => {
-        obj[prop] = value;
+        /** @type {Record<string | symbol, unknown>} */ (obj)[prop] = value;
         this._postOptions();
         return true;
       },
@@ -115,7 +147,9 @@ export class WaterMapSim {
         this._optionsTarget,
       );
       Object.assign(this._mainEngine.options, this._optionsTarget);
-      this.options = this._makeOptionsProxy(this._mainEngine.options);
+      this.options = this._makeOptionsProxy(
+        /** @type {RainOptions} */ (this._mainEngine.options),
+      );
       this._ready = true;
       return;
     }
@@ -123,15 +157,19 @@ export class WaterMapSim {
     await this._bootWorker(this.backend);
   }
 
+  /** @param {RainSimBackend} backend */
   async _bootWorker(backend) {
     this._teardownWorker();
     this.backend = backend;
-    this._worker = new RainSimWorker();
+    const worker = new RainSimWorker();
+    this._worker = worker;
     const dropAlphaBmp = await createImageBitmap(this.dropAlpha);
     const dropColorBmp = await createImageBitmap(this.dropColor);
 
     let settled = false;
+    /** @type {Promise<RainSimBackend>} */
     const ready = new Promise((resolve, reject) => {
+      /** @param {MessageEvent<WorkerOutMessage>} event */
       const onMessage = (event) => {
         const msg = event.data;
         if (!msg) return;
@@ -164,8 +202,8 @@ export class WaterMapSim {
           }
         }
       };
-      this._worker.onmessage = onMessage;
-      this._worker.onerror = (err) => {
+      worker.onmessage = onMessage;
+      worker.onerror = (err) => {
         if (!settled) {
           settled = true;
           reject(err?.error || new Error("rain sim worker failed"));
@@ -173,7 +211,7 @@ export class WaterMapSim {
       };
     });
 
-    this._worker.postMessage(
+    worker.postMessage(
       {
         type: "init",
         backend,
@@ -205,7 +243,9 @@ export class WaterMapSim {
         this._optionsTarget,
       );
       Object.assign(this._mainEngine.options, this._optionsTarget);
-      this.options = this._makeOptionsProxy(this._mainEngine.options);
+      this.options = this._makeOptionsProxy(
+        /** @type {RainOptions} */ (this._mainEngine.options),
+      );
       this._ready = true;
     }
   }
@@ -249,6 +289,11 @@ export class WaterMapSim {
     this._lastSimMainMs = performance.now() - t0;
   }
 
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @param {number} [r]
+   */
   clearDroplets(x, y, r = 30) {
     if (this._mainEngine) {
       this._mainEngine.clearDroplets(x, y, r);
@@ -257,6 +302,11 @@ export class WaterMapSim {
     this._worker?.postMessage({ type: "clearDroplets", x, y, r });
   }
 
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @param {number} [count]
+   */
   splash(x, y, count = 5) {
     if (this._mainEngine) {
       this._mainEngine.splash(x, y, count);
@@ -283,7 +333,7 @@ export class WaterMapSim {
 
   /**
    * Hot-swap backend for visual parity comparisons.
-   * @param {'auto' | 'main' | 'js' | 'wasm'} preference
+   * @param {RainSimPreference} preference
    */
   async setBackend(preference) {
     const normalized = persistRainSimBackend(preference);
@@ -301,7 +351,9 @@ export class WaterMapSim {
         this.dropColor,
         { ...this._optionsTarget },
       );
-      this.options = this._makeOptionsProxy(this._mainEngine.options);
+      this.options = this._makeOptionsProxy(
+        /** @type {RainOptions} */ (this._mainEngine.options),
+      );
       this.backend = "main";
       this._ready = true;
       return this.backend;
