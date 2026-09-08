@@ -1419,6 +1419,44 @@ manager.register({
     onUp: () => body.classList.remove("loupe-active", "quantum-mirror-active"),
   });
 
+  manager.register({
+    id: "tachyon-field",
+    category: "lens",
+    description: "Tachyon Field Lens (Alt+T)",
+    combo: { alt: true, code: "KeyT" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "tachyon-field-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "tachyon-field-active"),
+  });
+
+  manager.register({
+    id: "holo-topography",
+    category: "lens",
+    description: "Holographic Topography Lens (Alt+H)",
+    combo: { alt: true, code: "KeyH" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "holo-topography-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "holo-topography-active"),
+  });
+
   if (typeof doc.addEventListener === "function") {
     doc.addEventListener("mousemove", (e) => {
       if (!body.classList.contains("loupe-active")) return;
