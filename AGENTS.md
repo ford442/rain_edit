@@ -186,29 +186,59 @@ Focused unit tests use the built-in Node test runner and live in `tests/*.test.j
 
 This project stays vanilla ES modules; there is **no big-bang TS conversion**. Types
 are added incrementally at stable seams and enforced by `npm run typecheck`
-(`tsc --noEmit -p jsconfig.json`), which is part of `npm run ci`.
+(`tsc --noEmit -p jsconfig.json`), which is part of `npm run ci` **and** runs as its
+own step in the `syntax` job of `.github/workflows/ci.yml`, so a seam that stops
+typechecking fails CI, not just a local run.
 
 How it works:
 
 - **`jsconfig.json`** is strict with `checkJs: true`, but its `include` list is
   curated: only files that are fully annotated and pass today are type-checked.
-  `src/StorageAPI.js` is the first fully-typed seam (its response shapes live in
-  `src/types/storage.d.ts`; no `any`/loose `object` leaks from its public methods).
+  Typed seams today: `src/StorageAPI.js` (response shapes in
+  `src/types/storage.d.ts`), `src/rendering/createGLContext.js`,
+  `src/interactions/InputManager.js` + `InputRegistry.js`, and the water-map sim
+  seam `src/rain/WaterMapSim.js` + `optionsCodec.js` + `resolveBackend.js`. None
+  leak `any`/loose `object` from their public APIs.
 - **Mixin-composed managers** (`TabManager`, `Cabinet3D`) and the WebGL-heavy
   `RainLayer` have **authored sibling `.d.ts` files** (`TabManager.d.ts`,
   `Cabinet3D.d.ts`, `RainLayer.d.ts`) describing their trusted public APIs.
   TypeScript resolves imports of `./TabManager.js` to the `.d.ts` for types, so
   agents get a reliable surface without type-checking the mixin bodies. Keep these
-  declarations in sync when you change a public method.
+  declarations in sync when you change a public method. The same trick covers a
+  plain untyped dependency: `src/vendor/raindrops.js` (the legacy prototype-based
+  main-thread sim) has a `raindrops.d.ts` sibling describing only the handful of
+  members `WaterMapSim` actually uses, so its untyped body never enters the
+  type-checked program.
 - **Ambient shims** live in `src/types/globals.d.ts` (`*?glslify` shader imports,
-  `import.meta.env`).
+  Vite's `*?worker` constructor imports, `import.meta.env`).
 
-To type another seam:
+### Promoting a new file into `include`
 
-1. Add JSDoc types (and `// @ts-check`) to the `.js` file, reusing shapes from
-   `src/types/*.d.ts`.
-2. Add the file to the `include` list in `jsconfig.json`.
-3. Run `npm run typecheck` and fix until green.
+1. Add JSDoc types (and a `// @ts-check` pragma for clarity — `checkJs` is already
+   on globally) to the `.js` file, reusing shapes from `src/types/*.d.ts` or
+   `@typedef`s colocated in the file/module being typed.
+2. Add the file's path to the `include` array in `jsconfig.json`, then run
+   `npm run typecheck`.
+3. **Any module the new file imports is pulled into the type-checked program too**,
+   even if it's not itself listed in `include` — `strict` + `checkJs` apply to every
+   `.js` file reachable from a root file. Expect a cascade of errors from an
+   untyped dependency (implicit-`any` params, `this` typed `any` in prototype-style
+   constructors, etc.). Resolve each dependency with the lightest fix that keeps
+   its own body out of the checked set where practical:
+   - A small, stable dependency: add minimal JSDoc directly to it (see
+     `optionsCodec.js`/`resolveBackend.js`) and list it in `include` alongside the
+     seam that needs it.
+   - A larger or intentionally-untyped implementation (vendor code, a
+     mixin-composed manager): author a sibling `<name>.d.ts` declaring only the
+     members the typed seam actually calls, instead of annotating the
+     implementation. TypeScript resolves the relative import to the `.d.ts` and
+     never type-checks the `.js` body. Do **not** add the `.js` file itself to
+     `include` in this case.
+   - A Vite-specific import suffix (`?worker`, `?glslify`, `?url`, …) needs a
+     `declare module "*?suffix"` ambient shim in `src/types/globals.d.ts` if one
+     doesn't already exist for it.
+4. Run `npm run typecheck` again and iterate until clean, then run `npm run ci`
+   to confirm the rest of the gate (tests, build, smoke) still passes.
 
 Optionally, a fully-typed seam can later be renamed to `.ts` (Vite compiles it
 transparently); prefer this only once its JSDoc types are stable. Interaction
