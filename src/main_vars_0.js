@@ -328,6 +328,9 @@ window.initLayers = async function initLayers() {
   });
   resizeCanvases();
 
+  weatherSystem.attach({ raindrops, bgLayer, fgLayer });
+  weatherSystem.setManualIntensity(parseInt(intensitySlider?.value ?? "30", 10));
+
   // Pass raindrops to reference manager for shield effect
   if (referenceManager) {
     referenceManager.setRaindrops(raindrops);
@@ -337,6 +340,7 @@ window.initLayers = async function initLayers() {
   // Rain intensity: calm near focused 3D content, default otherwise
   const RAIN_CHANCE_DEFAULT = 0.3;
   const RAIN_CHANCE_CABINET = 0.12;
+  const RAIN_CHANCE_CABINET_FACTOR = RAIN_CHANCE_CABINET / RAIN_CHANCE_DEFAULT;
   let _cabinetWasVisible = false;
 
   function scheduleRainAnimation() {
@@ -348,15 +352,16 @@ window.initLayers = async function initLayers() {
     rainAnimationFrame = null;
     if (rainAnimationPaused) return;
     // Modulate rain density when cabinet opens/closes
-    if (cabinet3D) {
-      if (cabinet3D.visible && !_cabinetWasVisible) {
-        raindrops.options.rainChance = RAIN_CHANCE_CABINET;
-        _cabinetWasVisible = true;
-      } else if (!cabinet3D.visible && _cabinetWasVisible) {
-        raindrops.options.rainChance = RAIN_CHANCE_DEFAULT;
-        _cabinetWasVisible = false;
-      }
+    if (cabinet3D && cabinet3D.visible !== _cabinetWasVisible) {
+      weatherSystem.setSceneMultiplier(
+        cabinet3D.visible ? RAIN_CHANCE_CABINET_FACTOR : 1,
+      );
+      _cabinetWasVisible = cabinet3D.visible;
     }
+
+    // Drive rainChance / dropletsRate / refraction uniforms from the active
+    // weather mode + damped editor-activity signal (typing, cursor, focus).
+    weatherSystem.update();
 
     raindrops.update(); // updates raindrops.canvas internally
     // update texture bindings from the raindrops canvas

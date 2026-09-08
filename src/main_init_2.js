@@ -241,12 +241,22 @@ editor.onDidScrollChange((e) => {
 });
 
 intensitySlider.addEventListener("input", (e) => {
-  const val = parseInt(e.target.value, 10);
-  if (raindrops) {
-    raindrops.options.rainChance = val / 100;
-    raindrops.options.dropletsRate = val * 2;
-  }
+  weatherSystem.setManualIntensity(parseInt(e.target.value, 10));
 });
+
+if (weatherModeSelect) {
+  weatherModeSelect.value = weatherSystem.getMode();
+  weatherModeSelect.addEventListener("change", (e) => {
+    weatherSystem.setMode(e.target.value);
+  });
+}
+
+if (weatherAudioToggle) {
+  weatherAudioToggle.addEventListener("change", (e) => {
+    if (e.target.checked) weatherAudio.enable();
+    else weatherAudio.disable();
+  });
+}
 
 document.getElementById("focus-mode").addEventListener("change", (e) => {
   focusMode = e.target.checked;
@@ -401,6 +411,8 @@ editor.onKeyDown((e) => {
 });
 
 editor.onDidChangeCursorPosition((e) => {
+  weatherSystem?.registerCursorMove();
+
   const position = e.position;
   const scrolledVisiblePosition = editor.getScrolledVisiblePosition(position);
 

@@ -250,6 +250,7 @@ window.atmosphereIntensity = 0;
 editor.onDidChangeModelContent((e) => {
   e.changes.forEach((change) => {
     stormCharCount += change.text.length;
+    weatherSystem?.registerTyping(change.text.length || 1);
 
     // Typing Particle Emitter
     if (change.text.length > 0) {
@@ -371,30 +372,15 @@ setInterval(() => {
     referenceManager.setStormIntensity(totalIntensity);
   }
 
-  if (raindrops && intensitySlider) {
-    const baseRate = parseInt(intensitySlider.value, 10) * 2;
-    const baseChance = parseInt(intensitySlider.value, 10) / 100;
-
-    let multiplier = 1;
-
+  // rainChance/dropletsRate themselves are owned by weatherSystem (mode +
+  // damped editor activity + the Storm Intensity slider); this block only
+  // reacts to error/warning-driven "atmosphere" surges (lightning, streaks).
+  if (raindrops) {
     if (totalIntensity > STORM_intense) {
-      multiplier = 4.0;
       // 20% chance of lightning every second during intense storm
       if (Math.random() < 0.2) triggerLightning();
-    } else if (totalIntensity > STORM_heavy) {
-      multiplier = 2.0;
     }
 
-    if (multiplier > 1) {
-      raindrops.options.dropletsRate = baseRate * multiplier;
-      raindrops.options.rainChance = Math.min(1, baseChance * multiplier);
-    } else {
-      // Revert to slider values
-      raindrops.options.dropletsRate = baseRate;
-      raindrops.options.rainChance = baseChance;
-    }
-
-    // Toggle rain streaks on notes if intense
     if (referenceManager) {
       referenceManager.toggleRainStreaks(raindrops.options.rainChance > 0.5);
     }
