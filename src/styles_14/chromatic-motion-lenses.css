@@ -1,0 +1,459 @@
+/* Chromatic Aberration, Aurora Layer Shift, Ripple Displacement, Neon Pulse,
+   Ethereal Glitch, Spectral Refraction, Topographic Contour, and Ectoplasmic
+   Ooze (with the nested Cosmic Void/Zenith Halo/Quantum Fracture lenses) —
+   split out of styles_ui.css for size. */
+
+/* ─── Chromatic Aberration Lens (Alt+Shift+C) ─────────────────────────────── */
+body.chromatic-aberration-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease;
+  opacity: 0.95 !important;
+  filter: brightness(1.2) drop-shadow(calc(var(--item-index, 0) * 2px) 0 0 rgba(255, 0, 0, 0.8)) drop-shadow(calc(var(--item-index, 0) * -2px) 0 0 rgba(0, 255, 255, 0.8)) !important;
+  z-index: calc(200 - var(--item-index, 0)) !important;
+}
+
+body.chromatic-aberration-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  transition: mask-image 0.3s ease;
+}
+
+/* ─── Aurora Layer Shift (Alt+Shift+A) ─────────────────────────────────────── */
+body.aurora-shift-active #editor {
+  mask-image: radial-gradient(
+    ellipse 400px 200px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 400px 200px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    black 100%
+  );
+  transition: opacity 0.4s ease, filter 0.4s ease;
+  filter: hue-rotate(45deg) saturate(150%);
+}
+
+body.aurora-shift-active .echo-document {
+  transition: opacity 0.5s ease, filter 0.5s ease, transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  opacity: 0.9 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) saturate(200%) brightness(1.2) drop-shadow(0 0 20px rgba(0, 255, 128, 0.4)) !important;
+  z-index: calc(200 - var(--item-index, 0)) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px) + (var(--item-index, 0) * 10px)),
+      calc(var(--tz, 0px) + (var(--item-index, 0) * 20px) + 50px)
+    )
+    rotateX(calc(var(--rot-x, 0deg) + (var(--item-index, 0) * 5deg)))
+    rotateY(calc(var(--rot-y, 0deg) + (var(--item-index, 0) * -5deg)))
+    rotateZ(var(--rot-z, 0deg)) scale(calc(1.05 + (var(--item-index, 0) * 0.02))) !important;
+}
+
+body.aurora-shift-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--lens-x, 50%) var(--lens-y, 50%), rgba(0, 255, 128, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: screen;
+}
+
+/* ─── Ripple Displacement (Alt+Shift+R) ────────────────────────────────── */
+body.ripple-displacement-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--ripple-cx, 50%) var(--ripple-cy, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 30%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--ripple-cx, 50%) var(--ripple-cy, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 30%,
+    black 100%
+  );
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  filter: blur(2px) contrast(1.2);
+}
+
+body.ripple-displacement-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.1s linear;
+  opacity: 0.95 !important;
+  /* We use CSS variables to calculate the distance and wave effect */
+  --dx: calc(var(--tx, 0px) - var(--ripple-cx, 0px));
+  --dy: calc(var(--ty, 0px) - var(--ripple-cy, 0px));
+  /* Basic simulated distance logic */
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateX(calc(var(--rot-x, 0deg) + (var(--ty, 0px) * 0.02deg)))
+    rotateY(calc(var(--rot-y, 0deg) + (var(--tx, 0px) * 0.02deg)))
+    rotateZ(calc(var(--rot-z, 0deg) + 5deg)) scale(1.1) !important;
+
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.4), inset 0 0 15px rgba(0, 191, 255, 0.2) !important;
+  border-color: rgba(0, 191, 255, 0.6) !important;
+  filter: hue-rotate(calc(var(--tx, 0px) * 0.1deg)) saturate(200%) brightness(1.2) !important;
+  z-index: 250 !important;
+}
+
+/* ─── Neon Pulse Lens (Alt+Shift+N) ─────────────────────────────────────── */
+body.neon-pulse-active #editor {
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    black 100%
+  );
+  transition: mask-image 0.3s ease;
+}
+
+body.neon-pulse-active .echo-document {
+  opacity: 0.95 !important;
+  z-index: 250 !important;
+  animation: neon-pulse-anim 2s infinite alternate ease-in-out;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
+}
+
+@keyframes neon-pulse-anim {
+  0% {
+    filter: hue-rotate(0deg) brightness(1.2) saturate(150%);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.6), inset 0 0 10px rgba(0, 229, 255, 0.4) !important;
+    border-color: rgba(0, 229, 255, 0.8) !important;
+  }
+  100% {
+    filter: hue-rotate(90deg) brightness(1.5) saturate(200%);
+    box-shadow: 0 0 50px rgba(255, 0, 128, 0.8), inset 0 0 20px rgba(255, 0, 128, 0.6) !important;
+    border-color: rgba(255, 0, 128, 1) !important;
+  }
+}
+
+/* ─── Ethereal Glitch Lens (Alt+Shift+J) ────────────────────────────────── */
+body.ethereal-glitch-active #editor {
+  mask-image: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    black 3px,
+    black 6px
+  );
+  -webkit-mask-image: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    black 3px,
+    black 6px
+  );
+  transition: mask-image 0.3s ease;
+}
+
+body.ethereal-glitch-active .echo-document {
+  opacity: 0.9 !important;
+  z-index: 260 !important;
+  animation: glitch-slice 0.4s infinite linear alternate-reverse;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 100px)
+    )
+    rotateX(var(--rot-x, 0deg))
+    rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg)) scale(1.05) !important;
+}
+
+@keyframes glitch-slice {
+  0% {
+    clip-path: polygon(0 0, 100% 0, 100% 10%, 0 10%);
+    filter: hue-rotate(0deg) contrast(1.5);
+    transform: translate3d(
+        calc(var(--tx, 0px) - 5px),
+        calc(var(--ty, 0px) + 2px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  20% {
+    clip-path: polygon(0 15%, 100% 15%, 100% 30%, 0 30%);
+    filter: hue-rotate(90deg) contrast(2);
+    transform: translate3d(
+        calc(var(--tx, 0px) + 5px),
+        calc(var(--ty, 0px) - 2px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  40% {
+    clip-path: polygon(0 35%, 100% 35%, 100% 50%, 0 50%);
+    filter: hue-rotate(180deg) contrast(1.5);
+    transform: translate3d(
+        calc(var(--tx, 0px) - 3px),
+        calc(var(--ty, 0px) + 4px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  60% {
+    clip-path: polygon(0 55%, 100% 55%, 100% 70%, 0 70%);
+    filter: hue-rotate(270deg) contrast(2.5);
+    transform: translate3d(
+        calc(var(--tx, 0px) + 6px),
+        calc(var(--ty, 0px) - 5px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  80% {
+    clip-path: polygon(0 75%, 100% 75%, 100% 90%, 0 90%);
+    filter: hue-rotate(360deg) contrast(1.5);
+    transform: translate3d(
+        calc(var(--tx, 0px) - 2px),
+        calc(var(--ty, 0px) + 2px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+  100% {
+    clip-path: polygon(0 95%, 100% 95%, 100% 100%, 0 100%);
+    filter: hue-rotate(90deg) contrast(3);
+    transform: translate3d(
+        calc(var(--tx, 0px) + 4px),
+        calc(var(--ty, 0px) - 3px),
+        calc(var(--tz, 0px) + 100px)
+      ) scale(1.05);
+  }
+}
+
+/* ─── Innovate: Spectral Refraction Lens (Alt+Shift+W) ──────────────────── */
+body.spectral-refraction-active .echo-document {
+  opacity: 0.9 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px)),
+    calc(var(--tz, 0px) + 150px - (var(--item-index, 0) * 10px))
+  ) rotateZ(calc((var(--item-index, 0) - 2) * 5deg)) scale(1.05) !important;
+  z-index: calc(200 - var(--item-index, 0)) !important;
+  mix-blend-mode: color-dodge;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) contrast(1.5) saturate(200%) drop-shadow(0 0 20px rgba(255, 255, 255, 0.2)) !important;
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.6) 40%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.6) 40%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ─── Innovate: Topographic Contour Lens (Alt+Shift+Z) ────────────────── */
+body.topographic-contour-active .echo-document {
+  opacity: 0.8 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px)),
+    calc(var(--tz, 0px) + 50px)
+  ) scale(1.1) !important;
+  z-index: 150 !important;
+  filter: invert(1) hue-rotate(180deg) contrast(2) brightness(1.5) drop-shadow(0 0 15px rgba(0, 255, 255, 0.8)) !important;
+  mask-image: repeating-radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    rgba(0, 0, 0, 1) 0px,
+    rgba(0, 0, 0, 1) 5px,
+    rgba(0, 0, 0, 0.1) 10px,
+    rgba(0, 0, 0, 0.1) 15px
+  );
+  -webkit-mask-image: repeating-radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    rgba(0, 0, 0, 1) 0px,
+    rgba(0, 0, 0, 1) 5px,
+    rgba(0, 0, 0, 0.1) 10px,
+    rgba(0, 0, 0, 0.1) 15px
+  );
+  border: 2px solid rgba(0, 255, 255, 0.9) !important;
+  box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.5) !important;
+}
+
+/* ─── Innovate: Ectoplasmic Ooze Lens (Alt+Shift+Y) ───────────────────── */
+body.ectoplasmic-ooze-active .echo-document {
+  opacity: 0.85 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + var(--part-tx, 0px)),
+    calc(var(--ty, 0px) + var(--part-ty, 0px) + (var(--item-index, 0) * 40px)),
+    calc(var(--tz, 0px) + 100px)
+  ) scale(1.1) !important;
+  z-index: 250 !important;
+  filter: hue-rotate(270deg) contrast(2.5) saturate(300%) blur(2px) drop-shadow(0 20px 30px rgba(128, 255, 0, 0.6)) !important;
+  mix-blend-mode: screen;
+  mask-image: radial-gradient(
+    ellipse 200px 400px at var(--lens-x, 50%) calc(var(--lens-y, 50%) - 100px),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 200px 400px at var(--lens-x, 50%) calc(var(--lens-y, 50%) - 100px),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.8) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  border-bottom: 5px solid rgba(128, 255, 0, 0.8) !important;
+  border-radius: 8px !important;
+}
+
+/* Cosmic Void Lens (Alt+Shift+V) */
+body.cosmic-void-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    black 70%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    black 70%
+  );
+}
+
+body.cosmic-void-active .echo-document {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s ease;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) - 2) * 50px),
+    calc(var(--ty, 0px) + (var(--item-index, 0) - 2) * 30px),
+    calc(var(--tz, 0px) - (var(--item-index, 0) * 80px))
+  ) rotateZ(calc((var(--item-index, 0) - 2) * 20deg)) scale(calc(1 - (var(--item-index, 0) * 0.15))) !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 60deg)) saturate(400%) contrast(1.5) drop-shadow(0 0 40px rgba(138, 43, 226, 0.8)) drop-shadow(0 0 80px rgba(255, 0, 255, 0.6)) !important;
+  z-index: calc(100 - var(--item-index, 0)) !important;
+  border-radius: 50% !important;
+  opacity: 0.8 !important;
+}
+
+body.cosmic-void-active .echo-document::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, transparent 40%, rgba(255, 255, 255, 0.6) 80%, transparent 100%);
+  animation: cosmic-pulse 2s infinite ease-in-out alternate;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes cosmic-pulse {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+/* Zenith Halo Lens */
+body.zenith-halo-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 30%,
+    rgba(0, 0, 0, 0.8) 70%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.2) 30%,
+    rgba(0, 0, 0, 0.8) 70%,
+    black 100%
+  );
+}
+
+body.zenith-halo-active .echo-document {
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
+  transform: translate3d(
+    calc(var(--tx, 0px) + cos(var(--item-index, 0) * 36deg) * 200px),
+    calc(var(--ty, 0px) + sin(var(--item-index, 0) * 36deg) * 200px),
+    calc(var(--tz, 0px) + 50px)
+  ) rotateZ(calc(var(--item-index, 0) * 36deg)) scale(0.6) !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 36deg)) saturate(200%) drop-shadow(0 0 30px rgba(0, 255, 255, 0.6)) !important;
+  z-index: calc(100 - var(--item-index, 0)) !important;
+  border-radius: 50% !important;
+  opacity: 0.9 !important;
+}
+
+body.zenith-halo-active .echo-document::before {
+  content: '';
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: radial-gradient(circle at center, transparent 30%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
+  animation: zenith-halo-pulse 3s infinite ease-in-out alternate;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes zenith-halo-pulse {
+  0% { transform: scale(0.95); opacity: 0.5; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); }
+  100% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 40px rgba(0, 255, 255, 0.8); }
+}
+
+/* Quantum Fracture Lens */
+body.quantum-fracture-active #editor {
+  mask-image: conic-gradient(
+    from 45deg at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    rgba(0, 0, 0, 0.9) 0deg,
+    rgba(0, 0, 0, 0.2) 60deg,
+    rgba(0, 0, 0, 0.9) 120deg,
+    rgba(0, 0, 0, 0.2) 180deg,
+    rgba(0, 0, 0, 0.9) 240deg,
+    rgba(0, 0, 0, 0.2) 300deg,
+    rgba(0, 0, 0, 0.9) 360deg
+  );
+  -webkit-mask-image: conic-gradient(
+    from 45deg at var(--lens-x, 50vw) var(--lens-y, 50vh),
+    rgba(0, 0, 0, 0.9) 0deg,
+    rgba(0, 0, 0, 0.2) 60deg,
+    rgba(0, 0, 0, 0.9) 120deg,
+    rgba(0, 0, 0, 0.2) 180deg,
+    rgba(0, 0, 0, 0.9) 240deg,
+    rgba(0, 0, 0, 0.2) 300deg,
+    rgba(0, 0, 0, 0.9) 360deg
+  );
+}
+
+body.quantum-fracture-active .echo-document {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), clip-path 0.4s ease;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) - 1) * 150px),
+    calc(var(--ty, 0px) + (var(--item-index, 0) - 1) * -100px),
+    calc(var(--tz, 0px) + (var(--item-index, 0) * 40px))
+  ) rotateX(calc(var(--item-index, 0) * 15deg)) rotateY(calc(var(--item-index, 0) * 25deg)) scale(calc(1 - (var(--item-index, 0) * 0.05))) !important;
+  mix-blend-mode: color-dodge !important;
+  filter: contrast(1.5) brightness(1.2) drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) !important;
+  opacity: 0.85 !important;
+}
+
+body.quantum-fracture-active .echo-document:nth-child(4n+1) { clip-path: polygon(0 0, 50% 0, 100% 100%, 0 100%); }
+body.quantum-fracture-active .echo-document:nth-child(4n+2) { clip-path: polygon(50% 0, 100% 0, 100% 100%, 0 50%); }
+body.quantum-fracture-active .echo-document:nth-child(4n+3) { clip-path: polygon(0 50%, 100% 0, 100% 100%, 50% 100%); }
+body.quantum-fracture-active .echo-document:nth-child(4n+4) { clip-path: polygon(0 0, 100% 50%, 50% 100%, 0 100%); }
+

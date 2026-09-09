@@ -88,7 +88,10 @@ root/
     styles_base.css       # Base layout, shell, editor chrome
     styles_views.css      # 3D view-mode body classes
     styles_echo.css       # Echo documents and depth effects
-    styles_ui.css         # Dock, overlays, cheatsheet
+    styles_ui.css         # Dock, overlays, cheatsheet; the former styles_14.css lens rules are
+                           # @imported from styles_14/ (each module kept under 700 lines)
+    styles_14/             # Lens-effect CSS modules imported by styles_ui.css (fold/fracture,
+                           # view-mode, chromatic/motion, crystalline/hologram lenses)
     shaders/
       simple.vert         # Basic fullscreen vertex shader
       water.frag          # Front rain fragment shader
