@@ -1,0 +1,237 @@
+/* ─── styles_12.css ─── */
+body.quantum-superposition-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) !important;
+  border-color: rgba(100, 200, 255, 1);
+  box-shadow: 0 0 40px rgba(100, 200, 255, 0.6);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 9999 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.quantum-superposition-active .echo-document {
+    transition: opacity 0.3s ease;
+    transform: none !important;
+  }
+}
+
+/* =========================================================
+   FOCUS TORCH (Alt + Shift + F)
+   ========================================================= */
+body.focus-torch-active #echo-layer .echo-document {
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.focus-torch-active #echo-layer .echo-document:not(:hover) {
+  opacity: 0.1 !important;
+  filter: blur(8px) grayscale(50%) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      -200px
+    )
+    scale(0.8) !important;
+  z-index: 10 !important;
+}
+
+body.focus-torch-active #echo-layer .echo-document:hover {
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) saturate(200%) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      200px
+    )
+    scale(1.1) !important;
+  box-shadow:
+    0 0 60px rgba(255, 255, 255, 0.8),
+    inset 0 0 20px rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(255, 255, 255, 1) !important;
+  z-index: 1000 !important;
+}
+
+body.focus-torch-active #editor {
+  opacity: 0.2;
+  filter: blur(6px);
+  transition: all 0.4s ease;
+}
+
+/* =========================================================
+   DEPTH SPOTLIGHT (Ctrl + Shift + S)
+   ========================================================= */
+body.depth-spotlight-active #echo-layer .echo-document {
+  transition:
+    filter 0.3s ease,
+    opacity 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.depth-spotlight-active #echo-layer .echo-document.spotlight-target {
+  opacity: 1 !important;
+  filter: blur(0px) saturate(200%) brightness(1.2) !important;
+  box-shadow:
+    0 0 50px rgba(0, 255, 255, 0.8),
+    inset 0 0 20px rgba(0, 255, 255, 0.4) !important;
+  border: 1px solid rgba(0, 255, 255, 1) !important;
+  /* Lift it slightly forward based on its base transform */
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 100px)
+    )
+    scale(1.05) !important;
+  z-index: 1000 !important;
+}
+
+body.depth-spotlight-active #echo-layer .echo-document:not(.spotlight-target) {
+  opacity: 0.1 !important;
+  filter: blur(10px) grayscale(80%) !important;
+}
+
+body.depth-spotlight-active #editor {
+  opacity: 0.2;
+  filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+/* =========================================================
+   HOLOGRAM PREVIEW (Alt + Shift + H)
+   ========================================================= */
+body.hologram-preview-active #echo-layer .echo-document {
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.hologram-preview-active #echo-layer .echo-document.hologram-target {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      400px
+    )
+    scale(1.5) !important;
+  z-index: 9999 !important;
+  /* Holographic visual effects */
+  background: rgba(0, 50, 100, 0.8) !important;
+  backdrop-filter: blur(10px) sepia(50%) hue-rotate(180deg) !important;
+  border: 2px solid rgba(0, 255, 255, 0.8) !important;
+  box-shadow:
+    0 4px 12px rgba(0, 255, 255, 0.5),
+    inset 0 0 30px rgba(0, 255, 255, 0.3) !important;
+}
+body.hologram-preview-active #echo-layer .echo-document.hologram-target::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 255, 0.1) 2px,
+    rgba(0, 255, 255, 0.1) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+body.hologram-preview-active #echo-layer .echo-document:not(.hologram-target) {
+  opacity: 0.15 !important;
+  filter: blur(5px) !important;
+}
+
+/* =========================================================
+   OUTLINE VIEW  (Ctrl+Shift+O / #view-mode-select → outline)
+   ========================================================= */
+
+/* Enhanced tab active appearance in outline mode */
+body.outline-active .tab-item.active {
+  background: rgba(0, 229, 255, 0.25);
+  border-bottom: 2px solid #00e5ff;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
+}
+
+body.outline-active .tab-depth-badge.depth-2 {
+  color: #fff;
+  text-shadow: 0 0 12px rgba(0, 229, 255, 1);
+}
+
+/* Echo documents get stronger outlines in outline view */
+body.outline-active .echo-document {
+  border: 1px solid hsla(var(--echo-tint, 180deg), 100%, 70%, 0.65);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.35),
+    inset 0 0 30px hsla(var(--echo-tint, 180deg), 100%, 60%, 0.15);
+  opacity: calc(var(--base-opacity, 0.4) + 0.2);
+  filter: blur(calc(var(--base-blur, 4px) * 0.5))
+    hue-rotate(var(--echo-tint, 0deg));
+  backdrop-filter: blur(10px) saturate(160%);
+  background: linear-gradient(135deg, rgba(15, 20, 25, 0.6), rgba(5, 10, 15, 0.8));
+  border-radius: 8px;
+  transform: scale(0.95);
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.outline-active .echo-document:hover {
+  border-color: hsla(var(--echo-tint, 180deg), 100%, 80%, 1) !important;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.6),
+    0 0 0 2px hsla(var(--echo-tint, 180deg), 100%, 80%, 0.6),
+    0 0 40px hsla(var(--echo-tint, 180deg), 100%, 70%, 0.3),
+    inset 0 0 40px hsla(var(--echo-tint, 180deg), 100%, 70%, 0.2) !important;
+  transform: scale(1.02) translateY(-10px) !important;
+  z-index: 1000 !important;
+}
+
+/* Animated neon border in outline mode */
+body.outline-active .echo-document::before {
+  animation: aurora-border-spin 4s linear infinite;
+  opacity: 0.8;
+}
+
+/* Rain-drip animation on echo headers in outline mode */
+@keyframes rain-drip {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+  }
+  80% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+body.outline-active .echo-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsla(var(--echo-tint, 180deg), 100%, 70%, 0.6),
+    transparent
+  );
+  will-change: transform;
+  animation: rain-drip 2.5s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+

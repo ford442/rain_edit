@@ -1,0 +1,281 @@
+/* Base layout, shell, editor chrome — merged from styles_1, styles_2, styles_3, styles_4.css */
+
+/* ─── styles_1.css ─── */
+:root {
+  --bg-color-glass: rgba(8, 12, 18, 0.85);
+  --accent-color: hsl(var(--dynamic-hue), 85%, 65%);
+  --text-primary: #c0d0e0;
+  --text-heading: #ffffff;
+  --font-primary:
+    "Fira Code", "JetBrains Mono", monospace, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --dynamic-hue: 180; /* Default Cyan hue */
+  /* Base Bioluminescent Green */
+  --bio-glow-color: rgba(57, 255, 20, 0.6);
+  --bio-glow-strong: rgba(57, 255, 20, 1.0);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body,
+#app {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: var(--font-primary);
+  background: linear-gradient(135deg, rgba(8, 12, 18, 1) 0%, rgba(3, 4, 8, 1) 100%);
+}
+
+#container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: radial-gradient(circle at 50% 30%, #0c121e 0%, #030408 80%);
+}
+
+#container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  z-index: 9999;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.3);
+  border-radius: 5px;
+  border: 1px solid rgba(0, 229, 255, 0.8);
+  box-shadow: inset 0 0 5px rgba(0, 229, 255, 0.4), 0 0 5px rgba(0, 229, 255, 0.3);
+  box-shadow: inset 0 0 5px rgba(0, 229, 255, 0.2);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 229, 255, 0.6);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 1), inset 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+#editor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5; /* default: depth 1 — middle between rain layers; JS will update dynamically */
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.8),
+    inset 0 2px 10px rgba(255, 255, 255, 0.15),
+    0 0 20px rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+
+  /* Cyber Grid Background */
+  background-image:
+    radial-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+  background-size:
+    20px 20px,
+    40px 40px,
+    40px 40px;
+
+  /* X-Ray Mode variables */
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --sonar-x: 50%;
+  --sonar-y: 50%;
+  --sonar-radius: 0px;
+}
+
+::selection {
+  background: rgba(0, 229, 255, 0.4);
+  color: #fff;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+}
+
+#editor.x-ray-active {
+  mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 100px,
+    black 250px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 100px,
+    black 250px
+  );
+}
+
+#editor.x-ray-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 95px,
+    rgba(0, 229, 255, 0.4) 100px,
+    transparent 105px
+  );
+  z-index: 100;
+  mix-blend-mode: screen;
+}
+
+#editor.sonar-active {
+  mask-image:
+    radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y),
+      transparent 100px,
+      black 250px
+    ),
+    radial-gradient(
+      circle at var(--sonar-x) var(--sonar-y),
+      black calc(var(--sonar-radius) - 150px),
+      transparent var(--sonar-radius),
+      black calc(var(--sonar-radius) + 150px)
+    );
+  -webkit-mask-image:
+    radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y),
+      transparent 100px,
+      black 250px
+    ),
+    radial-gradient(
+      circle at var(--sonar-x) var(--sonar-y),
+      black calc(var(--sonar-radius) - 150px),
+      transparent var(--sonar-radius),
+      black calc(var(--sonar-radius) + 150px)
+    );
+
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+#editor.sonar-active::before {
+  content: "";
+  position: absolute;
+  top: var(--sonar-y, 50%);
+  left: var(--sonar-x, 50%);
+  width: calc(var(--sonar-radius, 0px) * 2);
+  height: calc(var(--sonar-radius, 0px) * 2);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid rgba(0, 229, 255, 0.5);
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.4),
+    inset 0 0 20px rgba(0, 229, 255, 0.2);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.sonar-hit {
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  opacity: 1 !important;
+  filter: blur(0px) brightness(1.5) drop-shadow(0 0 15px rgba(0, 229, 255, 0.8)) !important;
+  transform: scale(1.05) translateZ(50px) !important;
+  z-index: 100 !important;
+  border-color: rgba(0, 229, 255, 1) !important;
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.5),
+    inset 0 0 20px rgba(0, 229, 255, 0.3) !important;
+}
+
+.echo-document.sonar-hit pre {
+  color: rgba(0, 229, 255, 1) !important;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+}
+
+.echo-document.sonar-hit .scan-line {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 229, 255, 0.8),
+    transparent
+  );
+  height: 20px;
+  animation-duration: 1s;
+}
+
+#editor.lens-active {
+  mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 160px,
+    black 320px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 160px,
+    black 320px
+  );
+}
+
+#editor.lens-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    rgba(255, 255, 255, 0.05) 150px,
+    rgba(0, 229, 255, 0.3) 160px,
+    transparent 165px
+  );
+  mix-blend-mode: screen;
+  z-index: 100;
+}
+
+#editor .monaco-editor .view-lines {
+  text-shadow:
+    0 0 8px rgba(0, 229, 255, 0.2),
+    0 0 15px rgba(0, 229, 255, 0.1);
+}
+.rain-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+#rain-back {
+  z-index: 1;
+}
+#rain-front {
+  z-index: 10;
+}
+
+#connections-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+  mix-blend-mode: screen;
+}
+
+#matrix-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2; /* Behind the editor, above the deep background */
+  opacity: 0.3;
+}
+
