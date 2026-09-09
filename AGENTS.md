@@ -101,7 +101,8 @@ root/
     styles_ui.css         # Dock, overlays, cheatsheet; the former styles_14.css lens rules are
                            # @imported from styles_14/ (each module kept under 700 lines)
     styles_14/             # Lens-effect CSS modules imported by styles_ui.css (fold/fracture,
-                           # view-mode, chromatic/motion, crystalline/hologram lenses)
+                           # view-mode, chromatic/motion, crystalline/hologram lenses, plus
+                           # extra-lenses-{a,b,c}.css split purely by line count)
     shaders/
       simple.vert         # Basic fullscreen vertex shader
       water.frag          # Front rain fragment shader

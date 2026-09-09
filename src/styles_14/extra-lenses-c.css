@@ -1,0 +1,424 @@
+/**
+ * Extended lens effects, part 3 of 3 (see styles_ui.css). Split purely by
+ * line count from a long run of independent per-lens rules; each lens is
+ * scoped to its own body.*-active class, so file order does not affect
+ * behavior.
+ */
+
+/* Ethereal Echoes v2 Lens */
+body.ethereal-echoes-v2-active #editor {
+  -webkit-mask-image: radial-gradient(circle 300px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 300px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+}
+body.ethereal-echoes-v2-active .echo-document {
+  opacity: calc(1 - (var(--item-index, 0) * 0.15));
+  filter: blur(calc(var(--item-index, 0) * 1px));
+  transform: scale(calc(1 + (var(--item-index, 0) * 0.05)));
+}
+
+/* Cybernetic Core Lens */
+body.cybernetic-core-active #editor {
+  -webkit-mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+}
+body.cybernetic-core-active .echo-document {
+  border: 2px solid rgba(0, 255, 0, 0.8) !important;
+  background: rgba(0, 20, 0, 0.5) !important;
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.5), inset 0 0 10px rgba(0, 255, 0, 0.3) !important;
+  color: rgba(0, 255, 0, 0.9) !important;
+  transform: rotateY(calc(var(--item-index, 0) * 10deg)) rotateZ(calc(var(--item-index, 0) * -5deg)) translateZ(calc(var(--item-index, 0) * -30px)) !important;
+}
+body.cybernetic-core-active .echo-document pre,
+body.cybernetic-core-active .echo-document .echo-header {
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.8) !important;
+  color: rgba(0, 255, 0, 0.9) !important;
+}
+
+/* Fractal Disintegration Lens */
+body.fractal-disintegration-active #editor {
+  -webkit-mask-image: radial-gradient(circle 200px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 200px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+}
+body.fractal-disintegration-active .echo-document:nth-child(3n+1) {
+  clip-path: polygon(0 0, 50% 100%, 100% 0);
+  transform: translate3d(calc(var(--item-index, 0) * 20px), calc(var(--item-index, 0) * -20px), calc(var(--item-index, 0) * -50px)) !important;
+  opacity: 0.8 !important;
+}
+body.fractal-disintegration-active .echo-document:nth-child(3n+2) {
+  clip-path: polygon(0 100%, 50% 0, 100% 100%);
+  transform: translate3d(calc(var(--item-index, 0) * -20px), calc(var(--item-index, 0) * 20px), calc(var(--item-index, 0) * -40px)) !important;
+  opacity: 0.7 !important;
+}
+body.fractal-disintegration-active .echo-document:nth-child(3n) {
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  transform: translate3d(0, 0, calc(var(--item-index, 0) * -60px)) scale(0.9) !important;
+  opacity: 0.6 !important;
+}
+
+/* Aurora Glitch Lens */
+body.aurora-glitch-active #editor {
+  -webkit-mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+  mask-image: radial-gradient(circle 250px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 100%);
+}
+
+body.aurora-glitch-active .echo-document:nth-child(even) {
+  clip-path: polygon(0 10%, 100% 0, 100% 90%, 0 100%);
+  transform: translate3d(calc(var(--item-index, 0) * 15px), calc(var(--item-index, 0) * -15px), calc(var(--item-index, 0) * -40px)) rotateZ(calc(var(--item-index, 0) * 2deg)) !important;
+  opacity: 0.8 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) drop-shadow(0 0 10px rgba(255, 0, 255, 0.6)) !important;
+}
+
+body.aurora-glitch-active .echo-document:nth-child(odd) {
+  clip-path: polygon(0 0, 100% 10%, 100% 100%, 0 90%);
+  transform: translate3d(calc(var(--item-index, 0) * -15px), calc(var(--item-index, 0) * 15px), calc(var(--item-index, 0) * -40px)) rotateZ(calc(var(--item-index, 0) * -2deg)) !important;
+  opacity: 0.7 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * -45deg)) drop-shadow(0 0 10px rgba(0, 255, 255, 0.6)) !important;
+}
+
+/* --- Zenith Mirage Lens (Alt+Z) --- */
+body.zenith-mirage-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.2) 40%,
+    black 80%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.2) 40%,
+    black 80%
+  );
+}
+
+body.zenith-mirage-active .echo-document.loupe-active {
+  /* No special override needed for the magnified one, unless desired */
+}
+
+body.zenith-mirage-active .echo-document:not(.loupe-active) {
+  opacity: 0.9 !important;
+  filter: blur(2px) drop-shadow(0 0 15px rgba(255, 100, 0, 0.7)) hue-rotate(calc(var(--item-index) * 45deg)) !important;
+  transform: translate3d(
+    calc(sin(var(--item-index)) * 40px),
+    calc(cos(var(--item-index)) * 40px),
+    calc(var(--item-index) * -80px)
+  ) rotateZ(calc(var(--item-index) * 5deg)) scale(1.1) !important;
+  border: 1px solid rgba(255, 100, 0, 0.4);
+  box-shadow:
+    0 0 30px rgba(255, 150, 0, 0.6),
+    inset 0 0 20px rgba(255, 50, 0, 0.4);
+  background: rgba(40, 10, 0, 0.4);
+  transition: transform 0.4s ease-out, filter 0.4s ease-out;
+}
+
+/* --- Plasma Web Lens (Alt+P) --- */
+body.plasma-web-active #editor {
+  mask-image: repeating-radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0px,
+    transparent 20px,
+    black 21px,
+    black 40px
+  );
+  -webkit-mask-image: repeating-radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0px,
+    transparent 20px,
+    black 21px,
+    black 40px
+  );
+}
+
+body.plasma-web-active .echo-document:not(.loupe-active) {
+  opacity: 0.8 !important;
+  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  border: 2px solid rgba(0, 255, 255, 0.8);
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+  transform: translate3d(
+    calc(var(--item-index) * 20px),
+    calc(var(--item-index) * -20px),
+    calc(var(--item-index) * -100px)
+  ) rotateX(calc(var(--item-index) * 10deg)) rotateY(calc(var(--item-index) * -10deg)) scale(calc(1 - (var(--item-index) * 0.05))) !important;
+  filter: brightness(1.5) contrast(1.2) drop-shadow(0 0 10px rgba(0,255,255,0.8)) !important;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), clip-path 0.3s;
+}
+
+/* ─── Quantum Weaver Lens (Ctrl+Alt+Q) ────────────────────────────── */
+body.quantum-weaver-active #editor {
+  mask-image: radial-gradient(circle 300px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.5) 40%, black 80%);
+  -webkit-mask-image: radial-gradient(circle 300px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.5) 40%, black 80%);
+}
+
+body.quantum-weaver-active .echo-document:not(.loupe-active) {
+  opacity: 0.8 !important;
+  border: 1px solid rgba(0, 255, 255, 0.6);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.2);
+  filter: brightness(1.2) contrast(1.3) hue-rotate(calc(var(--item-index) * 15deg)) !important;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), clip-path 0.4s;
+}
+
+body.quantum-weaver-active .echo-document:nth-child(even):not(.loupe-active) {
+  clip-path: polygon(0% 10%, 100% 0%, 100% 90%, 0% 100%);
+  transform: translate3d(
+    calc(var(--item-index) * 30px),
+    calc(var(--item-index) * -15px),
+    calc(var(--item-index) * -60px)
+  ) rotateX(calc(var(--item-index) * 5deg)) rotateY(calc(var(--item-index) * -10deg)) !important;
+}
+
+body.quantum-weaver-active .echo-document:nth-child(odd):not(.loupe-active) {
+  clip-path: polygon(0% 0%, 100% 10%, 100% 100%, 0% 90%);
+  transform: translate3d(
+    calc(var(--item-index) * -30px),
+    calc(var(--item-index) * 15px),
+    calc(var(--item-index) * -60px)
+  ) rotateX(calc(var(--item-index) * -5deg)) rotateY(calc(var(--item-index) * 10deg)) !important;
+}
+
+/* ─── Celestial Resonance Lens (Ctrl+Alt+W) ────────────────────────────── */
+body.celestial-resonance-active #editor {
+  mask-image: radial-gradient(circle 350px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.3) 50%, black 80%);
+  -webkit-mask-image: radial-gradient(circle 350px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.3) 50%, black 80%);
+}
+
+body.celestial-resonance-active .echo-document:not(.loupe-active) {
+  opacity: 0.85 !important;
+  border-radius: 50% !important; /* Circular like an orbit */
+  border: 2px solid rgba(255, 180, 50, 0.7);
+  box-shadow: 0 0 30px rgba(255, 150, 0, 0.5), inset 0 0 15px rgba(255, 100, 0, 0.4);
+  background: rgba(40, 20, 5, 0.6);
+  filter: brightness(1.3) contrast(1.2) drop-shadow(0 0 15px rgba(255, 180, 50, 0.8)) !important;
+  /* Math using sine and cosine for orbital placement */
+  transform: translate3d(
+    calc(sin(calc(var(--item-index) * 1.5)) * (100px + var(--item-index) * 20px)),
+    calc(cos(calc(var(--item-index) * 1.5)) * (100px + var(--item-index) * 20px)),
+    calc(var(--item-index) * -50px)
+  ) rotateZ(calc(var(--item-index) * 45deg)) scale(calc(1 - (var(--item-index) * 0.05))) !important;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), border-radius 0.5s ease-out;
+}
+
+/* ─── Neon Fractal Rift Lens (Ctrl+Alt+R) ────────────────────────────── */
+body.neon-fractal-rift-active #editor {
+  mask-image: radial-gradient(circle 400px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.2) 60%, black 100%);
+  -webkit-mask-image: radial-gradient(circle 400px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.2) 60%, black 100%);
+}
+
+body.neon-fractal-rift-active .echo-document:not(.loupe-active) {
+  opacity: 0.9 !important;
+  border: 2px solid rgba(255, 0, 128, 0.8);
+  box-shadow: 0 0 40px rgba(255, 0, 128, 0.6), inset 0 0 20px rgba(255, 0, 128, 0.4);
+  background: rgba(30, 0, 15, 0.8);
+  filter: brightness(1.4) contrast(1.5) drop-shadow(0 0 20px rgba(255, 0, 255, 1)) !important;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), clip-path 0.4s ease-out;
+}
+
+body.neon-fractal-rift-active .echo-document:nth-child(3n):not(.loupe-active) {
+  clip-path: polygon(10% 0%, 90% 10%, 100% 80%, 20% 100%);
+  transform: translate3d(
+    calc(var(--item-index) * -40px),
+    calc(var(--item-index) * -20px),
+    calc(var(--item-index) * -80px)
+  ) rotateZ(calc(var(--item-index) * 12deg)) scale(calc(1 - (var(--item-index) * 0.03))) !important;
+}
+
+body.neon-fractal-rift-active .echo-document:nth-child(3n+1):not(.loupe-active) {
+  clip-path: polygon(0% 20%, 80% 0%, 100% 100%, 10% 80%);
+  transform: translate3d(
+    calc(var(--item-index) * 40px),
+    calc(var(--item-index) * 30px),
+    calc(var(--item-index) * -80px)
+  ) rotateZ(calc(var(--item-index) * -15deg)) scale(calc(1 - (var(--item-index) * 0.03))) !important;
+}
+
+body.neon-fractal-rift-active .echo-document:nth-child(3n+2):not(.loupe-active) {
+  clip-path: polygon(20% 10%, 100% 20%, 80% 100%, 0% 90%);
+  transform: translate3d(
+    calc(var(--item-index) * 10px),
+    calc(var(--item-index) * -40px),
+    calc(var(--item-index) * -80px)
+  ) rotateZ(calc(var(--item-index) * 8deg)) scale(calc(1 - (var(--item-index) * 0.03))) !important;
+}
+/* --- Nebula Cascade Lens (Alt+1) --- */
+body.nebula-cascade-active #editor {
+  mask-image: radial-gradient(
+    ellipse 400px 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.1) 30%,
+    black 70%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 400px 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.1) 30%,
+    black 70%
+  );
+}
+
+body.nebula-cascade-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.9 - (var(--item-index) * 0.05)) !important;
+  filter: blur(calc(var(--item-index) * 0.5px)) drop-shadow(0 0 20px rgba(0, 255, 200, 0.6)) hue-rotate(calc(var(--item-index) * 60deg)) !important;
+  transform: translate3d(
+    calc(var(--tx, 0) + (var(--item-index) * 35px)),
+    calc(var(--ty, 0) + (var(--item-index) * 25px)),
+    calc(var(--tz, 0) + (var(--item-index) * -40px))
+  ) rotateX(calc(var(--item-index) * 5deg)) rotateY(calc(var(--item-index) * -5deg)) scale(calc(1 + (var(--item-index) * 0.05))) !important;
+  border: 1px solid rgba(0, 255, 200, 0.5);
+  box-shadow:
+    0 0 40px rgba(0, 255, 200, 0.4),
+    inset 0 0 20px rgba(0, 150, 255, 0.3);
+  background: rgba(0, 15, 30, 0.6);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease-out;
+}
+
+/* --- Quantum Mirror Lens (Alt+2) --- */
+body.quantum-mirror-active #editor {
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(var(--lens-y, 50%) - 100px),
+    transparent calc(var(--lens-y, 50%) - 80px),
+    transparent calc(var(--lens-y, 50%) + 80px),
+    black calc(var(--lens-y, 50%) + 100px),
+    black 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(var(--lens-y, 50%) - 100px),
+    transparent calc(var(--lens-y, 50%) - 80px),
+    transparent calc(var(--lens-y, 50%) + 80px),
+    black calc(var(--lens-y, 50%) + 100px),
+    black 100%
+  );
+}
+
+body.quantum-mirror-active .echo-document:not(.loupe-active) {
+  opacity: 0.8 !important;
+  border: 1px solid rgba(200, 100, 255, 0.5);
+  box-shadow: 0 0 30px rgba(150, 50, 255, 0.4);
+  transition: transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1), clip-path 0.4s ease;
+}
+
+body.quantum-mirror-active .echo-document:nth-child(even):not(.loupe-active) {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%);
+  transform: translate3d(
+    calc(var(--tx, 0)),
+    calc(var(--ty, 0) - (var(--item-index) * 20px) - 50px),
+    calc(var(--tz, 0) - (var(--item-index) * 30px))
+  ) rotateX(calc(var(--item-index) * 10deg)) !important;
+  filter: hue-rotate(90deg) brightness(1.2) drop-shadow(0 10px 15px rgba(200, 100, 255, 0.5)) !important;
+}
+
+body.quantum-mirror-active .echo-document:nth-child(odd):not(.loupe-active) {
+  clip-path: polygon(0% 50%, 100% 50%, 100% 100%, 0% 100%);
+  /* The odd ones are mirrored over the X axis */
+  transform: translate3d(
+    calc(var(--tx, 0)),
+    calc(var(--ty, 0) + (var(--item-index) * 20px) + 50px),
+    calc(var(--tz, 0) - (var(--item-index) * 30px))
+  ) rotateX(calc(180deg - (var(--item-index) * 10deg))) !important;
+  filter: hue-rotate(-90deg) brightness(0.8) drop-shadow(0 -10px 15px rgba(100, 200, 255, 0.5)) !important;
+}
+
+/* --- Chrono-Pulse Lens (Ctrl+Alt+D) --- */
+body.chrono-pulse-active #editor {
+  mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 150px,
+    black 300px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 150px,
+    black 300px
+  );
+}
+body.chrono-pulse-active .echo-document {
+  transition: all 0.3s ease-out;
+}
+body.chrono-pulse-active .echo-document:not(.loupe-active) {
+  transform: translateZ(calc(var(--item-index, 0) * -100px)) scale(calc(1 - var(--item-index, 0) * 0.1)) rotate(calc(var(--item-index, 0) * 5deg));
+  filter: hue-rotate(calc(var(--item-index, 0) * 60deg)) brightness(1.5) blur(calc(var(--item-index, 0) * 1px));
+  opacity: 0.8;
+}
+
+/* --- Nebula Void Lens (Alt+Shift+V) --- */
+body.nebula-void-active #editor {
+  mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 100px,
+    black 250px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 100px,
+    black 250px
+  );
+}
+body.nebula-void-active .echo-document {
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+body.nebula-void-active .echo-document:not(.loupe-active) {
+  transform: translateZ(calc(var(--item-index, 0) * -150px)) scale(1.1) rotateX(calc(var(--item-index, 0) * 10deg));
+  filter: invert(0.8) hue-rotate(calc(var(--item-index, 0) * 45deg)) drop-shadow(0 0 20px rgba(128, 0, 255, 0.6));
+  opacity: 0.9;
+}
+
+/* --- Void Echoes Lens (Ctrl+Alt+P) --- */
+body.void-echoes-active #editor {
+  mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 180px,
+    black 350px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 180px,
+    black 350px
+  );
+}
+body.void-echoes-active .echo-document {
+  transition: transform 0.5s ease-out, filter 0.5s ease-out;
+}
+body.void-echoes-active .echo-document:not(.loupe-active) {
+  clip-path: polygon(
+    10% 0%, 90% 0%, 100% 10%, 100% 90%, 90% 100%, 10% 100%, 0% 90%, 0% 10%
+  );
+  transform: translateZ(calc(var(--item-index, 0) * -80px)) translateX(calc(sin(var(--item-index, 0) * 1.5) * 150px)) translateY(calc(cos(var(--item-index, 0) * 1.5) * 100px));
+  filter: sepia(0.8) hue-rotate(calc(var(--item-index, 0) * -30deg)) contrast(1.2);
+  opacity: 0.7;
+}
+
+/* --- Tachyon Field Lens (Alt+T) --- */
+body.tachyon-field-active #editor {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,1) 70%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,1) 30%, rgba(0,0,0,1) 70%, transparent 100%);
+}
+
+body.tachyon-field-active .echo-document:not(.loupe-active) {
+  transition: transform 0.2s cubic-bezier(0.1, 0.7, 0.1, 1), filter 0.2s ease;
+  transform: translateX(calc(var(--item-index, 0) * 100px - 200px)) skewX(-20deg) scale(calc(1 - (var(--item-index, 0) * 0.05)));
+  filter: blur(calc(2px + (var(--item-index, 0) * 1px))) brightness(1.5) hue-rotate(calc(var(--item-index, 0) * 45deg)) drop-shadow(-20px 0 10px rgba(0, 255, 255, 0.6));
+  opacity: calc(0.8 - (var(--item-index, 0) * 0.1));
+  border-left: 4px solid rgba(0, 255, 255, 0.8);
+}
+
+/* --- Holographic Topography Lens (Alt+H) --- */
+body.holo-topography-active #editor {
+  -webkit-mask-image: radial-gradient(circle 350px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.8) 100%);
+  mask-image: radial-gradient(circle 350px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,0.8) 100%);
+}
+
+body.holo-topography-active .echo-document:not(.loupe-active) {
+  transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transform: translateZ(calc(var(--item-index, 0) * 30px)) scale(calc(1 - (var(--item-index, 0) * 0.02)));
+  border: 1px solid rgba(0, 255, 128, calc(1 - (var(--item-index, 0) * 0.1)));
+  border-radius: calc(10px + (var(--item-index, 0) * 15px));
+  box-shadow:
+    inset 0 0 20px rgba(0, 255, 128, 0.2),
+    0 0 15px rgba(0, 255, 128, calc(0.3 - (var(--item-index, 0) * 0.05))),
+    0 0 0 calc(var(--item-index, 0) * 5px) rgba(0, 255, 128, 0.1);
+  filter: hue-rotate(calc(var(--item-index, 0) * 15deg)) saturate(1.2);
+  background: rgba(0, 40, 20, 0.1);
+  opacity: 0.9;
+}
