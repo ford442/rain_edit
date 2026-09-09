@@ -10,6 +10,8 @@ import { VPSFileBrowser } from "./VPSFileBrowser.js";
 import DataSiphon from "./DataSiphon.js";
 import { VeilExcavator } from "./VeilExcavator.js";
 import { setAppContext } from "./appContext.js";
+import { WeatherSystem } from "./rain/WeatherSystem.js";
+import { WeatherAudio } from "./audio/WeatherAudio.js";
 
 window.scanPortals = function scanPortals() {
   const model = editor.getModel();
@@ -330,6 +332,11 @@ window.matrixActive = true;
 window.bgLayer = null;
 window.fgLayer = null;
 window.raindrops = null;
+window.weatherModeSelect = document.getElementById("weather-mode");
+window.weatherAudioToggle = document.getElementById("weather-audio-toggle");
+window.weatherAudio = new WeatherAudio();
+window.weatherSystem = new WeatherSystem();
+weatherSystem.attach({ audio: weatherAudio });
 window._staticBgImg = null;
 window._staticFgImg = null;
 window._usingCabinetBg = false;
@@ -446,7 +453,6 @@ window.dock = document.getElementById("dock");
 window.dockToggle = document.getElementById("dock-toggle");
 window.stormCharCount = 0;
 window.STORM_decay = 4;
-window.STORM_heavy = 30;
 window.STORM_intense = 80;
 window.lastShiftTime = 0;
 window.sonarActive = false;

@@ -26,6 +26,10 @@ referenceManager.setConnectionManager(connectionManager);
 
 referenceManager.setFogManager(fogManager);
 
+editor.onDidFocusEditorText(() => weatherSystem.registerFocus(true));
+
+editor.onDidBlurEditorText(() => weatherSystem.registerFocus(false));
+
 if (referenceLayer) {
   referenceManager.update(INITIAL_MARKDOWN);
 }

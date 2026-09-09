@@ -92,7 +92,8 @@ root/
       image-loader.js
       random.js
       times.js
-    rain/                 # Off-main-thread water-map (WaterMapSim, worker, wasm)
+    rain/                 # Off-main-thread water-map (WaterMapSim, worker, wasm) + WeatherSystem
+    audio/                # Optional ambient audio (WeatherAudio rain bed)
     workspace/            # Session persist/restore, local project, export/import
   crates/
     rain-sim/             # Rust wasm32 droplet sim → src/rain/wasm/rain_sim.wasm
@@ -118,6 +119,7 @@ root/
 - `RainLayer` caches texture sources and uniform values, pauses the shared rain RAF on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy.
 - `window.tabManager` is intentionally exposed on the global object for manual/debug automation.
 - Water-map simulation lives behind `src/rain/WaterMapSim.js`. It prefers an off-main-thread worker (`js` OffscreenCanvas or `wasm` Rust pixel sim in `crates/rain-sim`), and falls back to `src/vendor/raindrops.js` on the main thread. Toggle with the dock **Rain Sim** control, `?rainSim=wasm|js|main|auto`, or `localStorage['rain-edit:rainSimBackend']`. Rebuild the wasm artifact with `npm run build:wasm` (Vite imports `src/rain/wasm/rain_sim.wasm` via `?url` — no public/ copy).
+- `src/rain/WeatherSystem.js` is the control surface for rain "feel": it drives `raindrops.options.{rainChance,dropletsRate,maxDrops,trailRate,globalTimeScale}` and the `RainLayer` refraction uniforms from a damped editor-activity signal (typing/cursor/focus) plus a `drizzle`/`steady`/`storm`/`clearing` weather-mode state machine (`src/rain/weatherModes.js`). Switch modes from the dock's **Weather** select, `?weather=`, or `localStorage['rain-edit:weatherMode']`. It is the single owner of those options — do not write `raindrops.options.rainChance`/`dropletsRate` elsewhere; use `setManualIntensity()`/`setSceneMultiplier()` instead. `src/audio/WeatherAudio.js` is an optional muted-by-default ambient rain bed that follows the mode. See `docs/water-map-sim.md` for the full API.
 - Workspace sessions live in `src/workspace/` (`WorkspaceSession`, `LocalProject`). Refresh restores tabs (content + depth), view mode, and reference layouts from IndexedDB (localStorage fallback). Dirty tabs show `*`; `beforeunload` confirms. Optional remote sync writes note `__rain_workspace_session__.json` via StorageAPI. See `docs/workspace-session.md`.
 
 ---

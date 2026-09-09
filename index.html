@@ -267,6 +267,19 @@
               <option value="main">Main-thread JS</option>
             </select>
           </div>
+          <div title="Weather mode: adjusts rain intensity, drop rate, and refraction strength">
+            <label for="weather-mode">Weather</label>
+            <select id="weather-mode">
+              <option value="drizzle">🌦️ Drizzle</option>
+              <option value="steady">🌧️ Steady</option>
+              <option value="storm">⛈️ Storm</option>
+              <option value="clearing">🌤️ Clearing</option>
+            </select>
+          </div>
+          <label title="Ambient rain audio bed that follows the weather mode (starts muted)"
+            ><input id="weather-audio-toggle" type="checkbox" /> Ambient
+            Audio</label
+          >
           <label title="Back Rain"
             ><input id="toggle-back" type="checkbox" checked /> Back Rain</label
           >
