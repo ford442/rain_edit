@@ -92,7 +92,11 @@ root/
     VPSFileBrowser.js     # Slide-in panel to browse/open/save VPS remote files
     UploadProgressUI.js   # Small toast UI for drag-and-drop uploads
     styles_base.css       # Base layout, shell, editor chrome
-    styles_views.css      # 3D view-mode body classes
+    styles_views.css      # 3D view-mode body classes; @imports styles_views/
+                           # (each module kept under ~700 lines)
+    styles_views/          # View-mode/echo-effect CSS modules imported by styles_views.css
+                           # (holographic overlays, transition effects, flat/layered/orbital/
+                           # crystal-matrix view modes, background effects, lens overlays)
     styles_echo.css       # Echo documents and depth effects
     styles_ui.css         # Dock, overlays, cheatsheet; the former styles_14.css lens rules are
                            # @imported from styles_14/ (each module kept under 700 lines)
