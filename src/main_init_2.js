@@ -2,60 +2,9 @@ import { monaco } from "./editor/setupMonaco.js";
 import { FogManager } from "./FogManager.js";
 import { inputManager as im } from "./interactions/InputManager.js";
 
-document.addEventListener("mouseup", (e) => {
-  if (!document.body.classList.contains("siphon-mode-active")) return;
-
-  // Check if we selected text inside an echo document
-  const selection = window.getSelection();
-  if (!selection || selection.isCollapsed) return;
-
-  const selectedText = selection.toString();
-  if (!selectedText.trim()) return;
-
-  // Check if target is inside an echo document
-  let target = e.target;
-  let inEchoDoc = false;
-  while (target && target !== document.body) {
-    if (target.classList && target.classList.contains("echo-document")) {
-      inEchoDoc = true;
-      break;
-    }
-    target = target.parentElement;
-  }
-
-  if (inEchoDoc && window.editor) {
-    // Clear selection to prepare for next siphon
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    selection.removeAllRanges();
-
-    // Fire Siphon Packet Animation
-    fireSiphonPacket(selectedText, rect.left, rect.top);
-
-    // Inject into editor
-    const position = window.editor.getPosition();
-    if (position) {
-      window.editor.executeEdits("siphon", [
-        {
-          range: new monaco.Range(
-            position.lineNumber,
-            position.column,
-            position.lineNumber,
-            position.column,
-          ),
-          text: selectedText,
-          forceMoveMarkers: true,
-        },
-      ]);
-
-      // Visual feedback on the editor
-      document.body.classList.add("shockwave-hit");
-      setTimeout(() => document.body.classList.remove("shockwave-hit"), 400);
-    }
-  }
-});
-
-// (X-ray and siphon release are handled by their bindings' onUp in main_init_1.)
+// X-ray, siphon (mode toggle + drag-drop + selection release), and the
+// depth-cursor wheel gesture live in src/interactions/ — see
+// docs/depth-interactions.md.
 
 document.getElementById("toggle-back").addEventListener("change", (e) => {
   if (bgLayer) bgLayer.setVisible(e.target.checked);

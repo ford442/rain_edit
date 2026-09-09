@@ -51,8 +51,8 @@ root/
     main.js               # Thin entry point; loads Monaco setup, state shards, then init shards
     appContext.js         # Shared runtime refs (tabManager, editors, managers); prefer over window.*
     main_vars_0.js - main_vars_2.js # Transitional global state/function shards (migrating to appContext)
-    main_init_0.js - main_init_3.js # Transitional side-effect initialization shards
-    main_init_4.js        # Boots echo-document interactions + InputManager dispatcher
+    main_init_0.js, main_init_2.js, main_init_3.js # Transitional side-effect initialization shards
+    main_init_4.js        # Boots echo-document + depth-gesture interactions and the InputManager dispatcher
     editor/
       setupMonaco.js      # Sole Monaco language/worker registration point
     interactions/
@@ -60,6 +60,13 @@ root/
       InputRegistry.js    # Listener lifecycle/disposal helper
       EchoDocumentInteractions.js # Echo depth gestures, peel/fan/portal modes (from legacy main_init_4)
       lensBindings.js     # Lens-family shortcuts (magnifier, x-ray, magnetic separation, …)
+      depthState.js       # Shared echo/mouse-math helpers for the depth gesture classes below
+      AmbientCursorField.js, CinematicAutofocusTargeting.js, DepthSpotlightTargeting.js,
+      EchoLayerParallax.js, ShiftLensGesture.js, WormholeGesture.js, PeelFanGesture.js,
+      PointerHoldGestures.js, TesseractDragGesture.js, MagnifierLoupeGesture.js,
+      ProximityWakeGesture.js, SiphonInteraction.js, XRayHoldGestures.js,
+      PointerFeedbackEffects.js # Depth/reveal/lens gesture classes extracted from main_init_1 — see docs/depth-interactions.md
+      initDepthGestures.js # Constructs + inits every class above; called once from main_init_4.js
       initInteractions.js # Starts InputManager after all bindings register
     tabManager/
       core.js             # Tab lifecycle (active file, depth, persistence)
@@ -99,6 +106,7 @@ root/
     rain-sim/             # Rust wasm32 droplet sim → src/rain/wasm/rain_sim.wasm
   docs/
     workspace-session.md  # Session schema, StorageAPI sync, local project mode
+    depth-interactions.md # Depth/reveal/lens gesture families and which src/interactions/ class owns each
   public/img/             # Local texture assets (drop-alpha, drop-color, textures, backgrounds)
   tests/                  # Focused Node tests for extracted domain modules
   Kimi_Agent/             # Agent workspace: patches and alternate file versions (not part of main build)
@@ -109,7 +117,7 @@ root/
 
 - `main.js` is the build entry point. It loads `editor/setupMonaco.js` once, then the transitional `main_vars_*` state shards followed by `main_init_*` initialization shards. Prefer `appContext.js` for shared manager references; `window.tabManager` remains for debug automation only.
 - New or extracted interactions belong in `src/interactions/` as named classes/functions with explicit DOM or manager dependencies, an `init()`/`destroy()` lifecycle, and focused tests. Do not add new `window.*` globals.
-- `main_vars_*` and `main_init_0`–`main_init_3` remain legacy migration surfaces. Echo-document keyboard/mouse interactions live in `interactions/EchoDocumentInteractions.js`.
+- `main_vars_*` and `main_init_0`, `main_init_2`, `main_init_3` remain legacy migration surfaces (there is no longer a `main_init_1.js` — every gesture it held moved into `src/interactions/`). Echo-document keyboard/mouse interactions live in `interactions/EchoDocumentInteractions.js`; the depth/reveal/lens gesture classes extracted from the old `main_init_1.js` mousemove handler are documented in `docs/depth-interactions.md`.
 - `TabManager` owns the list of open files, switches active models in Monaco, manages per-file depth (0/1/2), and renders background echoes in `#echo-layer`. It implements 25+ CSS-driven 3D view modes.
 - `ReferenceManager` owns `#reference-layer` and `#reference-overlay`. It parses markdown into floating cards and handles lantern/spotlight/frost interactions, drag-and-drop, and rain-shield clearing.
 - `ConnectionManager` draws on the radar canvas (`#radar-canvas`) using 2D canvas. It receives reference card data from `ReferenceManager` and echo targets from the DOM.
@@ -318,6 +326,17 @@ Files/tabs exist at three depth levels:
 - **2 (Front)** — above all rain (`z-index: 15`)
 
 Opening a file from the 3D cabinet pushes existing tabs to depth 1 and pulls the new tab to depth 2.
+
+### Depth & Spatial Interactions
+
+The Alt/Shift/Ctrl gestures that manipulate echo documents in depth space
+(peel, fanning, wormhole, x-ray, magnetic/proximity repulsion, lens
+targeting, orbit/solar/helix rotation, siphon, …) live as focused classes
+under `src/interactions/`, built on the shared `InputManager` +
+`InputRegistry` and a small `depthState.js` helper module for common
+echo/mouse math. See **`docs/depth-interactions.md`** for the full gesture
+list and which class owns each one, and `initDepthGestures.js` for where a
+new gesture gets wired up.
 
 ---
 
