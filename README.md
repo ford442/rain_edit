@@ -23,9 +23,9 @@ npm run ci
 ```
 
 The Playwright smoke starts Vite itself and verifies that Monaco initializes and
-both rain canvases are visible and sized. Scripts and screenshots under
-`verification/` are legacy, feature-specific checks and are not part of the
-standard CI path.
+both rain canvases are visible and sized. `npm test`, `npm run check`, and
+`npm run test:smoke` (bundled together as `npm run ci`) are the whole gate —
+there are no other verification scripts in the tree.
 
 ## Notes
 

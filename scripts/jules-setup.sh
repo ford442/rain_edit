@@ -14,8 +14,8 @@ else
   npm install --no-audit --no-fund --prefer-offline
 fi
 
-# Playwright browsers (only needed if a task will run your screenshot_*.js scripts)
-# Uncomment the next line if Jules tasks frequently involve running those:
+# Playwright browsers (only needed if a task will run `npm run test:smoke`)
+# Uncomment the next line if Jules tasks frequently involve running that:
 # npx playwright install --with-deps chromium
 
 echo "✅ [Jules] rain_edit environment ready!"
