@@ -58,8 +58,14 @@ root/
     interactions/
       InputManager.js     # Unified keyboard registry + cheatsheet
       InputRegistry.js    # Listener lifecycle/disposal helper
-      EchoDocumentInteractions.js # Echo depth gestures, peel/fan/portal modes (from legacy main_init_4)
-      lensBindings.js     # Lens-family shortcuts (magnifier, x-ray, magnetic separation, …)
+      EchoDocumentInteractions.js # Echo depth gestures, peel/fan/portal modes (from legacy main_init_4);
+                          # thin orchestrator over echo/*.js (split by feature to stay under ~700 lines/file)
+      echo/               # initEchoDocumentInteractions's feature modules: depthScanningTools,
+                          # revealToggles, depthPeelGestures, pointerEffectsMousemove,
+                          # lensAndScanEffects, spatialDispersionEffects
+      lensBindings.js     # Lens-family shortcuts (magnifier, x-ray, magnetic separation, …);
+                          # thin orchestrator over lensBindings/{groupA,groupB,groupC}.js
+      lensBindings/        # registerLensBindings's binding lists, split by line count only
       depthState.js       # Shared echo/mouse-math helpers for the depth gesture classes below
       AmbientCursorField.js, CinematicAutofocusTargeting.js, DepthSpotlightTargeting.js,
       EchoLayerParallax.js, ShiftLensGesture.js, WormholeGesture.js, PeelFanGesture.js,
