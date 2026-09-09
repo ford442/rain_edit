@@ -365,4 +365,42 @@ export function registerLensGroupC(manager, doc, body) {
     },
     onUp: () => body.classList.remove("loupe-active", "holo-topography-active"),
   });
+
+  manager.register({
+    id: "data-stream-ripple",
+    category: "lens",
+    description: "Data Stream Ripple Lens (Alt+3)",
+    combo: { alt: true, code: "Digit3" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "data-stream-ripple-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "data-stream-ripple-active"),
+  });
+
+  manager.register({
+    id: "plasma-pulse",
+    category: "lens",
+    description: "Plasma Pulse Lens (Alt+4)",
+    combo: { alt: true, code: "Digit4" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "plasma-pulse-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "plasma-pulse-active"),
+  });
 }
