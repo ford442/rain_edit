@@ -15,16 +15,21 @@ npm test
 # Parse every src/**/*.js file with esbuild
 npm run check
 
+# Type-check the annotated seams
+npm run typecheck
+
+# Production build
+npm run build
+
 # Canonical browser smoke (one-time setup: npx playwright install chromium)
 npm run test:smoke
 
-# Complete local CI gate
+# Complete local CI gate: check, typecheck, test, build, check:secrets, test:smoke
 npm run ci
 ```
 
 The Playwright smoke starts Vite itself and verifies that Monaco initializes and
-both rain canvases are visible and sized. `npm test`, `npm run check`, and
-`npm run test:smoke` (bundled together as `npm run ci`) are the whole gate —
+both rain canvases are visible and sized. `npm run ci` is the whole gate —
 there are no other verification scripts in the tree.
 
 ## Notes
