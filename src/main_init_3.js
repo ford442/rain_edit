@@ -96,30 +96,8 @@ im.register({
   },
 });
 
-// Loupe magnifier (hold Meta+Shift)
-im.register({
-  id: "loupe-magnifier",
-  category: "lens",
-  description: "Loupe magnifier (hold Cmd+Shift)",
-  combo: { meta: true, shift: true },
-  type: "hold",
-  preventDefault: false,
-  allowInEditor: true,
-  onDown: () => {
-    isMagnifierMode = true;
-    editorEl.classList.add("x-ray-active");
-  },
-  onUp: () => {
-    isMagnifierMode = false;
-    editorEl.classList.remove("x-ray-active");
-    if (echoLayerEl) {
-      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
-
-        echo.classList.remove("loupe-active");
-      });
-    }
-  },
-});
+// Loupe magnifier (hold Cmd+Shift) is registered by MagnifierLoupeGesture
+// (src/interactions/MagnifierLoupeGesture.js).
 
 window.addEventListener(
   "wheel",
@@ -469,17 +447,8 @@ im.register({
   onUp: () => document.body.classList.remove("holographic-slice-active"),
 });
 
-// Semantic X-Ray (hold Alt+Shift+X)
-im.register({
-  id: "semantic-xray",
-  category: "lens",
-  description: "Semantic x-ray (Alt+Shift+X)",
-  combo: { alt: true, shift: true, code: "KeyX" },
-  type: "hold",
-  preventDefault: false,
-  onDown: () => document.body.classList.add("x-ray-active"),
-  onUp: () => document.body.classList.remove("x-ray-active"),
-});
+// Semantic X-Ray (hold Alt+Shift+X) is registered by XRayHoldGestures
+// (src/interactions/XRayHoldGestures.js), alongside the plain Ctrl/Cmd x-ray.
 
 // Singularity (Alt+Shift+Backspace)
 im.register({

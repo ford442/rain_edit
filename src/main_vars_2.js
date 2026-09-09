@@ -258,7 +258,6 @@ window.connectionManager = new ConnectionManager(
 );
 window.fogManager = new FogManager(fogLayerEl);
 window.focusDepth = 0;
-window.isMagnifierMode = false;
 window.INITIAL_MARKDOWN = `# REFERENCE LAYER
 Use this space for documentation, specs, or notes.
 It sits behind the rain but remains readable.
@@ -396,21 +395,7 @@ window.rainEffects = {
     }
   },
 };
-window.isFlashlightActive = false;
-window.isAltDragActive = false;
-window.altDragStartX = 0;
-window.altDragStartY = 0;
-window.sceneRotX = 0;
-window.sceneRotY = 0;
-window.currentSceneRotX = 0;
-window.currentSceneRotY = 0;
-window.isWormholeActive = false;
 window.holographicMinimap = null;
-window.isTesseractDragging = false;
-window.tesseractLastX = 0;
-window.tesseractLastY = 0;
-window.tesseractRotX = 0;
-window.tesseractRotY = 0;
 window.btnDepthForward = document.getElementById("btn-depth-forward");
 window.btnDepthBack = document.getElementById("btn-depth-back");
 window.viewModeSelect = document.getElementById("view-mode-select");

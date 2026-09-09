@@ -3,7 +3,6 @@ import "./main_vars_0.js";
 import "./main_vars_1.js";
 import "./main_vars_2.js";
 import "./main_init_0.js";
-import "./main_init_1.js";
 import "./main_init_2.js";
 import "./main_init_3.js";
 import "./main_init_4.js";

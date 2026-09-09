@@ -237,57 +237,6 @@ document.addEventListener("mousedown", (e) => {
       });
     }
   }
-
-  // Middle mouse button activates Flashlight mode
-  if (e.button === 1) {
-    isFlashlightActive = true;
-    e.preventDefault(); // Prevent default middle-click scroll behavior
-  }
-
-  if (e.altKey && e.button === 0) {
-    // Left click + Alt
-    isAltDragActive = true;
-    altDragStartX = e.clientX;
-    altDragStartY = e.clientY;
-    currentSceneRotX = sceneRotX;
-    currentSceneRotY = sceneRotY;
-    e.preventDefault(); // Prevent text selection while dragging
-  }
-});
-
-document.addEventListener("mouseup", (e) => {
-  if (e.button === 1) {
-    isFlashlightActive = false;
-  }
-
-  if (e.button === 0) {
-    isAltDragActive = false;
-  }
-});
-
-// Wormhole (hold Ctrl+Alt)
-im.register({
-  id: "wormhole",
-  category: "depth",
-  description: "Wormhole warp (hold Ctrl+Alt)",
-  combo: { ctrl: true, alt: true },
-  type: "hold",
-  preventDefault: false,
-  allowInEditor: true,
-  onDown: () => {
-    isWormholeActive = true;
-  },
-  onUp: () => {
-    isWormholeActive = false;
-    if (echoLayerEl) {
-      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
-        echo.style.removeProperty("--wormhole-tx");
-        echo.style.removeProperty("--wormhole-ty");
-        echo.style.removeProperty("--wormhole-tz");
-        echo.style.removeProperty("--wormhole-scale");
-      });
-    }
-  },
 });
 
 // Gravity Well — reassigned Alt+Z -> Alt+Shift+Z (Alt+Z is the depth x-ray scan).
@@ -302,23 +251,6 @@ im.register({
   onUp: () => document.body.classList.remove("gravity-well-active"),
 });
 
-// Tesseract exit (Escape)
-im.register({
-  id: "tesseract-exit",
-  category: "navigation",
-  description: "Exit tesseract view (Esc)",
-  combo: { key: "Escape" },
-  type: "action",
-  preventDefault: false,
-  allowInEditor: true,
-  when: () => document.body.classList.contains("tesseract-active"),
-  onDown: () => {
-    const viewSelect = document.getElementById("view-mode-select");
-    if (viewSelect) viewSelect.value = "";
-    tabManager._deactivateAllViews();
-  },
-});
-
 if (document.getElementById("radar-canvas")) {
   holographicMinimap = new HolographicMinimap("radar-canvas");
 }
@@ -328,16 +260,4 @@ window.addEventListener("resize", () => {
   const tabsEl = document.getElementById("tabs-container");
   if (dockEl) dockEl._origRect = null;
   if (tabsEl) tabsEl._origRect = null;
-});
-
-document.addEventListener("mousedown", (e) => {
-  if (document.body.classList.contains("tesseract-active")) {
-    isTesseractDragging = true;
-    tesseractLastX = e.clientX;
-    tesseractLastY = e.clientY;
-  }
-});
-
-document.addEventListener("mouseup", () => {
-  isTesseractDragging = false;
 });
