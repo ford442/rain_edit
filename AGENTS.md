@@ -180,7 +180,7 @@ The Vite dev server is configured to allow file-system access to the parent dire
 
 ## Testing
 
-Focused unit tests use the built-in Node test runner and live in `tests/*.test.js`; run them with `npm test`. `npm run check` parses every `src/**/*.js` file with esbuild. The canonical browser check is `npm run test:smoke`; it starts Vite and uses Playwright to verify Monaco and both rain canvases. Install its browser once with `npx playwright install chromium`. Run `npm run ci` for the complete local gate. Browser-only scripts under `verification/` are legacy, feature-specific checks and are not part of CI.
+Focused unit tests use the built-in Node test runner and live in `tests/*.test.js`; run them with `npm test`. `npm run check` parses every `src/**/*.js` file with esbuild. The canonical browser check is `npm run test:smoke`; it starts Vite and uses Playwright to verify Monaco and both rain canvases. Install its browser once with `npx playwright install chromium`. Run `npm run ci` for the complete local gate — this is the only path a change needs to satisfy; there are no other verification scripts in the tree.
 
 ---
 

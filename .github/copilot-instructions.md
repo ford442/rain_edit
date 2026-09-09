@@ -14,5 +14,5 @@ npm run ci
 ```
 
 The browser smoke requires a one-time `npx playwright install chromium`.
-There is no lint command. Files under `verification/` are legacy,
-feature-specific checks rather than the standard CI entrypoint.
+There is no lint command. The commands above are the whole gate — there are
+no other ad-hoc verification scripts in the tree.
