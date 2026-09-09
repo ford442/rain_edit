@@ -1,0 +1,281 @@
+/* Reference Layer */
+#reference-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none; /* Children have auto */
+  overflow: hidden;
+  color: rgba(180, 200, 220, 0.9);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 40px;
+  white-space: pre-wrap;
+  opacity: 0.95; /* Sharp by default */
+  /* No blur here, handled by overlay */
+  transition:
+    opacity 0.4s ease,
+    filter 0.4s ease,
+    background 0.4s ease;
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 0.2) 0%,
+    transparent 70%
+  );
+}
+
+/* When a card is spotlighted, bring the whole layer to the front so it sits above the editor and overlay */
+#reference-layer.has-spotlight {
+  z-index: 15;
+}
+
+#reference-layer h1 {
+  font-size: 24px;
+  color: #fff;
+  margin-bottom: 10px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+}
+#reference-layer h2 {
+  font-size: 18px;
+  color: #e0e0e0;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+#reference-layer h3 {
+  font-size: 16px;
+  color: #ccc;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+.md-list-item {
+  padding-left: 20px;
+  color: #b4c8dc;
+  margin-bottom: 4px;
+  position: relative;
+}
+.md-list-item::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: rgba(255, 255, 255, 0.3);
+}
+.md-list-item input[type="checkbox"] {
+  margin-right: 8px;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+.md-list-item.checked {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Task Items */
+.md-task-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b4c8dc;
+  margin-bottom: 4px;
+}
+.md-task-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+.md-task-item input[type="checkbox"]:checked {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+}
+.md-task-item input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 3px;
+  height: 7px;
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+#reference-layer code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  color: #aaddff;
+}
+#reference-layer b {
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Reference Overlay (Lantern Effect) */
+#reference-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* On top of reference layer (due to DOM order) but below editor */
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.5); /* Dim the background notes */
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  /* Lantern Mask: Transparent hole at mouse, Black elsewhere */
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 120px,
+    black 350px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 120px,
+    black 350px
+  );
+  transition:
+    opacity 0.3s ease,
+    background 0.3s ease;
+}
+
+/* Lantern Beam Effect */
+#reference-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    rgba(200, 220, 255, 0.06) 0%,
+    transparent 350px
+  );
+  mix-blend-mode: screen;
+  z-index: 2;
+  opacity: 0.8;
+}
+
+#reference-overlay.lantern-inactive {
+  mask-image: none;
+  -webkit-mask-image: none;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+}
+
+/* Blueprint Mode */
+#reference-layer.blueprint-mode {
+  background-color: #0d1b2a;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  font-family: "Courier New", Courier, monospace;
+  color: #89cff0;
+  text-shadow: 0 0 2px #89cff0;
+  opacity: 1 !important;
+}
+
+#reference-layer.blueprint-mode h1,
+#reference-layer.blueprint-mode h2,
+#reference-layer.blueprint-mode h3 {
+  color: #fff;
+  text-shadow: 0 0 5px #fff;
+  text-transform: uppercase;
+  border-bottom-style: dashed;
+}
+
+textarea {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: #c0c0d0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 10px;
+  margin-top: 8px;
+  resize: vertical;
+  min-height: 60px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+textarea:focus {
+  outline: none;
+  border-color: rgba(0, 229, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+}
+
+/* Fog Layer */
+#fog-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  backdrop-filter: blur(var(--blur, 0px));
+  -webkit-backdrop-filter: blur(var(--blur, 0px));
+  transition: backdrop-filter 0.5s ease;
+
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 60px,
+    black 200px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    transparent 60px,
+    black 200px
+  );
+}
+
+/* Lightning Layer */
+#lightning-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: white;
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition: opacity 0.05s ease-out;
+}
+
+/* Vignette Layer */
+#vignette-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.8) 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* Border Glow Animation */
+@keyframes borderGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
