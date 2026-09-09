@@ -1,0 +1,278 @@
+/* Standalone lens overlays and panel refinements — neon matrix wireframe
+   lens, fractal dimension lens, astral projection lens, prismatic array
+   view, X-ray grid lens, plus tab/echo-header and VPS action panel style
+   refinements — split out of styles_views.css for size. */
+
+/* Neon Matrix Wireframe Lens */
+.neon-matrix-wireframe-active #editor {
+  -webkit-mask-image: linear-gradient(135deg, transparent 40%, black 45%, black 55%, transparent 60%);
+  mask-image: linear-gradient(135deg, transparent 40%, black 45%, black 55%, transparent 60%);
+  -webkit-mask-size: 20px 20px;
+  mask-size: 20px 20px;
+  opacity: 0.2;
+}
+body.neon-matrix-wireframe-active {
+  background-color: #050505;
+}
+.neon-matrix-wireframe-active .echo-document {
+  opacity: 0.9 !important;
+  filter: none !important;
+  background: transparent !important;
+  border: 1px solid rgba(0, 255, 0, 0.8) !important;
+  color: rgba(0, 255, 0, 0.8);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.4), inset 0 0 10px rgba(0, 255, 0, 0.2);
+  transform: translate3d(
+      calc(var(--tx, 0px) * 1.5),
+      calc(var(--ty, 0px) * 1.5),
+      calc(var(--tz, 0px) - var(--item-index, 0) * 100px)
+    )
+    rotateX(calc(var(--item-index, 0) * 5deg)) rotateY(calc(var(--item-index, 0) * -5deg)) !important;
+}
+.neon-matrix-wireframe-active .echo-document pre,
+.neon-matrix-wireframe-active .echo-document .echo-header {
+  color: rgba(0, 255, 0, 0.8) !important;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+}
+
+/* Fractal Dimension Lens */
+.fractal-dimension-active #editor {
+  -webkit-mask-image: conic-gradient(from 0deg at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0deg, black 90deg, transparent 180deg, black 270deg, transparent 360deg);
+  mask-image: conic-gradient(from 0deg at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0deg, black 90deg, transparent 180deg, black 270deg, transparent 360deg);
+  opacity: 0.15;
+}
+.fractal-dimension-active .echo-document {
+  opacity: 0.85 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) contrast(1.5) !important;
+  transform: translate3d(
+      calc(var(--tx, 0px) * (1 + var(--item-index, 0) * 0.1)),
+      calc(var(--ty, 0px) * (1 + var(--item-index, 0) * 0.1)),
+      calc(var(--tz, 0px) + calc(var(--item-index, 0) * 20px))
+    )
+    rotateZ(calc(var(--item-index, 0) * 15deg)) scale(calc(1 - var(--item-index, 0) * 0.05)) !important;
+  box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+  border: 1px solid rgba(255, 0, 255, 0.4);
+}
+
+/* Astral Projection Lens */
+.astral-projection-active #editor {
+  -webkit-mask-image: radial-gradient(ellipse at var(--lens-x, 50%) var(--lens-y, 50%), transparent 20%, black 80%);
+  mask-image: radial-gradient(ellipse at var(--lens-x, 50%) var(--lens-y, 50%), transparent 20%, black 80%);
+  opacity: 0.3;
+}
+.astral-projection-active .echo-document {
+  opacity: 0.8 !important;
+  filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.8)) drop-shadow(0 0 40px rgba(255, 20, 147, 0.6)) brightness(1.2) !important;
+  mix-blend-mode: screen;
+  transform: translate3d(
+      calc(var(--tx, 0px)),
+      calc(var(--ty, 0px)),
+      calc(var(--tz, 0px) + var(--item-index, 0) * 50px)
+    )
+    rotateX(10deg) scale(1.05) !important;
+  background: rgba(20, 0, 40, 0.4) !important;
+  border: 1px solid rgba(255, 20, 147, 0.5) !important;
+}
+@keyframes astral-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+.astral-projection-active .echo-document {
+  animation: astral-float 4s ease-in-out infinite alternate;
+}
+
+/* Prismatic Array View */
+body.prismatic-array-active .echo-document {
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease, filter 0.5s ease;
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0))
+             rotateX(var(--rot-x, 0)) rotateY(var(--rot-y, 0)) rotateZ(var(--rot-z, 0));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 200, 0.3);
+  background: rgba(10, 15, 25, 0.8);
+  backdrop-filter: blur(8px);
+  opacity: 0.8;
+  filter: hue-rotate(calc(var(--item-index) * 25deg)) brightness(1.2);
+}
+
+body.prismatic-array-active .echo-document:hover {
+  transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, 0) + 150px))
+             rotateX(0) rotateY(0) rotateZ(0) scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 255, 200, 0.4);
+  border-color: rgba(0, 255, 200, 0.8);
+  z-index: 1000 !important;
+  opacity: 1;
+  filter: hue-rotate(calc(var(--item-index) * 25deg)) brightness(1.5);
+}
+
+body.prismatic-array-active #editor {
+  transform: scale(0.85) translateZ(100px);
+  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.5s ease;
+}
+
+/* X-Ray Grid Lens */
+.xray-grid-active #editor {
+  opacity: 0.15;
+  filter: blur(4px) grayscale(100%);
+  transform: scale(0.95);
+  transition: all 0.3s ease;
+}
+
+.xray-grid-active .echo-document {
+  opacity: 1 !important;
+  filter: none !important;
+  background: rgba(10, 20, 15, 0.9) !important;
+  border: 1px solid rgba(57, 255, 20, 0.6) !important;
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.3), inset 0 0 10px rgba(57, 255, 20, 0.2) !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) * 100px) - 100px),
+    calc(var(--ty, 0px) + (var(--item-index, 0) * 150px) - 150px),
+    calc(var(--tz, 0px) + 200px)
+  ) scale(0.9) !important;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  z-index: calc(100 + var(--item-index, 0)) !important;
+}
+
+.xray-grid-active .echo-document:hover {
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) * 100px) - 100px),
+    calc(var(--ty, 0px) + (var(--item-index, 0) * 150px) - 150px),
+    calc(var(--tz, 0px) + 300px)
+  ) scale(1.1) !important;
+  border-color: rgba(57, 255, 20, 1) !important;
+  box-shadow: 0 0 40px rgba(57, 255, 20, 0.6), inset 0 0 20px rgba(57, 255, 20, 0.4) !important;
+  z-index: 999 !important;
+}
+
+/* ─── Pixelate Lens ─────────────────────────────────────────────────── */
+body.pixelate-lens-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease;
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  opacity: 0.9 !important;
+  /* Basic CSS pixelation technique uses crisp-edges and blur/contrast */
+  image-rendering: pixelated;
+  filter: blur(2px) contrast(2) drop-shadow(0 0 15px rgba(0, 255, 100, 0.5)) !important;
+  z-index: 300 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) * 1.05),
+    calc(var(--ty, 0px) * 1.05),
+    calc(var(--tz, -200px) + 50px)
+  ) rotateX(calc(var(--item-index, 0) * 2deg)) !important;
+}
+body.pixelate-lens-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+}
+
+
+/* ─── Vortex Warp Lens ─────────────────────────────────────────────────── */
+body.vortex-warp-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.4s ease;
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  opacity: 0.9 !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 20deg)) brightness(1.2) drop-shadow(0 0 20px rgba(200, 50, 255, 0.4)) !important;
+  z-index: 300 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (sin(calc(var(--item-index, 0) * 0.5)) * 100px)),
+    calc(var(--ty, 0px) + (cos(calc(var(--item-index, 0) * 0.5)) * 100px)),
+    calc(var(--tz, -200px) + 100px)
+  ) rotateZ(calc(var(--item-index, 0) * 15deg)) !important;
+}
+body.vortex-warp-active #editor {
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+}
+
+
+/* ─── Echo Trails Lens ─────────────────────────────────────────────────── */
+body.echo-trails-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.8s cubic-bezier(0.1, 0.9, 0.2, 1);
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    black 0%,
+    transparent 100%
+  );
+  opacity: calc(0.9 - (var(--item-index, 0) * 0.05)) !important;
+  filter: blur(calc(var(--item-index, 0) * 1px)) drop-shadow(0 0 10px rgba(0, 200, 255, 0.3)) !important;
+  z-index: 300 !important;
+  transform: translate3d(
+    calc(var(--tx, 0px) + (var(--item-index, 0) * 20px)),
+    calc(var(--ty, 0px) - (var(--item-index, 0) * 10px)),
+    calc(var(--tz, -200px) - (var(--item-index, 0) * 50px))
+  ) scale(calc(1 - (var(--item-index, 0) * 0.05))) !important;
+}
+body.echo-trails-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    black 100%
+  );
+}
+
+/* VPS Action Panel Refinements */
+.vps-action-panel {
+  background: rgba(10, 14, 22, 0.6);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.7),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 0 15px rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  backdrop-filter: blur(65px) saturate(240%);
+  -webkit-backdrop-filter: blur(65px) saturate(240%);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.vps-action-panel:hover {
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 0 25px rgba(0, 229, 255, 0.2),
+    0 0 20px rgba(0, 229, 255, 0.15);
+  border-color: rgba(0, 229, 255, 0.4);
+}
+
