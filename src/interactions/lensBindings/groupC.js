@@ -403,4 +403,61 @@ export function registerLensGroupC(manager, doc, body) {
     },
     onUp: () => body.classList.remove("loupe-active", "plasma-pulse-active"),
   });
+
+  manager.register({
+    id: "quantum-ripple",
+    category: "lens",
+    description: "Quantum Ripple Lens (Alt+5)",
+    combo: { alt: true, code: "Digit5" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "quantum-ripple-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "quantum-ripple-active"),
+  });
+
+  manager.register({
+    id: "prismatic-echo",
+    category: "lens",
+    description: "Prismatic Echo Lens (Alt+6)",
+    combo: { alt: true, code: "Digit6" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "prismatic-echo-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "prismatic-echo-active"),
+  });
+
+  manager.register({
+    id: "void-shatter",
+    category: "lens",
+    description: "Void Shatter Lens (Alt+7)",
+    combo: { alt: true, code: "Digit7" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "void-shatter-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "void-shatter-active"),
+  });
 }
