@@ -460,4 +460,42 @@ export function registerLensGroupC(manager, doc, body) {
     },
     onUp: () => body.classList.remove("loupe-active", "void-shatter-active"),
   });
+
+  manager.register({
+    id: "quantum-flux",
+    category: "lens",
+    description: "Quantum Flux Lens (Alt+8)",
+    combo: { alt: true, code: "Digit8" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "quantum-flux-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "quantum-flux-active"),
+  });
+
+  manager.register({
+    id: "stellar-parallax",
+    category: "lens",
+    description: "Stellar Parallax Lens (Alt+9)",
+    combo: { alt: true, code: "Digit9" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "stellar-parallax-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "stellar-parallax-active"),
+  });
 }
