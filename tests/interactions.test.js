@@ -98,10 +98,10 @@ test("lens group is mutually exclusive", () => {
   registerLensBindings(h.manager, { doc: { body: h.body, addEventListener() {} } });
 
   // Activate magnifier, then nebula core (same "lens" group).
-  h.doc.dispatch("keydown", key({ altKey: true, code: "KeyM", key: "m" }));
-  h.doc.dispatch("keydown", key({ altKey: true, shiftKey: true, code: "KeyM", key: "m" }));
+  h.doc.dispatch("keydown", key({ altKey: true, code: "KeyC", key: "c" })); // X-Ray Core Lens
+  h.doc.dispatch("keydown", key({ altKey: true, shiftKey: true, code: "KeyM", key: "m" })); // Nebula Core Lens
 
-  assert.equal(h.body.classList.contains("obscured-magnifier-active"), false, "magnifier released");
+  assert.equal(h.body.classList.contains("xray-core-active"), false, "xray released");
   assert.equal(h.body.classList.contains("nebula-core-active"), true, "nebula core active");
 });
 

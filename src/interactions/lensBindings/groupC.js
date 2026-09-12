@@ -484,8 +484,8 @@ export function registerLensGroupC(manager, doc, body) {
   manager.register({
     id: "neural-link",
     category: "lens",
-    description: "Neural Link Lens (Alt+Shift+B)",
-    combo: { alt: true, shift: true, code: 'KeyB' },
+    description: "Neural Link Lens (Ctrl+Alt+Shift+B)",
+    combo: { ctrl: true, alt: true, shift: true, code: 'KeyB' },
     type: "hold",
     group: "lens",
     onDown: () => body.classList.add("loupe-active", "neural-link-active"),
@@ -495,8 +495,8 @@ export function registerLensGroupC(manager, doc, body) {
   manager.register({
     id: "cyber-tear",
     category: "lens",
-    description: "Cyberpunk Neon Tear Lens (Alt+Shift+O)",
-    combo: { alt: true, shift: true, code: 'KeyO' },
+    description: "Cyberpunk Neon Tear Lens (Ctrl+Alt+Shift+O)",
+    combo: { ctrl: true, alt: true, shift: true, code: 'KeyO' },
     type: "hold",
     group: "lens",
     onDown: () => body.classList.add("loupe-active", "cyber-tear-active"),
@@ -506,8 +506,8 @@ export function registerLensGroupC(manager, doc, body) {
   manager.register({
     id: "temporal-stutter",
     category: "lens",
-    description: "Temporal Stutter Lens (Alt+Shift+T)",
-    combo: { alt: true, shift: true, code: 'KeyT' },
+    description: "Temporal Stutter Lens (Ctrl+Alt+Shift+T)",
+    combo: { ctrl: true, alt: true, shift: true, code: 'KeyT' },
     type: "hold",
     group: "lens",
     onDown: () => body.classList.add("loupe-active", "temporal-stutter-active"),
