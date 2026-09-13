@@ -513,7 +513,46 @@ export function registerLensGroupC(manager, doc, body) {
     onDown: () => body.classList.add("loupe-active", "temporal-stutter-active"),
     onUp: () => body.classList.remove("loupe-active", "temporal-stutter-active"),
   });
-manager.register({
+
+  manager.register({
+    id: "chrono-shift",
+    category: "lens",
+    description: "Chrono-Shift Resonator Lens (Alt+Shift+V)",
+    combo: { alt: true, shift: true, code: "KeyV" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "chrono-shift-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "chrono-shift-active"),
+  });
+
+  manager.register({
+    id: "crystal-hex",
+    category: "lens",
+    description: "Crystal-Hex Lattice Lens (Alt+Shift+X)",
+    combo: { alt: true, shift: true, code: "KeyX" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "crystal-hex-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "crystal-hex-active"),
+  });
+
+  manager.register({
     id: "stellar-parallax",
     category: "lens",
     description: "Stellar Parallax Lens (Alt+9)",
