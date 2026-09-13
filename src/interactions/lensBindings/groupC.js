@@ -480,7 +480,40 @@ export function registerLensGroupC(manager, doc, body) {
     onUp: () => body.classList.remove("loupe-active", "quantum-flux-active"),
   });
 
+
   manager.register({
+    id: "neural-link",
+    category: "lens",
+    description: "Neural Link Lens (Ctrl+Alt+Shift+B)",
+    combo: { ctrl: true, alt: true, shift: true, code: 'KeyB' },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("loupe-active", "neural-link-active"),
+    onUp: () => body.classList.remove("loupe-active", "neural-link-active"),
+  });
+
+  manager.register({
+    id: "cyber-tear",
+    category: "lens",
+    description: "Cyberpunk Neon Tear Lens (Ctrl+Alt+Shift+O)",
+    combo: { ctrl: true, alt: true, shift: true, code: 'KeyO' },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("loupe-active", "cyber-tear-active"),
+    onUp: () => body.classList.remove("loupe-active", "cyber-tear-active"),
+  });
+
+  manager.register({
+    id: "temporal-stutter",
+    category: "lens",
+    description: "Temporal Stutter Lens (Ctrl+Alt+Shift+T)",
+    combo: { ctrl: true, alt: true, shift: true, code: 'KeyT' },
+    type: "hold",
+    group: "lens",
+    onDown: () => body.classList.add("loupe-active", "temporal-stutter-active"),
+    onUp: () => body.classList.remove("loupe-active", "temporal-stutter-active"),
+  });
+manager.register({
     id: "stellar-parallax",
     category: "lens",
     description: "Stellar Parallax Lens (Alt+9)",

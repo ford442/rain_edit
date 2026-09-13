@@ -179,7 +179,7 @@
   flex-shrink: 0;
   background: rgba(0, 0, 0, 0.3);
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .depth-controls button {
@@ -189,7 +189,7 @@
   font-family: var(--font-primary);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 16px;
   box-shadow: none;
   color: #fff;
   cursor: pointer;
@@ -216,7 +216,7 @@
   font-family: var(--font-primary);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 16px;
   color: #fff;
   cursor: pointer;
   outline: none;
