@@ -517,8 +517,8 @@ export function registerLensGroupC(manager, doc, body) {
   manager.register({
     id: "chrono-shift",
     category: "lens",
-    description: "Chrono-Shift Resonator Lens (Alt+Shift+V)",
-    combo: { alt: true, shift: true, code: "KeyV" },
+    description: "Chrono-Shift Resonator Lens (Ctrl+Alt+Shift+V)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyV" },
     type: "hold",
     group: "lens",
     onDown: () => {
@@ -536,8 +536,8 @@ export function registerLensGroupC(manager, doc, body) {
   manager.register({
     id: "crystal-hex",
     category: "lens",
-    description: "Crystal-Hex Lattice Lens (Alt+Shift+X)",
-    combo: { alt: true, shift: true, code: "KeyX" },
+    description: "Crystal-Hex Lattice Lens (Ctrl+Alt+Shift+X)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyX" },
     type: "hold",
     group: "lens",
     onDown: () => {
