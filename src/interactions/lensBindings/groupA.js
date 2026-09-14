@@ -283,6 +283,25 @@ manager.register({
   });
 
   manager.register({
+    id: "ethereal-dispersion",
+    category: "lens",
+    description: "Ethereal Dispersion Lens (Ctrl+Alt+Shift+D)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyD" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "ethereal-dispersion-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
+          doc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "ethereal-dispersion-active"),
+  });
+
+  manager.register({
     id: "geometric-shatter",
     category: "lens",
     description: "Geometric Shatter Lens (Alt+Shift+G)",
