@@ -570,4 +570,42 @@ export function registerLensGroupC(manager, doc, body) {
     },
     onUp: () => body.classList.remove("loupe-active", "stellar-parallax-active"),
   });
+
+  manager.register({
+    id: "hyper-tesseract",
+    category: "lens",
+    description: "Hyper-Tesseract Lens (Alt+Ctrl+Shift+Y)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyY" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "hyper-tesseract-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "hyper-tesseract-active"),
+  });
+
+  manager.register({
+    id: "bio-bloom",
+    category: "lens",
+    description: "Bio-luminescent Bloom Lens (Alt+Ctrl+Shift+W)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyW" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "bio-bloom-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "bio-bloom-active"),
+  });
 }

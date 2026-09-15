@@ -262,3 +262,46 @@ body.crystal-hex-active #echo-layer .echo-document {
   border: 1px solid rgba(255, 255, 255, 0.6);
   mix-blend-mode: color-dodge;
 }
+
+/* Hyper-Tesseract Lens (Alt+Shift+Y) */
+body.hyper-tesseract-active #editor {
+  -webkit-mask-image: radial-gradient(circle 500px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 10%, rgba(0,0,0,0.9) 70%);
+  mask-image: radial-gradient(circle 500px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 10%, rgba(0,0,0,0.9) 70%);
+}
+
+body.hyper-tesseract-active .echo-document {
+  transform:
+    translateZ(calc(var(--item-index, 0) * -30px))
+    rotateX(calc(sin(var(--item-index, 0)) * 15deg))
+    rotateY(calc(cos(var(--item-index, 0)) * 15deg))
+    scale(calc(1 - (var(--item-index, 0) * 0.05)));
+  filter: hue-rotate(calc(var(--item-index, 0) * 60deg)) brightness(1.3) contrast(1.2);
+  border: 2px solid hsla(calc(var(--item-index, 0) * 60deg), 100%, 60%, 0.6);
+  box-shadow:
+    0 0 30px hsla(calc(var(--item-index, 0) * 60deg), 100%, 60%, 0.3),
+    inset 0 0 20px hsla(calc(var(--item-index, 0) * 60deg), 100%, 60%, 0.2);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease;
+}
+
+/* Bio-luminescent Bloom Lens (Alt+Shift+W) */
+body.bio-bloom-active #editor {
+  -webkit-mask-image: radial-gradient(circle 450px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 80%);
+  mask-image: radial-gradient(circle 450px at var(--lens-x, 50%) var(--lens-y, 50%), transparent 0%, rgba(0,0,0,1) 80%);
+}
+
+body.bio-bloom-active .echo-document {
+  transform:
+    translateY(calc(sin(var(--item-index, 0) * 2) * 10px))
+    translateZ(calc(var(--item-index, 0) * -12px))
+    scale(calc(1 + (sin(var(--item-index, 0)) * 0.03)));
+  filter:
+    drop-shadow(0 0 15px var(--bio-glow-strong))
+    saturate(180%)
+    hue-rotate(calc(var(--item-index, 0) * 15deg));
+  border-radius: 20px;
+  border-color: rgba(57, 255, 20, 0.4);
+  box-shadow:
+    0 10px 40px rgba(57, 255, 20, 0.2),
+    inset 0 0 25px rgba(57, 255, 20, 0.15);
+  transition: transform 0.5s ease-in-out, filter 0.5s ease, border-radius 0.5s ease;
+}

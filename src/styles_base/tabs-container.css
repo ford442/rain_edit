@@ -75,15 +75,16 @@
   border-color: rgba(255, 200, 80, 0.35);
 }
 .tab-item:hover {
-  background: rgba(30, 30, 35, 0.8);
-  border-color: rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(40, 45, 60, 0.85);
+  border-color: rgba(0, 229, 255, 0.4);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.3);
   color: #fff;
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.8),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px) scale(1.03);
-  text-shadow: 0 0 10px rgba(0, 229, 255, 1);
+    0 6px 16px rgba(0, 0, 0, 0.9),
+    inset 0 1px 4px rgba(255, 255, 255, 0.3),
+    0 0 15px rgba(0, 229, 255, 0.2);
+  transform: translateY(-2px) scale(1.04);
+  text-shadow: 0 0 12px rgba(0, 229, 255, 1);
 }
 @keyframes text-pulse {
   from {
@@ -106,14 +107,14 @@
 }
 
 .tab-item.active {
-  background: rgba(30, 35, 45, 0.85);
-  border-color: rgba(255, 255, 255, 0.4);
-  border-bottom: 1px solid rgba(0, 229, 255, 0.5);
+  background: rgba(45, 55, 75, 0.9);
+  border-color: rgba(0, 229, 255, 0.6);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.8);
   color: #ffffff;
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.95),
-    inset 0 1px 5px rgba(255, 255, 255, 0.4),
-    0 0 20px rgba(0, 229, 255, 0.4);
+    0 8px 24px rgba(0, 0, 0, 0.95),
+    inset 0 1px 6px rgba(255, 255, 255, 0.5),
+    0 0 30px rgba(0, 229, 255, 0.6);
   transform: translateY(-4px) scale(1.08);
   text-shadow:
     0 0 15px #fff,
