@@ -274,6 +274,25 @@ export function registerLensGroupB(manager, doc, body) {
   });
 
   manager.register({
+    id: "prism-depth-lens",
+    category: "lens",
+    description: "Prism Depth Separation Lens (Ctrl+Alt+Shift+U)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyU" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "prism-depth-active");
+      const echoLayer = document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
+          doc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "prism-depth-active"),
+  });
+
+  manager.register({
     id: "ethereal-ghost",
     category: "lens",
     description: "Ethereal Ghost Lens (Alt+Shift+8)",
