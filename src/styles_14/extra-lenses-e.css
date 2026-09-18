@@ -1,0 +1,55 @@
+/* Neon Grid Lens (Ctrl+Alt+Shift+G) */
+body.neon-grid-lens-active #editor {
+  mask-image: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 1) 100%),
+              linear-gradient(90deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 1) 100%);
+  -webkit-mask-image: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 1) 100%),
+                      linear-gradient(90deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 1) 100%);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+body.neon-grid-lens-active .echo-document {
+  transform: translateZ(calc(var(--item-index) * -80px)) rotateX(15deg);
+  border: 2px solid #0ff;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.3);
+  filter: hue-rotate(calc(var(--item-index) * 15deg)) saturate(150%);
+  opacity: 0.85;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease, border 0.4s ease, box-shadow 0.4s ease;
+}
+
+/* Cosmic Web Lens (Ctrl+Alt+Shift+C) */
+body.cosmic-web-lens-active #editor {
+  mask-image: radial-gradient(circle at center, transparent 15%, black 60%);
+  -webkit-mask-image: radial-gradient(circle at center, transparent 15%, black 60%);
+}
+
+body.cosmic-web-lens-active .echo-document {
+  transform: translateZ(calc(var(--item-index) * -120px)) scale(calc(1 - (var(--item-index) * 0.05))) rotate(calc(var(--item-index) * 8deg));
+  filter: hue-rotate(270deg) drop-shadow(0 0 25px rgba(138, 43, 226, 0.7)) contrast(120%);
+  opacity: 0.9;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.5s ease;
+}
+
+/* Cyber-Pulse Lens (Ctrl+Alt+Shift+P) */
+body.cyber-pulse-lens-active #editor {
+  mask-image: repeating-linear-gradient(45deg, transparent, transparent 10px, black 10px, black 20px);
+  -webkit-mask-image: repeating-linear-gradient(45deg, transparent, transparent 10px, black 10px, black 20px);
+  animation: cyber-pulse-mask-scroll 2s linear infinite;
+}
+
+@keyframes cyber-pulse-mask-scroll {
+  0% { mask-position: 0 0; -webkit-mask-position: 0 0; }
+  100% { mask-position: 28px 28px; -webkit-mask-position: 28px 28px; }
+}
+
+body.cyber-pulse-lens-active .echo-document {
+  transform: translateZ(calc(var(--item-index) * -50px)) scale(1.05);
+  filter: hue-rotate(320deg) brightness(1.2) drop-shadow(0 0 15px rgba(255, 0, 255, 0.8));
+  animation: cyber-pulse-beat 1.5s ease-in-out infinite alternate;
+  opacity: 0.8;
+}
+
+@keyframes cyber-pulse-beat {
+  0% { transform: translateZ(calc(var(--item-index) * -50px)) scale(1.05); filter: hue-rotate(320deg) brightness(1.2) drop-shadow(0 0 15px rgba(255, 0, 255, 0.8)); }
+  100% { transform: translateZ(calc(var(--item-index) * -40px)) scale(1.08); filter: hue-rotate(340deg) brightness(1.4) drop-shadow(0 0 30px rgba(255, 0, 255, 1)); }
+}
