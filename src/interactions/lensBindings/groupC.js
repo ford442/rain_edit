@@ -610,6 +610,63 @@ export function registerLensGroupC(manager, doc, body) {
   });
 
   manager.register({
+    id: "neon-grid",
+    category: "lens",
+    description: "Neon Grid Lens (Ctrl+Alt+Shift+G)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyG" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "neon-grid-lens-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "neon-grid-lens-active"),
+  });
+
+  manager.register({
+    id: "cosmic-web",
+    category: "lens",
+    description: "Cosmic Web Lens (Ctrl+Alt+Shift+C)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyC" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "cosmic-web-lens-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "cosmic-web-lens-active"),
+  });
+
+  manager.register({
+    id: "cyber-pulse",
+    category: "lens",
+    description: "Cyber-Pulse Lens (Ctrl+Alt+Shift+P)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyP" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "cyber-pulse-lens-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "cyber-pulse-lens-active"),
+  });
+
+  manager.register({
     id: "hyper-nova-flare",
     category: "lens",
     description: "Hyper-Nova Flare Lens (Ctrl+Alt+Shift+N)",
