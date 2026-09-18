@@ -665,4 +665,61 @@ export function registerLensGroupC(manager, doc, body) {
     },
     onUp: () => body.classList.remove("loupe-active", "cyber-pulse-lens-active"),
   });
+
+  manager.register({
+    id: "hyper-nova-flare",
+    category: "lens",
+    description: "Hyper-Nova Flare Lens (Ctrl+Alt+Shift+N)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyN" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "hyper-nova-flare-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "hyper-nova-flare-active"),
+  });
+
+  manager.register({
+    id: "dark-matter-vortex",
+    category: "lens",
+    description: "Dark Matter Vortex Lens (Ctrl+Alt+Shift+M)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyM" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "dark-matter-vortex-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "dark-matter-vortex-active"),
+  });
+
+  manager.register({
+    id: "digital-mirage",
+    category: "lens",
+    description: "Digital Mirage Lens (Ctrl+Alt+Shift+L)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyL" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "digital-mirage-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "digital-mirage-active"),
+  });
 }
