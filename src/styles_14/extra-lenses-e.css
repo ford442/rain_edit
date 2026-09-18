@@ -104,7 +104,8 @@ body.digital-mirage-active .echo-document {
   filter: hue-rotate(calc(var(--item-index, 0) * 30deg))
           contrast(1.2)
           blur(calc(var(--item-index, 0) * 1px));
-  transform: translate(calc(sin(var(--item-index, 0) * 1.5) * 30px), calc(cos(var(--item-index, 0) * 1.5) * 30px))
+  transform: translateX(calc(var(--item-index, 0) * 18px))
+             translateY(calc(var(--item-index, 0) * -12px))
              translateZ(calc(var(--item-index, 0) * -20px))
              skewX(calc(var(--item-index, 0) * 2deg));
   border: 1px solid rgba(0, 255, 255, 0.4);
