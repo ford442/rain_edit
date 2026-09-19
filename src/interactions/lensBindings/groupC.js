@@ -722,4 +722,42 @@ export function registerLensGroupC(manager, doc, body) {
     },
     onUp: () => body.classList.remove("loupe-active", "digital-mirage-active"),
   });
+
+  manager.register({
+    id: "echo-shift",
+    category: "lens",
+    description: "Echo Shift Lens (Ctrl+Alt+1)",
+    combo: { ctrl: true, alt: true, code: "Digit1" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "echo-shift-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "echo-shift-active"),
+  });
+
+  manager.register({
+    id: "quantum-fold",
+    category: "lens",
+    description: "Quantum Fold Lens (Ctrl+Alt+2)",
+    combo: { ctrl: true, alt: true, code: "Digit2" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "quantum-fold-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "quantum-fold-active"),
+  });
 }
