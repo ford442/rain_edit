@@ -1,0 +1,10 @@
+1. I will add 3 new interactive features (lenses) that manipulate obscured documents:
+   - "Neon Nexus Lens" (Ctrl+Alt+3)
+   - "Void Prism Lens" (Ctrl+Alt+4)
+   - "Celestial Echo Lens" (Ctrl+Alt+5)
+2. I will register these lenses in `src/interactions/lensBindings/groupC.js` (around the other digit lenses).
+3. I will create a new CSS file `src/styles_14/extra-lenses-f.css` containing the styles for these 3 new lenses.
+4. I will import `src/styles_14/extra-lenses-f.css` in `src/styles_ui.css`.
+5. I will make sure the UI components in `#editor` and `.echo-document` look great with these new lenses, using masks, CSS 3D transformations, and filtering.
+6. The styling will use trigonometric functions (`sin`, `cos`) with `--item-index` and apply stunning holographic and glassmorphism themes that take advantage of partially obscured documents.
+7. Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
