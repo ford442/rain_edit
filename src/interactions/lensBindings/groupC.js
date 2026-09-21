@@ -817,4 +817,24 @@ export function registerLensGroupC(manager, doc, body) {
     },
     onUp: () => body.classList.remove("loupe-active", "celestial-echo-active"),
   });
+
+  manager.register({
+    id: "quantum-singularity",
+    category: "lens",
+    description: "Quantum Singularity Lens (Ctrl+Alt+Shift+Z)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyZ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "quantum-singularity-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "quantum-singularity-active"),
+  });
+
 }

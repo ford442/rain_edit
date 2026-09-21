@@ -24,7 +24,7 @@ body.x-ray-active #echo-layer {
   left: 10%;
   width: 80%;
   height: 80%;
-  border-radius: 12px;
+  border-radius: 16px;
   pointer-events: auto; /* Allow hovering to peek */
   cursor: pointer;
   font-family: var(--font-mono);
@@ -83,7 +83,7 @@ body.x-ray-active #echo-layer {
   border: 1px solid hsla(var(--echo-tint, 0deg), 100%, 80%, 0.6);
   border-top: 1px solid hsla(var(--echo-tint, 0deg), 100%, 90%, 0.8);
   border-left: 1px solid hsla(var(--echo-tint, 0deg), 100%, 80%, 0.6);
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 24px;
   box-sizing: border-box;
   box-shadow:
@@ -97,7 +97,7 @@ body.x-ray-active #echo-layer {
   content: "";
   position: absolute;
   inset: -1px;
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 1px;
   background: linear-gradient(
     45deg,
@@ -197,7 +197,7 @@ body.flashlight-active .echo-document {
   opacity: 0.5;
   z-index: 1;
   animation: echo-gradient-shift 12s ease-in-out infinite alternate;
-  border-radius: 8px;
+  border-radius: 16px;
 }
 
 @keyframes echo-gradient-shift {
@@ -232,7 +232,7 @@ body.flashlight-active .echo-document {
   content: "";
   position: absolute;
   inset: -4px;
-  border-radius: 8px;
+  border-radius: 16px;
   border: 2px dashed rgba(0, 229, 255, 0.4);
   pointer-events: none;
   animation: holo-ring-spin 20s linear infinite;
@@ -262,7 +262,7 @@ body.flashlight-active .echo-document {
 .echo-document-holo-ring {
   position: absolute;
   inset: -6px;
-  border-radius: 8px;
+  border-radius: 16px;
   border: 2px dashed rgba(0, 229, 255, 0.5);
   pointer-events: none;
   animation: holo-ring-spin 10s linear infinite;
@@ -342,7 +342,7 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
   /* Deep Layer Breathing */
   animation: deep-pulse calc(10s + (var(--index, 0) * 2s)) infinite alternate
     ease-in-out;
-  border-radius: 8px;
+  border-radius: 16px;
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.02) 0%,
@@ -395,7 +395,7 @@ body.rolodex-active .echo-document:hover .echo-document-holo-ring {
   color: #00e5ff;
   border: 1px solid rgba(0, 229, 255, 0.4);
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 16px;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 12px;
   outline: none;
@@ -467,8 +467,8 @@ body::after {
 
 /* Enhanced scrollbars for holographic theme */
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {

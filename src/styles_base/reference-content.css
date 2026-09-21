@@ -91,7 +91,7 @@
   height: 14px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+  border-radius: 16px;
   cursor: pointer;
   position: relative;
   flex-shrink: 0;
@@ -115,7 +115,7 @@
 #reference-layer code {
   background: rgba(255, 255, 255, 0.1);
   padding: 2px 4px;
-  border-radius: 8px;
+  border-radius: 16px;
   font-family: var(--font-mono);
   color: #aaddff;
 }
@@ -201,7 +201,7 @@ textarea {
   width: 100%;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  border-radius: 16px;
   color: #c0c0d0;
   font-family: var(--font-mono);
   font-size: 11px;
