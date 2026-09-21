@@ -91,3 +91,53 @@ body.celestial-echo-active .echo-document:not(.loupe-active) {
   border-radius: 50% !important;
   border: 1px solid rgba(255, 255, 255, 0.5) !important;
 }
+
+/* =========================================
+   QUANTUM SINGULARITY LENS (Ctrl+Alt+Shift+Z)
+   ========================================= */
+body.quantum-singularity-active #editor {
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    transparent 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  pointer-events: none;
+}
+
+body.quantum-singularity-active .echo-document {
+  --layer-rad: calc(var(--item-index, 0) * 0.5rad);
+  --radius: calc(30px + (var(--item-index, 0) * 15px));
+  border: 1px solid rgba(255, 100, 255, 0.6);
+  box-shadow: 0 0 25px rgba(255, 100, 255, 0.3), inset 0 0 15px rgba(255, 100, 255, 0.2);
+  transform:
+    translate3d(
+      calc(cos(var(--layer-rad)) * var(--radius)),
+      calc(sin(var(--layer-rad)) * var(--radius)),
+      calc(var(--item-index, 0) * -40px)
+    )
+    scale(calc(1 - (var(--item-index, 0) * 0.05)))
+    rotateZ(calc(var(--item-index, 0) * 5deg));
+  filter: hue-rotate(calc(var(--item-index, 0) * 20deg)) brightness(1.2) contrast(1.1);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease, border-color 0.4s ease;
+}
+
+body.quantum-singularity-active .echo-document:hover {
+  border-color: rgba(255, 100, 255, 1);
+  box-shadow: 0 0 40px rgba(255, 100, 255, 0.6), inset 0 0 20px rgba(255, 100, 255, 0.4);
+  transform:
+    translate3d(
+      calc(cos(var(--layer-rad)) * var(--radius) * 1.2),
+      calc(sin(var(--layer-rad)) * var(--radius) * 1.2),
+      20px
+    )
+    scale(1.05)
+    rotateZ(0deg);
+  z-index: 999;
+}
