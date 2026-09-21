@@ -1,0 +1,93 @@
+/**
+ * Extended lens effects, part 6.
+ * Adds new experimental interactions for obscured documents.
+ */
+
+/* --- Neon Nexus Lens (Ctrl+Alt+3) --- */
+body.neon-nexus-active #editor {
+  mask-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(0, 0, 0, 0.8) 20px,
+    black 40px
+  );
+  -webkit-mask-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(0, 0, 0, 0.8) 20px,
+    black 40px
+  );
+}
+
+body.neon-nexus-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.9 - (var(--item-index) * 0.05)) !important;
+  filter: hue-rotate(calc(var(--item-index) * 60deg)) saturate(200%) drop-shadow(0 0 20px rgba(0, 255, 255, 0.8)) !important;
+  transform: translate3d(
+    calc(var(--tx, 0) + (sin(calc(var(--item-index) * 0.5rad)) * 60px)),
+    calc(var(--ty, 0) + (cos(calc(var(--item-index) * 0.5rad)) * 60px)),
+    calc(var(--tz, -100px) - (var(--item-index) * 60px))
+  ) rotateX(calc(var(--item-index) * 10deg)) rotateY(calc(var(--item-index) * 10deg)) !important;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease, opacity 0.4s ease;
+  border: 2px solid rgba(0, 255, 255, 0.8) !important;
+  box-shadow: inset 0 0 30px rgba(0, 255, 255, 0.4), 0 0 30px rgba(0, 255, 255, 0.6) !important;
+}
+
+/* --- Void Prism Lens (Ctrl+Alt+4) --- */
+body.void-prism-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.4) 50%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.4) 50%,
+    black 100%
+  );
+}
+
+body.void-prism-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.8 - (var(--item-index) * 0.07)) !important;
+  filter: invert(0.8) hue-rotate(calc(var(--item-index) * 45deg)) contrast(150%) blur(calc(var(--item-index) * 1px)) !important;
+  transform: translate3d(
+    calc(var(--tx, 0) - (var(--item-index) * 30px)),
+    calc(var(--ty, 0) + (var(--item-index) * 30px)),
+    calc(var(--tz, -200px) - (var(--item-index) * 80px))
+  ) rotateZ(calc(var(--item-index) * -15deg)) scale(calc(1 - (var(--item-index) * 0.08))) !important;
+  transition: transform 0.6s cubic-bezier(0.1, 0.9, 0.2, 1), filter 0.6s ease, opacity 0.6s ease;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  box-shadow: 0 0 50px rgba(255, 0, 255, 0.5) !important;
+}
+
+/* --- Celestial Echo Lens (Ctrl+Alt+5) --- */
+body.celestial-echo-active #editor {
+  mask-image: radial-gradient(
+    ellipse at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.2) 30%,
+    black 70%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.2) 30%,
+    black 70%
+  );
+}
+
+body.celestial-echo-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.85 - (var(--item-index) * 0.06)) !important;
+  filter: hue-rotate(calc(var(--item-index) * 30deg)) brightness(1.2) drop-shadow(0 0 25px rgba(255, 255, 255, 0.6)) !important;
+  transform: translate3d(
+    calc(var(--tx, 0) + (cos(calc(var(--item-index) * 1.5rad)) * 80px)),
+    calc(var(--ty, 0) + (sin(calc(var(--item-index) * 1.5rad)) * 80px)),
+    calc(var(--tz, -150px) - (var(--item-index) * 50px))
+  ) rotateZ(calc(var(--item-index) * 20deg)) scale(calc(1 - (var(--item-index) * 0.04))) !important;
+  transition: transform 0.5s cubic-bezier(0.3, 1, 0.3, 1), filter 0.5s ease, opacity 0.5s ease;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
