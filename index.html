@@ -140,6 +140,7 @@
         <div class="dock-title">RAIN CONTROL</div>
 
         <div class="dock-group">
+          <div style="width: 100%; text-align: center; margin-bottom: 8px; font-size: 11px; color: rgba(0, 229, 255, 0.7); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(0, 229, 255, 0.2); padding-bottom: 4px;">Weather Radar</div>
           <canvas
             id="radar-canvas"
             width="160"
@@ -148,7 +149,7 @@
         </div>
 
         <div class="dock-group">
-          <label><span class="icon">⛈️</span> Storm Intensity</label>
+          <label title="Adjust the visual intensity of the storm"><span class="icon">⛈️</span> Storm Intensity</label>
           <input
             id="storm-intensity"
             type="range"
@@ -159,7 +160,7 @@
         </div>
 
         <div class="dock-group">
-          <label><span class="icon">👁️</span> Editor Opacity</label>
+          <label title="Fade the main editor to reveal layers behind it"><span class="icon">👁️</span> Editor Opacity</label>
           <input
             id="editor-opacity"
             type="range"
@@ -171,7 +172,7 @@
         </div>
 
         <div class="dock-group">
-          <label><span class="icon">📝</span> Reference Text</label>
+          <label title="Enter text to see it mapped into the environment"><span class="icon">📝</span> Reference Text</label>
           <textarea
             id="reference-input"
             rows="3"
@@ -180,7 +181,7 @@
         </div>
 
         <div class="dock-group">
-          <label><span class="icon">🔍</span> Deep Search</label>
+          <label title="Search across all obscured documents in the background"><span class="icon">🔍</span> Deep Search</label>
           <input
             id="global-search"
             type="text"
@@ -189,7 +190,7 @@
         </div>
 
         <div class="dock-group">
-          <label><span class="icon">🎨</span> Theme</label>
+          <label title="Select the global color theme"><span class="icon">🎨</span> Theme</label>
           <select
             id="theme-select"
           >
