@@ -1,0 +1,94 @@
+/* extra-lenses-g.css - Innovative lenses */
+
+/* --- Quantum Entanglement Lens (Ctrl+Alt+Shift+Q) --- */
+.quantum-entanglement-active #editor {
+  mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 100px,
+    rgba(0, 0, 0, 0.4) 250px,
+    black 400px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 100px,
+    rgba(0, 0, 0, 0.4) 250px,
+    black 400px
+  );
+}
+
+.quantum-entanglement-active .echo-document {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s ease, opacity 0.4s ease;
+  transform-style: preserve-3d;
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) brightness(1.5) contrast(1.2);
+  opacity: 0.8;
+
+  /* Pull elements inward toward the lens center */
+  --dx: calc(var(--lens-x, 50%) - 50%);
+  --dy: calc(var(--lens-y, 50%) - 50%);
+  transform: translate3d(
+    calc(var(--dx) * 0.5 * (1 + (var(--item-index, 0) % 3) * 0.5)),
+    calc(var(--dy) * 0.5 * (1 + (var(--item-index, 0) % 3) * 0.5)),
+    calc(var(--item-index, 0) * 40px)
+  ) rotateZ(calc(var(--item-index, 0) * 15deg));
+
+  box-shadow:
+    0 0 20px rgba(0, 255, 255, 0.6),
+    inset 0 0 15px rgba(0, 255, 255, 0.4);
+  border: 1px solid rgba(0, 255, 255, 0.8);
+}
+
+.quantum-entanglement-active .echo-document::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.8), transparent);
+  transform: translate(-50%, -50%) rotate(calc(var(--item-index, 0) * 30deg));
+  pointer-events: none;
+  z-index: -1;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 1);
+}
+
+/* --- Cyber-Vortex Lens (Ctrl+Alt+Shift+V) --- */
+.cyber-vortex-active #editor {
+  mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 150px,
+    black 350px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 150px,
+    black 350px
+  );
+  filter: sepia(0.5) hue-rotate(-50deg) saturate(2);
+}
+
+.cyber-vortex-active .echo-document {
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease;
+  transform-style: preserve-3d;
+  opacity: 0.9;
+
+  /* Apply a vortex spin based on index and time (time simulation via index) */
+  --angle: calc(var(--item-index, 0) * 45deg);
+  --radius: calc(100px + var(--item-index, 0) * 30px);
+
+  transform: translate3d(
+    calc(cos(var(--angle)) * var(--radius)),
+    calc(sin(var(--angle)) * var(--radius)),
+    calc(var(--item-index, 0) * -50px)
+  ) rotateZ(calc(var(--angle) + 90deg)) rotateX(20deg);
+
+  border: 2px solid rgba(255, 0, 255, 0.7);
+  box-shadow:
+    0 0 30px rgba(255, 0, 255, 0.5),
+    inset 0 0 20px rgba(255, 0, 255, 0.3);
+  filter: drop-shadow(0 0 10px rgba(255, 0, 255, 0.8));
+}
+
+.cyber-vortex-active .echo-document pre {
+  color: #ff00ff !important;
+  text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+}
