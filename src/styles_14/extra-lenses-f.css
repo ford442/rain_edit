@@ -141,3 +141,101 @@ body.quantum-singularity-active .echo-document:hover {
     rotateZ(0deg);
   z-index: 999;
 }
+
+/* =========================================
+   SYNAPTIC WEB LENS (Ctrl+Alt+Shift+S)
+   ========================================= */
+body.synaptic-web-lens-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 20%,
+    rgba(0,0,0,0.5) 50%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 20%,
+    rgba(0,0,0,0.5) 50%,
+    black 100%
+  );
+}
+
+body.synaptic-web-lens-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.9 - (var(--item-index) * 0.05)) !important;
+  filter: hue-rotate(calc(var(--item-index) * 45deg)) contrast(150%) brightness(1.2) drop-shadow(0 0 20px rgba(100, 255, 100, 0.5)) !important;
+  transform: translate3d(
+    calc(var(--tx, 0) + (sin(calc(var(--item-index) * 1.2rad)) * 80px)),
+    calc(var(--ty, 0) + (cos(calc(var(--item-index) * 0.8rad)) * 80px)),
+    calc(var(--tz, -100px) - (var(--item-index) * 50px))
+  ) scale(calc(1 - (var(--item-index) * 0.03))) !important;
+  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.5s ease, opacity 0.5s ease;
+  border: 1px solid rgba(100, 255, 100, 0.8) !important;
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(100, 255, 100, 0.1) 10px, rgba(100, 255, 100, 0.1) 12px) !important;
+  box-shadow: inset 0 0 40px rgba(100, 255, 100, 0.3) !important;
+}
+
+/* =========================================
+   PLASMA CORE LENS (Ctrl+Alt+Shift+E)
+   ========================================= */
+body.plasma-core-active #editor {
+  mask-image: radial-gradient(
+    ellipse 400px 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 10%,
+    rgba(0,0,0,0.6) 60%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 400px 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 10%,
+    rgba(0,0,0,0.6) 60%,
+    black 100%
+  );
+}
+
+body.plasma-core-active .echo-document:not(.loupe-active) {
+  opacity: calc(1 - (var(--item-index) * 0.1)) !important;
+  filter: saturate(calc(200% - (var(--item-index) * 20%))) hue-rotate(calc(var(--item-index) * 15deg)) contrast(130%) brightness(calc(1.5 - (var(--item-index) * 0.1))) drop-shadow(0 0 30px rgba(255, 100, 0, 0.8)) !important;
+  transform: translate3d(
+    var(--tx, 0),
+    var(--ty, 0),
+    calc(var(--tz, -50px) - (var(--item-index) * 40px))
+  ) scale(calc(1 + (var(--item-index) * 0.05))) !important;
+  transition: transform 0.6s ease-out, filter 0.6s ease, opacity 0.6s ease;
+  border: 2px solid rgba(255, 150, 0, 0.9) !important;
+  box-shadow: 0 0 50px rgba(255, 50, 0, 0.6), inset 0 0 30px rgba(255, 150, 0, 0.4) !important;
+  border-radius: 20px !important;
+}
+
+/* =========================================
+   FRACTAL RESONANCE LENS (Ctrl+Alt+Shift+R)
+   ========================================= */
+body.fractal-resonance-active #editor {
+  mask-image: repeating-radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent,
+    transparent 20px,
+    rgba(0,0,0,0.8) 25px,
+    black 40px
+  );
+  -webkit-mask-image: repeating-radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent,
+    transparent 20px,
+    rgba(0,0,0,0.8) 25px,
+    black 40px
+  );
+}
+
+body.fractal-resonance-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.85 - (var(--item-index) * 0.05)) !important;
+  filter: hue-rotate(calc(var(--item-index) * 90deg)) saturate(150%) blur(calc(var(--item-index) * 0.5px)) !important;
+  transform: translate3d(
+    calc(var(--tx, 0) + (cos(calc(var(--item-index) * 2.5rad)) * 40px)),
+    calc(var(--ty, 0) + (sin(calc(var(--item-index) * 2.5rad)) * 40px)),
+    calc(var(--tz, -120px) - (var(--item-index) * 70px))
+  ) rotateZ(calc(var(--item-index) * 45deg)) scale(calc(1 - (var(--item-index) * 0.06))) !important;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), filter 0.7s ease, opacity 0.7s ease;
+  border: 1px dashed rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 0 30px rgba(0, 200, 255, 0.4) !important;
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}

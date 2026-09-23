@@ -368,6 +368,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .dock-btn-sonar {
   background: rgba(0, 229, 255, 0.1);
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
   border: 1px solid rgba(0, 229, 255, 0.3);
   color: #00e5ff;
   padding: 4px 10px;
@@ -383,8 +384,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .dock-btn-sonar:hover {
   background: rgba(0, 229, 255, 0.25);
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.1), transparent);
   border-color: #00e5ff;
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
 }
 
 .workspace-actions {
@@ -397,6 +399,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .dock-btn-workspace {
   background: rgba(0, 229, 255, 0.05);
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
   border: 1px solid rgba(0, 229, 255, 0.2);
   color: rgba(230, 240, 255, 0.9);
   padding: 4px 8px;
@@ -411,9 +414,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .dock-btn-workspace:hover {
   background: rgba(0, 229, 255, 0.15);
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.1), transparent);
   border-color: rgba(0, 229, 255, 0.8);
   color: #00e5ff;
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
 }
 
 #container.local-drop-active::after {

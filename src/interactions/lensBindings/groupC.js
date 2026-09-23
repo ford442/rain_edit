@@ -837,4 +837,61 @@ export function registerLensGroupC(manager, doc, body) {
     onUp: () => body.classList.remove("loupe-active", "quantum-singularity-active"),
   });
 
+  manager.register({
+    id: "synaptic-web-lens",
+    category: "lens",
+    description: "Synaptic Web Lens (Ctrl+Alt+Shift+S)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyS" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "synaptic-web-lens-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "synaptic-web-lens-active"),
+  });
+
+  manager.register({
+    id: "plasma-core-lens",
+    category: "lens",
+    description: "Plasma Core Lens (Ctrl+Alt+Shift+E)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyE" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "plasma-core-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "plasma-core-active"),
+  });
+
+  manager.register({
+    id: "fractal-resonance-lens",
+    category: "lens",
+    description: "Fractal Resonance Lens (Ctrl+Alt+Shift+R)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyR" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "fractal-resonance-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "fractal-resonance-active"),
+  });
+
 }
