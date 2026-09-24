@@ -894,4 +894,42 @@ export function registerLensGroupC(manager, doc, body) {
     onUp: () => body.classList.remove("loupe-active", "fractal-resonance-active"),
   });
 
+  manager.register({
+    id: "quantum-entanglement-lens",
+    category: "lens",
+    description: "Quantum Entanglement Lens (Ctrl+Alt+Shift+Q)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyQ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "quantum-entanglement-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "quantum-entanglement-active"),
+  });
+
+  manager.register({
+    id: "cyber-vortex-lens",
+    category: "lens",
+    description: "Cyber-Vortex Lens (Ctrl+Alt+Shift+I)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyI" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "cyber-vortex-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "cyber-vortex-active"),
+  });
+
 }

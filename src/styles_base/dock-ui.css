@@ -13,7 +13,7 @@
   display: flex;
   flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center;
   gap: 14px;
-  padding: 22px 28px;
+  padding: 20px 24px;
   overflow: hidden;
 
   /* Enhanced Premium Glassmorphism */
@@ -22,7 +22,7 @@
   -webkit-backdrop-filter: blur(80px) saturate(260%);
   border: 1px solid rgba(0, 229, 255, 0.2);
   border-top: 1px solid rgba(0, 229, 255, 0.5);
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.8),
     0 0 80px rgba(0, 229, 255, 0.2),
@@ -95,9 +95,9 @@
 .dock-title {
   width: 100% !important;
   text-align: center !important;
-  font-size: 16px !important;
+  font-size: 12px !important;
   font-weight: 800 !important;
-  letter-spacing: 3px !important;
+  letter-spacing: 4px !important;
   color: #00e5ff !important;
   margin-bottom: 12px !important;
   text-transform: uppercase !important;
