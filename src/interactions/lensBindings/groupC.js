@@ -932,4 +932,62 @@ export function registerLensGroupC(manager, doc, body) {
     onUp: () => body.classList.remove("loupe-active", "cyber-vortex-active"),
   });
 
+
+  manager.register({
+    id: "hyper-thread-lens",
+    category: "lens",
+    description: "Hyper-Thread Lens (Ctrl+Alt+6)",
+    combo: { ctrl: true, alt: true, code: "Digit6" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "hyper-thread-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "hyper-thread-active"),
+  });
+
+  manager.register({
+    id: "crystal-matrix-lens",
+    category: "lens",
+    description: "Crystal Matrix Lens (Ctrl+Alt+7)",
+    combo: { ctrl: true, alt: true, code: "Digit7" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "crystal-matrix-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "crystal-matrix-active"),
+  });
+
+  manager.register({
+    id: "bio-luminescent-lens",
+    category: "lens",
+    description: "Bio-Luminescent Lens (Ctrl+Alt+8)",
+    combo: { ctrl: true, alt: true, code: "Digit8" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "bio-luminescent-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "bio-luminescent-active"),
+  });
+
 }
