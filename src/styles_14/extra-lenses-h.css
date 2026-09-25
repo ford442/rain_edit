@@ -1,0 +1,92 @@
+/* extra-lenses-h.css - Innovative lenses */
+
+/* --- Aura Resonance Lens (Ctrl+Alt+Shift+H) --- */
+body.aura-resonance-active #editor {
+  mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 50px,
+    rgba(0, 0, 0, 0.6) 200px,
+    black 450px
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 50px,
+    rgba(0, 0, 0, 0.6) 200px,
+    black 450px
+  );
+}
+
+body.aura-resonance-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.8 - (var(--item-index, 0) * 0.1));
+  filter: hue-rotate(calc(var(--item-index, 0) * 30deg)) blur(calc(var(--item-index, 0) * 1px));
+  transform: translate3d(
+    calc(sin(calc(var(--item-index, 0) * 1rad)) * 80px),
+    calc(cos(calc(var(--item-index, 0) * 1rad)) * 80px),
+    calc(var(--item-index, 0) * -80px)
+  ) scale(calc(1 - var(--item-index, 0) * 0.05));
+  box-shadow: 0 0 30px rgba(0, 255, 150, 0.4);
+  border-color: rgba(0, 255, 150, 0.6);
+}
+
+/* --- Prismatic Spiral Lens (Ctrl+Alt+Shift+J) --- */
+body.prismatic-spiral-active #editor {
+  mask-image: conic-gradient(
+    from 0deg at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0deg,
+    black 90deg,
+    transparent 180deg,
+    black 270deg,
+    transparent 360deg
+  );
+  -webkit-mask-image: conic-gradient(
+    from 0deg at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0deg,
+    black 90deg,
+    transparent 180deg,
+    black 270deg,
+    transparent 360deg
+  );
+}
+
+body.prismatic-spiral-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.9 - (var(--item-index, 0) * 0.08));
+  --angle: calc(var(--item-index, 0) * 1.5rad);
+  --radius: calc(var(--item-index, 0) * 40px);
+  transform: translate3d(
+    calc(cos(var(--angle)) * var(--radius)),
+    calc(sin(var(--angle)) * var(--radius)),
+    calc(var(--item-index, 0) * -40px)
+  ) rotateZ(calc(var(--item-index, 0) * 20deg));
+  filter: hue-rotate(calc(var(--item-index, 0) * -45deg)) contrast(1.5);
+  box-shadow: inset 0 0 20px rgba(255, 100, 0, 0.3);
+}
+
+/* --- Ethereal Drift Lens (Ctrl+Alt+Shift+K) --- */
+body.ethereal-drift-active #editor {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 30%,
+    black 70%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 30%,
+    black 70%,
+    transparent
+  );
+}
+
+body.ethereal-drift-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.7 - (var(--item-index, 0) * 0.1));
+  --drift-x: calc(sin(calc(var(--item-index, 0) * 0.8rad)) * 150px);
+  --drift-y: calc(var(--item-index, 0) * -30px);
+  transform: translate3d(
+    var(--drift-x),
+    var(--drift-y),
+    calc(var(--item-index, 0) * -120px)
+  ) rotateY(calc(var(--item-index, 0) * 10deg));
+  filter: drop-shadow(0 10px 20px rgba(100, 100, 255, 0.5)) grayscale(calc(var(--item-index, 0) * 20%));
+}
