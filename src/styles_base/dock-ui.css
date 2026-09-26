@@ -227,15 +227,15 @@
   width: 360px;
   max-height: 85vh;
   box-shadow:
-    0 50px 100px -10px rgba(0, 0, 0, 0.98),
+    0 60px 120px -10px rgba(0, 0, 0, 1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
     inset 0 0 45px rgba(255, 0, 128, 0.25),
     0 0 60px rgba(0, 229, 255, 0.45); /* Subtle accent glow */
   border-radius: 16px;
   background: rgba(10, 15, 25, 0.65);
-  backdrop-filter: blur(50px) saturate(200%);
+  backdrop-filter: blur(64px) saturate(220%);
   -webkit-backdrop-filter: blur(60px) saturate(250%);
-  -webkit-backdrop-filter: blur(50px) saturate(200%);
+  -webkit-backdrop-filter: blur(64px) saturate(220%);
   -webkit-backdrop-filter: blur(60px) saturate(250%);
 }
 

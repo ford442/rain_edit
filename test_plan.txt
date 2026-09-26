@@ -1,0 +1,13 @@
+1. We need to create a new lens effect for obscured documents by registering it in `src/interactions/lensBindings/groupC.js` and styling it in a new CSS file `src/styles_14/extra-lenses-h.css` (or appending to an existing one). Let's define:
+   - "Aura Resonance Lens" (Ctrl+Alt+Shift+H)
+   - "Prismatic Spiral Lens" (Ctrl+Alt+Shift+J)
+   - "Ethereal Drift Lens" (Ctrl+Alt+Shift+K)
+   - "Stardust Ripple Lens" (Ctrl+Alt+Shift+U) - Wait, Ctrl+Alt+Shift+U is already used? Let's check available keys in group C. We'll use H, J, K.
+   These lenses will manipulate obscured `.echo-document` layers using spatial transformations, masks, and glassmorphism/holographic themes with `sin()` and `cos()` functions.
+
+2. I will add the CSS import for `extra-lenses-h.css` to `src/styles_ui.css`.
+
+3. Let's refine the global formatting/look and feel. Base UI styling is in `src/styles_base/`. The goal is "Improve the formatting and look and feel of this web IDE".
+   - We will enhance the dock, tabs, and base text styles slightly to emphasize the premium glassmorphism effect. I will look at `src/styles_base/shell-and-editor.css` and `dock-ui.css`.
+
+4. Add the pre-commit steps.
