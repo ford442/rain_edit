@@ -1,3 +1,5 @@
+/* extra-lenses-h.css — Aura Resonance / Prismatic Spiral / Ethereal Drift */
+
 /* =========================================
    AURA RESONANCE LENS (Ctrl+Alt+Shift+H)
    ========================================= */
@@ -16,12 +18,12 @@ body.aura-resonance-active #editor {
     rgba(0, 0, 0, 0.4) 60%,
     rgba(0, 0, 0, 1) 100%
   );
-  pointer-events: none;
 }
 
-body.aura-resonance-active .echo-document {
+body.aura-resonance-active .echo-document:not(.loupe-active) {
   --resonance-rad: calc(var(--item-index, 0) * 0.8rad);
   --resonance-radius: calc(40px + (var(--item-index, 0) * 10px));
+  pointer-events: auto;
   border: 1px solid rgba(200, 100, 255, 0.5);
   box-shadow: 0 0 30px rgba(200, 100, 255, 0.2), inset 0 0 20px rgba(200, 100, 255, 0.1);
   transform:
@@ -38,7 +40,7 @@ body.aura-resonance-active .echo-document {
   background: rgba(10, 5, 20, 0.4);
 }
 
-body.aura-resonance-active .echo-document:hover {
+body.aura-resonance-active .echo-document:not(.loupe-active):hover {
   border-color: rgba(200, 100, 255, 1);
   box-shadow: 0 0 50px rgba(200, 100, 255, 0.6), inset 0 0 30px rgba(200, 100, 255, 0.4);
   transform:
@@ -52,7 +54,6 @@ body.aura-resonance-active .echo-document:hover {
   z-index: 999;
 }
 
-
 /* =========================================
    PRISMATIC SPIRAL LENS (Ctrl+Alt+Shift+J)
    ========================================= */
@@ -60,21 +61,25 @@ body.prismatic-spiral-active #editor {
   mask-image: conic-gradient(
     from 0deg at var(--lens-x, 50%) var(--lens-y, 50%),
     transparent 0deg,
-    rgba(0, 0, 0, 0.8) 180deg,
+    black 90deg,
+    transparent 180deg,
+    black 270deg,
     transparent 360deg
   );
   -webkit-mask-image: conic-gradient(
     from 0deg at var(--lens-x, 50%) var(--lens-y, 50%),
     transparent 0deg,
-    rgba(0, 0, 0, 0.8) 180deg,
+    black 90deg,
+    transparent 180deg,
+    black 270deg,
     transparent 360deg
   );
-  pointer-events: none;
 }
 
-body.prismatic-spiral-active .echo-document {
+body.prismatic-spiral-active .echo-document:not(.loupe-active) {
   --spiral-rad: calc(var(--item-index, 0) * 1.2rad);
   --spiral-radius: calc(20px + (var(--item-index, 0) * 20px));
+  pointer-events: auto;
   border: 1px dashed rgba(100, 255, 200, 0.6);
   box-shadow: 0 0 25px rgba(100, 255, 200, 0.3);
   transform:
@@ -85,12 +90,13 @@ body.prismatic-spiral-active .echo-document {
     )
     scale(calc(1 - (var(--item-index, 0) * 0.05)))
     rotateZ(calc(var(--item-index, 0) * 15deg));
-  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) brightness(1.2) drop-shadow(0 0 10px rgba(100, 255, 200, 0.4));
+  filter: hue-rotate(calc(var(--item-index, 0) * 45deg)) brightness(1.2)
+    drop-shadow(0 0 10px rgba(100, 255, 200, 0.4));
   transition: transform 0.6s cubic-bezier(0.3, 0.9, 0.3, 1), filter 0.6s ease;
   clip-path: polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%);
 }
 
-body.prismatic-spiral-active .echo-document:hover {
+body.prismatic-spiral-active .echo-document:not(.loupe-active):hover {
   border-color: rgba(100, 255, 200, 1);
   box-shadow: 0 0 40px rgba(100, 255, 200, 0.7);
   transform:
@@ -103,7 +109,6 @@ body.prismatic-spiral-active .echo-document:hover {
     rotateZ(0deg);
   z-index: 999;
 }
-
 
 /* =========================================
    ETHEREAL DRIFT LENS (Ctrl+Alt+Shift+K)
@@ -121,12 +126,12 @@ body.ethereal-drift-active #editor {
     rgba(0, 0, 0, 0.5) 50%,
     rgba(0, 0, 0, 1) 100%
   );
-  pointer-events: none;
 }
 
-body.ethereal-drift-active .echo-document {
+body.ethereal-drift-active .echo-document:not(.loupe-active) {
   --drift-rad: calc(var(--item-index, 0) * 0.5rad);
   --drift-radius: calc(50px + (var(--item-index, 0) * 15px));
+  pointer-events: auto;
   border: 1px solid rgba(150, 200, 255, 0.4);
   box-shadow: 0 0 20px rgba(150, 200, 255, 0.2);
   transform:
@@ -137,13 +142,14 @@ body.ethereal-drift-active .echo-document {
     )
     scale(calc(1 - (var(--item-index, 0) * 0.03)))
     skewX(calc(var(--item-index, 0) * -2deg));
-  filter: hue-rotate(calc(var(--item-index, 0) * 15deg)) blur(calc(var(--item-index, 0) * 0.5px)) brightness(1.1);
-  transition: transform 0.7s cubic-bezier(0.4, 0.0, 0.2, 1), filter 0.7s ease, opacity 0.7s ease;
+  filter: hue-rotate(calc(var(--item-index, 0) * 15deg))
+    blur(calc(var(--item-index, 0) * 0.5px)) brightness(1.1);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), filter 0.7s ease, opacity 0.7s ease;
   opacity: calc(0.9 - (var(--item-index, 0) * 0.05));
   border-radius: 20px;
 }
 
-body.ethereal-drift-active .echo-document:hover {
+body.ethereal-drift-active .echo-document:not(.loupe-active):hover {
   border-color: rgba(150, 200, 255, 0.9);
   box-shadow: 0 0 40px rgba(150, 200, 255, 0.6);
   transform:

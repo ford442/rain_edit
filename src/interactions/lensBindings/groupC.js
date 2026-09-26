@@ -991,6 +991,63 @@ export function registerLensGroupC(manager, doc, body) {
     onUp: () => body.classList.remove("loupe-active", "bio-luminescent-active"),
   });
 
+
+  manager.register({
+    id: "aura-resonance",
+    category: "lens",
+    description: "Aura Resonance Lens (Ctrl+Alt+Shift+H)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyH" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "aura-resonance-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "aura-resonance-active"),
+  });
+
+  manager.register({
+    id: "prismatic-spiral",
+    category: "lens",
+    description: "Prismatic Spiral Lens (Ctrl+Alt+Shift+J)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyJ" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "prismatic-spiral-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "prismatic-spiral-active"),
+  });
+
+  manager.register({
+    id: "ethereal-drift",
+    category: "lens",
+    description: "Ethereal Drift Lens (Ctrl+Alt+Shift+K)",
+    combo: { ctrl: true, alt: true, shift: true, code: "KeyK" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "ethereal-drift-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "ethereal-drift-active"),
+  });
 }
 
 export function registerLensGroupC_extensions(manager, doc, body) {
