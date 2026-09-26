@@ -54,14 +54,14 @@ body,
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 229, 255, 0.4);
+  background: rgba(0, 229, 255, 0.5);
   background-image: linear-gradient(180deg, rgba(255,255,255,0.1), transparent);
   border-radius: 8px;
   border: 1px solid rgba(0, 229, 255, 0.8);
@@ -82,13 +82,13 @@ body,
   bottom: 0;
   z-index: 5; /* default: depth 1 — middle between rain layers; JS will update dynamically */
   box-shadow:
-    0 16px 56px rgba(0, 0, 0, 0.95),
+    0 24px 64px rgba(0, 0, 0, 0.98), 0 0 80px rgba(0, 229, 255, 0.1),
     inset 0 2px 16px rgba(255, 255, 255, 0.25),
     0 0 50px rgba(0, 229, 255, 0.25),
     inset 0 0 25px rgba(0, 229, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 16px;
-  backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(30px) saturate(160%);
 
   /* Cyber Grid Background */
   background-image:
@@ -109,7 +109,7 @@ body,
 }
 
 ::selection {
-  background: rgba(0, 229, 255, 0.4);
+  background: rgba(0, 229, 255, 0.5);
   color: #fff;
   text-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
 }
@@ -135,7 +135,7 @@ body,
   background: radial-gradient(
     circle at var(--mouse-x) var(--mouse-y),
     transparent 95px,
-    rgba(0, 229, 255, 0.4) 100px,
+    rgba(0, 229, 255, 0.5) 100px,
     transparent 105px
   );
   z-index: 100;
@@ -183,7 +183,7 @@ body,
   border-radius: 50%;
   border: 2px solid rgba(0, 229, 255, 0.5);
   box-shadow:
-    0 0 40px rgba(0, 229, 255, 0.4),
+    0 0 40px rgba(0, 229, 255, 0.5),
     inset 0 0 20px rgba(0, 229, 255, 0.2);
   pointer-events: none;
   z-index: 9999;
