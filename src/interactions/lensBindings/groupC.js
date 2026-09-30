@@ -1067,6 +1067,25 @@ export function registerLensGroupC(manager, doc, body) {
     },
     onUp: () => body.classList.remove("loupe-active", "ethereal-drift-active"),
   });
+
+  manager.register({
+    id: "chronosphere-lens",
+    category: "lens",
+    description: "Chronosphere Lens (Ctrl+Alt+Shift+Slash)",
+    combo: { ctrl: true, alt: true, shift: true, code: "Slash" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "chronosphere-lens-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "chronosphere-lens-active"),
+  });
 }
 
 export function registerLensGroupC_extensions(manager, doc, body) {
