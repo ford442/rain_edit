@@ -343,7 +343,6 @@ body.bio-luminescent-active .echo-document:not(.loupe-active) {
   box-shadow: 0 0 40px rgba(50, 255, 100, 0.4), inset 0 0 25px rgba(50, 255, 100, 0.3) !important;
 }
 
-<<<<<<< HEAD
 /* =========================================
    CHRONOSPHERE LENS (Ctrl+Alt+Shift+O)
    ========================================= */
@@ -375,7 +374,8 @@ body.chronosphere-lens-active .echo-document:not(.loupe-active) {
   box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), inset 0 0 15px rgba(0, 255, 255, 0.3) !important;
   border-radius: 50% !important;
   clip-path: circle(50% at 50% 50%);
-=======
+}
+
 /* Plasma Void Lens Effects */
 .plasma-void-active #editor {
   mask-image: radial-gradient(circle at center, transparent 30%, black 70%);
@@ -391,5 +391,4 @@ body.chronosphere-lens-active .echo-document:not(.loupe-active) {
   ) rotateY(calc(var(--item-index) * 12deg)) scale(calc(1 - (var(--item-index) * 0.05)));
   filter: hue-rotate(calc(var(--item-index) * 45deg)) brightness(1.2) drop-shadow(0 0 15px rgba(255, 0, 128, 0.4));
   border: 1px solid rgba(255, 0, 128, 0.3);
->>>>>>> 93ee989787b8dcb3059488617596efb8ca547543
 }
