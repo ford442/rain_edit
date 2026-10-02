@@ -101,7 +101,7 @@
   color: #00e5ff !important;
   margin-bottom: 12px !important;
   text-transform: uppercase !important;
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.6), 0 0 16px rgba(0, 229, 255, 0.3) !important;
+  text-shadow: 0 0 15px rgba(0, 229, 255, 0.8) !important;
 }
 
 .dock-group {
