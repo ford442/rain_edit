@@ -1089,41 +1089,60 @@ manager.register({
   });
 
   manager.register({
-    id: "stardust-ripple",
-    category: "lens",
-    description: "Stardust Ripple Lens (Ctrl+Alt+Shift+F)",
-    combo: { ctrl: true, alt: true, shift: true, code: "KeyF" },
-    type: "hold",
-    group: "lens",
-    onDown: () => {
-      body.classList.add("loupe-active", "stardust-ripple-active");
-      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
-      if (echoLayer) {
-        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
-          echoDoc.style.setProperty("--item-index", idx);
-        });
-      }
-    },
-    onUp: () => body.classList.remove("loupe-active", "stardust-ripple-active"),
+   id: "chronosphere-lens",
+   category: "lens",
+   description: "Chronosphere Lens (Ctrl+Alt+Shift+Slash)",
+   combo: { ctrl: true, alt: true, shift: true, code: "Slash" },
+   type: "hold",
+   group: "lens",
+   onDown: () => {
+     body.classList.add("loupe-active", "chronosphere-lens-active");
+     const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+     if (echoLayer) {
+       echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+         echoDoc.style.setProperty("--item-index", idx);
+       });
+     }
+   },
+   onUp: () => body.classList.remove("loupe-active", "chronosphere-lens-active"),
   });
 
   manager.register({
-    id: "neon-web",
-    category: "lens",
-    description: "Neon Web Lens (Ctrl+Alt+Shift+A)",
-    combo: { ctrl: true, alt: true, shift: true, code: "KeyA" },
-    type: "hold",
-    group: "lens",
-    onDown: () => {
-      body.classList.add("loupe-active", "neon-web-active");
-      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
-      if (echoLayer) {
-        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
-          echoDoc.style.setProperty("--item-index", idx);
-        });
-      }
-    },
-    onUp: () => body.classList.remove("loupe-active", "neon-web-active"),
+   id: "stardust-ripple",
+   category: "lens",
+   description: "Stardust Ripple Lens (Ctrl+Alt+Shift+F)",
+   combo: { ctrl: true, alt: true, shift: true, code: "KeyF" },
+   type: "hold",
+   group: "lens",
+   onDown: () => {
+     body.classList.add("loupe-active", "stardust-ripple-active");
+     const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+     if (echoLayer) {
+       echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+         echoDoc.style.setProperty("--item-index", idx);
+       });
+     }
+   },
+   onUp: () => body.classList.remove("loupe-active", "stardust-ripple-active"),
+  });
+
+  manager.register({
+   id: "neon-web",
+   category: "lens",
+   description: "Neon Web Lens (Ctrl+Alt+Shift+A)",
+   combo: { ctrl: true, alt: true, shift: true, code: "KeyA" },
+   type: "hold",
+   group: "lens",
+   onDown: () => {
+     body.classList.add("loupe-active", "neon-web-active");
+     const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+     if (echoLayer) {
+       echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+         echoDoc.style.setProperty("--item-index", idx);
+       });
+     }
+   },
+   onUp: () => body.classList.remove("loupe-active", "neon-web-active"),
   });
 }
 
