@@ -1,0 +1,138 @@
+/* extra-lenses-j.css - Stardust Ripple & Neon Web */
+
+/* =========================================
+   STARDUST RIPPLE LENS (Ctrl+Alt+Shift+F)
+   ========================================= */
+
+body.stardust-ripple-active #editor {
+  mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.6) 50%,
+    black 100%
+  );
+  /* Do not animate mask-image for performance */
+}
+
+@keyframes stardust-bob {
+  0%, 100% {
+    transform: translate3d(0, calc(sin(var(--item-index, 0)) * 18px), calc(100px - var(--item-index, 0) * 40px));
+  }
+  50% {
+    transform: translate3d(0, calc(sin(var(--item-index, 0)) * -18px), calc(100px - var(--item-index, 0) * 40px));
+  }
+}
+
+body.stardust-ripple-active #echo-layer .echo-document {
+  will-change: transform;
+  pointer-events: auto;
+  border-radius: 16px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 196, 86, 0.15), rgba(20, 10, 0, 0.6));
+  border: 1px solid rgba(255, 196, 86, 0.35);
+  box-shadow: 0 10px 30px rgba(255, 196, 86, 0.2);
+
+  opacity: calc(0.9 - (var(--item-index, 0) * 0.08));
+  filter: blur(calc(var(--item-index, 0) * 0.8px));
+  z-index: calc(100 - var(--item-index, 0));
+
+  animation: stardust-bob 4s ease-in-out infinite;
+  animation-delay: calc(var(--item-index, 0) * -0.15s);
+
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+body.stardust-ripple-active #echo-layer .echo-document:hover {
+  opacity: 1;
+  filter: blur(0px) brightness(1.2);
+  box-shadow: 0 15px 40px rgba(255, 196, 86, 0.5);
+  border-color: rgba(255, 196, 86, 0.8);
+  z-index: 999;
+  animation: none;
+  transform: translate3d(0, 0, 120px) !important;
+  transition: transform 0.4s ease, opacity 0.4s ease, filter 0.4s ease;
+}
+
+
+/* =========================================
+   NEON WEB LENS (Ctrl+Alt+Shift+A)
+   ========================================= */
+
+body.neon-web-active #editor {
+  mask-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 14px,
+    rgba(0, 0, 0, 0.8) 14px,
+    rgba(0, 0, 0, 0.8) 28px
+  );
+  -webkit-mask-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 14px,
+    rgba(0, 0, 0, 0.8) 14px,
+    rgba(0, 0, 0, 0.8) 28px
+  );
+}
+
+body.neon-web-active #echo-layer .echo-document {
+  will-change: transform;
+  pointer-events: auto;
+
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(0, 255, 255, 0.05),
+    rgba(0, 255, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 28px
+  ), repeating-linear-gradient(
+    0deg,
+    rgba(255, 0, 255, 0.05),
+    rgba(255, 0, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 28px
+  );
+
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  filter: drop-shadow(-5px 5px 10px rgba(0, 255, 255, 0.4)) drop-shadow(5px -5px 10px rgba(255, 0, 255, 0.4)) blur(calc(var(--item-index, 0) * 0.5px));
+
+  transform:
+    perspective(1000px)
+    translate3d(0, 0, calc(var(--item-index, 0) * -36px))
+    rotateX(calc(sin(var(--item-index, 0) * 0.35) * 8deg));
+
+  opacity: calc(0.9 - (var(--item-index, 0) * 0.06));
+  z-index: calc(100 - var(--item-index, 0));
+
+  transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.6s ease, filter 0.6s ease;
+}
+
+body.neon-web-active #echo-layer .echo-document:hover {
+  opacity: 1;
+  filter: drop-shadow(-8px 8px 15px rgba(0, 255, 255, 0.6)) drop-shadow(8px -8px 15px rgba(255, 0, 255, 0.6)) blur(0px) brightness(1.2);
+  transform:
+    perspective(1000px)
+    translate3d(0, 0, 80px)
+    rotateX(0deg);
+  z-index: 999;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  body.stardust-ripple-active #echo-layer .echo-document,
+  body.neon-web-active #echo-layer .echo-document {
+    animation: none !important;
+    transition: opacity 0.3s ease, filter 0.3s ease !important;
+    transform: none !important;
+  }
+
+  body.stardust-ripple-active #echo-layer .echo-document:hover,
+  body.neon-web-active #echo-layer .echo-document:hover {
+    transform: scale(1.02) !important;
+  }
+}
