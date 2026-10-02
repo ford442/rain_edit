@@ -1049,7 +1049,27 @@ export function registerLensGroupC(manager, doc, body) {
     onUp: () => body.classList.remove("loupe-active", "prismatic-spiral-active"),
   });
 
+
   manager.register({
+    id: "plasma-void",
+    category: "lens",
+    description: "Plasma Void Lens (Alt+Shift+F9)",
+    combo: { alt: true, shift: true, code: "F9" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "plasma-void-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "plasma-void-active"),
+  });
+
+manager.register({
     id: "ethereal-drift",
     category: "lens",
     description: "Ethereal Drift Lens (Ctrl+Alt+Shift+K)",
