@@ -1147,5 +1147,41 @@ manager.register({
 }
 
 export function registerLensGroupC_extensions(manager, doc, body) {
-  // Empty block or keep if other extensions come here.
+  manager.register({
+    id: "cyber-kinetic-wave",
+    category: "lens",
+    description: "Cyber-Kinetic Wave Lens (Ctrl+Alt+Shift+F7)",
+    combo: { ctrl: true, alt: true, shift: true, code: "F7" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "cyber-kinetic-wave-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "cyber-kinetic-wave-active"),
+  });
+
+  manager.register({
+    id: "holographic-fractus",
+    category: "lens",
+    description: "Holographic Fractus Lens (Ctrl+Alt+Shift+F8)",
+    combo: { ctrl: true, alt: true, shift: true, code: "F8" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "holographic-fractus-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "holographic-fractus-active"),
+  });
 }
