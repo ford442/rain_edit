@@ -1184,4 +1184,42 @@ export function registerLensGroupC_extensions(manager, doc, body) {
     },
     onUp: () => body.classList.remove("loupe-active", "holographic-fractus-active"),
   });
+
+  manager.register({
+    id: "neural-matrix",
+    category: "lens",
+    description: "Neural Matrix Lens (Ctrl+Alt+M)",
+    combo: { ctrl: true, alt: true, code: "KeyM" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "neural-matrix-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "neural-matrix-active"),
+  });
+
+  manager.register({
+    id: "quantum-cascade",
+    category: "lens",
+    description: "Quantum Cascade Lens (Ctrl+Alt+N)",
+    combo: { ctrl: true, alt: true, code: "KeyN" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "quantum-cascade-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "quantum-cascade-active"),
+  });
 }

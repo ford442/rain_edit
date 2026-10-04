@@ -1,0 +1,138 @@
+/* extra-lenses-l.css - Neural Matrix & Quantum Cascade */
+
+/* =========================================
+   NEURAL MATRIX LENS (Ctrl+Alt+M)
+   ========================================= */
+body.neural-matrix-active #editor {
+  mask-image: radial-gradient(
+    ellipse 400px 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 400px 300px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 40%,
+    black 100%
+  );
+}
+
+body.neural-matrix-active #echo-layer .echo-document {
+  will-change: transform, opacity, filter;
+  pointer-events: auto;
+
+  border-radius: 12px;
+  background: rgba(5, 15, 10, 0.7);
+  border: 1px solid rgba(0, 255, 100, 0.4);
+  box-shadow:
+    0 0 20px rgba(0, 255, 100, 0.15),
+    inset 0 0 30px rgba(0, 255, 100, 0.1);
+  backdrop-filter: blur(8px);
+
+  opacity: calc(0.8 - (var(--item-index, 0) * 0.1));
+  z-index: calc(100 - var(--item-index, 0));
+
+  /* Matrix-style 3D staggered flow */
+  transform:
+    perspective(1000px)
+    translate3d(
+      calc(sin(var(--item-index, 0) * 1.5) * 45px),
+      calc(cos(var(--item-index, 0) * 1.5) * -60px),
+      calc(var(--item-index, 0) * -50px)
+    )
+    rotateX(calc(sin(var(--item-index, 0) * 2) * 10deg))
+    rotateY(calc(var(--item-index, 0) * 5deg));
+
+  transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.1), opacity 0.4s;
+}
+
+body.neural-matrix-active #echo-layer .echo-document:hover {
+  opacity: 1;
+  background: rgba(10, 30, 20, 0.85);
+  border-color: rgba(0, 255, 100, 0.9);
+  box-shadow:
+    0 0 40px rgba(0, 255, 100, 0.5),
+    inset 0 0 25px rgba(0, 255, 100, 0.3);
+  transform:
+    perspective(1000px)
+    translate3d(0, 0, 100px)
+    rotateX(0deg)
+    rotateY(0deg)
+    scale(1.05);
+  z-index: 999;
+}
+
+/* =========================================
+   QUANTUM CASCADE LENS (Ctrl+Alt+N)
+   ========================================= */
+body.quantum-cascade-active #editor {
+  mask-image: conic-gradient(
+    from calc(var(--lens-y, 50%) * 1deg) at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0deg,
+    rgba(0, 0, 0, 0.3) 120deg,
+    black 240deg,
+    transparent 360deg
+  );
+  -webkit-mask-image: conic-gradient(
+    from calc(var(--lens-y, 50%) * 1deg) at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0deg,
+    rgba(0, 0, 0, 0.3) 120deg,
+    black 240deg,
+    transparent 360deg
+  );
+}
+
+body.quantum-cascade-active #echo-layer .echo-document {
+  will-change: transform, filter;
+  pointer-events: auto;
+
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.2), rgba(0, 255, 255, 0.2));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 10px 30px rgba(138, 43, 226, 0.3),
+    inset 0 0 15px rgba(0, 255, 255, 0.2);
+
+  filter: hue-rotate(calc(var(--item-index, 0) * 35deg)) blur(calc(var(--item-index, 0) * 0.5px));
+  opacity: calc(0.9 - (var(--item-index, 0) * 0.08));
+  z-index: calc(100 - var(--item-index, 0));
+
+  /* Tumbling cascade */
+  transform:
+    perspective(1200px)
+    translate3d(
+      calc(var(--item-index, 0) * 20px),
+      calc(var(--item-index, 0) * 40px),
+      calc(var(--item-index, 0) * -80px)
+    )
+    rotateZ(calc(sin(var(--item-index, 0)) * -15deg))
+    rotateX(calc(cos(var(--item-index, 0)) * 15deg));
+
+  transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1), filter 0.5s;
+}
+
+body.quantum-cascade-active #echo-layer .echo-document:hover {
+  opacity: 1;
+  filter: hue-rotate(0deg) blur(0px) brightness(1.2);
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.4), rgba(0, 255, 255, 0.4));
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 15px 45px rgba(138, 43, 226, 0.6),
+    inset 0 0 25px rgba(0, 255, 255, 0.5);
+  transform:
+    perspective(1200px)
+    translate3d(0, 0, 120px)
+    rotateZ(0deg)
+    rotateX(0deg)
+    scale(1.1);
+  z-index: 999;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.neural-matrix-active #echo-layer .echo-document,
+  body.quantum-cascade-active #echo-layer .echo-document {
+    transition: opacity 0.3s ease !important;
+    transform: none !important;
+  }
+}
