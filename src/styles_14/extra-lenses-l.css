@@ -68,14 +68,14 @@ body.neural-matrix-active #echo-layer .echo-document:hover {
    ========================================= */
 body.quantum-cascade-active #editor {
   mask-image: conic-gradient(
-    from calc(var(--lens-y, 50%) * 1deg) at var(--lens-x, 50%) var(--lens-y, 50%),
+    from 0deg at var(--lens-x, 50%) var(--lens-y, 50%),
     transparent 0deg,
     rgba(0, 0, 0, 0.3) 120deg,
     black 240deg,
     transparent 360deg
   );
   -webkit-mask-image: conic-gradient(
-    from calc(var(--lens-y, 50%) * 1deg) at var(--lens-x, 50%) var(--lens-y, 50%),
+    from 0deg at var(--lens-x, 50%) var(--lens-y, 50%),
     transparent 0deg,
     rgba(0, 0, 0, 0.3) 120deg,
     black 240deg,

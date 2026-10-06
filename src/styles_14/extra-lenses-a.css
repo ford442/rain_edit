@@ -541,23 +541,44 @@ body.dimensional-rift-active .echo-document {
   box-shadow: inset 0 0 15px rgba(255, 0, 255, 0.2);
 }
 
-/* Cyber-Matrix Scanner */
+/* =========================================
+   CYBER-MATRIX SCANNER LENS (Alt+Shift+Semicolon)
+   ========================================= */
 body.cyber-matrix-active #editor {
-  -webkit-mask-image: repeating-linear-gradient(0deg, rgba(0,0,0,1) 0px, rgba(0,0,0,1) 2px, transparent 3px, transparent 5px);
-  mask-image: repeating-linear-gradient(0deg, rgba(0,0,0,1) 0px, rgba(0,0,0,1) 2px, transparent 3px, transparent 5px);
-  opacity: 0.4;
+  mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.6) 40%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 350px at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0%,
+    rgba(0,0,0,0.6) 40%,
+    black 100%
+  );
 }
 
-body.cyber-matrix-active .echo-document {
-  filter: sepia(1) hue-rotate(80deg) saturate(300%) brightness(1.2);
-  transform: translateZ(calc(var(--item-index, 0) * -20px));
-  border: 1px solid #0f0;
-  box-shadow: inset 0 0 10px #0f0, 0 0 15px rgba(0, 255, 0, 0.5);
+body.cyber-matrix-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.9 - (var(--item-index, 0) * 0.08)) !important;
+  filter: hue-rotate(calc(var(--item-index, 0) * 20deg)) saturate(150%) brightness(1.2) drop-shadow(0 0 15px rgba(0, 255, 128, 0.6)) !important;
+  transform: translate3d(
+    calc(var(--tx, 0) + (sin(calc(var(--item-index, 0) * 0.5rad)) * 60px)),
+    calc(var(--ty, 0) + (cos(calc(var(--item-index, 0) * 0.5rad)) * 60px)),
+    calc(var(--tz, -80px) - (var(--item-index, 0) * 50px))
+  ) scale(calc(1 - (var(--item-index, 0) * 0.02))) rotateZ(calc(var(--item-index, 0) * -5deg)) !important;
+  transition: transform 0.5s ease-out, filter 0.5s ease, opacity 0.5s ease;
+  border: 1px solid rgba(0, 255, 128, 0.8) !important;
+  background-image: linear-gradient(0deg, transparent 24%, rgba(0, 255, 128, 0.1) 25%, rgba(0, 255, 128, 0.1) 26%, transparent 27%, transparent 74%, rgba(0, 255, 128, 0.1) 75%, rgba(0, 255, 128, 0.1) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 255, 128, 0.1) 25%, rgba(0, 255, 128, 0.1) 26%, transparent 27%, transparent 74%, rgba(0, 255, 128, 0.1) 75%, rgba(0, 255, 128, 0.1) 76%, transparent 77%, transparent) !important;
+  background-size: 30px 30px !important;
+  box-shadow: inset 0 0 20px rgba(0, 255, 128, 0.2) !important;
 }
 
-body.cyber-matrix-active .echo-document * {
-  color: #0f0 !important;
-  text-shadow: 0 0 5px #0f0;
+@media (prefers-reduced-motion: reduce) {
+  body.cyber-matrix-active .echo-document:not(.loupe-active) {
+    transform: translate3d(var(--tx, 0), var(--ty, 0), calc(var(--tz, -80px) - (var(--item-index, 0) * 50px))) scale(calc(1 - (var(--item-index, 0) * 0.02))) !important;
+    transition: opacity 0.5s ease, filter 0.5s ease !important;
+  }
 }
 
 
