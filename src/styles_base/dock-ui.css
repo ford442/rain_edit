@@ -14,15 +14,14 @@
   flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center;
   gap: 14px;
   padding: 20px 24px;
-  overflow: hidden;
 
   /* Enhanced Premium Glassmorphism */
   background: rgba(10, 14, 22, 0.85);
-  backdrop-filter: blur(80px) saturate(260%);
-  -webkit-backdrop-filter: blur(80px) saturate(260%);
+  backdrop-filter: var(--glass-blur-md) var(--glass-sat);
+  -webkit-backdrop-filter: var(--glass-blur-md) var(--glass-sat);
   border: 1px solid rgba(0, 229, 255, 0.2);
   border-top: 1px solid rgba(0, 229, 255, 0.5);
-  border-radius: 20px;
+  border-radius: var(--ui-radius-lg);
   box-shadow:
     0 16px 40px rgba(0, 0, 0, 0.8),
     0 0 80px rgba(0, 229, 255, 0.2),

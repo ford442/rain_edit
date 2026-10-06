@@ -1,11 +1,22 @@
 /* ─── Tabs Container ─────────────────────────────────────────────────────── */
 
 /* ─── styles_4.css ─── */
+#tabs-container {
+  background: rgba(10, 14, 22, 0.85);
+  backdrop-filter: var(--glass-blur-md) var(--glass-sat);
+  -webkit-backdrop-filter: var(--glass-blur-md) var(--glass-sat);
+  border-radius: var(--ui-radius-lg);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.95),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
 #tabs-container::before {
   content: "";
   position: absolute;
   inset: -2px;
-  border-radius: 16px;
+  border-radius: var(--ui-radius-lg);
   background: linear-gradient(
     90deg,
     rgba(0, 229, 255, 0.6),
@@ -49,15 +60,15 @@
   align-items: center;
   gap: 12px;
   padding: 8px 20px;
-  border-radius: 16px;
+  border-radius: var(--ui-radius-sm);
   cursor: pointer;
   font-size: 13px;
   font-weight: 800;
   font-family: var(--font-mono);
   color: rgba(230, 240, 255, 0.85);
   background: rgba(20, 20, 25, 0.65);
-  backdrop-filter: blur(64px) saturate(200%);
-  -webkit-backdrop-filter: blur(64px) saturate(200%);
+  backdrop-filter: var(--glass-blur-md) var(--glass-sat);
+  -webkit-backdrop-filter: var(--glass-blur-md) var(--glass-sat);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -131,7 +142,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 16px;
+  border-radius: var(--ui-radius-sm);
   padding: 2px;
   background: linear-gradient(90deg, rgba(0, 229, 255, 0.8), rgba(255, 0, 128, 0.8), rgba(0, 255, 128, 0.8), rgba(0, 229, 255, 0.8));
   background-size: 300% 300%;
