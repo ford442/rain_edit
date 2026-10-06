@@ -1,10 +1,9 @@
-1. I will add 3 new interactive features (lenses) that manipulate obscured documents:
-   - "Neon Nexus Lens" (Ctrl+Alt+3)
-   - "Void Prism Lens" (Ctrl+Alt+4)
-   - "Celestial Echo Lens" (Ctrl+Alt+5)
-2. I will register these lenses in `src/interactions/lensBindings/groupC.js` (around the other digit lenses).
-3. I will create a new CSS file `src/styles_14/extra-lenses-f.css` containing the styles for these 3 new lenses.
-4. I will import `src/styles_14/extra-lenses-f.css` in `src/styles_ui.css`.
-5. I will make sure the UI components in `#editor` and `.echo-document` look great with these new lenses, using masks, CSS 3D transformations, and filtering.
-6. The styling will use trigonometric functions (`sin`, `cos`) with `--item-index` and apply stunning holographic and glassmorphism themes that take advantage of partially obscured documents.
-7. Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
+1. Improve the formatting and look and feel of the web IDE.
+   - I will review `src/styles_base/shell-and-editor.css` to update the webkit-scrollbar design to a modern glowing cyan aesthetic, making the scrollbar 10px wide with a translucent track and a glowing thumb with a gradient, border, inset box-shadow, and a hover effect that intensifies the glow.
+2. Innovate new features that take advantage of the layers of partially obscured documents.
+   - I will implement a "Stellar Parallax Lens" interaction mapped to `Alt+0`. It will be registered in `src/interactions/lensBindings/groupC.js`.
+   - I will add a new CSS file `src/styles_14/extra-lenses-m.css` to define the styling for the Stellar Parallax Lens. The lens will use an radial mask to reveal underlying `.echo-document` layers with 3D spatial transformation that create a parallax effect based on `--item-index`.
+   - I will update `src/styles_ui.css` to `@import "./styles_14/extra-lenses-m.css"`.
+3. Complete pre-commit steps to ensure proper testing, verification, review, and reflection are done.
+   - I will run `npm run ci` or the specific test command for verification.
+4. Submit the change.
