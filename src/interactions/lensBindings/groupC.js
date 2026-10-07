@@ -1144,6 +1144,27 @@ manager.register({
    },
    onUp: () => body.classList.remove("loupe-active", "neon-web-active"),
   });
+
+  manager.register({
+    id: "chroma-sphere",
+    category: "lens",
+    description: "Chroma-Sphere Lens (Ctrl+Alt+O)",
+    combo: { ctrl: true, alt: true, code: "KeyO" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("chroma-sphere-active");
+      const echoLayer = typeof doc !== "undefined" && doc.getElementById
+        ? doc.getElementById("echo-layer")
+        : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((doc, idx) => {
+          doc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("chroma-sphere-active"),
+  });
 }
 
 export function registerLensGroupC_extensions(manager, doc, body) {
