@@ -24,6 +24,11 @@
   );
 }
 
+body.focus-readable #reference-layer {
+  opacity: 1;
+  filter: none;
+}
+
 /* When a card is spotlighted, bring the whole layer to the front so it sits above the editor and overlay */
 #reference-layer.has-spotlight {
   z-index: 15;

@@ -366,8 +366,12 @@ setInterval(() => {
 
   // Hyper-Focus Vignette
   if (vignetteLayer) {
-    const opacity = Math.min(1, totalIntensity / 60);
-    vignetteLayer.style.opacity = opacity;
+    if (document.body.classList.contains("focus-readable")) {
+      vignetteLayer.style.opacity = 0;
+    } else {
+      const opacity = Math.min(1, totalIntensity / 60);
+      vignetteLayer.style.opacity = opacity;
+    }
   }
 }, 1000);
 
