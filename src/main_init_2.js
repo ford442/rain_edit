@@ -209,6 +209,7 @@ if (weatherAudioToggle) {
 
 document.getElementById("focus-mode").addEventListener("change", (e) => {
   focusMode = e.target.checked;
+  document.body.classList.toggle("focus-readable", focusMode);
 });
 
 if (lanternToggle) {
