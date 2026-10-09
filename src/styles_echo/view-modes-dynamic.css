@@ -637,3 +637,40 @@ body.quantum-superposition-active .echo-document {
   filter: brightness(1.2) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.8));
 }
 
+
+/* Holographic Cylinder View */
+body.holographic-cylinder-active #editor {
+  transform: translateZ(50px) scale(0.9);
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+}
+
+body.holographic-cylinder-active .echo-document:not(.loupe-active) {
+  opacity: 0.8;
+  filter: hue-rotate(calc(var(--item-index) * 15deg)) saturate(150%) drop-shadow(0 0 20px rgba(0, 229, 255, 0.3));
+  transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body.holographic-cylinder-active .echo-document:hover {
+  opacity: 1;
+  filter: hue-rotate(calc(var(--item-index) * 15deg)) saturate(200%) brightness(1.5) drop-shadow(0 0 40px rgba(0, 229, 255, 0.8));
+  transform: var(--base-transform) scale(1.1) translateZ(50px);
+}
+
+/* Cascading Depth View */
+body.cascading-depth-active #editor {
+  transform: translateZ(30px) scale(0.95);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 229, 255, 0.2);
+}
+
+body.cascading-depth-active .echo-document:not(.loupe-active) {
+  opacity: calc(1 - var(--item-index) * 0.1);
+  filter: blur(calc(var(--item-index) * 2px)) brightness(calc(1 - var(--item-index) * 0.05));
+  transition: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body.cascading-depth-active .echo-document:hover {
+  opacity: 1;
+  filter: blur(0px) brightness(1.2) drop-shadow(0 0 30px rgba(0, 229, 255, 0.6));
+  transform: var(--base-transform) translateZ(100px) scale(1.05);
+  z-index: 999;
+}

@@ -250,6 +250,24 @@ export const TabManagerEchoLayoutsMixin = {
       el.style.setProperty("--rot-z", "0deg");
       return true;
     }
+    if (this.isCascadingDepthView) {
+      // Cascading Depth View
+      const tx = 0;
+      const ty = index * 60; // Shift down
+      const tz = -150 - (index * 120); // Push back progressively
+
+      el.style.setProperty("--tx", `${tx}px`);
+      el.style.setProperty("--ty", `${ty}px`);
+      el.style.setProperty("--tz", `${tz}px`);
+      el.style.setProperty("--rot-x", "0deg");
+      el.style.setProperty("--rot-y", "0deg");
+      el.style.setProperty("--rot-z", "0deg");
+      el.style.setProperty("--scatter-x", "0px");
+      el.style.setProperty("--scatter-y", "0px");
+      el.style.setProperty("--scatter-z", "0px");
+      el.style.setProperty("--scatter-rot", "0deg");
+      return true;
+    }
     if (this.isCascadeView) {
       // Cascade positions
       const vw = window.innerWidth;
@@ -1935,6 +1953,36 @@ if (this.isPrismaticArrayView) {
         el.style.setProperty("--rot-x", "0deg");
         el.style.setProperty("--rot-y", "0deg");
         el.style.setProperty("--rot-z", `${index * 15}deg`);
+        return true;
+      }
+      if (this.isHolographicCylinderView) {
+        // Holographic Cylinder View
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const angle = (index / totalEchoes) * Math.PI * 2;
+        const radius = 650;
+
+        const tx = Math.sin(angle) * radius;
+        const ty = 0;
+        const tz = Math.cos(angle) * radius - 200;
+
+        // Orient planes facing outward
+        const rotX = 0;
+        const rotY = (angle * 180) / Math.PI;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+
+        // Save base transform for animations
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
         return true;
       }
       if (this.isRolodexView) {
