@@ -48,6 +48,7 @@ export const VIEW_MODE_TOGGLES = {
   "blueprint-3d": "toggleBlueprint3dView",
   "cyber-cortex": "toggleCyberCortexView",
   quantum: "toggleQuantumSuperpositionView",
+  "synapse-web": "toggleSynapseWebView",
   outline: "toggleOutlineView",
   tesseract: "toggleTesseractView",
   "floating-nexus": "toggleFloatingNexusView",
