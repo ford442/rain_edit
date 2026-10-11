@@ -1187,6 +1187,25 @@ export function registerLensGroupC_extensions(manager, doc, body) {
     onUp: () => body.classList.remove("loupe-active", "singularity-core-active"),
   });
 
+  manager.register({
+    id: "stellar-parallax-lens",
+    category: "lens",
+    description: "Stellar Parallax Lens (Alt+Minus)",
+    combo: { alt: true, code: "Minus" },
+    type: "hold",
+    group: "lens",
+    onDown: () => {
+      body.classList.add("loupe-active", "stellar-parallax-active");
+      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
+      if (echoLayer) {
+        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
+          echoDoc.style.setProperty("--item-index", idx);
+        });
+      }
+    },
+    onUp: () => body.classList.remove("loupe-active", "stellar-parallax-active"),
+  });
+
 
   manager.register({
     id: "cyber-kinetic-wave",
