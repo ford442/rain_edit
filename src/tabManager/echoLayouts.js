@@ -12,6 +12,38 @@ import {
 export const TabManagerEchoLayoutsMixin = {
 
   _applyLayoutChunk0(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+    if (this.isSynapseWebView) {
+      // Golden spiral distribution on a sphere
+      const goldenRatio = (1 + Math.sqrt(5)) / 2;
+      const t = index / Math.max(1, totalEchoes - 1);
+      // Inclination from 0 to pi (or from -1 to 1 via acos)
+      const inclination = Math.acos(1 - 2 * t);
+      // Azimuth via golden ratio
+      const azimuth = 2 * Math.PI * index / goldenRatio;
+
+      const radius = 600;
+
+      const tx = radius * Math.sin(inclination) * Math.cos(azimuth);
+      const ty = radius * Math.sin(inclination) * Math.sin(azimuth);
+      const tz = radius * Math.cos(inclination) - 400; // offset back
+
+      // Orient planes facing outward (mostly)
+      // We calculate rough rotation from center
+      const rotY = -(azimuth * 180) / Math.PI + 90;
+      const rotX = (inclination * 180) / Math.PI - 90;
+
+      el.style.setProperty("--tx", `${tx}px`);
+      el.style.setProperty("--ty", `${ty}px`);
+      el.style.setProperty("--tz", `${tz}px`);
+      el.style.setProperty("--rot-x", `${rotX}deg`);
+      el.style.setProperty("--rot-y", `${rotY}deg`);
+      el.style.setProperty("--rot-z", `0deg`);
+
+      // Store base for animations
+      const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+      el.setAttribute('data-base-transform', transformString);
+      return true;
+    }
     if (this.isLotusView) {
       // Lotus View positions
       const angle = (index / totalEchoes) * Math.PI * 2;

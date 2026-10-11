@@ -90,8 +90,10 @@ export const TabManagerViewModesMixin = {
     this.isTorusView = false;
     this.isFloatingNexusView = false;
     this.isPrismaticArrayView = false;
+    this.isSynapseWebView = false;
 
     document.body.classList.remove(
+      "synapse-web-active",
       "shattered-glass-active",
       "waterfall-active",
       "cityscape-active",
@@ -199,6 +201,15 @@ export const TabManagerViewModesMixin = {
     if (!wasActive) {
       this.isLotusView = true;
       document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleSynapseWebView() {
+    const wasActive = this.isSynapseWebView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isSynapseWebView = true;
+      document.body.classList.add("synapse-web-active");
     }
     this._renderEchoes();
   },
