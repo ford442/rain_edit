@@ -134,6 +134,8 @@ export class TabManager {
     this.isHexagonMatrixView = false;
     this.isLuminescenceView = false;
     this.isGeodeView = false;
+    this.isCascadingDepthView = false;
+    this.isHolographicCylinderView = false;
   }
 
 

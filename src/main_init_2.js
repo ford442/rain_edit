@@ -122,6 +122,8 @@ if (viewModeSelect) {
     else if (view === "luminescence") tabManager.toggleLuminescenceView();
     else if (view === "geode") tabManager.toggleGeodeView();
     else if (view === "stackdeck") tabManager.toggleStackDeckView();
+    else if (view === "cascading-depth") tabManager.toggleCascadingDepthView();
+    else if (view === "holographic-cylinder") tabManager.toggleHolographicCylinderView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }

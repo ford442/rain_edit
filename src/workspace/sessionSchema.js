@@ -75,6 +75,8 @@ export const VIEW_MODE_TOGGLES = {
   bookshelf: "toggleBookshelfView",
   accordion: "toggleAccordionView",
   "prism-split": "togglePrismSplitView",
+  "cascading-depth": "toggleCascadingDepthView",
+  "holographic-cylinder": "toggleHolographicCylinderView",
 };
 
 /** Body CSS class suffix used by most view modes (value → `${value}-active`). */
