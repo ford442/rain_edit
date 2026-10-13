@@ -137,6 +137,8 @@ export const TabManagerViewModesMixin = {
       "carousel-active",
       "time-tunnel-active",
       "accordion-active",
+      "holographic-cylinder-active",
+      "cascading-depth-active",
       "chrono-ring-active",
       "cyclone-active",
       "mobius-active",
@@ -513,6 +515,18 @@ export const TabManagerViewModesMixin = {
     this._deactivateAllViews();
     this.isArchwayView = true;
     document.body.classList.add("archway-active");
+    this._renderEchoes();
+  },
+  toggleHolographicCylinderView() {
+    this._deactivateAllViews();
+    this.isHolographicCylinderView = true;
+    document.body.classList.add("holographic-cylinder-active");
+    this._renderEchoes();
+  },
+  toggleCascadingDepthView() {
+    this._deactivateAllViews();
+    this.isCascadingDepthView = true;
+    document.body.classList.add("cascading-depth-active");
     this._renderEchoes();
   },
   toggleAccordionView() {

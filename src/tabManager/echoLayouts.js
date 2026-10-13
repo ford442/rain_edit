@@ -1987,7 +1987,24 @@ if (this.isPrismaticArrayView) {
         el.style.setProperty("--rot-z", `${index * 15}deg`);
         return true;
       }
-      if (this.isHolographicCylinderView) {
+            if (this.isCascadingDepthView) {
+        // Cascading Depth View
+        const tz = -150 - index * 60;
+        const ty = index * 30; // slightly downward cascade
+        const tx = index * 10;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "0deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(0deg) rotateY(0deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
+if (this.isHolographicCylinderView) {
         // Holographic Cylinder View
         const totalEchoes = Math.max(1, inactiveFiles.length);
         const angle = (index / totalEchoes) * Math.PI * 2;
