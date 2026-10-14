@@ -10,7 +10,27 @@ import {
 
 /** 3D view-mode flags, toggles, and addFile entry point. */
 export const TabManagerViewModesMixin = {
+  toggleCascadingDepthView() {
+    const wasActive = this.isCascadingDepthView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCascadingDepthView = true;
+      document.body.classList.add("cascading-depth-active");
+    }
+    this._renderEchoes();
+  },
+  toggleHolographicCylinderView() {
+    const wasActive = this.isHolographicCylinderView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHolographicCylinderView = true;
+      document.body.classList.add("holographic-cylinder-active");
+    }
+    this._renderEchoes();
+  },
   _deactivateAllViews() {
+    this.isCascadingDepthView = false;
+    this.isHolographicCylinderView = false;
     this.isFloatingNexusView = false;
     this.isPrismaticArrayView = false;
 
@@ -90,10 +110,14 @@ export const TabManagerViewModesMixin = {
     this.isTorusView = false;
     this.isFloatingNexusView = false;
     this.isPrismaticArrayView = false;
+    this.isCascadingDepthView = false;
+    this.isHolographicCylinderView = false;
     this.isSynapseWebView = false;
 
     document.body.classList.remove(
       "synapse-web-active",
+      "cascading-depth-active",
+      "holographic-cylinder-active",
       "shattered-glass-active",
       "waterfall-active",
       "cityscape-active",
