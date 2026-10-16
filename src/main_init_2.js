@@ -124,8 +124,6 @@ if (viewModeSelect) {
     else if (view === "holographic-cylinder") tabManager.toggleHolographicCylinderView();
     else if (view === "cascading-depth") tabManager.toggleCascadingDepthView();
     else if (view === "stackdeck") tabManager.toggleStackDeckView();
-    else if (view === "cascading-depth") tabManager.toggleCascadingDepthView();
-    else if (view === "holographic-cylinder") tabManager.toggleHolographicCylinderView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }
