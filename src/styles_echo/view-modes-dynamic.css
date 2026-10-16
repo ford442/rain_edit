@@ -674,3 +674,61 @@ body.cascading-depth-active .echo-document:hover {
   transform: var(--base-transform) translateZ(100px) scale(1.05);
   z-index: 999;
 }
+
+/* =========================================================
+   STARLIGHT MESH VIEW
+   ========================================================= */
+body.starlight-mesh-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+}
+
+body.starlight-mesh-active .echo-document {
+  transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1),
+              opacity 1.2s ease,
+              filter 1.2s ease;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 0 15px rgba(255, 255, 255, 0.1),
+    inset 0 0 20px rgba(0, 229, 255, 0.15);
+  backdrop-filter: blur(12px) contrast(1.2);
+  border-radius: var(--ui-radius-lg);
+  animation: starlight-mesh-pulse 8s infinite alternate ease-in-out;
+  /* staggered animation delay */
+  animation-delay: calc(var(--item-index, 0) * 0.5s);
+}
+
+body.starlight-mesh-active .echo-document:hover {
+  filter: hue-rotate(45deg) brightness(1.5);
+  box-shadow:
+    0 0 30px rgba(0, 229, 255, 0.4),
+    inset 0 0 40px rgba(0, 229, 255, 0.3);
+  border-color: rgba(0, 229, 255, 0.8);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 50px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg)) scale(1.05) !important;
+}
+
+@keyframes starlight-mesh-pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05), inset 0 0 15px rgba(0, 229, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(0, 229, 255, 0.2), inset 0 0 30px rgba(0, 229, 255, 0.3);
+    border-color: rgba(0, 229, 255, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05), inset 0 0 15px rgba(255, 0, 128, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}

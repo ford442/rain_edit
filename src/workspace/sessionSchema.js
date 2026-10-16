@@ -10,6 +10,7 @@ export const REMOTE_SYNC_OPT_IN_KEY = "rain-edit:remoteSessionSync";
 
 /** Select value → TabManager toggle method name. */
 export const VIEW_MODE_TOGGLES = {
+  "starlight-mesh": "toggleStarlightMeshView",
   theater: "toggleTheaterView",
   tornado: "toggleTornadoView",
   waterfall: "toggleWaterfallView",
@@ -81,6 +82,7 @@ export const VIEW_MODE_TOGGLES = {
 
 /** Body CSS class suffix used by most view modes (value → `${value}-active`). */
 export const VIEW_MODE_BODY_CLASS = {
+  "starlight-mesh": "starlight-mesh-active",
   quantum: "quantum-superposition-active",
   stackdeck: "stack-deck-active",
 };

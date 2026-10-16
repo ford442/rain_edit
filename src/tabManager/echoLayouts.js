@@ -1899,6 +1899,37 @@ if (this.isChronoRingView) {
     return false;
   },
   _applyLayoutChunk4(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+
+      if (this.isStarlightMeshView) {
+        // Starlight Mesh View: interconnected spherical mesh
+        const total = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / total);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+
+        const radius = 550;
+
+        // Add pulsating effect to radius based on index
+        const tX = radius * Math.sin(phi) * Math.cos(theta);
+        const tY = radius * Math.sin(phi) * Math.sin(theta);
+        const tZ = radius * Math.cos(phi) - 300;
+
+        // Orient to face the center
+        const rX = (phi * 180 / Math.PI) - 90;
+        const rY = theta * 180 / Math.PI;
+
+        el.style.setProperty("--tx", `${tX}px`);
+        el.style.setProperty("--ty", `${tY}px`);
+        el.style.setProperty("--tz", `${tZ}px`);
+        el.style.setProperty("--rot-x", `${rX}deg`);
+        el.style.setProperty("--rot-y", `${rY}deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+
+        // Save base transform for mesh interactivity
+        const transformString = `translate3d(${tX}px, ${tY}px, ${tZ}px) rotateX(${rX}deg) rotateY(${rY}deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        el.style.setProperty("--item-index", index);
+        return true;
+      }
 if (this.isPrismaticArrayView) {
         // Prismatic Array View positions
         const total = inactiveFiles.length;
