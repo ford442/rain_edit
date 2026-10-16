@@ -541,18 +541,6 @@ export const TabManagerViewModesMixin = {
     document.body.classList.add("archway-active");
     this._renderEchoes();
   },
-  toggleHolographicCylinderView() {
-    this._deactivateAllViews();
-    this.isHolographicCylinderView = true;
-    document.body.classList.add("holographic-cylinder-active");
-    this._renderEchoes();
-  },
-  toggleCascadingDepthView() {
-    this._deactivateAllViews();
-    this.isCascadingDepthView = true;
-    document.body.classList.add("cascading-depth-active");
-    this._renderEchoes();
-  },
   toggleAccordionView() {
     this._deactivateAllViews();
     this.isAccordionView = true;
