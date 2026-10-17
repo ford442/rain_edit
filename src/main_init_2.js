@@ -71,7 +71,8 @@ window.addEventListener(
 if (viewModeSelect) {
   viewModeSelect.addEventListener("change", (e) => {
     const view = e.target.value;
-    if (view === "shattered-glass") tabManager.toggleShatteredGlassView();
+    if (view === "starlight-mesh") tabManager.toggleStarlightMeshView();
+    else if (view === "shattered-glass") tabManager.toggleShatteredGlassView();
     else if (view === "theater") tabManager.toggleTheaterView();
     else if (view === "tornado") tabManager.toggleTornadoView();
     else if (view === "waterfall") tabManager.toggleWaterfallView();

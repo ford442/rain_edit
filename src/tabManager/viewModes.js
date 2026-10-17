@@ -10,6 +10,16 @@ import {
 
 /** 3D view-mode flags, toggles, and addFile entry point. */
 export const TabManagerViewModesMixin = {
+
+  toggleStarlightMeshView() {
+    const wasActive = this.isStarlightMeshView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isStarlightMeshView = true;
+      document.body.classList.add("starlight-mesh-active");
+    }
+    this._renderEchoes();
+  },
   toggleCascadingDepthView() {
     const wasActive = this.isCascadingDepthView;
     this._deactivateAllViews();
@@ -113,9 +123,11 @@ export const TabManagerViewModesMixin = {
     this.isCascadingDepthView = false;
     this.isHolographicCylinderView = false;
     this.isSynapseWebView = false;
+    this.isStarlightMeshView = false;
 
     document.body.classList.remove(
       "synapse-web-active",
+      "starlight-mesh-active",
       "cascading-depth-active",
       "holographic-cylinder-active",
       "shattered-glass-active",
