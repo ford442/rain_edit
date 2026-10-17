@@ -2018,6 +2018,38 @@ if (this.isPrismaticArrayView) {
         el.style.setProperty("--rot-z", `${index * 15}deg`);
         return true;
       }
+      if (this.isQuantumWebView) {
+        // Quantum Web View: a 3D dual-helix intertwined structure
+        const total = Math.max(1, inactiveFiles.length);
+        const ratio = index / total;
+
+        // Two interlaced spirals
+        const branch = index % 2 === 0 ? 1 : -1;
+        const radius = 500 + (Math.sin(index * 0.5) * 50);
+
+        const angle = index * (Math.PI / 6) + (branch === 1 ? 0 : Math.PI);
+        const verticalSpread = 1200;
+
+        const tx = Math.cos(angle) * radius;
+        const ty = (ratio * verticalSpread) - (verticalSpread / 2);
+        const tz = Math.sin(angle) * radius - 400;
+
+        // Facing inwards with a slight tilt
+        const rotY = (angle * 180 / Math.PI) - 90 * branch;
+        const rotX = Math.cos(index) * 15;
+        const rotZ = Math.sin(index) * 10;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
             if (this.isCascadingDepthView) {
         // Cascading Depth View
         const tz = -150 - index * 60;

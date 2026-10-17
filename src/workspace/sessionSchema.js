@@ -13,6 +13,7 @@ export const VIEW_MODE_TOGGLES = {
   "starlight-mesh": "toggleStarlightMeshView",
   theater: "toggleTheaterView",
   tornado: "toggleTornadoView",
+  "quantum-web": "toggleQuantumWebView",
   waterfall: "toggleWaterfallView",
   cascade: "toggleCascadeView",
   orbit: "toggleOrbitView",
@@ -85,6 +86,7 @@ export const VIEW_MODE_BODY_CLASS = {
   "starlight-mesh": "starlight-mesh-active",
   quantum: "quantum-superposition-active",
   stackdeck: "stack-deck-active",
+  "quantum-web": "quantum-web-active",
 };
 
 /**
