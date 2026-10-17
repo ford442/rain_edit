@@ -75,6 +75,7 @@ if (viewModeSelect) {
     else if (view === "shattered-glass") tabManager.toggleShatteredGlassView();
     else if (view === "theater") tabManager.toggleTheaterView();
     else if (view === "tornado") tabManager.toggleTornadoView();
+    else if (view === "quantum-web") tabManager.toggleQuantumWebView();
     else if (view === "waterfall") tabManager.toggleWaterfallView();
     else if (view === "cascade") tabManager.toggleCascadeView();
     else if (view === "orbit") tabManager.toggleOrbitView();
