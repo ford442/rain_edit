@@ -20,6 +20,15 @@ export const TabManagerViewModesMixin = {
     }
     this._renderEchoes();
   },
+  toggleQuantumWebView() {
+    const wasActive = this.isQuantumWebView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isQuantumWebView = true;
+      document.body.classList.add("quantum-web-active");
+    }
+    this._renderEchoes();
+  },
   toggleCascadingDepthView() {
     const wasActive = this.isCascadingDepthView;
     this._deactivateAllViews();
@@ -39,6 +48,7 @@ export const TabManagerViewModesMixin = {
     this._renderEchoes();
   },
   _deactivateAllViews() {
+    this.isQuantumWebView = false;
     this.isCascadingDepthView = false;
     this.isHolographicCylinderView = false;
     this.isFloatingNexusView = false;
@@ -134,6 +144,7 @@ export const TabManagerViewModesMixin = {
       "waterfall-active",
       "cityscape-active",
       "house-of-cards-active",
+      "quantum-web-active",
       "cascade-active",
       "orbit-active",
       "scattered-active",

@@ -732,3 +732,57 @@ body.starlight-mesh-active .echo-document:hover {
     border-color: rgba(255, 255, 255, 0.1);
   }
 }
+
+body.quantum-web-active #echo-layer {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+}
+
+body.quantum-web-active .echo-document {
+  transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1),
+              opacity 1.5s ease,
+              filter 1.5s ease;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  border: 1px solid rgba(0, 255, 128, 0.2);
+  box-shadow:
+    0 0 20px rgba(0, 255, 128, 0.1),
+    inset 0 0 15px rgba(0, 255, 128, 0.05);
+  backdrop-filter: blur(8px) contrast(1.1);
+  border-radius: var(--ui-radius-lg);
+  animation: quantum-web-pulse 6s infinite alternate ease-in-out;
+  animation-delay: calc(var(--item-index, 0) * 0.3s);
+}
+
+body.quantum-web-active .echo-document:hover {
+  filter: hue-rotate(-30deg) brightness(1.6);
+  box-shadow:
+    0 0 40px rgba(0, 255, 128, 0.5),
+    inset 0 0 30px rgba(0, 255, 128, 0.3);
+  border-color: rgba(0, 255, 128, 0.9);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 80px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg)) scale(1.1) !important;
+}
+
+@keyframes quantum-web-pulse {
+  0% {
+    box-shadow: 0 0 15px rgba(0, 255, 128, 0.05), inset 0 0 10px rgba(0, 255, 128, 0.05);
+    border-color: rgba(0, 255, 128, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(0, 255, 128, 0.25), inset 0 0 20px rgba(0, 255, 128, 0.2);
+    border-color: rgba(0, 255, 128, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.1), inset 0 0 10px rgba(0, 229, 255, 0.1);
+    border-color: rgba(0, 229, 255, 0.2);
+  }
+}
