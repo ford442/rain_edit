@@ -87,6 +87,8 @@ export const VIEW_MODE_BODY_CLASS = {
   quantum: "quantum-superposition-active",
   stackdeck: "stack-deck-active",
   "quantum-web": "quantum-web-active",
+  "cascading-depth": "cascading-depth-active",
+  "holographic-cylinder": "holographic-cylinder-active",
 };
 
 /**

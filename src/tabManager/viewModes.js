@@ -130,16 +130,14 @@ export const TabManagerViewModesMixin = {
     this.isTorusView = false;
     this.isFloatingNexusView = false;
     this.isPrismaticArrayView = false;
-    this.isCascadingDepthView = false;
-    this.isHolographicCylinderView = false;
     this.isSynapseWebView = false;
     this.isStarlightMeshView = false;
 
     document.body.classList.remove(
       "synapse-web-active",
-      "starlight-mesh-active",
       "cascading-depth-active",
       "holographic-cylinder-active",
+      "starlight-mesh-active",
       "shattered-glass-active",
       "waterfall-active",
       "cityscape-active",
@@ -184,8 +182,6 @@ export const TabManagerViewModesMixin = {
       "carousel-active",
       "time-tunnel-active",
       "accordion-active",
-      "holographic-cylinder-active",
-      "cascading-depth-active",
       "chrono-ring-active",
       "cyclone-active",
       "mobius-active",
