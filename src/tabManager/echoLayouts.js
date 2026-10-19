@@ -1900,6 +1900,31 @@ if (this.isChronoRingView) {
   },
   _applyLayoutChunk4(el, index, totalEchoes, file, inactiveFiles, activeFile) {
 
+      if (this.isZenithSpiralView) {
+        // Zenith Spiral View: A downward spiral curve
+        const total = Math.max(1, inactiveFiles.length);
+        const radius = 600 + index * 40; // Gradually expand outwards
+        const angle = index * (Math.PI / 3); // 60 degrees per item
+
+        const tx = Math.cos(angle) * radius;
+        const ty = index * 100 - (total * 50); // Spiraling downwards/upwards
+        const tz = -300 - index * 120; // Pushing back in Z-space
+
+        // Tilt facing inward slightly
+        const rotY = -(angle * 180 / Math.PI) + 90;
+        const rotX = 15; // slight tilt down
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
       if (this.isStarlightMeshView) {
         // Starlight Mesh View: interconnected spherical mesh
         const total = Math.max(1, inactiveFiles.length);

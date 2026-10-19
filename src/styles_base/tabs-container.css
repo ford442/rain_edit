@@ -125,19 +125,19 @@
 
 
 .tab-item.active {
-  background: rgba(45, 55, 75, 0.92);
-  border-color: rgba(0, 229, 255, 0.7);
+  background: rgba(45, 60, 90, 0.95);
+  border-color: rgba(0, 229, 255, 0.9);
   border-bottom: 2px solid transparent;
   background-clip: padding-box;
   color: #ffffff;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.95),
-    inset 0 1px 8px rgba(255, 255, 255, 0.6),
-    0 0 45px rgba(0, 229, 255, 0.8);
+    0 12px 40px rgba(0, 0, 0, 0.98),
+    inset 0 1px 10px rgba(255, 255, 255, 0.8),
+    0 0 60px rgba(0, 229, 255, 0.9);
   transform: translateY(-4px) scale(1.08);
   text-shadow:
-    0 0 15px #fff,
-    0 0 40px rgba(0, 229, 255, 1);
+    0 0 20px #fff,
+    0 0 50px rgba(0, 229, 255, 1);
   position: relative;
   overflow: visible;
   animation: text-pulse 2s infinite alternate;
@@ -150,9 +150,9 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, rgba(0, 229, 255, 1), rgba(255, 0, 128, 1), rgba(0, 255, 128, 1), rgba(0, 229, 255, 1));
+  background: linear-gradient(90deg, rgba(0, 229, 255, 1), rgba(255, 0, 128, 1), rgba(0, 229, 255, 1), rgba(0, 255, 128, 1), rgba(0, 229, 255, 1));
   background-size: 300% 100%;
-  animation: tab-scan-border 4s linear infinite;
+  animation: tab-scan-border 3s linear infinite;
   border-radius: 0 0 var(--ui-radius-sm) var(--ui-radius-sm);
 }
 

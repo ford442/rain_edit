@@ -72,6 +72,7 @@ if (viewModeSelect) {
   viewModeSelect.addEventListener("change", (e) => {
     const view = e.target.value;
     if (view === "starlight-mesh") tabManager.toggleStarlightMeshView();
+    else if (view === "zenith-spiral") tabManager.toggleZenithSpiralView();
     else if (view === "shattered-glass") tabManager.toggleShatteredGlassView();
     else if (view === "theater") tabManager.toggleTheaterView();
     else if (view === "tornado") tabManager.toggleTornadoView();

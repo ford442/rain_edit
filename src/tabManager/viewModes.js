@@ -11,6 +11,15 @@ import {
 /** 3D view-mode flags, toggles, and addFile entry point. */
 export const TabManagerViewModesMixin = {
 
+  toggleZenithSpiralView() {
+    const wasActive = this.isZenithSpiralView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isZenithSpiralView = true;
+      document.body.classList.add("zenith-spiral-active");
+    }
+    this._renderEchoes();
+  },
   toggleStarlightMeshView() {
     const wasActive = this.isStarlightMeshView;
     this._deactivateAllViews();
@@ -131,12 +140,14 @@ export const TabManagerViewModesMixin = {
     this.isFloatingNexusView = false;
     this.isPrismaticArrayView = false;
     this.isSynapseWebView = false;
+    this.isZenithSpiralView = false;
     this.isStarlightMeshView = false;
 
     document.body.classList.remove(
       "synapse-web-active",
       "cascading-depth-active",
       "holographic-cylinder-active",
+      "zenith-spiral-active",
       "starlight-mesh-active",
       "shattered-glass-active",
       "waterfall-active",
