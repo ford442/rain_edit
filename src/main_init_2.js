@@ -117,6 +117,8 @@ if (viewModeSelect) {
     else if (view === "outline") tabManager.toggleOutlineView();
     else if (view === "tesseract") tabManager.toggleTesseractView();
     else if (view === "floating-nexus") tabManager.toggleFloatingNexusView();
+    else if (view === "abyssal-trench") tabManager.toggleAbyssalTrenchView();
+    else if (view === "celestial-sphere") tabManager.toggleCelestialSphereView();
     else if (view === "cyclone") tabManager.toggleCycloneView();
     else if (view === "mobius") tabManager.toggleMobiusView();
     else if (view === "astrolabe") tabManager.toggleAstrolabeView();
