@@ -833,3 +833,52 @@ body.zenith-spiral-active .echo-document:hover {
     rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.15) !important;
   z-index: 100 !important;
 }
+
+/* =========================================================
+   ABYSSAL TRENCH VIEW
+   ========================================================= */
+body.abyssal-trench-active #editor {
+  transform: translateZ(50px) scale(0.9);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(0, 150, 255, 0.3);
+}
+
+body.abyssal-trench-active .echo-document:not(.loupe-active) {
+  opacity: calc(1 - var(--item-index) * 0.15);
+  filter: blur(calc(var(--item-index) * 3px)) brightness(calc(1 - var(--item-index) * 0.1));
+  animation: abyssalSway 6s ease-in-out infinite alternate;
+  animation-delay: calc(var(--item-index) * 0.2s);
+}
+
+body.abyssal-trench-active .echo-document:hover {
+  opacity: 1;
+  filter: blur(0px) brightness(1.2) drop-shadow(0 0 30px rgba(0, 150, 255, 0.6));
+  transform: var(--base-transform) translateZ(100px) scale(1.05);
+  z-index: 999;
+}
+
+@keyframes abyssalSway {
+  0% { transform: var(--base-transform) translateY(0px) rotateX(15deg); }
+  100% { transform: var(--base-transform) translateY(20px) rotateX(20deg); }
+}
+
+/* =========================================================
+   CELESTIAL SPHERE VIEW
+   ========================================================= */
+body.celestial-sphere-active #editor {
+  transform: translateZ(100px) scale(0.85);
+  box-shadow: 0 0 100px rgba(255, 255, 255, 0.2);
+}
+
+body.celestial-sphere-active .echo-document:not(.loupe-active) {
+  opacity: 0.8;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: var(--base-transform);
+}
+
+body.celestial-sphere-active .echo-document:hover {
+  opacity: 1;
+  filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.8)) brightness(1.3);
+  transform: var(--base-transform) translateZ(150px) scale(1.1);
+  z-index: 999;
+}

@@ -47,6 +47,24 @@ export const TabManagerViewModesMixin = {
     }
     this._renderEchoes();
   },
+  toggleAbyssalTrenchView() {
+    const wasActive = this.isAbyssalTrenchView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isAbyssalTrenchView = true;
+      document.body.classList.add("abyssal-trench-active");
+    }
+    this._renderEchoes();
+  },
+  toggleCelestialSphereView() {
+    const wasActive = this.isCelestialSphereView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCelestialSphereView = true;
+      document.body.classList.add("celestial-sphere-active");
+    }
+    this._renderEchoes();
+  },
   toggleHolographicCylinderView() {
     const wasActive = this.isHolographicCylinderView;
     this._deactivateAllViews();
@@ -59,6 +77,8 @@ export const TabManagerViewModesMixin = {
   _deactivateAllViews() {
     this.isQuantumWebView = false;
     this.isCascadingDepthView = false;
+    this.isAbyssalTrenchView = false;
+    this.isCelestialSphereView = false;
     this.isHolographicCylinderView = false;
     this.isFloatingNexusView = false;
     this.isPrismaticArrayView = false;
