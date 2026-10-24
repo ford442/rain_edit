@@ -11,6 +11,24 @@ import {
 /** 3D view-mode flags, toggles, and addFile entry point. */
 export const TabManagerViewModesMixin = {
 
+  toggleAbyssalTrenchView() {
+    const wasActive = this.isAbyssalTrenchView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isAbyssalTrenchView = true;
+      document.body.classList.add("abyssal-trench-active");
+    }
+    this._renderEchoes();
+  },
+  toggleCelestialSphereView() {
+    const wasActive = this.isCelestialSphereView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCelestialSphereView = true;
+      document.body.classList.add("celestial-sphere-active");
+    }
+    this._renderEchoes();
+  },
   toggleZenithSpiralView() {
     const wasActive = this.isZenithSpiralView;
     this._deactivateAllViews();
@@ -140,6 +158,8 @@ export const TabManagerViewModesMixin = {
     this.isFloatingNexusView = false;
     this.isPrismaticArrayView = false;
     this.isSynapseWebView = false;
+    this.isAbyssalTrenchView = false;
+    this.isCelestialSphereView = false;
     this.isZenithSpiralView = false;
     this.isStarlightMeshView = false;
 
@@ -147,6 +167,8 @@ export const TabManagerViewModesMixin = {
       "synapse-web-active",
       "cascading-depth-active",
       "holographic-cylinder-active",
+      "abyssal-trench-active",
+      "celestial-sphere-active",
       "zenith-spiral-active",
       "starlight-mesh-active",
       "shattered-glass-active",
