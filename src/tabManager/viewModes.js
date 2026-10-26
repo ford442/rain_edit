@@ -525,8 +525,9 @@ export const TabManagerViewModesMixin = {
     this._renderEchoes();
   },
   toggleQuantumSuperpositionView() {
+    const wasActive = this.isQuantumSuperpositionView;
     this._deactivateAllViews();
-    if (!document.body.classList.contains("quantum-superposition-active")) {
+    if (!wasActive) {
       this.isQuantumSuperpositionView = true;
       document.body.classList.add("quantum-superposition-active");
     }
