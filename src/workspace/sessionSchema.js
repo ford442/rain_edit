@@ -80,6 +80,8 @@ export const VIEW_MODE_TOGGLES = {
   "prism-split": "togglePrismSplitView",
   "cascading-depth": "toggleCascadingDepthView",
   "holographic-cylinder": "toggleHolographicCylinderView",
+  "abyssal-trench": "toggleAbyssalTrenchView",
+  "celestial-sphere": "toggleCelestialSphereView",
 };
 
 /** Body CSS class suffix used by most view modes (value → `${value}-active`). */
@@ -91,6 +93,8 @@ export const VIEW_MODE_BODY_CLASS = {
   "quantum-web": "quantum-web-active",
   "cascading-depth": "cascading-depth-active",
   "holographic-cylinder": "holographic-cylinder-active",
+  "abyssal-trench": "abyssal-trench-active",
+  "celestial-sphere": "celestial-sphere-active",
 };
 
 /**
