@@ -11,7 +11,7 @@
   --font-mono: "JetBrains Mono", monospace;
   --dynamic-hue: 180; /* Default Cyan hue */
   /* Base Bioluminescent Green */
-  --bio-glow-color: rgba(0, 229, 255, 0.7);
+  --bio-glow-color: rgba(0, 229, 255, 0.8);
   --bio-glow-strong: rgba(57, 255, 20, 1.0);
 
   /* Shared UI Radii & Blur Values */
@@ -104,7 +104,7 @@ body,
     inset 0 2px 20px rgba(255, 255, 255, 0.3),
     0 0 60px rgba(0, 229, 255, 0.3),
     inset 0 0 30px rgba(0, 229, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(0, 229, 255, 0.5);
   border-radius: var(--ui-radius-lg);
   backdrop-filter: var(--glass-blur-lg) var(--glass-sat);
   -webkit-backdrop-filter: var(--glass-blur-lg) var(--glass-sat);
