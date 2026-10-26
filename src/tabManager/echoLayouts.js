@@ -2146,6 +2146,49 @@ if (this.isPrismaticArrayView) {
         el.setAttribute('data-base-transform', transformString);
         return true;
       }
+      if (this.isAbyssalTrenchView) {
+        // Abyssal Trench View: Deep stacking, tilt, sine wave sway
+        const tz = -300 - (index * 200);
+        const ty = index * 40 + Math.sin(index) * 50;
+        const tx = Math.sin(index * 0.5) * 100;
+        const rotX = 15;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(0deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
+      if (this.isCelestialSphereView) {
+        // Celestial Sphere View: sphere formation with varying tilt and depth
+        const total = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(-1 + (2 * index) / total);
+        const theta = Math.sqrt(total * Math.PI) * phi;
+        const radius = 600;
+
+        const tx = radius * Math.cos(theta) * Math.sin(phi);
+        const ty = radius * Math.sin(theta) * Math.sin(phi);
+        const tz = radius * Math.cos(phi) - 300;
+
+        const rotX = (ty / radius) * 45;
+        const rotY = (tx / radius) * 45;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
 if (this.isHolographicCylinderView) {
         // Holographic Cylinder View
         const totalEchoes = Math.max(1, inactiveFiles.length);

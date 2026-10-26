@@ -129,6 +129,8 @@ if (viewModeSelect) {
     else if (view === "holographic-cylinder") tabManager.toggleHolographicCylinderView();
     else if (view === "cascading-depth") tabManager.toggleCascadingDepthView();
     else if (view === "stackdeck") tabManager.toggleStackDeckView();
+    else if (view === "abyssal-trench") tabManager.toggleAbyssalTrenchView();
+    else if (view === "celestial-sphere") tabManager.toggleCelestialSphereView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }

@@ -656,6 +656,47 @@ body.holographic-cylinder-active .echo-document:hover {
   transform: var(--base-transform) scale(1.1) translateZ(50px);
 }
 
+/* Abyssal Trench View */
+body.abyssal-trench-active #editor {
+  transform: translateZ(-100px) scale(0.85);
+  box-shadow: 0 0 50px rgba(0, 100, 255, 0.2);
+  border-color: rgba(0, 150, 255, 0.3);
+}
+
+body.abyssal-trench-active .echo-document:not(.loupe-active) {
+  opacity: calc(1 - var(--item-index) * 0.05);
+  filter: hue-rotate(calc(var(--item-index) * -10deg)) saturate(80%) brightness(calc(1 - var(--item-index) * 0.08));
+  transition: all 0.9s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body.abyssal-trench-active .echo-document:hover {
+  opacity: 1;
+  filter: hue-rotate(calc(var(--item-index) * -10deg)) saturate(150%) brightness(1.5) drop-shadow(0 0 30px rgba(0, 150, 255, 0.8));
+  transform: var(--base-transform) translateZ(150px) scale(1.1);
+  z-index: 999;
+}
+
+/* Celestial Sphere View */
+body.celestial-sphere-active #editor {
+  transform: translateZ(100px) scale(0.9);
+  box-shadow: 0 0 40px rgba(255, 200, 0, 0.3);
+  border-color: rgba(255, 200, 0, 0.5);
+}
+
+body.celestial-sphere-active .echo-document:not(.loupe-active) {
+  opacity: 0.7;
+  filter: sepia(0.5) hue-rotate(calc(var(--item-index) * 20deg)) brightness(1.1);
+  transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.celestial-sphere-active .echo-document:hover {
+  opacity: 1;
+  filter: sepia(0) hue-rotate(calc(var(--item-index) * 20deg)) brightness(1.6) drop-shadow(0 0 50px rgba(255, 200, 0, 0.9));
+  transform: var(--base-transform) scale(1.2) translateZ(100px);
+  z-index: 999;
+}
+
+
 /* Cascading Depth View */
 body.cascading-depth-active #editor {
   transform: translateZ(30px) scale(0.95);
