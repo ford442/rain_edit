@@ -104,3 +104,37 @@ test("VIEW_MODE_TOGGLES covers core spatial modes", () => {
     assert.equal(typeof VIEW_MODE_TOGGLES[key], "string");
   }
 });
+
+test("quantum superposition toggle removes class on deactivate", async () => {
+  const { TabManager } = await import("../src/TabManager.js");
+
+  // Mock document body and classList
+  globalThis.document = {
+    body: {
+      classList: {
+        _classes: new Set(),
+        add(...cls) { cls.forEach(c => this._classes.add(c)); },
+        remove(...cls) { cls.forEach(c => this._classes.delete(c)); },
+        contains(c) { return this._classes.has(c); }
+      }
+    },
+    querySelectorAll() { return []; },
+    getElementById() { return null; }
+  };
+
+  const tm = new TabManager();
+  tm._renderEchoes = () => {};
+
+  // Turn on
+  tm.toggleQuantumSuperpositionView();
+  assert.equal(tm.isQuantumSuperpositionView, true);
+  assert.equal(document.body.classList.contains("quantum-superposition-active"), true);
+
+  // Turn off
+  tm.toggleQuantumSuperpositionView();
+  assert.equal(tm.isQuantumSuperpositionView, false);
+  assert.equal(document.body.classList.contains("quantum-superposition-active"), false);
+
+  // Clean up
+  delete globalThis.document;
+});
