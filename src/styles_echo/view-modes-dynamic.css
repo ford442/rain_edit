@@ -656,6 +656,47 @@ body.holographic-cylinder-active .echo-document:hover {
   transform: var(--base-transform) scale(1.1) translateZ(50px);
 }
 
+/* Abyssal Trench View */
+body.abyssal-trench-active #editor {
+  transform: translateZ(-100px) scale(0.85);
+  box-shadow: 0 0 50px rgba(0, 100, 255, 0.2);
+  border-color: rgba(0, 150, 255, 0.3);
+}
+
+body.abyssal-trench-active .echo-document:not(.loupe-active) {
+  opacity: calc(1 - var(--item-index) * 0.05);
+  filter: hue-rotate(calc(var(--item-index) * -10deg)) saturate(80%) brightness(calc(1 - var(--item-index) * 0.08));
+  transition: all 0.9s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body.abyssal-trench-active .echo-document:hover {
+  opacity: 1;
+  filter: hue-rotate(calc(var(--item-index) * -10deg)) saturate(150%) brightness(1.5) drop-shadow(0 0 30px rgba(0, 150, 255, 0.8));
+  transform: var(--base-transform) translateZ(150px) scale(1.1);
+  z-index: 999;
+}
+
+/* Celestial Sphere View */
+body.celestial-sphere-active #editor {
+  transform: translateZ(100px) scale(0.9);
+  box-shadow: 0 0 40px rgba(255, 200, 0, 0.3);
+  border-color: rgba(255, 200, 0, 0.5);
+}
+
+body.celestial-sphere-active .echo-document:not(.loupe-active) {
+  opacity: 0.7;
+  filter: sepia(0.5) hue-rotate(calc(var(--item-index) * 20deg)) brightness(1.1);
+  transition: all 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.celestial-sphere-active .echo-document:hover {
+  opacity: 1;
+  filter: sepia(0) hue-rotate(calc(var(--item-index) * 20deg)) brightness(1.6) drop-shadow(0 0 50px rgba(255, 200, 0, 0.9));
+  transform: var(--base-transform) scale(1.2) translateZ(100px);
+  z-index: 999;
+}
+
+
 /* Cascading Depth View */
 body.cascading-depth-active #editor {
   transform: translateZ(30px) scale(0.95);
@@ -831,5 +872,97 @@ body.zenith-spiral-active .echo-document:hover {
       calc(var(--tz, 0px) + 150px)
     )
     rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.15) !important;
+  z-index: 100 !important;
+}
+
+/* =========================================================
+   ABYSSAL TRENCH VIEW
+   ========================================================= */
+body.abyssal-trench-active #editor {
+  transform: translateZ(-50px) scale(0.95);
+  box-shadow: 0 0 60px rgba(0, 50, 150, 0.4), inset 0 0 25px rgba(0, 50, 150, 0.2);
+  border-color: rgba(0, 100, 255, 0.3);
+  transition: all 0.9s cubic-bezier(0.2, 1, 0.4, 1);
+}
+
+body.abyssal-trench-active #echo-layer {
+  perspective: 3000px;
+  transform-style: preserve-3d;
+}
+
+body.abyssal-trench-active .echo-document {
+  transition: transform 1.5s cubic-bezier(0.2, 1, 0.3, 1),
+              opacity 1.5s ease, filter 1.5s ease, box-shadow 0.8s ease;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  border: 1px solid rgba(0, 150, 255, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 20, 80, 0.5);
+  backdrop-filter: blur(calc(10px + (var(--item-index) * 3px))) saturate(80%);
+  border-radius: var(--ui-radius-lg);
+  opacity: calc(0.9 - (var(--item-index) * 0.15));
+  filter: brightness(calc(1 - (var(--item-index) * 0.1))) hue-rotate(calc(var(--item-index) * -10deg));
+}
+
+body.abyssal-trench-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: brightness(1.4) drop-shadow(0 0 30px rgba(0, 200, 255, 0.8)) !important;
+  box-shadow: 0 0 60px rgba(0, 150, 255, 0.7), inset 0 0 25px rgba(0, 150, 255, 0.5);
+  border-color: rgba(0, 255, 255, 0.8);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.1) !important;
+  z-index: 100 !important;
+}
+
+/* =========================================================
+   CELESTIAL SPHERE VIEW
+   ========================================================= */
+body.celestial-sphere-active #editor {
+  transform: translateZ(50px) scale(0.9);
+  box-shadow: 0 0 80px rgba(255, 255, 255, 0.2), inset 0 0 30px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body.celestial-sphere-active #echo-layer {
+  perspective: 2800px;
+  transform-style: preserve-3d;
+}
+
+body.celestial-sphere-active .echo-document {
+  transition: transform 1.8s cubic-bezier(0.15, 1, 0.3, 1),
+              opacity 1.5s ease, filter 1.5s ease, box-shadow 0.8s ease;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  border: 1px solid rgba(255, 200, 100, 0.3);
+  box-shadow: 0 0 35px rgba(255, 220, 150, 0.15);
+  backdrop-filter: blur(12px) saturate(140%);
+  border-radius: var(--ui-radius-lg);
+  opacity: 0.8;
+  filter: hue-rotate(calc(var(--item-index) * 15deg)) drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+}
+
+body.celestial-sphere-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: hue-rotate(calc(var(--item-index) * 15deg)) brightness(1.5) drop-shadow(0 0 40px rgba(255, 255, 255, 0.9)) !important;
+  box-shadow: 0 0 80px rgba(255, 250, 200, 0.8), inset 0 0 30px rgba(255, 250, 200, 0.5);
+  border-color: rgba(255, 255, 255, 1);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.2) !important;
   z-index: 100 !important;
 }
