@@ -228,6 +228,7 @@ export const TabManagerViewModesMixin = {
       "fibonacci-spiral-active",
       "blueprint-3d-active",
       "cyber-cortex-active",
+      "quantum-superposition-active",
       "outline-active",
       "infinity-mirror-active",
       "kaleidoscope-active",
