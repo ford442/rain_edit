@@ -573,25 +573,6 @@ export function registerLensGroupC(manager, doc, body) {
   });
 
   manager.register({
-    id: "stellar-parallax",
-    category: "lens",
-    description: "Stellar Parallax Lens (Alt+9)",
-    combo: { alt: true, code: "Digit9" },
-    type: "hold",
-    group: "lens",
-    onDown: () => {
-      body.classList.add("loupe-active", "stellar-parallax-active");
-      const echoLayer = (typeof doc !== "undefined" && doc.getElementById) ? doc.getElementById("echo-layer") : document.getElementById("echo-layer");
-      if (echoLayer) {
-        echoLayer.querySelectorAll(".echo-document").forEach((echoDoc, idx) => {
-          echoDoc.style.setProperty("--item-index", idx);
-        });
-      }
-    },
-    onUp: () => body.classList.remove("loupe-active", "stellar-parallax-active"),
-  });
-
-  manager.register({
     id: "hyper-tesseract",
     category: "lens",
     description: "Hyper-Tesseract Lens (Alt+Ctrl+Shift+Y)",

@@ -12,6 +12,51 @@ import {
 export const TabManagerEchoLayoutsMixin = {
 
   _applyLayoutChunk0(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+    if (this.isAbyssalTrenchView) {
+      // Stack documents very deeply, tilting backwards into a trench
+      const depthStep = -300;
+      const yStep = 60;
+      const tz = index * depthStep - 400;
+      const ty = index * yStep;
+      // create a subtle sine wave sway down the trench
+      const tx = Math.sin(index * 0.8) * 150;
+      const rotX = 30 + index * 2; // tilts more backward the deeper it goes
+
+      el.style.setProperty("--tx", `${tx}px`);
+      el.style.setProperty("--ty", `${ty}px`);
+      el.style.setProperty("--tz", `${tz}px`);
+      el.style.setProperty("--rot-x", `${rotX}deg`);
+      el.style.setProperty("--rot-y", "0deg");
+      el.style.setProperty("--rot-z", "0deg");
+
+      const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(0deg) rotateZ(0deg)`;
+      el.setAttribute('data-base-transform', transformString);
+      return true;
+    }
+    if (this.isCelestialSphereView) {
+      // Position documents on a sphere enclosing the viewer
+      const phi = Math.acos(1 - (2 * index) / Math.max(1, totalEchoes));
+      const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+      const radius = 800;
+
+      const tx = radius * Math.cos(theta) * Math.sin(phi);
+      const ty = radius * Math.sin(theta) * Math.sin(phi);
+      const tz = radius * Math.cos(phi) - 200;
+
+      const rotY = (theta * 180) / Math.PI + 90;
+      const rotX = -(phi * 180) / Math.PI + 90;
+
+      el.style.setProperty("--tx", `${tx}px`);
+      el.style.setProperty("--ty", `${ty}px`);
+      el.style.setProperty("--tz", `${tz}px`);
+      el.style.setProperty("--rot-x", `${rotX}deg`);
+      el.style.setProperty("--rot-y", `${rotY}deg`);
+      el.style.setProperty("--rot-z", "0deg");
+
+      const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+      el.setAttribute('data-base-transform', transformString);
+      return true;
+    }
     if (this.isSynapseWebView) {
       // Golden spiral distribution on a sphere
       const goldenRatio = (1 + Math.sqrt(5)) / 2;
@@ -1900,6 +1945,60 @@ if (this.isChronoRingView) {
   },
   _applyLayoutChunk4(el, index, totalEchoes, file, inactiveFiles, activeFile) {
 
+      if (this.isAbyssalTrenchView) {
+        // Abyssal Trench: deep stacking, tilt, and sine wave sway
+        const total = Math.max(1, inactiveFiles.length);
+        const depthStep = -400; // Deep stacking
+
+        // Sway using Math.sin
+        const sway = Math.sin(index * 0.5) * 200;
+
+        const tx = sway;
+        const ty = index * 80;
+        const tz = index * depthStep - 300;
+
+        const rotX = 25; // Tilt
+        const rotY = Math.sin(index * 0.3) * 15;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
+
+      if (this.isCelestialSphereView) {
+        // Celestial Sphere: arranged in a sphere around editor
+        const total = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos( -1 + ( 2 * index ) / total );
+        const theta = Math.sqrt( total * Math.PI ) * phi;
+
+        const radius = 700;
+
+        const tx = radius * Math.cos( theta ) * Math.sin( phi );
+        const ty = radius * Math.sin( theta ) * Math.sin( phi );
+        const tz = radius * Math.cos( phi ) - 300;
+
+        // Orient towards center
+        const rotY = -(theta * 180 / Math.PI) + 90;
+        const rotX = (phi * 180 / Math.PI) - 90;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `0deg`);
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
       if (this.isZenithSpiralView) {
         // Zenith Spiral View: A downward spiral curve
         const total = Math.max(1, inactiveFiles.length);
@@ -2130,6 +2229,49 @@ if (this.isPrismaticArrayView) {
         el.style.setProperty("--rot-z", "0deg");
 
         const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(0deg) rotateY(0deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
+      if (this.isAbyssalTrenchView) {
+        // Abyssal Trench View: Deep stacking, tilt, sine wave sway
+        const tz = -300 - (index * 200);
+        const ty = index * 40 + Math.sin(index) * 50;
+        const tx = Math.sin(index * 0.5) * 100;
+        const rotX = 15;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(0deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
+      if (this.isCelestialSphereView) {
+        // Celestial Sphere View: sphere formation with varying tilt and depth
+        const total = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(-1 + (2 * index) / total);
+        const theta = Math.sqrt(total * Math.PI) * phi;
+        const radius = 600;
+
+        const tx = radius * Math.cos(theta) * Math.sin(phi);
+        const ty = radius * Math.sin(theta) * Math.sin(phi);
+        const tz = radius * Math.cos(phi) - 300;
+
+        const rotX = (ty / radius) * 45;
+        const rotY = (tx / radius) * 45;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
         el.setAttribute('data-base-transform', transformString);
         return true;
       }
