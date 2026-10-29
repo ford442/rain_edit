@@ -2024,6 +2024,47 @@ if (this.isChronoRingView) {
         el.setAttribute('data-base-transform', transformString);
         return true;
       }
+      if (this.isAbyssalTrenchView) {
+        // Abyssal Trench View
+        const tz = -200 - index * 150;
+        const ty = index * 40;
+        const tx = 0;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", "15deg");
+        el.style.setProperty("--rot-y", "0deg");
+        el.style.setProperty("--rot-z", "0deg");
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(15deg) rotateY(0deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
+      if (this.isCelestialSphereView) {
+        // Celestial Sphere View
+        const totalEchoes = Math.max(1, inactiveFiles.length);
+        const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+        const radius = 500;
+        const tx = radius * Math.sin(phi) * Math.cos(theta);
+        const ty = radius * Math.sin(phi) * Math.sin(theta);
+        const tz = radius * Math.cos(phi) - 200;
+
+        const rotX = -ty / 3;
+        const rotY = tx / 3;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", "0deg");
+
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
       if (this.isStarlightMeshView) {
         // Starlight Mesh View: interconnected spherical mesh
         const total = Math.max(1, inactiveFiles.length);
@@ -2290,6 +2331,49 @@ if (this.isHolographicCylinderView) {
         el.style.setProperty("--scatter-rot", "0deg");
         return true;
       }
+    if (this.isAbyssalTrenchView) {
+      // Abyssal Trench View
+      const tz = -200 - index * 150;
+      const ty = index * 40;
+      const tx = 0;
+
+      el.style.setProperty("--tx", `${tx}px`);
+      el.style.setProperty("--ty", `${ty}px`);
+      el.style.setProperty("--tz", `${tz}px`);
+      el.style.setProperty("--rot-x", "15deg");
+      el.style.setProperty("--rot-y", "0deg");
+      el.style.setProperty("--rot-z", "0deg");
+      el.style.setProperty("--scatter-x", "0px");
+      el.style.setProperty("--scatter-y", "0px");
+      el.style.setProperty("--scatter-z", "0px");
+      el.style.setProperty("--scatter-rot", "0deg");
+      return true;
+    }
+    if (this.isCelestialSphereView) {
+      // Celestial Sphere View
+      const totalEchoes = Math.max(1, inactiveFiles.length);
+      const phi = Math.acos(1 - (2 * (index + 0.5)) / totalEchoes);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+      const radius = 500;
+      const tx = radius * Math.sin(phi) * Math.cos(theta);
+      const ty = radius * Math.sin(phi) * Math.sin(theta);
+      const tz = radius * Math.cos(phi) - 200;
+
+      const rotX = -ty / 3;
+      const rotY = tx / 3;
+
+      el.style.setProperty("--tx", `${tx}px`);
+      el.style.setProperty("--ty", `${ty}px`);
+      el.style.setProperty("--tz", `${tz}px`);
+      el.style.setProperty("--rot-x", `${rotX}deg`);
+      el.style.setProperty("--rot-y", `${rotY}deg`);
+      el.style.setProperty("--rot-z", "0deg");
+      el.style.setProperty("--scatter-x", "0px");
+      el.style.setProperty("--scatter-y", "0px");
+      el.style.setProperty("--scatter-z", "0px");
+      el.style.setProperty("--scatter-rot", "0deg");
+      return true;
+    }
 
       if (this.isHouseOfCardsView) {
         // House of Cards View: stacked structure
