@@ -1,5 +1,62 @@
 /* Echo documents and depth effects — merged from styles_11, styles_12, styles_13.css */
 
+/* --- Abyssal Trench View --- */
+body.abyssal-trench-active #echo-layer {
+  perspective: 2500px;
+}
+
+body.abyssal-trench-active .echo-document {
+  transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
+  filter: drop-shadow(0 0 20px rgba(0, 150, 255, 0.3)) sepia(0.5) hue-rotate(180deg) opacity(0.8);
+}
+
+body.abyssal-trench-active .echo-document:hover {
+  filter: drop-shadow(0 0 40px rgba(0, 200, 255, 0.8)) brightness(1.2) opacity(1);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateX(0deg) scale(1.1) !important;
+  z-index: 100 !important;
+}
+
+/* --- Celestial Sphere View --- */
+body.celestial-sphere-active #echo-layer {
+  perspective: 2000px;
+  animation: celestial-spin 60s linear infinite;
+}
+
+@keyframes celestial-spin {
+  0% {
+    transform: rotateY(0deg) rotateX(10deg);
+  }
+  100% {
+    transform: rotateY(360deg) rotateX(10deg);
+  }
+}
+
+body.celestial-sphere-active .echo-document {
+  transition: transform 1.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+body.celestial-sphere-active .echo-document:hover {
+  transform: translate3d(
+      calc(var(--tx, 0px)),
+      calc(var(--ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) scale(1.5) !important;
+  border-radius: 8px; /* Un-circle on hover for readability */
+  z-index: 100 !important;
+  box-shadow: 0 0 50px rgba(255, 255, 255, 0.6);
+  background: rgba(10, 10, 20, 0.95);
+}
+
 /* ─── styles_11.css ─── */
 body.fractal-active .echo-document:hover {
   opacity: 1;

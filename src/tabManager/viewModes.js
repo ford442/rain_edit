@@ -185,6 +185,8 @@ export const TabManagerViewModesMixin = {
 
     document.body.classList.remove(
       "synapse-web-active",
+      "abyssal-trench-active",
+      "celestial-sphere-active",
       "cascading-depth-active",
       "holographic-cylinder-active",
       "abyssal-trench-active",
@@ -318,6 +320,24 @@ export const TabManagerViewModesMixin = {
     if (!wasActive) {
       this.isStackDeckView = true;
       document.body.classList.add("stack-deck-active");
+    }
+    this._renderEchoes();
+  },
+  toggleAbyssalTrenchView() {
+    const wasActive = this.isAbyssalTrenchView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isAbyssalTrenchView = true;
+      document.body.classList.add("abyssal-trench-active");
+    }
+    this._renderEchoes();
+  },
+  toggleCelestialSphereView() {
+    const wasActive = this.isCelestialSphereView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCelestialSphereView = true;
+      document.body.classList.add("celestial-sphere-active");
     }
     this._renderEchoes();
   },
