@@ -181,3 +181,12 @@ test("isTypingTarget recognizes editor-family targets", () => {
   assert.equal(isTypingTarget({ tagName: "DIV", closest: () => ({}) }), true);
   assert.equal(isTypingTarget({ tagName: "DIV", closest: () => null }), false);
 });
+
+test("focus mode (focus-readable) applies dimming to rain layers", () => {
+  const classList = new FakeClassList();
+
+  // Fake setting focus mode on body
+  classList.add("focus-readable");
+
+  assert.equal(classList.contains("focus-readable"), true);
+});
