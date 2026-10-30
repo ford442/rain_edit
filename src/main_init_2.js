@@ -135,6 +135,7 @@ if (viewModeSelect) {
     else if (view === "stackdeck") tabManager.toggleStackDeckView();
     else if (view === "abyssal-trench") tabManager.toggleAbyssalTrenchView();
     else if (view === "celestial-sphere") tabManager.toggleCelestialSphereView();
+    else if (view === "ethereal-canyon") tabManager.toggleEtherealCanyonView();
     else tabManager._deactivateAllViews(); // Default view
   });
 }
