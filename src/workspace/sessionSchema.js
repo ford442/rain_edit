@@ -82,6 +82,7 @@ export const VIEW_MODE_TOGGLES = {
   "holographic-cylinder": "toggleHolographicCylinderView",
   "abyssal-trench": "toggleAbyssalTrenchView",
   "celestial-sphere": "toggleCelestialSphereView",
+  "ethereal-canyon": "toggleEtherealCanyonView",
 };
 
 /** Body CSS class suffix used by most view modes (value → `${value}-active`). */
@@ -95,6 +96,7 @@ export const VIEW_MODE_BODY_CLASS = {
   "holographic-cylinder": "holographic-cylinder-active",
   "abyssal-trench": "abyssal-trench-active",
   "celestial-sphere": "celestial-sphere-active",
+  "ethereal-canyon": "ethereal-canyon-active",
 };
 
 /**

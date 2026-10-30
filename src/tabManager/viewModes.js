@@ -111,6 +111,7 @@ export const TabManagerViewModesMixin = {
     this._renderEchoes();
   },
   _deactivateAllViews() {
+    this.isEtherealCanyonView = false;
     this.isQuantumWebView = false;
     this.isCascadingDepthView = false;
     this.isAbyssalTrenchView = false;
@@ -211,6 +212,7 @@ export const TabManagerViewModesMixin = {
       "holographic-cylinder-active",
       "abyssal-trench-active",
       "celestial-sphere-active",
+      "ethereal-canyon-active",
       "zenith-spiral-active",
       "starlight-mesh-active",
       "shattered-glass-active",
@@ -322,6 +324,15 @@ export const TabManagerViewModesMixin = {
     if (!wasActive) {
       this.isLotusView = true;
       document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleEtherealCanyonView() {
+    const wasActive = this.isEtherealCanyonView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isEtherealCanyonView = true;
+      document.body.classList.add("ethereal-canyon-active");
     }
     this._renderEchoes();
   },

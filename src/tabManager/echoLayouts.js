@@ -12,6 +12,30 @@ import {
 export const TabManagerEchoLayoutsMixin = {
 
   _applyLayoutChunk0(el, index, totalEchoes, file, inactiveFiles, activeFile) {
+    if (this.isEtherealCanyonView) {
+      // Split into two angled walls facing inward
+      const isLeft = index % 2 === 0;
+      const wallIndex = Math.floor(index / 2);
+
+      const tz = -150 - (wallIndex * 250);
+      const ty = (Math.sin(wallIndex * 0.7) * 80);
+      const tx = isLeft ? -450 : 450;
+
+      const rotY = isLeft ? 45 : -45;
+      const rotX = Math.cos(wallIndex * 0.4) * 10;
+
+      el.style.setProperty("--tx", `${tx}px`);
+      el.style.setProperty("--ty", `${ty}px`);
+      el.style.setProperty("--tz", `${tz}px`);
+      el.style.setProperty("--rot-x", `${rotX}deg`);
+      el.style.setProperty("--rot-y", `${rotY}deg`);
+      el.style.setProperty("--rot-z", "0deg");
+
+      const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+      el.setAttribute('data-base-transform', transformString);
+      return true;
+    }
+
     if (this.isAbyssalTrenchView) {
       // Stack documents very deeply, tilting backwards into a trench
       const depthStep = -300;
