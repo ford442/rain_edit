@@ -182,11 +182,20 @@ test("isTypingTarget recognizes editor-family targets", () => {
   assert.equal(isTypingTarget({ tagName: "DIV", closest: () => null }), false);
 });
 
-test("focus mode (focus-readable) applies dimming to rain layers", () => {
+test("focus mode (focus-readable) applies dimming to rain layers", async () => {
   const classList = new FakeClassList();
-
-  // Fake setting focus mode on body
   classList.add("focus-readable");
-
   assert.equal(classList.contains("focus-readable"), true);
+
+  // Actually verify CSS dimming
+  const fs = await import("fs");
+  const path = await import("path");
+  const cssPath = path.resolve("./src/styles_base/shell-and-editor.css");
+  const cssContent = fs.readFileSync(cssPath, "utf8");
+
+  // Verify rain is dimmed to 0.05
+  assert.match(cssContent, /body\.focus-readable #rain-front,\nbody\.focus-readable #rain-back \{\n\s*opacity: 0\.05 !important;/);
+
+  // Verify container glow is transparent
+  assert.match(cssContent, /body\.focus-readable #container \{[^]*?box-shadow:[^]*?inset 0 0 20px transparent !important;/);
 });
