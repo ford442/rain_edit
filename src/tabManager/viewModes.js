@@ -196,6 +196,7 @@ export const TabManagerViewModesMixin = {
     this.isTorusView = false;
     this.isFloatingNexusView = false;
     this.isPrismaticArrayView = false;
+    this.isHyperThreadView = false;
     this.isSynapseWebView = false;
     this.isAbyssalTrenchView = false;
     this.isCelestialSphereView = false;
@@ -205,6 +206,7 @@ export const TabManagerViewModesMixin = {
     this.isCelestialSphereView = false;
 
     document.body.classList.remove(
+      "hyper-thread-active",
       "synapse-web-active",
       "abyssal-trench-active",
       "celestial-sphere-active",
@@ -420,6 +422,15 @@ export const TabManagerViewModesMixin = {
       document.body.classList.add("meteor-active");
       const btn = document.getElementById("btn-meteor-view");
       if (btn) btn.classList.add("active");
+    }
+    this._renderEchoes();
+  },
+  toggleHyperThreadView() {
+    const wasActive = this.isHyperThreadView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isHyperThreadView = true;
+      document.body.classList.add("hyper-thread-active");
     }
     this._renderEchoes();
   },

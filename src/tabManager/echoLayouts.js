@@ -2450,6 +2450,42 @@ if (this.isHolographicCylinderView) {
         return true;
       }
 
+if (this.isHyperThreadView) {
+        const total = Math.max(1, inactiveFiles.length);
+        const progress = index / total;
+
+        // Complex weaving logic using trig functions
+        const weaveFreqX = 3;
+        const weaveFreqY = 2;
+        const radiusX = 400 + (index * 10);
+        const radiusY = 250 + (index * 5);
+
+        const tx = Math.sin(progress * Math.PI * 2 * weaveFreqX) * radiusX;
+        const ty = Math.cos(progress * Math.PI * 2 * weaveFreqY) * radiusY;
+        const tz = -150 - (index * 60);
+
+        // Rotation to face the path tangent
+        const rotX = (ty / 15);
+        const rotY = -(tx / 15);
+        const rotZ = Math.sin(progress * Math.PI * 4) * 15;
+
+        el.style.setProperty("--tx", `${tx}px`);
+        el.style.setProperty("--ty", `${ty}px`);
+        el.style.setProperty("--tz", `${tz}px`);
+        el.style.setProperty("--rot-x", `${rotX}deg`);
+        el.style.setProperty("--rot-y", `${rotY}deg`);
+        el.style.setProperty("--rot-z", `${rotZ}deg`);
+        el.style.setProperty("--scatter-x", "0px");
+        el.style.setProperty("--scatter-y", "0px");
+        el.style.setProperty("--scatter-z", "0px");
+        el.style.setProperty("--scatter-rot", "0deg");
+
+        // Save base transform for animations
+        const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(${rotZ}deg)`;
+        el.setAttribute('data-base-transform', transformString);
+        return true;
+      }
+
 if (this.isFloatingNexusView) {
         const total = Math.max(1, inactiveFiles.length);
         const radius = Math.max(400, total * 60);

@@ -71,7 +71,8 @@ window.addEventListener(
 if (viewModeSelect) {
   viewModeSelect.addEventListener("change", (e) => {
     const view = e.target.value;
-    if (view === "abyssal-trench") tabManager.toggleAbyssalTrenchView();
+    if (view === "hyper-thread") tabManager.toggleHyperThreadView();
+    else if (view === "abyssal-trench") tabManager.toggleAbyssalTrenchView();
     else if (view === "celestial-sphere") tabManager.toggleCelestialSphereView();
     else if (view === "starlight-mesh") tabManager.toggleStarlightMeshView();
     else if (view === "zenith-spiral") tabManager.toggleZenithSpiralView();
