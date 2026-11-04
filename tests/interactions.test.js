@@ -193,8 +193,8 @@ test("focus mode (focus-readable) applies dimming to rain layers", async () => {
   const cssPath = path.resolve("./src/styles_base/shell-and-editor.css");
   const cssContent = fs.readFileSync(cssPath, "utf8");
 
-  // Verify rain is dimmed to 0.05
-  assert.match(cssContent, /body\.focus-readable #rain-front,\nbody\.focus-readable #rain-back \{\n\s*opacity: 0\.05 !important;/);
+  // Verify rain and vignette are dimmed to 0
+  assert.match(cssContent, /body\.focus-readable #rain-front,\nbody\.focus-readable #rain-back,\nbody\.focus-readable #vignette-layer \{\n\s*opacity: 0 !important;/);
 
   // Verify container glow is transparent
   assert.match(cssContent, /body\.focus-readable #container \{[^]*?box-shadow:[^]*?inset 0 0 20px transparent !important;/);
