@@ -140,8 +140,9 @@ body.focus-readable #editor {
 }
 
 body.focus-readable #rain-front,
-body.focus-readable #rain-back {
-  opacity: 0.05 !important;
+body.focus-readable #rain-back,
+body.focus-readable #vignette-layer {
+  opacity: 0 !important;
 }
 
 body.focus-readable #container {
