@@ -142,7 +142,11 @@ body.focus-readable #editor {
 body.focus-readable #rain-front,
 body.focus-readable #rain-back,
 body.focus-readable #vignette-layer {
-  opacity: 0 !important;
+  opacity: 0.2 !important;
+}
+
+body.focus-readable .echo-document {
+  opacity: 0.5 !important;
 }
 
 body.focus-readable #container {
