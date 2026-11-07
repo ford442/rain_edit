@@ -1,23 +1,11 @@
-1. **Analyze the Request**:
-   The prompt specifically says:
-   "wire the existing cascading-depth and holographic-cylinder layouts in echoLayouts.js (~L285, ~L1990) via viewModes.js toggles, TabManager flags, _deactivateAllViews cleanup, main_init_2.js and sessionSchema.js VIEW_MODE_TOGGLES. Make sure the quantum-superposition-active cleanup PR is its own PR."
-
-   Okay, let's fix the duplicates in `_deactivateAllViews()` in `src/tabManager/viewModes.js`.
-   There are duplicated lines:
-   ```javascript
-   this.isCascadingDepthView = false;
-   this.isHolographicCylinderView = false;
-   ```
-   and in the `classList.remove`:
-   ```javascript
-   "cascading-depth-active",
-   "holographic-cylinder-active",
-   ```
-
-   Let's also add `cascading-depth` and `holographic-cylinder` to `VIEW_MODE_BODY_CLASS` in `src/workspace/sessionSchema.js`.
-
-   Then, we need to create a separate branch for the `quantum-superposition-active` cleanup.
-   For `quantum-superposition-active`, in `toggleQuantumSuperpositionView()`, the `!document.body.classList.contains` logic should be replaced with `const wasActive = this.isQuantumSuperpositionView;`. Also, `"quantum-superposition-active"` is MISSING from `classList.remove` in `_deactivateAllViews()`, so it never gets removed when switching to another view! That's the bug.
-
-   Let's first create the `fix/wire-cascading-holographic` branch, make the changes, run tests, and submit it.
-   Then we'll switch back to `main`, create `fix/quantum-superposition-cleanup`, fix the bug, run tests, and submit.
+1. **Understand the Goal**: The user wants to improve the formatting and look and feel of the web IDE, specifically focusing on "improvising and innovating new features that take advantage of the layers of partially obscured documents".
+2. **Context from Memory**: "When building new features to take advantage of partially-obscured documents, the user previously preferred prioritizing interactive lenses over adding permanent 3D arrangement view modes. However, per Issue #290, the user explicitly prohibits adding any new named lenses."
+3. **Approach**: Instead of adding new named lenses (which is prohibited) or adding a new view mode, I will enhance an *existing* feature. The instructions specifically mention "floating-nexus" and "aurora" existing but not having any CSS. I will check for other existing but unstyled view modes.
+4. **Findings**:
+   - `Floating Nexus` (floating-nexus) is in `index.html` and `src/tabManager/viewModes.js`, with layout logic in `src/tabManager/echoLayouts.js`, but it lacks corresponding CSS styles in `src/styles_echo/view-modes-dynamic.css`.
+   - `Aurora` (aurora) is also in `index.html` and `src/tabManager/viewModes.js` but lacks CSS styles and layout logic.
+5. **Action Plan**:
+   - Add styles for the existing `floating-nexus` view mode in `src/styles_echo/view-modes-dynamic.css`.
+   - Make it look amazing to fulfill the "improve formatting and look and feel" requirement and "innovate new features".
+6. **Pre-commit**: Complete the `pre_commit_instructions` steps.
+7. **Submit**: Submit the changes.
