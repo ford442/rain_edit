@@ -111,6 +111,8 @@ export const TabManagerViewModesMixin = {
     this._renderEchoes();
   },
   _deactivateAllViews() {
+    this.isCosmicThreadView = false;
+    this.isLuminousCortexView = false;
     this.isEtherealCanyonView = false;
     this.isQuantumWebView = false;
     this.isCascadingDepthView = false;
@@ -206,6 +208,8 @@ export const TabManagerViewModesMixin = {
     this.isCelestialSphereView = false;
 
     document.body.classList.remove(
+      "cosmic-thread-active",
+      "luminous-cortex-active",
       "hyper-thread-active",
       "synapse-web-active",
       "abyssal-trench-active",
@@ -326,6 +330,24 @@ export const TabManagerViewModesMixin = {
     if (!wasActive) {
       this.isLotusView = true;
       document.body.classList.add("lotus-active");
+    }
+    this._renderEchoes();
+  },
+  toggleCosmicThreadView() {
+    const wasActive = this.isCosmicThreadView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isCosmicThreadView = true;
+      document.body.classList.add("cosmic-thread-active");
+    }
+    this._renderEchoes();
+  },
+  toggleLuminousCortexView() {
+    const wasActive = this.isLuminousCortexView;
+    this._deactivateAllViews();
+    if (!wasActive) {
+      this.isLuminousCortexView = true;
+      document.body.classList.add("luminous-cortex-active");
     }
     this._renderEchoes();
   },

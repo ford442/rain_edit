@@ -11,6 +11,8 @@ export const REMOTE_SYNC_OPT_IN_KEY = "rain-edit:remoteSessionSync";
 /** Select value → TabManager toggle method name. */
 export const VIEW_MODE_TOGGLES = {
   "hyper-thread": "toggleHyperThreadView",
+  "cosmic-thread": "toggleCosmicThreadView",
+  "luminous-cortex": "toggleLuminousCortexView",
   "starlight-mesh": "toggleStarlightMeshView",
   "zenith-spiral": "toggleZenithSpiralView",
   theater: "toggleTheaterView",
@@ -99,6 +101,8 @@ export const VIEW_MODE_BODY_CLASS = {
   "abyssal-trench": "abyssal-trench-active",
   "celestial-sphere": "celestial-sphere-active",
   "ethereal-canyon": "ethereal-canyon-active",
+  "cosmic-thread": "cosmic-thread-active",
+  "luminous-cortex": "luminous-cortex-active",
 };
 
 /**
