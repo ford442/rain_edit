@@ -36,6 +36,50 @@ export const TabManagerEchoLayoutsMixin = {
       return true;
     }
 
+    if (this.isCosmicThreadView) {
+      // Cosmic Thread View: dynamic sine wave interlacing 3D depth based on file index
+      const tx = Math.sin(index * 0.8) * 300;
+      const ty = Math.cos(index * 0.8) * 200;
+      const tz = -150 - (index * 120);
+      const rotZ = Math.sin(index * 0.5) * 15;
+
+      el.style.setProperty("--tx", `${tx}px`);
+      el.style.setProperty("--ty", `${ty}px`);
+      el.style.setProperty("--tz", `${tz}px`);
+      el.style.setProperty("--rot-x", "0deg");
+      el.style.setProperty("--rot-y", "0deg");
+      el.style.setProperty("--rot-z", `${rotZ}deg`);
+
+      const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(0deg) rotateY(0deg) rotateZ(${rotZ}deg)`;
+      el.setAttribute('data-base-transform', transformString);
+      return true;
+    }
+
+    if (this.isLuminousCortexView) {
+      // Luminous Cortex View: arrange echoes in an expanding cortical hemisphere
+      const phi = Math.acos(-1 + (2 * index) / Math.max(1, totalEchoes));
+      const theta = Math.sqrt(Math.max(1, totalEchoes) * Math.PI) * phi;
+      const radius = 350 + (index * 20);
+
+      const tx = radius * Math.cos(theta) * Math.sin(phi);
+      const ty = radius * Math.sin(theta) * Math.sin(phi);
+      const tz = radius * Math.cos(phi) - 200;
+
+      const rotX = Math.atan2(ty, tz) * (180 / Math.PI);
+      const rotY = Math.atan2(tx, tz) * (180 / Math.PI);
+
+      el.style.setProperty("--tx", `${tx}px`);
+      el.style.setProperty("--ty", `${ty}px`);
+      el.style.setProperty("--tz", `${tz}px`);
+      el.style.setProperty("--rot-x", `${rotX}deg`);
+      el.style.setProperty("--rot-y", `${rotY}deg`);
+      el.style.setProperty("--rot-z", "0deg");
+
+      const transformString = `translate3d(${tx}px, ${ty}px, ${tz}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotateZ(0deg)`;
+      el.setAttribute('data-base-transform', transformString);
+      return true;
+    }
+
     if (this.isAbyssalTrenchView) {
       // Stack documents very deeply, tilting backwards into a trench
       const depthStep = -300;
