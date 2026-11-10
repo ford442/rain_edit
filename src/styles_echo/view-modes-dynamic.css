@@ -1201,3 +1201,49 @@ body.ethereal-canyon-active .echo-document:hover {
     rotateX(0deg) rotateY(var(--rot-y, 0deg)) rotateZ(0deg) scale(1.1) !important;
   z-index: 100 !important;
 }
+
+/* =========================================================
+   FLOATING NEXUS VIEW
+   ========================================================= */
+body.floating-nexus-active #editor {
+  transform: translateZ(-150px) scale(0.95);
+  box-shadow: 0 0 60px rgba(0, 255, 180, 0.25), inset 0 0 30px rgba(0, 255, 180, 0.15);
+  border-color: rgba(0, 255, 180, 0.4);
+  transition: all 1.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+body.floating-nexus-active #echo-layer {
+  perspective: 2500px;
+  transform-style: preserve-3d;
+}
+
+body.floating-nexus-active .echo-document {
+  transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.3, 1),
+              opacity 1.5s ease, filter 1.5s ease, box-shadow 0.8s ease;
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      var(--tz, 0px)
+    )
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) rotateZ(var(--rot-z, 0deg));
+  border: 1px solid rgba(0, 255, 180, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 20, 50, 0.5), inset 0 0 15px rgba(0, 255, 180, 0.15);
+  backdrop-filter: blur(calc(8px + (var(--item-index) * 2px))) saturate(120%);
+  border-radius: var(--ui-radius-lg);
+  opacity: calc(0.9 - (var(--item-index) * 0.08));
+  filter: hue-rotate(calc(var(--item-index) * 15deg)) brightness(calc(1.1 - (var(--item-index) * 0.05)));
+}
+
+body.floating-nexus-active .echo-document:hover {
+  opacity: 1 !important;
+  filter: hue-rotate(calc(var(--item-index) * 15deg)) brightness(1.4) drop-shadow(0 0 35px rgba(0, 255, 180, 0.7)) !important;
+  box-shadow: 0 0 60px rgba(0, 255, 180, 0.6), inset 0 0 25px rgba(0, 255, 180, 0.4);
+  border-color: rgba(0, 255, 180, 0.9);
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 200px)
+    )
+    rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1.15) !important;
+  z-index: 100 !important;
+}
