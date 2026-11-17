@@ -61,17 +61,20 @@ function harness() {
   const doc = new FakeEventTarget();
   doc.body = body;
   const echoLayerEl = { querySelectorAll: () => [] };
-  const win = { echoLayerEl, editorEl: null };
-  const inputManager = new InputManager({ eventTarget: doc, body, storage: null, win }).start();
-  return { doc, body, win, inputManager };
+  // App refs and interaction flags are injected (ctx/state), never read off window.
+  const ctx = { echoLayerEl, editorEl: null };
+  const state = { lensActive: false };
+  const win = {};
+  const inputManager = new InputManager({ eventTarget: doc, body, storage: null, win, refs: ctx }).start();
+  return { doc, body, win, ctx, state, inputManager };
 }
 
 test("WormholeGesture registers a Ctrl+Alt hold and pulls/clears echoes on down/up", () => {
-  const { doc, win, inputManager } = harness();
+  const { doc, win, ctx, inputManager } = harness();
   const echo = fakeEcho({ left: 0, top: 0, width: 100, height: 100 }); // center (50,50)
-  win.echoLayerEl.querySelectorAll = () => [echo];
+  ctx.echoLayerEl.querySelectorAll = () => [echo];
 
-  const gesture = new WormholeGesture({ inputManager, doc, win }).init();
+  const gesture = new WormholeGesture({ inputManager, doc, win, ctx }).init();
   const binding = inputManager.bindings.get("wormhole");
   assert.equal(binding.combo.ctrl, true);
   assert.equal(binding.combo.alt, true);
@@ -86,8 +89,8 @@ test("WormholeGesture registers a Ctrl+Alt hold and pulls/clears echoes on down/
 });
 
 test("XRayHoldGestures registers both the plain and semantic x-ray holds", () => {
-  const { doc, win, inputManager } = harness();
-  new XRayHoldGestures({ inputManager, doc, win }).init();
+  const { doc, win, ctx, inputManager } = harness();
+  new XRayHoldGestures({ inputManager, doc, win, ctx }).init();
 
   const xray = inputManager.bindings.get("x-ray");
   assert.equal(xray.combo.ctrlOrMeta, true);
@@ -102,19 +105,19 @@ test("XRayHoldGestures registers both the plain and semantic x-ray holds", () =>
   assert.equal(doc.body.classList.contains("x-ray-active"), false);
 });
 
-test("ShiftLensGesture sets __lensActive while Shift is held and clears it on the next move after release", () => {
-  const { doc, win } = harness();
+test("ShiftLensGesture sets state.lensActive while Shift is held and clears it on the next move after release", () => {
+  const { doc, win, ctx, state } = harness();
   const echo = fakeEcho({ left: 0, top: 0, width: 100, height: 100 });
-  win.echoLayerEl.querySelectorAll = () => [echo];
-  win.tabManager = { files: [{}] };
+  ctx.echoLayerEl.querySelectorAll = () => [echo];
+  ctx.tabManager = { files: [{}] };
 
-  new ShiftLensGesture({ doc, win }).init();
+  new ShiftLensGesture({ doc, win, ctx, state }).init();
 
   doc.dispatch("mousemove", { shiftKey: true, clientX: 50, clientY: 50 });
-  assert.equal(win.__lensActive, true);
+  assert.equal(state.lensActive, true);
   assert.equal(echo.classList.contains("shift-lens-hit"), true);
 
   doc.dispatch("mousemove", { shiftKey: false, clientX: 50, clientY: 50 });
-  assert.equal(win.__lensActive, false);
+  assert.equal(state.lensActive, false);
   assert.equal(echo.classList.contains("shift-lens-hit"), false);
 });

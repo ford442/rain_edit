@@ -1,24 +1,28 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
+import * as appContext from "../appContext.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * Two unrelated pointer-button-held gestures that happen to share the same
  * mousedown/mouseup/mousemove event trio: middle-click-held Flashlight fog
  * clearing, and Alt+left-click-drag free-cam rotation of the echo layer.
  * (There is a second, unrelated "Flashlight" feature — the Alt+L
- * `flashlight-active` CSS toggle registered in `main_init_3.js` — this one
+ * `flashlight-active` CSS toggle registered in `boot/appBindings.js` — this one
  * is the middle-mouse-button hold instead.)
  */
 export class PointerHoldGestures {
   /**
-   * @param {{ doc?: Document, win?: Window }} [options]
+   * @param {{ doc?: Document, win?: Window, ctx?: AppRefs }} [options]
    */
   constructor({
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
   } = {}) {
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
     this.registry = new InputRegistry();
 
     this.isFlashlightActive = false;
@@ -72,7 +76,7 @@ export class PointerHoldGestures {
 
   /** @param {MouseEvent} e */
   _handleMouseMove(e) {
-    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.win.echoLayerEl);
+    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
 
     if (this.isAltDragActive && echoLayerEl) {
       const deltaX = e.clientX - this.altDragStartX;
@@ -85,7 +89,7 @@ export class PointerHoldGestures {
     }
 
     if (this.isFlashlightActive) {
-      const fogManager = /** @type {any} */ (this.win.fogManager);
+      const fogManager = /** @type {any} */ (this.ctx.fogManager);
       if (fogManager) fogManager.clearFogAt(e.clientX, e.clientY, 250);
     }
   }

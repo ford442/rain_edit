@@ -1,12 +1,24 @@
 import { expect, test } from "playwright/test";
 
+/**
+ * The app installs no boot globals (only `window.tabManager`). Tests read the
+ * live `src/appContext.js` module instead: Vite serves it at one URL, so a
+ * dynamic import from the page returns the same module instance the app uses.
+ */
+async function exposeAppContext(page) {
+  await page.evaluate(async () => {
+    globalThis.__appCtx = await import("/src/appContext.js");
+  });
+}
+
 test("initializes Monaco and both rain canvases", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
   await page.goto("/");
   await expect(page.locator("#editor .monaco-editor")).toBeVisible();
-  await page.waitForFunction(() => Boolean(window.editor));
+  await exposeAppContext(page);
+  await page.waitForFunction(() => Boolean(__appCtx.editor));
 
   for (const selector of ["#rain-back", "#rain-front"]) {
     const canvas = page.locator(selector);
@@ -28,13 +40,13 @@ test("initializes Monaco and both rain canvases", async ({ page }) => {
 
   await page.waitForFunction(
     () =>
-      window.raindrops &&
-      typeof window.raindrops.getDiagnostics === "function" &&
-      window.raindrops.getDiagnostics().ready,
+      __appCtx.raindrops &&
+      typeof __appCtx.raindrops.getDiagnostics === "function" &&
+      __appCtx.raindrops.getDiagnostics().ready,
   );
 
   const diagnostics = await page.evaluate(() => {
-    const rain = window.raindrops;
+    const rain = __appCtx.raindrops;
     // Drive a few updates so lastMainThreadSimMs is populated.
     for (let i = 0; i < 5; i++) rain.update();
     return rain.getDiagnostics();
@@ -52,7 +64,8 @@ test("workspace session restores tabs, depth, and view mode after reload", async
   page,
 }) => {
   await page.goto("/");
-  await page.waitForFunction(() => Boolean(window.workspaceSession));
+  await exposeAppContext(page);
+  await page.waitForFunction(() => Boolean(__appCtx.workspaceSession));
 
   await page.evaluate(async () => {
     const tm = window.tabManager;
@@ -67,13 +80,14 @@ test("workspace session restores tabs, depth, and view mode after reload", async
     tm.toggleOrbitView();
     const sel = document.getElementById("view-mode-select");
     if (sel) sel.value = "orbit";
-    await window.workspaceSession.persistNow();
+    await __appCtx.workspaceSession.persistNow();
   });
 
   await page.reload();
+  await exposeAppContext(page);
   await page.waitForFunction(
     () =>
-      window.workspaceSession &&
+      __appCtx.workspaceSession &&
       window.tabManager?.files?.some((f) => f.name === "persist-me.js"),
   );
 
@@ -98,20 +112,80 @@ test("rain sim backend toggle can switch js and wasm workers", async ({
   page,
 }) => {
   await page.goto("/?rainSim=js");
+  await exposeAppContext(page);
   await page.waitForFunction(
-    () => window.raindrops?.getDiagnostics?.().ready === true,
+    () => __appCtx.raindrops?.getDiagnostics?.().ready === true,
   );
 
-  const jsBackend = await page.evaluate(() => window.raindrops.backend);
+  const jsBackend = await page.evaluate(() => __appCtx.raindrops.backend);
   expect(["js", "main"]).toContain(jsBackend);
 
   await page.selectOption("#rain-sim-backend", "wasm");
   await page.waitForFunction(
     () =>
-      window.raindrops?.backend === "wasm" ||
-      window.raindrops?.backend === "main",
+      __appCtx.raindrops?.backend === "wasm" ||
+      __appCtx.raindrops?.backend === "main",
   );
 
-  const after = await page.evaluate(() => window.raindrops.getDiagnostics());
+  const after = await page.evaluate(() => __appCtx.raindrops.getDiagnostics());
   expect(["wasm", "main"]).toContain(after.backend);
+});
+
+test("one AppClock drives every main-thread frame and pauses when hidden", async ({
+  page,
+}) => {
+  // Record every distinct callback handed to requestAnimationFrame.
+  await page.addInitScript(() => {
+    const native = window.requestAnimationFrame.bind(window);
+    window.__rafCallbacks = new Set();
+    window.requestAnimationFrame = (cb) => {
+      window.__rafCallbacks.add(cb);
+      return native(cb);
+    };
+  });
+  await page.goto("/");
+  await exposeAppContext(page);
+  await page.waitForFunction(() => __appCtx.clock?.has("rain"));
+
+  // Only the app-owned boot globals: tabManager stays as the debug alias.
+  const globals = await page.evaluate(() => ({
+    tabManager: Boolean(window.tabManager),
+    leaked: ["editor", "raindrops", "workspaceSession", "cabinet3D", "editorEl", "scanPortals", "updateAtmosphere", "triggerExplodeView"]
+      // Named-element access (id="editor" → window.editor) is not a leak.
+      .filter((name) => name in window && !(window[name] instanceof Element)),
+  }));
+  expect(globals).toEqual({ tabManager: true, leaked: [] });
+
+  // Idle for a second: every RAF in that window must be the clock's tick.
+  const rootCallbacks = await page.evaluate(async () => {
+    window.__rafCallbacks.clear();
+    await new Promise((r) => setTimeout(r, 1000));
+    return window.__rafCallbacks.size;
+  });
+  expect(rootCallbacks).toBe(1);
+
+  const diag = await page.evaluate(() => __appCtx.clock.getDiagnostics());
+  expect(diag.tasks).toEqual(expect.arrayContaining(["rain", "cabinet", "fog", "matrix", "dust"]));
+
+  // Simulate a hidden tab: the clock stops ticking, then resumes.
+  const hidden = await page.evaluate(async () => {
+    const clock = __appCtx.clock;
+    globalThis.__setHidden = (value) => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => value });
+      document.dispatchEvent(new Event("visibilitychange"));
+    };
+    __setHidden(true);
+    const paused = clock.paused;
+    const start = clock.frame;
+    await new Promise((r) => setTimeout(r, 1000));
+    return { paused, start, whileHidden: clock.frame - start };
+  });
+  expect(hidden.paused).toBe(true);
+  expect(hidden.whileHidden).toBe(0);
+
+  await page.evaluate(() => __setHidden(false));
+  // Software GL under load can run at ~1 fps; poll rather than sleep.
+  await expect
+    .poll(() => page.evaluate(() => __appCtx.clock.frame), { timeout: 15_000 })
+    .toBeGreaterThan(hidden.start);
 });

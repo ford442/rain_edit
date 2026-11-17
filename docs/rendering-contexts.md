@@ -29,10 +29,11 @@ two shader copies.
 ## Context loss
 
 `RainLayer` owns `webglcontextlost` and `webglcontextrestored` listeners. Loss
-prevents the browser's default permanent teardown, pauses the shared rain RAF,
-and marks both uploads and draws inactive. Restoration rebuilds the program,
+prevents the browser's default permanent teardown, idles the AppClock `rain`
+task (`src/rain/RainScene.js`), and marks both uploads and draws inactive. Restoration rebuilds the program,
 vertex buffer, uniform locations, texture objects, cached texture sources, and
-cached uniform values before the RAF resumes. Call `destroy()` to remove the
+cached uniform values before the task resumes (only once both contexts are
+healthy). Call `destroy()` to remove the
 listeners and GPU resources.
 
 Use `RainLayer#getDiagnostics()` to inspect the selected API, actual attributes,
@@ -54,9 +55,11 @@ scene into one renderer, which is outside this incremental change.
 
 The former separate cabinet RAF meant rain could sample the canvas after browser
 compositing had discarded its drawing buffer, forcing
-`preserveDrawingBuffer: true`. The main rain RAF now calls
-`cabinet3D.renderFrame()` and immediately uploads that canvas into the two rain
-contexts in the same callback. Therefore the cabinet defaults to
+`preserveDrawingBuffer: true`. The cabinet now has no loop of its own: the
+AppClock `rain` task's render step calls `cabinet3D.renderFrame()` and
+immediately uploads that canvas into the two rain contexts in the same tick.
+When rain is not running (still loading, or a context is lost) a fallback
+`cabinet` task renders it instead, so the cabinet is never driven twice. Therefore the cabinet defaults to
 `preserveDrawingBuffer: false`. Use `?cabinetPreserveBuffer=1` only as a temporary
 diagnostic fallback.
 

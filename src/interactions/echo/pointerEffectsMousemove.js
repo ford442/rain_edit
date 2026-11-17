@@ -1,3 +1,5 @@
+import * as app from "../../appContext.js";
+import { appClock } from "../../runtime/AppClock.js";
 /**
  * Shared pointer-tracking effects: a single mousemove listener that drives
  * CSS custom properties for sonar pulse, depth lens focus, holographic
@@ -7,14 +9,15 @@
  * keep file size down.
  */
 export function initPointerEffectsMousemove() {
+let sonarPulseTicking = false;
 document.addEventListener("mousemove", (e) => {
   if (document.body.classList.contains("sonar-pulse-active")) {
     document.body.style.setProperty("--sonar-x", `${e.clientX}px`);
     document.body.style.setProperty("--sonar-y", `${e.clientY}px`);
 
-    // Use requestAnimationFrame for smooth UI updates
-    if (!window.sonarPulseTicking) {
-      window.requestAnimationFrame(() => {
+    // Coalesce to one update per AppClock frame.
+    if (!sonarPulseTicking) {
+      appClock.nextFrame(() => {
         // Calculate local mouse position and distance for each document for the mask and blur effect
         const echoes = document.querySelectorAll(".echo-document");
         echoes.forEach((doc) => {
@@ -30,9 +33,9 @@ document.addEventListener("mousemove", (e) => {
           const dist = Math.sqrt(Math.pow(centerX - e.clientX, 2) + Math.pow(centerY - e.clientY, 2));
           doc.style.setProperty("--sonar-dist", dist);
         });
-        window.sonarPulseTicking = false;
+        sonarPulseTicking = false;
       });
-      window.sonarPulseTicking = true;
+      sonarPulseTicking = true;
     }
   }
 
@@ -46,7 +49,7 @@ document.addEventListener("mousemove", (e) => {
     let minDistance = Infinity;
 
     // Get all echo documents that are visible
-    const echoes = window.echoLayerEl ? window.echoLayerEl.querySelectorAll(".echo-document") : document.querySelectorAll(".echo-document");
+    const echoes = app.echoLayerEl ? app.echoLayerEl.querySelectorAll(".echo-document") : document.querySelectorAll(".echo-document");
 
     echoes.forEach((doc) => {
       doc.classList.remove("depth-lens-focus"); // reset
@@ -87,14 +90,14 @@ document.addEventListener("mousemove", (e) => {
     document.body.style.setProperty("--mouse-x", `${e.clientX}px`);
     document.body.style.setProperty("--mouse-y", `${e.clientY}px`);
 
-    if (window.editorEl) {
-      const rect = window.editorEl.getBoundingClientRect();
-      window.editorEl.style.setProperty("--mouse-local-x", `${e.clientX - rect.left}px`);
-      window.editorEl.style.setProperty("--mouse-local-y", `${e.clientY - rect.top}px`);
+    if (app.editorEl) {
+      const rect = app.editorEl.getBoundingClientRect();
+      app.editorEl.style.setProperty("--mouse-local-x", `${e.clientX - rect.left}px`);
+      app.editorEl.style.setProperty("--mouse-local-y", `${e.clientY - rect.top}px`);
     }
 
-    if (window.echoLayerEl) {
-      const echoes = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
+    if (app.echoLayerEl) {
+      const echoes = Array.from(app.echoLayerEl.querySelectorAll(".echo-document"));
       // Map echoes to depth level
       echoes.forEach((doc, idx) => {
         // Calculate crater radius. Larger for closer elements, smaller for deeper.
@@ -122,10 +125,10 @@ document.addEventListener("mousemove", (e) => {
   }
 
   if (document.body.classList.contains("fabric-tear-active")) {
-    if (editorEl) {
+    if (app.editorEl) {
       const mouseX = e.clientX;
       const gradient = `linear-gradient(to right, black 0%, black calc(${mouseX}px - 50px), transparent calc(${mouseX}px - 20px), transparent calc(${mouseX}px + 20px), black calc(${mouseX}px + 50px), black 100%)`;
-      editorEl.style.setProperty("--tear-mask", gradient);
+      app.editorEl.style.setProperty("--tear-mask", gradient);
     }
   }
 });

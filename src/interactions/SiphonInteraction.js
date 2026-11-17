@@ -1,6 +1,9 @@
-// @ts-check
 import { monaco } from "../editor/setupMonaco.js";
 import { InputRegistry } from "./InputRegistry.js";
+import * as appContext from "../appContext.js";
+import { fireSiphonPacket } from "../effects/particles.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * Holographic Siphon (hold Alt+Shift+W): drag selected text from an echo
@@ -10,16 +13,18 @@ import { InputRegistry } from "./InputRegistry.js";
  */
 export class SiphonInteraction {
   /**
-   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window }} options
+   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window, ctx?: AppRefs }} options
    */
   constructor({
     inputManager,
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
   }) {
     this.inputManager = inputManager;
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
     this.registry = new InputRegistry();
 
     this._handleDragOver = this._handleDragOver.bind(this);
@@ -44,7 +49,7 @@ export class SiphonInteraction {
       },
     });
 
-    const editorEl = /** @type {HTMLElement | undefined} */ (this.win.editorEl);
+    const editorEl = /** @type {HTMLElement | undefined} */ (this.ctx.editorEl);
     if (editorEl) {
       this.registry.listen(editorEl, "dragover", this._handleDragOver);
       this.registry.listen(editorEl, "drop", this._handleDrop);
@@ -72,7 +77,7 @@ export class SiphonInteraction {
     const selectedText = e.dataTransfer.getData("text/plain");
     if (!selectedText || !selectedText.trim()) return;
 
-    const editor = /** @type {any} */ (this.win.editor);
+    const editor = /** @type {any} */ (this.ctx.editor);
     if (!editor) return;
 
     const targetPosition = editor.getTargetAtClientPoint(e.clientX, e.clientY);
@@ -82,7 +87,7 @@ export class SiphonInteraction {
       position = targetPosition.position;
     }
 
-    this.win.fireSiphonPacket(selectedText, e.clientX, e.clientY - 100);
+    fireSiphonPacket(selectedText, e.clientX, e.clientY - 100);
 
     if (position) {
       editor.executeEdits("siphon-drop", [
@@ -123,13 +128,13 @@ export class SiphonInteraction {
       target = target.parentElement;
     }
 
-    const editor = /** @type {any} */ (this.win.editor);
+    const editor = /** @type {any} */ (this.ctx.editor);
     if (inEchoDoc && editor) {
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
       selection.removeAllRanges();
 
-      this.win.fireSiphonPacket(selectedText, rect.left, rect.top);
+      fireSiphonPacket(selectedText, rect.left, rect.top);
 
       const position = editor.getPosition();
       if (position) {

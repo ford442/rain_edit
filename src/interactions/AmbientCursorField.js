@@ -1,6 +1,8 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
 import { localMouse, normalizedPointerInRect, queryEchoes } from "./depthState.js";
+import * as appContext from "../appContext.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * The always-on, no-modifier-required part of the depth cursor field: global
@@ -11,15 +13,17 @@ import { localMouse, normalizedPointerInRect, queryEchoes } from "./depthState.j
  */
 export class AmbientCursorField {
   /**
-   * @param {{ doc?: Document, win?: Window, body?: HTMLElement }} [options]
+   * @param {{ doc?: Document, win?: Window, body?: HTMLElement, ctx?: AppRefs }} [options]
    */
   constructor({
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
     body = typeof document !== "undefined" ? document.body : null,
   } = {}) {
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
     this.body = body;
     this.registry = new InputRegistry();
     this._handleMouseMove = this._handleMouseMove.bind(this);
@@ -50,7 +54,7 @@ export class AmbientCursorField {
     body.style.setProperty("--mouse-nx", String(nx));
     body.style.setProperty("--mouse-ny", String(ny));
 
-    const echoLayerEl = /** @type {HTMLElement | undefined} */ (win.echoLayerEl);
+    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
     this._applyEdgeFanning(echoLayerEl, nx, ny);
     this._applyUiTilt(nx, ny);
     this._applyLocalHoverTilt(echoLayerEl, mx, my);
@@ -59,7 +63,7 @@ export class AmbientCursorField {
     this._applyBackgroundParallax(mx, my);
     this._applyFogWipe(mx, my);
 
-    const neonScatterLayer = /** @type {HTMLElement | undefined} */ (win.neonScatterLayer);
+    const neonScatterLayer = /** @type {HTMLElement | undefined} */ (this.ctx.neonScatterLayer);
     if (neonScatterLayer) {
       neonScatterLayer.style.setProperty("--mouse-x", `${mx}px`);
       neonScatterLayer.style.setProperty("--mouse-y", `${my}px`);
@@ -191,19 +195,19 @@ export class AmbientCursorField {
 
   /** Background/foreground rain-layer parallax, relative to the editor viewport. */
   _applyBackgroundParallax(mx, my) {
-    const editorEl = /** @type {HTMLElement | undefined} */ (this.win.editorEl);
+    const editorEl = /** @type {HTMLElement | undefined} */ (this.ctx.editorEl);
     if (!editorEl) return;
     const { x, y } = normalizedPointerInRect(editorEl, mx, my);
 
-    const bgLayer = /** @type {any} */ (this.win.bgLayer);
-    const fgLayer = /** @type {any} */ (this.win.fgLayer);
+    const bgLayer = /** @type {any} */ (this.ctx.bgLayer);
+    const fgLayer = /** @type {any} */ (this.ctx.fgLayer);
     if (bgLayer) bgLayer.setParallax(x * 0.4, y * 0.4);
     if (fgLayer) fgLayer.setParallax(x, y);
   }
 
   /** Continuous small fog clear that follows the cursor. */
   _applyFogWipe(mx, my) {
-    const fogManager = /** @type {any} */ (this.win.fogManager);
+    const fogManager = /** @type {any} */ (this.ctx.fogManager);
     if (fogManager) fogManager.clearFogAt(mx, my, 60);
   }
 }

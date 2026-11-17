@@ -1,3 +1,5 @@
+import * as app from "../../appContext.js";
+import { interactionState } from "../interactionState.js";
 /**
  * Spatial dispersion / kinetic effects: pulse wave (Alt+J), drawer peek
  * (hold Shift), layer isolate (hold I), the editor typing ripple, layer
@@ -16,8 +18,8 @@ im.register({
   type: "action",
   onDown: () => {
     document.body.classList.add("pulse-wave-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         const index = parseInt(doc.dataset.index || "0", 10);
         doc.style.setProperty("--pulse-delay", `${index * 0.1}s`);
       });
@@ -61,8 +63,8 @@ document.addEventListener("keydown", (e) => {
 
     document.body.classList.add("typing-pulse");
 
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.classList.remove("typing-ripple");
         void doc.offsetWidth; // trigger reflow
         doc.classList.add("typing-ripple");
@@ -72,8 +74,8 @@ document.addEventListener("keydown", (e) => {
     clearTimeout(typingTimeout);
     typingTimeout = setTimeout(() => {
       document.body.classList.remove("typing-pulse");
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+      if (app.echoLayerEl) {
+        app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
           doc.classList.remove("typing-ripple");
         });
       }
@@ -99,8 +101,8 @@ im.register({
     if (!isLayerDispersionActive) return;
     isLayerDispersionActive = false;
     document.body.classList.remove("layer-dispersion-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.style.removeProperty("--disperse-x");
         doc.style.removeProperty("--disperse-y");
         doc.style.removeProperty("--disperse-z");
@@ -111,8 +113,8 @@ im.register({
 });
 
 document.addEventListener("mousemove", (e) => {
-  if (isLayerDispersionActive && window.echoLayerEl) {
-    const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+  if (isLayerDispersionActive && app.echoLayerEl) {
+    const echoes = app.echoLayerEl.querySelectorAll(".echo-document");
     const total = echoes.length;
 
     // Normalize mouse position (-1 to 1)
@@ -147,11 +149,11 @@ im.register({
   combo: { alt: true, shift: true, code: "KeyE" },
   type: "hold",
   onDown: () => {
-    if (window.isHolographicExplodeActive) return;
-    window.isHolographicExplodeActive = true;
+    if (interactionState.isHolographicExplodeActive) return;
+    interactionState.isHolographicExplodeActive = true;
     document.body.classList.add("holographic-explode-active");
-    if (window.echoLayerEl) {
-      const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+    if (app.echoLayerEl) {
+      const echoes = app.echoLayerEl.querySelectorAll(".echo-document");
       const total = echoes.length;
       if (total > 0) {
         echoes.forEach((doc, index) => {
@@ -173,10 +175,10 @@ im.register({
     }
   },
   onUp: () => {
-    window.isHolographicExplodeActive = false;
+    interactionState.isHolographicExplodeActive = false;
     document.body.classList.remove("holographic-explode-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.style.removeProperty("--explode-tx");
         doc.style.removeProperty("--explode-ty");
         doc.style.removeProperty("--explode-tz");
@@ -190,7 +192,7 @@ im.register({
 
 /* ─── Orbital Focus Scrubber ─── reassigned Alt+D -> Alt+Shift+O to end the
    collision with Layer Dispersion (Alt+D). */
-window.isOrbitalScrubberActive = false;
+interactionState.isOrbitalScrubberActive = false;
 im.register({
   id: "orbital-scrubber",
   category: "navigation",
@@ -198,15 +200,15 @@ im.register({
   combo: { alt: true, shift: true, code: "KeyO" },
   type: "hold",
   onDown: () => {
-    if (window.isOrbitalScrubberActive) return;
-    window.isOrbitalScrubberActive = true;
+    if (interactionState.isOrbitalScrubberActive) return;
+    interactionState.isOrbitalScrubberActive = true;
     document.body.classList.add("orbital-scrubber-active");
   },
   onUp: () => {
-    window.isOrbitalScrubberActive = false;
+    interactionState.isOrbitalScrubberActive = false;
     document.body.classList.remove("orbital-scrubber-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.style.removeProperty("--orbital-scrub-scale");
         doc.style.removeProperty("--orbital-scrub-angle");
         doc.style.removeProperty("--orbital-scrub-z");
@@ -216,8 +218,8 @@ im.register({
 });
 
 document.addEventListener("mousemove", (e) => {
-  if (window.isOrbitalScrubberActive && window.echoLayerEl) {
-    const docs = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
+  if (interactionState.isOrbitalScrubberActive && app.echoLayerEl) {
+    const docs = Array.from(app.echoLayerEl.querySelectorAll(".echo-document"));
     if (docs.length === 0) return;
 
     const pctX = e.clientX / window.innerWidth;
@@ -244,20 +246,20 @@ document.addEventListener("mousemove", (e) => {
 /* ─── Improvise: Kinetic Typography Echo (Alt + T) ─────────────────────────────── */
 // When triggered, extracts visible text from the editor, scales it up, and overlays it
 // across echo documents with varying delays and opacity to create a kinetic echo effect.
-window.isKineticEchoActive = false;
+interactionState.isKineticEchoActive = false;
 
 document.addEventListener("keydown", (e) => {
-  if (e.altKey && !e.shiftKey && e.code === "KeyT" && !window.isKineticEchoActive) {
+  if (e.altKey && !e.shiftKey && e.code === "KeyT" && !interactionState.isKineticEchoActive) {
     e.preventDefault();
-    window.isKineticEchoActive = true;
+    interactionState.isKineticEchoActive = true;
     document.body.classList.add("kinetic-echo-active");
 
-    if (window.editor) {
-      const code = window.editor.getValue();
+    if (app.editor) {
+      const code = app.editor.getValue();
       const words = code.split(/\s+/).filter(w => w.length > 3).slice(0, 10);
 
-      if (window.echoLayerEl) {
-         window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc, idx) => {
+      if (app.echoLayerEl) {
+         app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc, idx) => {
              const word = words[idx % words.length] || "ECHO";
              doc.setAttribute("data-kinetic-word", word);
          });
@@ -267,9 +269,9 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keyup", (e) => {
-  if ((e.key === "Alt" || e.code === "KeyT") && window.isKineticEchoActive) {
+  if ((e.key === "Alt" || e.code === "KeyT") && interactionState.isKineticEchoActive) {
     if (!e.altKey || e.code === "KeyT") {
-      window.isKineticEchoActive = false;
+      interactionState.isKineticEchoActive = false;
       document.body.classList.remove("kinetic-echo-active");
     }
   }

@@ -46,8 +46,9 @@ alive. It owns `raindrops.options.{rainChance,dropletsRate,maxDrops,
 trailRate,globalTimeScale}` and the front/back `RainLayer` refraction
 uniforms (`u_alphaMultiply`, `u_alphaSubtract`, `u_minRefraction`,
 `u_refractionDelta`) — no new shader uniforms were introduced. It is created
-once (`window.weatherSystem`) and `attach()`ed to `raindrops`/`bgLayer`/
-`fgLayer` once `initLayers()` finishes building them (see `main_vars_0.js`);
+once in `src/boot/createApp.js` (shared as `appContext.weatherSystem`) and
+`attach()`ed to `raindrops`/`bgLayer`/`fgLayer` once `RainScene.init()`
+finishes building them (see `src/rain/RainScene.js`);
 the dock's Weather select and Storm Intensity slider work immediately since
 they only touch `WeatherSystem`'s own state.
 
@@ -81,7 +82,7 @@ a ~240 ms time constant before being applied. In practice this means typing
 visibly changes the rain within roughly 200–400 ms, without snapping.
 
 `weatherSystem.update()` (no arguments) is called once per animation frame
-from the rain RAF loop in `main_vars_0.js`; it measures elapsed time via
+from the AppClock `rain` task in `src/rain/RainScene.js`; it measures elapsed time via
 `performance.now()` internally. Tests call `update(dtMs)` with an explicit
 step for deterministic timing (see `tests/weather-system.test.js`).
 

@@ -39,6 +39,18 @@ export class Cabinet3D {
   hide(): void;
   /** Toggle overlay visibility. */
   toggle(): void;
+  /**
+   * Render one frame (no-op while hidden). Driven by the AppClock: the rain
+   * task calls it right before uploading the canvas as a rain texture; the
+   * `cabinet` fallback task calls it when rain isn't running.
+   */
+  renderFrame(): void;
+  /** The Three.js canvas, for cross-context texture upload. */
+  getRendererCanvas(): HTMLCanvasElement;
+  /** Screen-space position/radius of the hovered or pinned file cube. */
+  getHoverScreenPos(): { x: number; y: number; r: number } | null;
+  /** Record one rain-texture upload duration for compositing diagnostics. */
+  recordRainTextureUpload(durationMs: number): void;
 }
 
 export const CATEGORY_COLORS: readonly number[];

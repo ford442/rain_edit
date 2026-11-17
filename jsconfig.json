@@ -5,7 +5,7 @@
     "moduleResolution": "bundler",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": [],
-    "checkJs": true,
+    "checkJs": false,
     "allowJs": true,
     "noEmit": true,
     "skipLibCheck": true,
@@ -17,7 +17,7 @@
       "@/*": ["src/*"]
     }
   },
-  "//": "Incremental JSDoc typing. `include` lists the seams that are fully type-checked today; add a file here once it is annotated and passes `npm run typecheck`. Authored *.d.ts siblings (RainLayer/TabManager/Cabinet3D) describe the mixin-composed managers' public APIs without checking their bodies. See AGENTS.md > TypeScript adoption.",
+  "//": "Incremental JSDoc typing. `checkJs` is off: a .js file is checked only when it carries `// @ts-check` (every `include`d .js must; tests/architecture.test.js enforces it), so a typed seam like createApp.js can import untyped modules without pulling their bodies into the strict program. `include` lists the seams that are fully type-checked today; add a file here once it is annotated and passes `npm run typecheck`. Authored *.d.ts siblings (RainLayer/TabManager/Cabinet3D) describe the mixin-composed managers' public APIs without checking their bodies. See AGENTS.md > TypeScript adoption.",
   "include": [
     "src/StorageAPI.js",
     "src/rendering/createGLContext.js",
@@ -26,6 +26,9 @@
     "src/rain/WaterMapSim.js",
     "src/rain/optionsCodec.js",
     "src/rain/resolveBackend.js",
+    "src/runtime/AppClock.js",
+    "src/boot/domRefs.js",
+    "src/boot/createApp.js",
     "src/types/**/*.d.ts",
     "src/**/*.d.ts"
   ]

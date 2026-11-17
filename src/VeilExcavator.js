@@ -1,4 +1,5 @@
 import { inputManager } from "./interactions/InputManager.js";
+import { appClock } from "./runtime/AppClock.js";
 
 export class VeilExcavator {
   constructor(tabManager) {
@@ -31,7 +32,7 @@ export class VeilExcavator {
 
     // Throttle for toDataURL
     this.lastUpdate = 0;
-    this.updateRAF = null;
+    this.updatePending = false;
 
     // Clear mask initially
     this.clearMask();
@@ -197,9 +198,10 @@ export class VeilExcavator {
     // Throttle toDataURL calls to ~30fps max to avoid jank
     const now = performance.now();
     if (!force && now - this.lastUpdate < 32) {
-      if (!this.updateRAF) {
-        this.updateRAF = requestAnimationFrame(() => {
-          this.updateRAF = null;
+      if (!this.updatePending) {
+        this.updatePending = true;
+        appClock.nextFrame(() => {
+          this.updatePending = false;
           this.updateMaskCSS(true);
         });
       }

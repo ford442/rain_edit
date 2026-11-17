@@ -155,7 +155,6 @@ export class Cabinet3D {
     // Track which categories have had files loaded
     this._loadedCats = new Set();
 
-    this._rafId = null;
 
     this._build();
   }

@@ -1,15 +1,15 @@
+/**
+ * Radar sweep on `#radar-canvas`. Drawn by the AppClock `minimap` task
+ * (registered in `createApp()`); `active` gates the task.
+ */
 export class HolographicMinimap {
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
+    this.active = Boolean(this.canvas);
     if (!this.canvas) return;
     this.ctx = this.canvas.getContext("2d");
     this.radarAngle = 0;
-    this.rafId = null;
-    this.active = true;
-
-    // Start animation loop
     this.render = this.render.bind(this);
-    this.rafId = requestAnimationFrame(this.render);
   }
 
   render() {
@@ -98,14 +98,9 @@ export class HolographicMinimap {
     this.ctx.stroke();
 
     this.ctx.restore();
-
-    this.rafId = requestAnimationFrame(this.render);
   }
 
   destroy() {
     this.active = false;
-    if (this.rafId) {
-      cancelAnimationFrame(this.rafId);
-    }
   }
 }

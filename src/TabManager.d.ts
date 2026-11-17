@@ -63,6 +63,8 @@ export class TabManager {
   cycleActiveTab(direction: number): void;
   /** Remove a document/tab by id. */
   removeFile(id: number): void;
+  /** Fetch a StorageAPI note and open it as a tab. */
+  openNoteAsTab(noteName: string): Promise<void>;
   /** Serialize open files for workspace session persistence. */
   serializeFiles(): object[];
   /** Persist hooks / workspace session controller (optional). */

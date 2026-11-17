@@ -16,10 +16,10 @@ import { InputRegistry } from "./InputRegistry.js";
  * @typedef {object} InputContext
  * @property {boolean} isTyping
  * @property {HTMLElement | null} body
- * @property {AppWindow | null} win
+ * @property {Window | null} win
  * @property {InputManager} modes
- * @property {HTMLElement | undefined} editorEl
- * @property {HTMLElement | undefined} echoLayerEl
+ * @property {HTMLElement | null | undefined} editorEl
+ * @property {HTMLElement | null | undefined} echoLayerEl
  * @property {unknown} tabManager
  * @property {unknown} referenceManager
  */
@@ -60,7 +60,7 @@ import { InputRegistry } from "./InputRegistry.js";
  *
  * One capture-phase `keydown` and one `keyup` listener dispatch every binding,
  * replacing the dozens of independent `document.addEventListener` blocks that
- * used to live in `main_init_*.js`. Bindings are registered from wherever their
+ * used to live in the legacy `main_init_*.js` boot shards. Bindings are registered from wherever their
  * state lives (they receive a live `ctx`), so this stays the single source of
  * truth for what a key does, while behavior stays colocated with its feature.
  *
@@ -142,14 +142,15 @@ export function isTypingTarget(target) {
 }
 
 /**
- * `window`, plus the ad hoc globals this project attaches to it for the
- * interaction bindings to read (see `appContext.js`).
- * @typedef {Window & {
- *   editorEl?: HTMLElement,
- *   echoLayerEl?: HTMLElement,
+ * Shared app references exposed to bindings through `ctx` (normally the
+ * `appContext.js` module namespace, installed by `createApp()` via
+ * `setRefs()`).
+ * @typedef {{
+ *   editorEl?: HTMLElement | null,
+ *   echoLayerEl?: HTMLElement | null,
  *   tabManager?: unknown,
  *   referenceManager?: unknown,
- * }} AppWindow
+ * }} InputRefs
  */
 
 /**
@@ -157,7 +158,8 @@ export function isTypingTarget(target) {
  * @property {Document | null} [eventTarget]
  * @property {HTMLElement | null} [body]
  * @property {Storage | null} [storage]
- * @property {AppWindow | null} [win]
+ * @property {Window | null} [win]
+ * @property {InputRefs | null} [refs]
  */
 
 export class InputManager {
@@ -167,11 +169,14 @@ export class InputManager {
     body = typeof document !== "undefined" ? document.body : null,
     storage = typeof localStorage !== "undefined" ? localStorage : null,
     win = typeof window !== "undefined" ? window : null,
+    refs = null,
   } = {}) {
     this.eventTarget = eventTarget;
     this.body = body;
     this.storage = storage;
     this.win = win;
+    /** @type {InputRefs | null} */
+    this.refs = refs;
     this.inputs = new InputRegistry();
     /** @type {Map<string, Binding>} */
     this.bindings = new Map();
@@ -241,6 +246,16 @@ export class InputManager {
     return this;
   }
 
+  /**
+   * Point `ctx.editorEl`/`echoLayerEl`/`tabManager`/`referenceManager` at a
+   * live reference source (the `appContext.js` namespace at boot).
+   * @param {InputRefs | null} refs
+   */
+  setRefs(refs) {
+    this.refs = refs;
+    return this;
+  }
+
   destroy() {
     this.inputs.dispose();
     this._releaseAll();
@@ -258,10 +273,10 @@ export class InputManager {
       body: this.body,
       win: this.win,
       modes: this,
-      editorEl: this.win ? this.win.editorEl : undefined,
-      echoLayerEl: this.win ? this.win.echoLayerEl : undefined,
-      tabManager: this.win ? this.win.tabManager : undefined,
-      referenceManager: this.win ? this.win.referenceManager : undefined,
+      editorEl: this.refs ? this.refs.editorEl : undefined,
+      echoLayerEl: this.refs ? this.refs.echoLayerEl : undefined,
+      tabManager: this.refs ? this.refs.tabManager : undefined,
+      referenceManager: this.refs ? this.refs.referenceManager : undefined,
     };
   }
 

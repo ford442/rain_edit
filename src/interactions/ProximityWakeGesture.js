@@ -1,6 +1,8 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
 import { queryEchoes } from "./depthState.js";
+import * as appContext from "../appContext.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * Always-on per-echo proximity reactions: the "wake" glow factor, the
@@ -13,14 +15,16 @@ import { queryEchoes } from "./depthState.js";
  */
 export class ProximityWakeGesture {
   /**
-   * @param {{ doc?: Document, win?: Window }} [options]
+   * @param {{ doc?: Document, win?: Window, ctx?: AppRefs }} [options]
    */
   constructor({
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
   } = {}) {
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
     this.registry = new InputRegistry();
     this._handleMouseMove = this._handleMouseMove.bind(this);
   }
@@ -37,8 +41,8 @@ export class ProximityWakeGesture {
 
   /** @param {MouseEvent} e */
   _handleMouseMove(e) {
-    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.win.echoLayerEl);
-    const tabManager = /** @type {any} */ (this.win.tabManager);
+    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
+    const tabManager = /** @type {any} */ (this.ctx.tabManager);
     if (!echoLayerEl || !tabManager || tabManager.isCascadeView) return;
 
     queryEchoes(echoLayerEl).forEach((echo) => {

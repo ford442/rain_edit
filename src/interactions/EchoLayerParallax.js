@@ -1,6 +1,8 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
 import { normalizedPointerInRect, queryEchoes } from "./depthState.js";
+import * as appContext from "../appContext.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * Drives the echo-layer's continuous mouse-parallax: per-echo depth
@@ -11,14 +13,16 @@ import { normalizedPointerInRect, queryEchoes } from "./depthState.js";
  */
 export class EchoLayerParallax {
   /**
-   * @param {{ doc?: Document, win?: Window }} [options]
+   * @param {{ doc?: Document, win?: Window, ctx?: AppRefs }} [options]
    */
   constructor({
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
   } = {}) {
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
     this.registry = new InputRegistry();
     this._handleMouseMove = this._handleMouseMove.bind(this);
   }
@@ -35,11 +39,11 @@ export class EchoLayerParallax {
 
   /** @param {MouseEvent} e */
   _handleMouseMove(e) {
-    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.win.echoLayerEl);
-    const tabManager = /** @type {any} */ (this.win.tabManager);
+    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
+    const tabManager = /** @type {any} */ (this.ctx.tabManager);
     if (!echoLayerEl || !tabManager || tabManager.isCascadeView) return;
 
-    const editorEl = /** @type {HTMLElement | undefined} */ (this.win.editorEl);
+    const editorEl = /** @type {HTMLElement | undefined} */ (this.ctx.editorEl);
     if (!editorEl) return;
     const { x, y } = normalizedPointerInRect(editorEl, e.clientX, e.clientY);
 

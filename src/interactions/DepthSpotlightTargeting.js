@@ -1,4 +1,3 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
 import { closestEcho } from "./depthState.js";
 

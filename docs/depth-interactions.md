@@ -6,15 +6,20 @@ of focused classes under `src/interactions/`, dispatched through the shared
 `InputManager` (`src/interactions/InputManager.js`) for anything bound to a
 key, and an `InputRegistry` (`src/interactions/InputRegistry.js`) for
 listener lifecycle. This doc lists every gesture family and which file owns
-it, so a new spatial feature has an obvious place to land instead of growing
-one of the `main_init_*.js` shards.
+it, so a new spatial feature has an obvious place to land.
 
 Every class in this list follows the same shape: a constructor that accepts
-its DOM/window/manager dependencies (with sensible `document`/`window`
-defaults), an `init()` that registers its keybinding(s) and/or starts its
+its dependencies — `doc`/`win` for events, `ctx` for app references
+(defaults to the `src/appContext.js` namespace: `echoLayerEl`, `editorEl`,
+`tabManager`, `raindrops`, …) and `state` for shared interaction flags
+(defaults to `src/interactions/interactionState.js`: `isPeelActive`,
+`lensActive`, `autofocusTargetZ`, …) — never `window.*` globals, an `init()` that registers its keybinding(s) and/or starts its
 `InputRegistry`-tracked listeners, and a `destroy()` that tears them down.
 `src/interactions/initDepthGestures.js` constructs and initializes all of
-them from `main_init_4.js`; add a new gesture's construction there.
+them; `src/boot/createApp.js` calls it once. Add a new gesture's
+construction there. Anything that animates per frame registers an
+`appClock` task (`src/runtime/AppClock.js`) or uses `appClock.nextFrame()`;
+private `requestAnimationFrame` loops fail `tests/architecture.test.js`.
 
 ## Shared helper
 
@@ -50,15 +55,15 @@ echo-document to the cursor", "compute mouse position local to an echo", or
 
 Non-spatial UI wiring (dock toggles, the view-mode `<select>`, weather
 controls, save/VPS actions, sonar, typing-particle/atmosphere effects,
-cursor-position semantic resonance) stays in `main_init_2.js` /
-`main_init_3.js` — those aren't depth/reveal/lens gestures, just event
-listeners for controls and editor feedback. A few small always-on
-`main_init_3.js` mousemove effects (the highlight-angle inset shadow,
-fabric-tear reveal speed) are cosmetic editor chrome, not part of the depth
-system, and were left in place.
+cursor-position semantic resonance) lives in `src/boot/` (`dockControls.js`,
+`appBindings.js`, `editorEffects.js`, `globalListeners.js`) and
+`src/effects/` — those aren't depth/reveal/lens gestures, just event
+listeners for controls and editor feedback. The small always-on mousemove
+effects (the highlight-angle inset shadow, fabric-tear reveal speed) are
+cosmetic editor chrome in `boot/globalListeners.js`.
 
-`main_init_1.js` no longer exists — every gesture it held was one of the
-extractions above.
+The legacy `main_vars_*.js` / `main_init_*.js` shards no longer exist and
+may not return (`tests/architecture.test.js`).
 
 ## Adding a new gesture
 
@@ -68,5 +73,6 @@ extractions above.
 2. Register any keybinding through the shared `inputManager` (see
    `InputManager.js` for the binding spec: `id`, `category`, `combo`,
    `type`, `onDown`/`onUp`).
-3. Construct it in `initDepthGestures.js`.
+3. Construct it in `initDepthGestures.js`. Read app refs through `ctx` and
+   shared flags through `state`; put per-frame work on the AppClock.
 4. Add a row to the table above.

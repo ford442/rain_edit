@@ -1,3 +1,5 @@
+import * as app from "../../appContext.js";
+import { appClock } from "../../runtime/AppClock.js";
 /**
  * X-ray lens (Ctrl+Alt+X), neon trace scanner (Alt+S), magnetic repulsion
  * field (hold M), and layer peek glass (Alt+K). Extracted from the
@@ -42,7 +44,6 @@ document.addEventListener("mousemove", (e) => {
 
 // Neon Trace Scanner (Alt + S)
 let isTraceScannerActive = false;
-let traceScannerRaf = null;
 let traceScannerY = 0;
 let traceScannerVelocity = 15;
 let traceScannerEl = null;
@@ -66,43 +67,42 @@ im.register({
 
     traceScannerEl.style.display = "block";
     traceScannerY = -100;
+  },
+});
 
-    const scanLoop = () => {
-      if (!isTraceScannerActive) return;
+// Advances on the shared AppClock while a sweep is in flight.
+appClock.register({
+  id: "neon-trace-scanner",
+  active: () => isTraceScannerActive && Boolean(traceScannerEl),
+  update: () => {
+    traceScannerY += traceScannerVelocity;
+    traceScannerEl.style.transform = `translateY(${traceScannerY}px)`;
 
-      traceScannerY += traceScannerVelocity;
-      traceScannerEl.style.transform = `translateY(${traceScannerY}px)`;
+    // Hit detection
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+        const rect = doc.getBoundingClientRect();
+        // Check if scanline intersects with document bounding box
+        if (traceScannerY > rect.top && traceScannerY < rect.bottom) {
+          doc.classList.add("trace-hit");
+          doc.style.setProperty("--trace-y-percent", `${((traceScannerY - rect.top) / rect.height) * 100}%`);
+        } else {
+          doc.classList.remove("trace-hit");
+        }
+      });
+    }
 
-      // Hit detection
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
-          const rect = doc.getBoundingClientRect();
-          // Check if scanline intersects with document bounding box
-          if (traceScannerY > rect.top && traceScannerY < rect.bottom) {
-            doc.classList.add("trace-hit");
-            doc.style.setProperty("--trace-y-percent", `${((traceScannerY - rect.top) / rect.height) * 100}%`);
-          } else {
-            doc.classList.remove("trace-hit");
-          }
+    if (traceScannerY > window.innerHeight + 100) {
+      // Reset or finish
+      isTraceScannerActive = false;
+      document.body.classList.remove("trace-scanner-active");
+      traceScannerEl.style.display = "none";
+      if (app.echoLayerEl) {
+        app.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+          doc.classList.remove("trace-hit");
         });
       }
-
-      if (traceScannerY > window.innerHeight + 100) {
-        // Reset or finish
-        isTraceScannerActive = false;
-        document.body.classList.remove("trace-scanner-active");
-        traceScannerEl.style.display = "none";
-        if (window.echoLayerEl) {
-          window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
-            doc.classList.remove("trace-hit");
-          });
-        }
-      } else {
-        traceScannerRaf = requestAnimationFrame(scanLoop);
-      }
-    };
-
-    traceScannerRaf = requestAnimationFrame(scanLoop);
+    }
   },
 });
 
@@ -124,8 +124,8 @@ im.register({
   onUp: () => {
     isMagneticRepulsionActive = false;
     document.body.classList.remove("magnetic-repulsion-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.style.removeProperty("--repulse-tx");
         doc.style.removeProperty("--repulse-ty");
         doc.style.removeProperty("--repulse-rot");
@@ -135,8 +135,8 @@ im.register({
 });
 
 document.addEventListener("mousemove", (e) => {
-  if (isMagneticRepulsionActive && window.echoLayerEl) {
-    const echoes = window.echoLayerEl.querySelectorAll(".echo-document");
+  if (isMagneticRepulsionActive && app.echoLayerEl) {
+    const echoes = app.echoLayerEl.querySelectorAll(".echo-document");
     const maxDist = 300;
     echoes.forEach(doc => {
       const rect = doc.getBoundingClientRect();
@@ -174,8 +174,8 @@ im.register({
   onDown: () => document.body.classList.add("layer-peek-glass-active"),
   onUp: () => {
     document.body.classList.remove("layer-peek-glass-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.classList.remove("peek-focus");
         doc.style.removeProperty("--peek-x");
         doc.style.removeProperty("--peek-y");
@@ -190,8 +190,8 @@ document.addEventListener("mousemove", (e) => {
     let target = document.elementFromPoint(e.clientX, e.clientY);
     let echoDoc = target ? target.closest(".echo-document") : null;
 
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach(doc => {
         if (doc === echoDoc) {
           doc.classList.add("peek-focus");
         } else {
