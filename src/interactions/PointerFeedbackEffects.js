@@ -1,6 +1,8 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
 import { queryEchoes } from "./depthState.js";
+import * as appContext from "../appContext.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * Small ambient pointer-feedback effects that don't warrant their own file:
@@ -9,14 +11,16 @@ import { queryEchoes } from "./depthState.js";
  */
 export class PointerFeedbackEffects {
   /**
-   * @param {{ doc?: Document, win?: Window }} [options]
+   * @param {{ doc?: Document, win?: Window, ctx?: AppRefs }} [options]
    */
   constructor({
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
   } = {}) {
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
     this.registry = new InputRegistry();
     this._handleMouseDown = this._handleMouseDown.bind(this);
     this._handleDoubleClick = this._handleDoubleClick.bind(this);
@@ -35,12 +39,12 @@ export class PointerFeedbackEffects {
 
   /** @param {MouseEvent} e */
   _handleMouseDown(e) {
-    const raindrops = /** @type {any} */ (this.win.raindrops);
+    const raindrops = /** @type {any} */ (this.ctx.raindrops);
     if (raindrops) raindrops.splash(e.clientX, e.clientY, 5);
   }
 
   _handleDoubleClick() {
-    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.win.echoLayerEl);
+    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
     if (!echoLayerEl) return;
 
     queryEchoes(echoLayerEl).forEach((echo) => {

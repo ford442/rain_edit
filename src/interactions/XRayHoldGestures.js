@@ -1,4 +1,6 @@
-// @ts-check
+import * as appContext from "../appContext.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * The two x-ray hold bindings: Ctrl/Cmd is the editor x-ray, Alt+Shift+X is
@@ -8,16 +10,18 @@
  */
 export class XRayHoldGestures {
   /**
-   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window }} options
+   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window, ctx?: AppRefs }} options
    */
   constructor({
     inputManager,
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
   }) {
     this.inputManager = inputManager;
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
   }
 
   init() {
@@ -30,12 +34,12 @@ export class XRayHoldGestures {
       preventDefault: false,
       allowInEditor: true,
       onDown: () => {
-        const editorEl = /** @type {HTMLElement | undefined} */ (this.win.editorEl);
+        const editorEl = /** @type {HTMLElement | undefined} */ (this.ctx.editorEl);
         if (editorEl) editorEl.classList.add("x-ray-active");
         this.doc.body.classList.add("x-ray-active");
       },
       onUp: () => {
-        const editorEl = /** @type {HTMLElement | undefined} */ (this.win.editorEl);
+        const editorEl = /** @type {HTMLElement | undefined} */ (this.ctx.editorEl);
         if (editorEl) editorEl.classList.remove("x-ray-active");
         this.doc.body.classList.remove("x-ray-active");
       },

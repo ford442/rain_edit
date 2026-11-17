@@ -1,3 +1,5 @@
+import * as app from "../../appContext.js";
+import { interactionState } from "../interactionState.js";
 /**
  * Depth-scanning tools: the Alt+wheel holographic depth cursor, the hold-B
  * depth beam, and the archway/Alt+wheel depth slicer. Extracted from the
@@ -6,7 +8,7 @@
  */
 export function initDepthCursor(im) {
 // Holographic Depth Cursor Logic
-window.cursorZDepth = 0;
+interactionState.cursorZDepth = 0;
 let depthCursorEl = document.getElementById("holographic-depth-cursor");
 
 document.addEventListener("wheel", (e) => {
@@ -21,17 +23,17 @@ document.addEventListener("wheel", (e) => {
     }
 
     // Adjust depth based on scroll (invert so scrolling down goes "deeper" / more negative)
-    window.cursorZDepth -= e.deltaY * 0.5;
+    interactionState.cursorZDepth -= e.deltaY * 0.5;
 
     // Clamp or let it go deep? Let's clamp between 500 and -5000
-    if (window.cursorZDepth > 500) window.cursorZDepth = 500;
-    if (window.cursorZDepth < -5000) window.cursorZDepth = -5000;
+    if (interactionState.cursorZDepth > 500) interactionState.cursorZDepth = 500;
+    if (interactionState.cursorZDepth < -5000) interactionState.cursorZDepth = -5000;
 
-    depthCursorEl.style.setProperty("--cursor-tz", `${window.cursorZDepth}px`);
+    depthCursorEl.style.setProperty("--cursor-tz", `${interactionState.cursorZDepth}px`);
 
     // Throttle intersection checks for performance
-    if (window.depthCursorThrottle) clearTimeout(window.depthCursorThrottle);
-    window.depthCursorThrottle = setTimeout(() => {
+    if (interactionState.depthCursorThrottle) clearTimeout(interactionState.depthCursorThrottle);
+    interactionState.depthCursorThrottle = setTimeout(() => {
       // Check intersection with echo-documents
       const echoes = document.querySelectorAll(".echo-document");
       echoes.forEach(doc => {
@@ -43,7 +45,7 @@ document.addEventListener("wheel", (e) => {
             const docZ = parseFloat(match[0]);
 
             // If within 150px depth, count as a hit
-            if (Math.abs(docZ - window.cursorZDepth) < 150) {
+            if (Math.abs(docZ - interactionState.cursorZDepth) < 150) {
               doc.classList.add("depth-cursor-hit");
               // Play a very subtle audio cue if it just entered the hit zone
               if (!doc.dataset.depthHitPlayed && window.AudioContext) {
@@ -125,8 +127,8 @@ im.register({
   onDown: () => document.body.classList.add("depth-beam-active"),
   onUp: () => {
     document.body.classList.remove("depth-beam-active");
-    if (echoLayerEl) {
-      echoLayerEl
+    if (app.echoLayerEl) {
+      app.echoLayerEl
         .querySelectorAll(".echo-document")
         .forEach((echo) => echo.classList.remove("depth-beam-intersect"));
     }
@@ -146,8 +148,8 @@ document.addEventListener("mousemove", (e) => {
       beam.style.transform = `translateZ(500px)`; // visually floating
     }
 
-    if (echoLayerEl) {
-      const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    if (app.echoLayerEl) {
+      const echoes = app.echoLayerEl.querySelectorAll(".echo-document");
       echoes.forEach((echo) => {
         const rect = echo.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
@@ -168,21 +170,21 @@ document.addEventListener("mousemove", (e) => {
 }
 
 export function initArchwayAndDepthSlicer(im) {
-window.archScrollOffset = 0;
+interactionState.archScrollOffset = 0;
 
 document.addEventListener("wheel", (e) => {
   if (document.body.classList.contains("archway-active") && e.altKey) {
     e.preventDefault();
     const delta = e.deltaY;
-    window.archScrollOffset += delta * 0.005; // Base scroll speed
-    if (window.tabManager && window.tabManager.isArchwayView) {
-        window.tabManager._renderEchoes();
+    interactionState.archScrollOffset += delta * 0.005; // Base scroll speed
+    if (app.tabManager && app.tabManager.isArchwayView) {
+        app.tabManager._renderEchoes();
     }
   }
 }, { passive: false });
 
 // Depth Slicer Logic (Alt + Scroll)
-window.__depthSliceIndex = 0;
+interactionState.depthSliceIndex = 0;
 im.register({
   id: "depth-slice",
   category: "depth",
@@ -197,8 +199,8 @@ im.register({
   },
   onUp: () => {
     document.body.classList.remove("depth-slice-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.classList.remove("depth-slice-hidden");
         doc.classList.remove("depth-slice-focus");
       });
@@ -210,9 +212,9 @@ document.addEventListener("wheel", (e) => {
   if (e.altKey && !document.body.classList.contains("archway-active")) {
     e.preventDefault();
     if (e.deltaY > 0) {
-      window.__depthSliceIndex++;
+      interactionState.depthSliceIndex++;
     } else {
-      window.__depthSliceIndex = Math.max(0, window.__depthSliceIndex - 1);
+      interactionState.depthSliceIndex = Math.max(0, interactionState.depthSliceIndex - 1);
     }
     updateDepthSlicer();
   }
@@ -220,16 +222,16 @@ document.addEventListener("wheel", (e) => {
 
 function updateDepthSlicer() {
   if (!document.body.classList.contains("depth-slice-active")) return;
-  if (window.echoLayerEl) {
-    const echoes = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
+  if (app.echoLayerEl) {
+    const echoes = Array.from(app.echoLayerEl.querySelectorAll(".echo-document"));
     // Limit max slice index to number of background documents
-    window.__depthSliceIndex = Math.min(window.__depthSliceIndex, Math.max(0, echoes.length - 1));
+    interactionState.depthSliceIndex = Math.min(interactionState.depthSliceIndex, Math.max(0, echoes.length - 1));
 
     echoes.forEach((doc, i) => {
       doc.classList.remove("depth-slice-hidden", "depth-slice-focus");
-      if (i < window.__depthSliceIndex) {
+      if (i < interactionState.depthSliceIndex) {
         doc.classList.add("depth-slice-hidden");
-      } else if (i === window.__depthSliceIndex) {
+      } else if (i === interactionState.depthSliceIndex) {
         doc.classList.add("depth-slice-focus");
       }
     });

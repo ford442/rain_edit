@@ -48,17 +48,30 @@ root/
   vite.config.js          # Vite config + custom glslify plugin
   git.sh                  # Simple helper: git add/commit/push
   src/
-    main.js               # Thin entry point; loads Monaco setup, state shards, then init shards
-    appContext.js         # Shared runtime refs (tabManager, editors, managers); prefer over window.*
-    main_vars_0.js - main_vars_2.js # Transitional global state/function shards (migrating to appContext)
-    main_init_0.js, main_init_2.js, main_init_3.js # Transitional side-effect initialization shards
-    main_init_4.js        # Boots echo-document + depth-gesture interactions and the InputManager dispatcher
+    main.js               # Entry point: imports and calls createApp() — nothing else
+    appContext.js         # Shared runtime refs (managers, editor, DOM roots, rain layers); never window.*
+    boot/
+      createApp.js        # The single, ordered construction graph (typed); starts the AppClock
+      domRefs.js          # One-time DOM lookups (typed) + #portal-visuals creation
+      appBindings.js      # App-level InputManager bindings (registered before echo bindings)
+      dockControls.js     # Dock controls → owners (view mode uses sessionSchema VIEW_MODE_TOGGLES)
+      editorEffects.js    # Monaco editor events → rain/fog/resonance/atmosphere/portals
+      globalListeners.js  # window/document glue (resize, cabinet rain events, ghost, sonar chord)
+      fileActions.js      # Local/VPS save, note save, open-from-cabinet
+      initialContent.js   # First-visit demo file + reference markdown
+    runtime/
+      AppClock.js         # The one main-thread RAF: tasks, visibility pause, nextFrame, LOD (typed)
+    effects/              # Per-feature effects driven by AppClock tasks: MatrixRain, HoloDust,
+                          # FocusDepth, CinematicFocus, Wiper, PortalMasks, Sonar, Atmosphere,
+                          # particles, zScan, tearSound, editorResonance
     editor/
       setupMonaco.js      # Sole Monaco language/worker registration point
     interactions/
       InputManager.js     # Unified keyboard registry + cheatsheet
       InputRegistry.js    # Listener lifecycle/disposal helper
-      EchoDocumentInteractions.js # Echo depth gestures, peel/fan/portal modes (from legacy main_init_4);
+      interactionState.js # Shared mutable interaction flags (peel/fan/lens/autofocus/…); never window.*
+      explodeView.js      # Explode-view toggle (dock button + Ctrl/Cmd+Alt+E)
+      EchoDocumentInteractions.js # Echo depth gestures, peel/fan/portal modes;
                           # thin orchestrator over echo/*.js (split by feature to stay under ~700 lines/file)
       echo/               # initEchoDocumentInteractions's feature modules: depthScanningTools,
                           # revealToggles, depthPeelGestures, pointerEffectsMousemove,
@@ -71,8 +84,8 @@ root/
       EchoLayerParallax.js, ShiftLensGesture.js, WormholeGesture.js, PeelFanGesture.js,
       PointerHoldGestures.js, TesseractDragGesture.js, MagnifierLoupeGesture.js,
       ProximityWakeGesture.js, SiphonInteraction.js, XRayHoldGestures.js,
-      PointerFeedbackEffects.js # Depth/reveal/lens gesture classes extracted from main_init_1 — see docs/depth-interactions.md
-      initDepthGestures.js # Constructs + inits every class above; called once from main_init_4.js
+      PointerFeedbackEffects.js # Depth/reveal/lens gesture classes (take ctx/state deps) — see docs/depth-interactions.md
+      initDepthGestures.js # Constructs + inits every class above; called once from boot/createApp.js
       initInteractions.js # Starts InputManager after all bindings register
     tabManager/
       core.js             # Tab lifecycle (active file, depth, persistence)
@@ -120,7 +133,8 @@ root/
       image-loader.js
       random.js
       times.js
-    rain/                 # Off-main-thread water-map (WaterMapSim, worker, wasm) + WeatherSystem
+    rain/                 # Off-main-thread water-map (WaterMapSim, worker, wasm) + WeatherSystem;
+                          # RainScene.js = the AppClock `rain` task (sim, layers, cabinet upload)
     audio/                # Optional ambient audio (WeatherAudio rain bed)
     workspace/            # Session persist/restore, local project, export/import
   crates/
@@ -136,17 +150,18 @@ root/
 
 ### Module relationships
 
-- `main.js` is the build entry point. It loads `editor/setupMonaco.js` once, then the transitional `main_vars_*` state shards followed by `main_init_*` initialization shards. Prefer `appContext.js` for shared manager references; `window.tabManager` remains for debug automation only.
-- New or extracted interactions belong in `src/interactions/` as named classes/functions with explicit DOM or manager dependencies, an `init()`/`destroy()` lifecycle, and focused tests. Do not add new `window.*` globals.
-- `main_vars_*` and `main_init_0`, `main_init_2`, `main_init_3` remain legacy migration surfaces (there is no longer a `main_init_1.js` — every gesture it held moved into `src/interactions/`). Echo-document keyboard/mouse interactions live in `interactions/EchoDocumentInteractions.js`; the depth/reveal/lens gesture classes extracted from the old `main_init_1.js` mousemove handler are documented in `docs/depth-interactions.md`.
+- `main.js` is the build entry point and only calls `createApp()` (`src/boot/createApp.js`). `createApp` is the one explicit construction graph: DOM refs → managers (published with `setAppContext(...)`) → workspace session → `RainScene` + effects → listeners, dock, editor effects, app keyboard bindings → echo interactions + depth gestures → `inputManager` start → AppClock tasks → `clock.start()`. Add new wiring there (or in a `src/boot/` / `src/effects/` module it calls), never as an import side effect.
+- **Shared state:** managers/DOM roots/rain layers live in `src/appContext.js` (import a named live binding, or pass `import * as appContext` as a `ctx` dependency). Mutable interaction flags live in `src/interactions/interactionState.js`. `window.tabManager` is the **only** window global the app installs — a documented debug alias. `tests/architecture.test.js` fails on any other `window.*` / `globalThis.*` assignment.
+- **Frame clock:** `src/runtime/AppClock.js` exports the single main-thread clock `appClock`. Per-frame work registers `appClock.register({ id, update?(dt, t), render?(dt, t), active?(), priority? })`; one-shot "next frame" work uses `appClock.nextFrame(cb)`. Each tick runs every active task's `update`, then every `render`, in registration order. The clock pauses while `document.hidden`, and drops to low LOD on sustained slow frames or a discharging battery under 20% (`?lod=auto|low|high`, `localStorage['rain-edit:lod']`): `priority: "decorative"` tasks (fog, matrix, dust, minimap) are skipped and rain DPR caps at 1. `requestAnimationFrame` may only appear in `AppClock.js` and worker files (`src/rain/rainSimWorker.js` keeps its own RAF on the worker thread) — enforced by `tests/architecture.test.js`. Inspect at runtime via `appContext.clock.getDiagnostics()`.
+- New or extracted interactions belong in `src/interactions/` as named classes/functions with explicit DOM or manager dependencies (`ctx`/`state` options, not `window`), an `init()`/`destroy()` lifecycle, and focused tests. Echo-document keyboard/mouse interactions live in `interactions/EchoDocumentInteractions.js`; the depth/reveal/lens gesture classes are documented in `docs/depth-interactions.md`. The legacy `main_vars_*` / `main_init_*` shards are gone and may not return.
 - `TabManager` owns the list of open files, switches active models in Monaco, manages per-file depth (0/1/2), and renders background echoes in `#echo-layer`. It implements 25+ CSS-driven 3D view modes.
 - `ReferenceManager` owns `#reference-layer` and `#reference-overlay`. It parses markdown into floating cards and handles lantern/spotlight/frost interactions, drag-and-drop, and rain-shield clearing.
 - `ConnectionManager` draws on the radar canvas (`#radar-canvas`) using 2D canvas. It receives reference card data from `ReferenceManager` and echo targets from the DOM.
 - `StorageAPI` is a thin REST client. It is consumed by `Cabinet3D`, `VPSFileBrowser`, and `main.js`.
-- `Cabinet3D` dispatches a custom `fileCubeClicked` event on `window`; `main.js` listens for it to open files and adjust depth focus.
+- `Cabinet3D` dispatches a custom `fileCubeClicked` event on `window`; `boot/fileActions.js` handles it to open files and adjust depth focus.
 - `createGLContext` is the single context factory. Rain prefers WebGL2, falls back to WebGL1, and uses non-antialiased, non-preserved drawing buffers. Cabinet rendering is synchronized immediately before cross-context texture upload, so its drawing buffer is also non-preserved by default. See `docs/rendering-contexts.md` before changing this frame order.
-- `RainLayer` caches texture sources and uniform values, pauses the shared rain RAF on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy.
-- `window.tabManager` is intentionally exposed on the global object for manual/debug automation.
+- `RainLayer` caches texture sources and uniform values, idles the AppClock `rain` task on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy. The cabinet has no loop of its own: the `rain` task renders it and uploads its canvas in the same tick, and a fallback `cabinet` task renders it only when rain can't.
+- `window.tabManager` is intentionally exposed on the global object for manual/debug automation. Smoke tests read everything else from the live `/src/appContext.js` module (`await import("/src/appContext.js")` in the page).
 - Water-map simulation lives behind `src/rain/WaterMapSim.js`. It prefers an off-main-thread worker (`js` OffscreenCanvas or `wasm` Rust pixel sim in `crates/rain-sim`), and falls back to `src/vendor/raindrops.js` on the main thread. Toggle with the dock **Rain Sim** control, `?rainSim=wasm|js|main|auto`, or `localStorage['rain-edit:rainSimBackend']`. Rebuild the wasm artifact with `npm run build:wasm` (Vite imports `src/rain/wasm/rain_sim.wasm` via `?url` — no public/ copy).
 - `src/rain/WeatherSystem.js` is the control surface for rain "feel": it drives `raindrops.options.{rainChance,dropletsRate,maxDrops,trailRate,globalTimeScale}` and the `RainLayer` refraction uniforms from a damped editor-activity signal (typing/cursor/focus) plus a `drizzle`/`steady`/`storm`/`clearing` weather-mode state machine (`src/rain/weatherModes.js`). Switch modes from the dock's **Weather** select, `?weather=`, or `localStorage['rain-edit:weatherMode']`. It is the single owner of those options — do not write `raindrops.options.rainChance`/`dropletsRate` elsewhere; use `setManualIntensity()`/`setSceneMultiplier()` instead. `src/audio/WeatherAudio.js` is an optional muted-by-default ambient rain bed that follows the mode. See `docs/water-map-sim.md` for the full API.
 - Workspace sessions live in `src/workspace/` (`WorkspaceSession`, `LocalProject`). Refresh restores tabs (content + depth), view mode, and reference layouts from IndexedDB (localStorage fallback). Dirty tabs show `*`; `beforeunload` confirms. Optional remote sync writes note `__rain_workspace_session__.json` via StorageAPI. See `docs/workspace-session.md`.
@@ -223,13 +238,19 @@ typechecking fails CI, not just a local run.
 
 How it works:
 
-- **`jsconfig.json`** is strict with `checkJs: true`, but its `include` list is
-  curated: only files that are fully annotated and pass today are type-checked.
-  Typed seams today: `src/StorageAPI.js` (response shapes in
+- **`jsconfig.json`** is strict with `checkJs: false`: a `.js` file is
+  type-checked only when it starts with `// @ts-check` (every `.js` in
+  `include` must; `tests/architecture.test.js` enforces it). This lets a typed
+  seam such as `createApp.js` import untyped modules without pulling their
+  bodies into the strict program — their types are still inferred. The
+  `include` list is curated: only files that are fully annotated and pass
+  today. Typed seams today: `src/StorageAPI.js` (response shapes in
   `src/types/storage.d.ts`), `src/rendering/createGLContext.js`,
-  `src/interactions/InputManager.js` + `InputRegistry.js`, and the water-map sim
-  seam `src/rain/WaterMapSim.js` + `optionsCodec.js` + `resolveBackend.js`. None
-  leak `any`/loose `object` from their public APIs.
+  `src/interactions/InputManager.js` + `InputRegistry.js`, the water-map sim
+  seam `src/rain/WaterMapSim.js` + `optionsCodec.js` + `resolveBackend.js`, the
+  frame clock `src/runtime/AppClock.js`, and the boot seam
+  `src/boot/createApp.js` + `domRefs.js`. Do not put `// @ts-check` on a file
+  that doesn't pass — it is checked as soon as a typed seam imports it.
 - **Mixin-composed managers** (`TabManager`, `Cabinet3D`) and the WebGL-heavy
   `RainLayer` have **authored sibling `.d.ts` files** (`TabManager.d.ts`,
   `Cabinet3D.d.ts`, `RainLayer.d.ts`) describing their trusted public APIs.
@@ -245,17 +266,16 @@ How it works:
 
 ### Promoting a new file into `include`
 
-1. Add JSDoc types (and a `// @ts-check` pragma for clarity — `checkJs` is already
-   on globally) to the `.js` file, reusing shapes from `src/types/*.d.ts` or
+1. Add JSDoc types and a `// @ts-check` first line (required — `checkJs` is
+   off, so without it the file is not checked) to the `.js` file, reusing shapes from `src/types/*.d.ts` or
    `@typedef`s colocated in the file/module being typed.
 2. Add the file's path to the `include` array in `jsconfig.json`, then run
    `npm run typecheck`.
-3. **Any module the new file imports is pulled into the type-checked program too**,
-   even if it's not itself listed in `include` — `strict` + `checkJs` apply to every
-   `.js` file reachable from a root file. Expect a cascade of errors from an
-   untyped dependency (implicit-`any` params, `this` typed `any` in prototype-style
-   constructors, etc.). Resolve each dependency with the lightest fix that keeps
-   its own body out of the checked set where practical:
+3. **Any imported module that carries `// @ts-check` is type-checked too**, even
+   if it's not itself listed in `include`; imports without the pragma only
+   contribute inferred types. When a typed seam needs precise types from an
+   untyped dependency, resolve it with the lightest fix that keeps the
+   dependency's own body out of the checked set where practical:
    - A small, stable dependency: add minimal JSDoc directly to it (see
      `optionsCodec.js`/`resolveBackend.js`) and list it in `include` alongside the
      seam that needs it.
@@ -328,7 +348,7 @@ window.dispatchEvent(
 );
 ```
 
-`main.js` listens and handles depth focus logic.
+`boot/fileActions.js` (`openCabinetFile`) handles it, including the depth focus logic.
 
 ### Shader imports
 
@@ -373,5 +393,5 @@ new gesture gets wired up.
 - **Runtime**: Node 22 (`package.json` requires `>=22.0.0`). Dependencies install with plain `npm install`; the startup update script already runs this, so you normally do not need to reinstall.
 - **Run the app (dev)**: `npm run dev` (Vite dev server, default port `5173`). Standard commands live in the `Build & Dev Commands` section above and in `package.json` — don't duplicate them. `dev.log` in the repo shows a past run using `--host 0.0.0.0 --port 3000`; that host/port is arbitrary, the app works on the default `5173`.
 - **Lint/tests**: no linter is configured. Use `npm test` for focused Node tests, `npm run check` for the JavaScript parse gate, `npm run test:smoke` for the canonical browser smoke, and `npm run ci` for the complete local gate.
-- **`src/` is split into many hand-maintained fragment files** (`main_*.js`, `TabManager_*.js`, `Cabinet3D_*.js`, `styles_*.css`, etc.). Vite fails hard on any single syntax error in these: `npm run dev` shows a blank page with a `Failed to scan for dependencies` / `Pre-transform error` in the Vite terminal, and `npm run build` aborts with `invalid JS syntax`. If the app renders blank, first check the Vite terminal (or run `node_modules/.bin/esbuild <file> --outfile=/dev/null` on suspect files) to locate the offending fragment before debugging anything else.
+- **`src/` is split into many hand-maintained module files** (`boot/*.js`, `tabManager/*.js`, `cabinet3d/*.js`, `styles_*.css`, etc.). Vite fails hard on any single syntax error in these: `npm run dev` shows a blank page with a `Failed to scan for dependencies` / `Pre-transform error` in the Vite terminal, and `npm run build` aborts with `invalid JS syntax`. If the app renders blank, first check the Vite terminal (or run `node_modules/.bin/esbuild <file> --outfile=/dev/null` on suspect files) to locate the offending fragment before debugging anything else.
 - **Backend**: `StorageAPI.js` calls the remote FastAPI backend at `https://storage.noahcohn.com` (override with `VITE_STORAGE_BASE_URL`). There is no local backend to run — File Cabinet / VPS Files features depend on that remote host being reachable. The editor, rain effects, tabs, and view modes all work fully offline without it.

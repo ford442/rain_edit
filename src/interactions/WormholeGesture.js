@@ -1,6 +1,8 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
 import { queryEchoes } from "./depthState.js";
+import * as appContext from "../appContext.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * Gravitational wormhole (hold Ctrl+Alt): pulls nearby echoes toward the
@@ -8,16 +10,18 @@ import { queryEchoes } from "./depthState.js";
  */
 export class WormholeGesture {
   /**
-   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window }} options
+   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window, ctx?: AppRefs }} options
    */
   constructor({
     inputManager,
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
   }) {
     this.inputManager = inputManager;
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
     this.registry = new InputRegistry();
     this.isActive = false;
     this._handleMouseMove = this._handleMouseMove.bind(this);
@@ -37,7 +41,7 @@ export class WormholeGesture {
       },
       onUp: () => {
         this.isActive = false;
-        const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.win.echoLayerEl);
+        const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
         queryEchoes(echoLayerEl).forEach((echo) => {
           echo.style.removeProperty("--wormhole-tx");
           echo.style.removeProperty("--wormhole-ty");
@@ -58,7 +62,7 @@ export class WormholeGesture {
   /** @param {MouseEvent} e */
   _handleMouseMove(e) {
     if (!this.isActive) return;
-    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.win.echoLayerEl);
+    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
     if (!echoLayerEl) return;
 
     queryEchoes(echoLayerEl).forEach((echo) => {

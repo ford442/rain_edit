@@ -20,7 +20,7 @@ import { initSpatialDispersionEffects } from "./echo/spatialDispersionEffects.js
  */
 export function initEchoDocumentInteractions() {
   const im = inputManager;
-  const tabManager = appTabManager ?? window.tabManager;
+  const tabManager = appTabManager;
 
   initDepthCursor(im);
   initRevealToggles(im);

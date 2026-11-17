@@ -15,6 +15,7 @@ export const VIEW_MODE_TOGGLES = {
   "luminous-cortex": "toggleLuminousCortexView",
   "starlight-mesh": "toggleStarlightMeshView",
   "zenith-spiral": "toggleZenithSpiralView",
+  "shattered-glass": "toggleShatteredGlassView",
   theater: "toggleTheaterView",
   tornado: "toggleTornadoView",
   "quantum-web": "toggleQuantumWebView",

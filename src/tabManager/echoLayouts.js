@@ -7,6 +7,7 @@ import {
   _extractSymbols,
   _symbolKindIcon,
 } from "../TabManager.js";
+import { interactionState } from "../interactions/interactionState.js";
 
 /** Per-view echo-document CSS variable layouts (chunked dispatch chain). */
 export const TabManagerEchoLayoutsMixin = {
@@ -519,7 +520,7 @@ export const TabManagerEchoLayoutsMixin = {
       const index = parseInt(el.dataset.index || 0);
 
       // Allow continuous cycling using scrollRotation added via main.js
-      const scrollOffset = window.archScrollOffset || 0;
+      const scrollOffset = interactionState.archScrollOffset || 0;
 
       const ARCH_ANGLE_SPAN = Math.PI * 1.1;
       const ANGLE_STEP = ARCH_ANGLE_SPAN / Math.min(15, totalEchoes);

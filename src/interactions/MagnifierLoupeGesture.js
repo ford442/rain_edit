@@ -1,6 +1,8 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
 import { queryEchoes } from "./depthState.js";
+import * as appContext from "../appContext.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * Loupe magnifier (hold Cmd+Shift): while held, echoes within range of the
@@ -10,16 +12,18 @@ import { queryEchoes } from "./depthState.js";
  */
 export class MagnifierLoupeGesture {
   /**
-   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window }} options
+   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window, ctx?: AppRefs }} options
    */
   constructor({
     inputManager,
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
   }) {
     this.inputManager = inputManager;
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
     this.registry = new InputRegistry();
     this.isActive = false;
     this._handleMouseMove = this._handleMouseMove.bind(this);
@@ -36,14 +40,14 @@ export class MagnifierLoupeGesture {
       allowInEditor: true,
       onDown: () => {
         this.isActive = true;
-        const editorEl = /** @type {HTMLElement | undefined} */ (this.win.editorEl);
+        const editorEl = /** @type {HTMLElement | undefined} */ (this.ctx.editorEl);
         if (editorEl) editorEl.classList.add("x-ray-active");
       },
       onUp: () => {
         this.isActive = false;
-        const editorEl = /** @type {HTMLElement | undefined} */ (this.win.editorEl);
+        const editorEl = /** @type {HTMLElement | undefined} */ (this.ctx.editorEl);
         if (editorEl) editorEl.classList.remove("x-ray-active");
-        const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.win.echoLayerEl);
+        const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
         queryEchoes(echoLayerEl).forEach((echo) => echo.classList.remove("loupe-active"));
       },
     });
@@ -59,8 +63,8 @@ export class MagnifierLoupeGesture {
   /** @param {MouseEvent} e */
   _handleMouseMove(e) {
     if (!this.isActive) return;
-    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.win.echoLayerEl);
-    const tabManager = /** @type {any} */ (this.win.tabManager);
+    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
+    const tabManager = /** @type {any} */ (this.ctx.tabManager);
     if (!echoLayerEl || !tabManager || tabManager.isCascadeView) return;
 
     queryEchoes(echoLayerEl).forEach((echo) => {

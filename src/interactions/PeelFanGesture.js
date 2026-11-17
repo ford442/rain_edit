@@ -1,24 +1,32 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
 import { queryEchoes } from "./depthState.js";
+import * as appContext from "../appContext.js";
+import { interactionState } from "./interactionState.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
+/** @typedef {typeof import("./interactionState.js").interactionState} InteractionState */
 
 /**
  * Per-frame fan-out math for the Peel gesture (Alt+Shift+Q). The binding
- * that flips `window.isPeelActive` and does enter/exit cleanup lives in
- * `EchoDocumentInteractions.js`; this class only reacts to it while active,
+ * that flips `interactionState.isPeelActive` and does enter/exit cleanup
+ * lives in `echo/depthPeelGestures.js`; this class only reacts to it while active,
  * spreading echoes vertically based on cursor Y and skipping any echo view
  * mode that owns its own layout transform.
  */
 export class PeelFanGesture {
   /**
-   * @param {{ doc?: Document, win?: Window }} [options]
+   * @param {{ doc?: Document, win?: Window, ctx?: AppRefs, state?: InteractionState }} [options]
    */
   constructor({
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
+    state = interactionState,
   } = {}) {
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
+    this.state = state;
     this.registry = new InputRegistry();
     this._handleMouseMove = this._handleMouseMove.bind(this);
   }
@@ -35,9 +43,9 @@ export class PeelFanGesture {
 
   /** @param {MouseEvent} e */
   _handleMouseMove(e) {
-    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.win.echoLayerEl);
-    const tabManager = /** @type {any} */ (this.win.tabManager);
-    if (!this.win.isPeelActive || !echoLayerEl || !tabManager) return;
+    const echoLayerEl = /** @type {HTMLElement | undefined} */ (this.ctx.echoLayerEl);
+    const tabManager = /** @type {any} */ (this.ctx.tabManager);
+    if (!this.state.isPeelActive || !echoLayerEl || !tabManager) return;
     if (
       tabManager.isCascadeView ||
       tabManager.isOrbitView ||

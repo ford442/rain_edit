@@ -1,4 +1,3 @@
-// @ts-check
 import { inputManager } from "./InputManager.js";
 import { AmbientCursorField } from "./AmbientCursorField.js";
 import { CinematicAutofocusTargeting } from "./CinematicAutofocusTargeting.js";
@@ -17,9 +16,10 @@ import { PointerFeedbackEffects } from "./PointerFeedbackEffects.js";
 
 /**
  * Bootstraps every depth/reveal/lens gesture class extracted out of the
- * `main_init_*.js` shards. A new spatial gesture belongs in its own file
- * under `src/interactions/`; add its construction here rather than growing
- * an init shard. See `docs/depth-interactions.md` for the full gesture list
+ * legacy `main_init_*.js` shards; called once from `boot/createApp.js`. A
+ * new spatial gesture belongs in its own file under `src/interactions/`; add
+ * its construction here. Per-frame work goes on the AppClock
+ * (`runtime/AppClock.js`), never a private requestAnimationFrame loop. See `docs/depth-interactions.md` for the full gesture list
  * and which class owns each one.
  */
 export function initDepthGestures(manager = inputManager) {

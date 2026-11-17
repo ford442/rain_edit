@@ -1,3 +1,8 @@
+import * as app from "../../appContext.js";
+import { interactionState } from "../interactionState.js";
+import { toggleExplodeView } from "../explodeView.js";
+import { playTearSound } from "../../effects/tearSound.js";
+import { appClock } from "../../runtime/AppClock.js";
 /**
  * Single-class reveal/depth toggle bindings (card shuffle, explode view,
  * focus pull, sonar pulse, prism depth, depth scan, depth lens, fanning,
@@ -6,11 +11,12 @@
  * EchoDocumentInteractions.js purely to keep file size down.
  */
 export function initRevealToggles(im) {
-window.isSteppedCraterActive = false;
-window.isFoldOutGalleryActive = false;
-window.isCardShuffleActive = false;
-window.isDepthScanActive = false;
-window.__depthScanTarget = 0;
+const portalToggle = () => /** @type {HTMLInputElement | null} */ (document.getElementById("portal-mode-toggle"));
+interactionState.isSteppedCraterActive = false;
+interactionState.isFoldOutGalleryActive = false;
+interactionState.isCardShuffleActive = false;
+interactionState.isDepthScanActive = false;
+interactionState.depthScanTarget = 0;
 
 // Card Shuffle Spread (Alt + Shift + D)
 im.register({
@@ -20,13 +26,13 @@ im.register({
   combo: { alt: true, shift: true, code: "KeyD" },
   type: "hold",
   onDown: () => {
-    if (!window.isCardShuffleActive) {
-      window.isCardShuffleActive = true;
+    if (!interactionState.isCardShuffleActive) {
+      interactionState.isCardShuffleActive = true;
       document.body.classList.add("card-shuffle-active");
     }
   },
   onUp: () => {
-    window.isCardShuffleActive = false;
+    interactionState.isCardShuffleActive = false;
     document.body.classList.remove("card-shuffle-active");
   },
 });
@@ -38,7 +44,7 @@ im.register({
   description: "Explode view (Ctrl+Alt+E)",
   combo: { ctrlOrMeta: true, alt: true, code: "KeyE" },
   type: "action",
-  onDown: () => window.triggerExplodeView(),
+  onDown: () => toggleExplodeView(),
 });
 
 // Focus Pull Interaction (Alt + F)
@@ -75,6 +81,24 @@ im.register({
   onUp: () => document.body.classList.remove("prism-depth-active"),
 });
 
+// Depth x-ray scan sweep: runs on the shared AppClock while Alt+Z is held.
+appClock.register({
+  id: "depth-scan-sweep",
+  active: () => interactionState.isDepthScanActive,
+  update: () => {
+    interactionState.depthScanTarget = (interactionState.depthScanTarget + 0.1) % 15;
+    document.body.style.setProperty("--scan-depth", interactionState.depthScanTarget);
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+        const idx = parseInt(doc.dataset.index || 0, 10);
+        const dist = Math.abs(idx - interactionState.depthScanTarget);
+        if (dist < 1.5) doc.classList.add("scan-highlight");
+        else doc.classList.remove("scan-highlight");
+      });
+    }
+  },
+});
+
 // Depth X-Ray Scan (Alt + Z)
 im.register({
   id: "depth-scan",
@@ -83,31 +107,16 @@ im.register({
   combo: { alt: true, code: "KeyZ" },
   type: "hold",
   onDown: () => {
-    if (window.isDepthScanActive) return;
-    window.isDepthScanActive = true;
+    if (interactionState.isDepthScanActive) return;
+    interactionState.isDepthScanActive = true;
     document.body.classList.add("depth-scan-active");
-    window.__depthScanTarget = 0;
-    const animateScan = () => {
-      if (!window.isDepthScanActive) return;
-      window.__depthScanTarget = (window.__depthScanTarget + 0.1) % 15;
-      document.body.style.setProperty("--scan-depth", window.__depthScanTarget);
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
-          const idx = parseInt(doc.dataset.index || 0, 10);
-          const dist = Math.abs(idx - window.__depthScanTarget);
-          if (dist < 1.5) doc.classList.add("scan-highlight");
-          else doc.classList.remove("scan-highlight");
-        });
-      }
-      requestAnimationFrame(animateScan);
-    };
-    requestAnimationFrame(animateScan);
+    interactionState.depthScanTarget = 0;
   },
   onUp: () => {
-    window.isDepthScanActive = false;
+    interactionState.isDepthScanActive = false;
     document.body.classList.remove("depth-scan-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl
+    if (app.echoLayerEl) {
+      app.echoLayerEl
         .querySelectorAll(".echo-document")
         .forEach((doc) => doc.classList.remove("scan-highlight"));
     }
@@ -145,11 +154,11 @@ im.register({
   combo: { alt: true, code: "KeyC" },
   type: "hold",
   onDown: () => {
-    if (window.isFanningActive) return;
-    window.isFanningActive = true;
+    if (interactionState.isFanningActive) return;
+    interactionState.isFanningActive = true;
     document.body.classList.add("fanning-active");
-    if (echoLayerEl) {
-      const echoes = echoLayerEl.querySelectorAll(".echo-document:not(.peek)");
+    if (app.echoLayerEl) {
+      const echoes = app.echoLayerEl.querySelectorAll(".echo-document:not(.peek)");
       const total = echoes.length;
       if (total > 0) {
         const maxAngle = Math.min(120, total * 15);
@@ -171,10 +180,10 @@ im.register({
     }
   },
   onUp: () => {
-    window.isFanningActive = false;
+    interactionState.isFanningActive = false;
     document.body.classList.remove("fanning-active");
-    if (echoLayerEl) {
-      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
         echo.style.removeProperty("--fan-tx");
         echo.style.removeProperty("--fan-ty");
         echo.style.removeProperty("--fan-tz");
@@ -192,13 +201,13 @@ im.register({
   combo: { alt: true, code: "KeyP" },
   type: "toggle",
   onDown: () => {
-    window.isPortalModeActive = true;
-    if (portalToggle) portalToggle.checked = true;
+    interactionState.isPortalModeActive = true;
+    if (portalToggle()) portalToggle().checked = true;
     document.body.classList.add("portal-mode-active");
   },
   onUp: () => {
-    window.isPortalModeActive = false;
-    if (portalToggle) portalToggle.checked = false;
+    interactionState.isPortalModeActive = false;
+    if (portalToggle()) portalToggle().checked = false;
     document.body.classList.remove("portal-mode-active");
   },
 });
@@ -238,7 +247,7 @@ document.addEventListener("mousemove", (e) => {
 });
 
 // Fabric Tear (Alt + T) — merges the old class toggle with the tear sound that
-// lived in a duplicate Alt+T listener in main_init_3.
+// lived in a duplicate Alt+T listener in the legacy main_init_3 shard.
 im.register({
   id: "fabric-tear",
   category: "reveal",
@@ -249,12 +258,12 @@ im.register({
   onDown: () => {
     if (!document.body.classList.contains("fabric-tear-active")) {
       document.body.classList.add("fabric-tear-active");
-      if (typeof window.playTearSound === "function") window.playTearSound();
+      playTearSound();
     }
   },
   onUp: () => {
     document.body.classList.remove("fabric-tear-active");
-    if (editorEl) editorEl.style.removeProperty("--tear-mask");
+    if (app.editorEl) app.editorEl.style.removeProperty("--tear-mask");
   },
 });
 
@@ -299,13 +308,13 @@ im.register({
   combo: { alt: true, shift: true, code: "KeyB" },
   type: "hold",
   onDown: () => {
-    if (!window.isVenetianBlindsActive) {
-      window.isVenetianBlindsActive = true;
+    if (!interactionState.isVenetianBlindsActive) {
+      interactionState.isVenetianBlindsActive = true;
       document.body.classList.add("venetian-blinds-interaction-active");
     }
   },
   onUp: () => {
-    window.isVenetianBlindsActive = false;
+    interactionState.isVenetianBlindsActive = false;
     document.body.classList.remove("venetian-blinds-interaction-active");
   },
 });
@@ -318,16 +327,16 @@ im.register({
   combo: { alt: true, shift: true, code: "KeyC" },
   type: "hold",
   onDown: () => {
-    if (!window.isSteppedCraterActive) {
-      window.isSteppedCraterActive = true;
+    if (!interactionState.isSteppedCraterActive) {
+      interactionState.isSteppedCraterActive = true;
       document.body.classList.add("stepped-crater-active");
     }
   },
   onUp: () => {
-    window.isSteppedCraterActive = false;
+    interactionState.isSteppedCraterActive = false;
     document.body.classList.remove("stepped-crater-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl
+    if (app.echoLayerEl) {
+      app.echoLayerEl
         .querySelectorAll(".echo-document")
         .forEach((doc) => doc.style.removeProperty("--crater-radius"));
     }
@@ -342,11 +351,11 @@ im.register({
   combo: { alt: true, shift: true, code: "KeyG" },
   type: "hold",
   onDown: () => {
-    if (window.isFoldOutGalleryActive) return;
-    window.isFoldOutGalleryActive = true;
+    if (interactionState.isFoldOutGalleryActive) return;
+    interactionState.isFoldOutGalleryActive = true;
     document.body.classList.add("fold-out-gallery-active");
-    if (window.echoLayerEl) {
-      const echoes = Array.from(window.echoLayerEl.querySelectorAll(".echo-document"));
+    if (app.echoLayerEl) {
+      const echoes = Array.from(app.echoLayerEl.querySelectorAll(".echo-document"));
       const total = echoes.length;
       echoes.forEach((doc, i) => {
         const isRight = i % 2 === 0;
@@ -364,10 +373,10 @@ im.register({
     }
   },
   onUp: () => {
-    window.isFoldOutGalleryActive = false;
+    interactionState.isFoldOutGalleryActive = false;
     document.body.classList.remove("fold-out-gallery-active");
-    if (window.echoLayerEl) {
-      window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+    if (app.echoLayerEl) {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
         doc.style.removeProperty("--fold-tx");
         doc.style.removeProperty("--fold-ty");
         doc.style.removeProperty("--fold-tz");

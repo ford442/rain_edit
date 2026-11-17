@@ -1159,17 +1159,4 @@ export const Cabinet3DMethodsMixin = {
       mesh.rotation.y = t * 0.4 + i * 0.5;
     });
   },
-  _loop() {
-    this._rafId = requestAnimationFrame(() => this._loop());
-    this.renderFrame();
-  },
-  _startLoop() {
-    if (this._rafId !== null) return;
-    this._loop();
-  },
-  _stopLoop() {
-    if (this._rafId === null) return;
-    cancelAnimationFrame(this._rafId);
-    this._rafId = null;
-  },
 };

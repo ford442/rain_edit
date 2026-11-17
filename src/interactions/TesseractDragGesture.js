@@ -1,5 +1,7 @@
-// @ts-check
 import { InputRegistry } from "./InputRegistry.js";
+import * as appContext from "../appContext.js";
+
+/** @typedef {Partial<typeof import("../appContext.js")>} AppRefs */
 
 /**
  * Tesseract view drag rotation: while `.tesseract-active`, dragging rotates
@@ -7,16 +9,18 @@ import { InputRegistry } from "./InputRegistry.js";
  */
 export class TesseractDragGesture {
   /**
-   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window }} options
+   * @param {{ inputManager: import("./InputManager.js").InputManager, doc?: Document, win?: Window, ctx?: AppRefs }} options
    */
   constructor({
     inputManager,
     doc = typeof document !== "undefined" ? document : null,
     win = typeof window !== "undefined" ? window : null,
+    ctx = appContext,
   }) {
     this.inputManager = inputManager;
     this.doc = doc;
     this.win = win;
+    this.ctx = ctx;
     this.registry = new InputRegistry();
 
     this.isDragging = false;
@@ -41,7 +45,7 @@ export class TesseractDragGesture {
       allowInEditor: true,
       when: () => this.doc.body.classList.contains("tesseract-active"),
       onDown: () => {
-        const tabManager = /** @type {any} */ (this.win.tabManager);
+        const tabManager = /** @type {any} */ (this.ctx.tabManager);
         const viewSelect = this.doc.getElementById("view-mode-select");
         if (viewSelect) /** @type {HTMLSelectElement} */ (viewSelect).value = "";
         if (tabManager) tabManager._deactivateAllViews();

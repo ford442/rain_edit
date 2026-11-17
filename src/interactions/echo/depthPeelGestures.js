@@ -1,3 +1,5 @@
+import * as app from "../../appContext.js";
+import { interactionState } from "../interactionState.js";
 /**
  * Peel-family depth gestures: Alt+Q depth peel, the shared reveal-toggle
  * keyup reset handler, Alt+Shift+Q peel (uses tabManager to skip resetting
@@ -9,23 +11,23 @@
 export function initDepthPeelGestures(im, tabManager) {
 /* ─── Improvise: Depth Peel Feature (Alt + Q) ─────────────────────────────── */
 // Fanning out all partially obscured echo-document layers sideways based on cursor pos.
-window.isDepthPeelActive = false;
+interactionState.isDepthPeelActive = false;
 
 document.addEventListener("keydown", (e) => {
-  if (e.altKey && !e.shiftKey && e.code === "KeyQ" && !window.isDepthPeelActive) {
+  if (e.altKey && !e.shiftKey && e.code === "KeyQ" && !interactionState.isDepthPeelActive) {
     e.preventDefault();
-    window.isDepthPeelActive = true;
+    interactionState.isDepthPeelActive = true;
     document.body.classList.add("depth-peel-active");
   }
 });
 
 document.addEventListener("keyup", (e) => {
-  if ((e.key === "Alt" || e.code === "KeyQ") && window.isDepthPeelActive) {
+  if ((e.key === "Alt" || e.code === "KeyQ") && interactionState.isDepthPeelActive) {
     if (!e.altKey || e.code === "KeyQ") {
-      window.isDepthPeelActive = false;
+      interactionState.isDepthPeelActive = false;
       document.body.classList.remove("depth-peel-active");
-      if (window.echoLayerEl) {
-        window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
+      if (app.echoLayerEl) {
+        app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc) => {
           doc.style.setProperty("--peel-offset", "0px");
         });
       }
@@ -34,9 +36,9 @@ document.addEventListener("keyup", (e) => {
 });
 
 document.addEventListener("mousemove", (e) => {
-  if (window.isDepthPeelActive && window.echoLayerEl) {
+  if (interactionState.isDepthPeelActive && app.echoLayerEl) {
     const peelAmount = (e.clientX - window.innerWidth / 2) * 0.5;
-    window.echoLayerEl.querySelectorAll(".echo-document").forEach((doc, idx) => {
+    app.echoLayerEl.querySelectorAll(".echo-document").forEach((doc, idx) => {
       // Fan out more deeply buried layers further
       doc.style.setProperty("--peel-offset", `${peelAmount * (idx + 1)}px`);
     });
@@ -60,11 +62,11 @@ document.addEventListener("keyup", (e) => {
   }
 
   if (e.key === "c" || e.key === "C" || e.key === "Alt") {
-    if (isFanningActive && (!e.altKey || (e.code === "KeyC" && !e.altKey))) {
-      isFanningActive = false;
+    if (interactionState.isFanningActive && (!e.altKey || (e.code === "KeyC" && !e.altKey))) {
+      interactionState.isFanningActive = false;
       document.body.classList.remove("fanning-active");
-      if (echoLayerEl) {
-        const echoes = echoLayerEl.querySelectorAll(".echo-document");
+      if (app.echoLayerEl) {
+        const echoes = app.echoLayerEl.querySelectorAll(".echo-document");
         echoes.forEach((echo) => {
           echo.style.removeProperty("--fan-tx");
           echo.style.removeProperty("--fan-ty");
@@ -76,8 +78,8 @@ document.addEventListener("keyup", (e) => {
   }
 
   if (e.key === "Shift") {
-    if (echoLayerEl && window.__lensActive) {
-      const echoes = echoLayerEl.querySelectorAll(".echo-document");
+    if (app.echoLayerEl && interactionState.lensActive) {
+      const echoes = app.echoLayerEl.querySelectorAll(".echo-document");
       echoes.forEach((echo) => {
         echo.style.setProperty("--lens-pull", 0);
         echo.classList.remove("shift-lens-hit");
@@ -95,14 +97,14 @@ im.register({
   combo: { alt: true, shift: true, code: "KeyQ" },
   type: "hold",
   onDown: () => {
-    window.isPeelActive = true;
+    interactionState.isPeelActive = true;
     document.body.classList.add("peel-active");
   },
   onUp: () => {
-    window.isPeelActive = false;
+    interactionState.isPeelActive = false;
     document.body.classList.remove("peel-active");
     if (
-      echoLayerEl &&
+      app.echoLayerEl &&
       typeof tabManager !== "undefined" &&
       !tabManager.isCascadeView &&
       !tabManager.isOrbitView &&
@@ -122,7 +124,7 @@ im.register({
       !tabManager.isSphereView &&
       !tabManager.isMatrixRainView
     ) {
-      echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
+      app.echoLayerEl.querySelectorAll(".echo-document").forEach((echo) => {
         echo.style.removeProperty("transform");
         echo.style.setProperty("--tz-val", echo.style.getPropertyValue("--tz"));
       });
