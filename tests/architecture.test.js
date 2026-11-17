@@ -118,10 +118,68 @@ test("every type-checked .js seam opts in with // @ts-check", () => {
   // jsconfig.json sets checkJs: false, so a listed file without the pragma
   // would silently drop out of `npm run typecheck`.
   const config = JSON.parse(readFileSync(join(repositoryRoot, "jsconfig.json"), "utf8"));
+  // Expand simple `dir/*.js` globs (no recursive `**` for .js seams).
+  const expand = (entry) => {
+    if (!entry.includes("*")) return [entry];
+    assert.match(entry, /^[^*]+\/\*\.js$/, `unsupported .js include glob: ${entry}`);
+    const dir = entry.slice(0, -"/*.js".length);
+    return readdirSync(join(repositoryRoot, dir))
+      .filter((name) => name.endsWith(".js"))
+      .map((name) => `${dir}/${name}`);
+  };
   const missing = config.include
     .filter((entry) => entry.endsWith(".js"))
+    .flatMap(expand)
     .filter((entry) => !readFileSync(join(repositoryRoot, entry), "utf8").startsWith("// @ts-check"));
   assert.deepEqual(missing, []);
+});
+
+
+test("echo layouts are a pure registry, not mixin chunks", () => {
+  const files = srcFiles();
+  const rels = files.map((f) => f.rel);
+  for (const gone of [
+    "src/tabManager/echoLayouts.js",
+    "src/tabManager/echoRender.js",
+    "src/tabManager/core.js",
+  ]) {
+    assert.ok(!rels.includes(gone), `${gone} must not return`);
+  }
+  const chunky = files.filter(({ code }) => /_applyLayoutChunk\d/.test(code)).map((f) => f.rel);
+  assert.deepEqual(chunky, [], "add a pure function to src/tabManager/layouts/ instead");
+  const mixins = files
+    .filter(({ code }) => /Object\.assign\(\s*TabManager\.prototype/.test(code))
+    .map((f) => f.rel);
+  assert.deepEqual(mixins, [], "TabManager is a real class; no prototype mixins");
+  // Layout math stays pure: no DOM, window, or Math.random (use input.random).
+  const impure = files
+    .filter(({ rel }) => rel.startsWith("src/tabManager/layouts/"))
+    .filter(({ code }) => /\b(document|window|globalThis)\b|Math\.random\(|\bel\./.test(code))
+    .map((f) => f.rel);
+  assert.deepEqual(impure, []);
+});
+
+
+test("innerHTML is only cleared or set to static markup", () => {
+  // Untrusted names/content go through textContent or src/dom/sanitize.js.
+  const offenders = srcFiles()
+    .filter(({ rel }) => !rel.startsWith("src/vendor/"))
+    .flatMap(({ rel, code }) =>
+      [...code.matchAll(/\.(?:innerHTML|outerHTML)\s*\+?=\s*([^;]+);/g)]
+        .filter(([, rhs]) => {
+          const value = rhs.trim();
+          const staticString = /^(["'])(?:(?!\1)[^\\])*\1$/.test(value);
+          const staticTemplate = /^`[^`]*`$/.test(value) && !value.includes("${");
+          return !(staticString || staticTemplate);
+        })
+        .map(([match]) => `${rel}: ${match.trim().slice(0, 80)}`),
+    );
+  assert.deepEqual(offenders, []);
+  const adjacent = srcFiles()
+    .filter(({ rel }) => !rel.startsWith("src/vendor/"))
+    .filter(({ code }) => /insertAdjacentHTML|document\.write\(/.test(code))
+    .map((f) => f.rel);
+  assert.deepEqual(adjacent, []);
 });
 
 

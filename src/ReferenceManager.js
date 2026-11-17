@@ -1,3 +1,4 @@
+import { escapeHtml, setSanitizedHtml, setColorizedHtml, MARKDOWN_POLICY } from "./dom/sanitize.js";
 export class ReferenceManager {
   constructor(layerEl, overlayEl, monacoInstance) {
     this.layer = layerEl;
@@ -320,7 +321,8 @@ export class ReferenceManager {
 
       const content = document.createElement("div");
       content.className = "card-content";
-      content.innerHTML = html;
+      // Notes can come from StorageAPI: rebuild only the markdown allowlist.
+      setSanitizedHtml(content, html, MARKDOWN_POLICY);
       card.appendChild(content);
 
       // Deterministic random positioning based on index
@@ -460,10 +462,10 @@ export class ReferenceManager {
             lang = langClass.replace("language-", "");
           }
 
-          const code = block.innerText;
+          const code = block.innerText; // <br> line breaks → "\n"
           try {
             const colorized = await this.monaco.editor.colorize(code, lang, {});
-            block.innerHTML = colorized;
+            setColorizedHtml(block, colorized);
           } catch (err) {
             console.warn("Colorize failed:", err);
           }
@@ -492,8 +494,15 @@ export class ReferenceManager {
     });
   }
 
+  /**
+   * Tiny markdown subset → HTML string. Input is escaped *first* (escapeHtml),
+   * so the only markup is what the rules below emit; callers still render it
+   * through `setSanitizedHtml(…, MARKDOWN_POLICY)` as a second fence.
+   * @param {string} text
+   * @returns {string}
+   */
   parseMarkdown(text) {
-    let safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    let safeText = escapeHtml(text);
 
     // Enhanced Table Support
     safeText = safeText.replace(/((?:^\|.*\|\r?\n?)+)/gm, (match) => {
@@ -530,21 +539,21 @@ export class ReferenceManager {
     // Process callouts
     // Support [!NOTE], [!WARN], [!INFO]
     safeText = safeText.replace(
-      /^> \[!NOTE\] (.*$)/gim,
+      /^&gt; \[!NOTE\] (.*$)/gim,
       '<div class="callout note">$1</div>',
     );
     safeText = safeText.replace(
-      /^> \[!WARN\] (.*$)/gim,
+      /^&gt; \[!WARN\] (.*$)/gim,
       '<div class="callout warn">$1</div>',
     );
     safeText = safeText.replace(
-      /^> \[!INFO\] (.*$)/gim,
+      /^&gt; \[!INFO\] (.*$)/gim,
       '<div class="callout info">$1</div>',
     );
 
     // Process blockquotes first to avoid conflicts (non-callout blockquotes)
     safeText = safeText.replace(
-      /^> (?!\[!)(.*$)/gim,
+      /^&gt; (?!\[!)(.*$)/gim,
       "<blockquote>$1</blockquote>",
     );
 

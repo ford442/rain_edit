@@ -179,7 +179,8 @@ document.addEventListener("wheel", (e) => {
     const delta = e.deltaY;
     interactionState.archScrollOffset += delta * 0.005; // Base scroll speed
     if (app.tabManager && app.tabManager.isArchwayView) {
-        app.tabManager._renderEchoes();
+        // Placement-only update: no card rebuild or recolorize per wheel tick.
+        app.tabManager.relayoutEchoes();
     }
   }
 }, { passive: false });

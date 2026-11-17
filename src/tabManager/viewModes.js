@@ -1,1097 +1,195 @@
-import {
-  storageAPI,
-  TOAST_DISPLAY_DURATION,
-  DEPTH_Z_INDEX,
-  DEPTH_ICONS,
-  DEPTH_TITLES,
-  _extractSymbols,
-  _symbolKindIcon,
-} from "../TabManager.js";
+// @ts-check
+/**
+ * View-mode registry — the single list of TabManager's 3D view modes.
+ *
+ * Each row names one mode; everything else is derived from it:
+ *   - select value        `value`               (index.html #view-mode-select)
+ *   - toggle method       `toggle${name}View`   (public, stable API)
+ *   - state flag          `is${name}View`       (read-only getter)
+ *   - body class          `${value}-active`     (unless `bodyClass` overrides)
+ *   - dock button         `#btn-${value}-view`  (optional; `.active` toggled)
+ *   - echo layout         LAYOUTS[value]        (src/tabManager/layouts/)
+ *
+ * Adding a mode = one row here + one pure layout function + its CSS. Do not add
+ * a new mode until EchoLayer virtualization covers it (it does, automatically).
+ */
 
-/** 3D view-mode flags, toggles, and addFile entry point. */
-export const TabManagerViewModesMixin = {
+/**
+ * How an echo reacts while hovered.
+ *   front   pull to tz = 100px (default)
+ *   pop     tz += 150px from its placement
+ *   flatten pop, and zero the roll (pinboard/vortex)
+ *   orbit   push --orbit-tz out by 100px
+ *   scatter pull --scatter-z forward by 150px
+ *   none    leave the placement alone
+ * @typedef {"front" | "pop" | "flatten" | "orbit" | "scatter" | "none"} EchoHover
+ */
 
-  toggleAbyssalTrenchView() {
-    const wasActive = this.isAbyssalTrenchView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isAbyssalTrenchView = true;
-      document.body.classList.add("abyssal-trench-active");
-    }
-    this._renderEchoes();
-  },
-  toggleCelestialSphereView() {
-    const wasActive = this.isCelestialSphereView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCelestialSphereView = true;
-      document.body.classList.add("celestial-sphere-active");
-    }
-    this._renderEchoes();
-  },
-  toggleZenithSpiralView() {
-    const wasActive = this.isZenithSpiralView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isZenithSpiralView = true;
-      document.body.classList.add("zenith-spiral-active");
-    }
-    this._renderEchoes();
-  },
-  toggleStarlightMeshView() {
-    const wasActive = this.isStarlightMeshView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isStarlightMeshView = true;
-      document.body.classList.add("starlight-mesh-active");
-    }
-    this._renderEchoes();
-  },
-  toggleQuantumWebView() {
-    const wasActive = this.isQuantumWebView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isQuantumWebView = true;
-      document.body.classList.add("quantum-web-active");
-    }
-    this._renderEchoes();
-  },
-  toggleCascadingDepthView() {
-    const wasActive = this.isCascadingDepthView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCascadingDepthView = true;
-      document.body.classList.add("cascading-depth-active");
-    }
-    this._renderEchoes();
-  },
-  toggleAbyssalTrenchView() {
-    const wasActive = this.isAbyssalTrenchView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isAbyssalTrenchView = true;
-      document.body.classList.add("abyssal-trench-active");
-    }
-    this._renderEchoes();
-  },
-  toggleCelestialSphereView() {
-    const wasActive = this.isCelestialSphereView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCelestialSphereView = true;
-      document.body.classList.add("celestial-sphere-active");
-    }
-    this._renderEchoes();
-  },
-  toggleHolographicCylinderView() {
-    const wasActive = this.isHolographicCylinderView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isHolographicCylinderView = true;
-      document.body.classList.add("holographic-cylinder-active");
-    }
-    this._renderEchoes();
-  },
-  toggleAbyssalTrenchView() {
-    const wasActive = this.isAbyssalTrenchView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isAbyssalTrenchView = true;
-      document.body.classList.add("abyssal-trench-active");
-    }
-    this._renderEchoes();
-  },
-  toggleCelestialSphereView() {
-    const wasActive = this.isCelestialSphereView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCelestialSphereView = true;
-      document.body.classList.add("celestial-sphere-active");
-    }
-    this._renderEchoes();
-  },
-  _deactivateAllViews() {
-    this.isCosmicThreadView = false;
-    this.isLuminousCortexView = false;
-    this.isEtherealCanyonView = false;
-    this.isQuantumWebView = false;
-    this.isCascadingDepthView = false;
-    this.isAbyssalTrenchView = false;
-    this.isCelestialSphereView = false;
-    this.isHolographicCylinderView = false;
-    this.isFloatingNexusView = false;
-    this.isPrismaticArrayView = false;
+/**
+ * @typedef {object} ViewMode
+ * @property {string} value      select value + session key
+ * @property {string} name       PascalCase stem for toggle/flag names
+ * @property {string} [bodyClass] defaults to `${value}-active`
+ * @property {EchoHover} [hover] defaults to "front"
+ * @property {boolean} [semanticGravity] same-language pull; defaults to true
+ * @property {number} [tint]     fixed echo hue (deg) instead of the per-file tint
+ */
 
-    // Clear inline styles that could freeze layouts
-    const echoes = document.querySelectorAll('.echo-document');
-    echoes.forEach(doc => {
-      doc.style.transform = '';
-      doc.style.boxShadow = '';
-      doc.style.borderColor = '';
-    });
+/** @type {readonly ViewMode[]} */
+export const VIEW_MODES = Object.freeze([
+  // Spatial & environment
+  { value: "hyper-thread", name: "HyperThread" },
+  { value: "abyssal-trench", name: "AbyssalTrench" },
+  { value: "celestial-sphere", name: "CelestialSphere" },
+  { value: "starlight-mesh", name: "StarlightMesh" },
+  { value: "zenith-spiral", name: "ZenithSpiral" },
+  { value: "cityscape", name: "Cityscape" },
+  { value: "house-of-cards", name: "HouseOfCards" },
+  { value: "floating-nexus", name: "FloatingNexus" },
+  { value: "holographic-cylinder", name: "HolographicCylinder" },
+  { value: "cascading-depth", name: "CascadingDepth" },
+  { value: "time-tunnel", name: "TimeTunnel", hover: "none" },
+  { value: "theater", name: "Theater" },
+  { value: "tornado", name: "Tornado" },
+  { value: "aurora", name: "Aurora" },
+  { value: "quantum-web", name: "QuantumWeb" },
+  { value: "waterfall", name: "Waterfall" },
+  { value: "cascade", name: "Cascade", hover: "none", semanticGravity: false },
+  { value: "scattered", name: "Scattered", hover: "scatter", semanticGravity: false },
+  { value: "tunnel", name: "Tunnel", semanticGravity: false },
+  { value: "meteor", name: "Meteor", hover: "pop" },
+  { value: "vortex", name: "Vortex", hover: "flatten", semanticGravity: false },
+  { value: "black-hole", name: "BlackHole" },
+  { value: "galaxy", name: "Galaxy" },
+  { value: "cyclone", name: "Cyclone" },
+  { value: "prismatic-array", name: "PrismaticArray" },
+  // Geometric
+  { value: "isometric", name: "Isometric", semanticGravity: false },
+  { value: "grid", name: "Grid", semanticGravity: false },
+  { value: "helix", name: "Helix", hover: "pop", semanticGravity: false },
+  { value: "prism", name: "Prism", hover: "pop", semanticGravity: false },
+  { value: "prism-split", name: "PrismSplit" },
+  { value: "sphere", name: "Sphere", hover: "pop", semanticGravity: false },
+  { value: "wave", name: "Wave", hover: "pop", semanticGravity: false },
+  { value: "cylinder", name: "Cylinder", hover: "pop", semanticGravity: false },
+  { value: "pyramid", name: "Pyramid" },
+  { value: "crystal", name: "Crystal" },
+  { value: "fractal", name: "Fractal", semanticGravity: false },
+  { value: "tesseract", name: "Tesseract" },
+  { value: "mobius", name: "Mobius" },
+  { value: "hexagon-matrix", name: "HexagonMatrix" },
+  { value: "torus", name: "Torus" },
+  { value: "hypercube", name: "Hypercube" },
+  { value: "dna-helix", name: "DnaHelix" },
+  { value: "shattered-glass", name: "ShatteredGlass" },
+  { value: "venetian", name: "Venetian" },
+  { value: "stackdeck", name: "StackDeck", bodyClass: "stack-deck-active" },
+  { value: "card-spread", name: "CardSpread" },
+  // Layout & organization
+  { value: "orbit", name: "Orbit", hover: "orbit", semanticGravity: false },
+  { value: "stack", name: "Stack", semanticGravity: false },
+  { value: "timeline", name: "Timeline" },
+  { value: "carousel", name: "Carousel" },
+  { value: "accordion", name: "Accordion", hover: "none" },
+  { value: "infinity-mirror", name: "InfinityMirror" },
+  { value: "archway", name: "Archway", semanticGravity: false },
+  { value: "pinboard", name: "Pinboard", hover: "flatten", semanticGravity: false },
+  { value: "constellation", name: "Constellation", semanticGravity: false },
+  { value: "coverflow", name: "Coverflow", hover: "none", semanticGravity: false },
+  { value: "chrono-ring", name: "ChronoRing" },
+  { value: "ribbon", name: "Ribbon" },
+  { value: "rolodex", name: "Rolodex", hover: "pop", semanticGravity: false },
+  { value: "staircase", name: "Staircase" },
+  { value: "solar-system", name: "SolarSystem" },
+  { value: "bookshelf", name: "Bookshelf" },
+  { value: "astrolabe", name: "Astrolabe" },
+  { value: "dominoes", name: "Dominoes" },
+  { value: "kaleidoscope", name: "Kaleidoscope" },
+  // Sci-fi & abstract
+  { value: "synapse-web", name: "SynapseWeb" },
+  {
+    value: "quantum",
+    name: "QuantumSuperposition",
+    bodyClass: "quantum-superposition-active",
+  },
+  { value: "cosmic-thread", name: "CosmicThread" },
+  { value: "luminous-cortex", name: "LuminousCortex" },
+  { value: "data-hive", name: "DataHive" },
+  { value: "origami", name: "Origami" },
+  {
+    value: "matrix-rain",
+    name: "MatrixRain",
+    hover: "pop",
+    semanticGravity: false,
+    tint: 120,
+  },
+  { value: "neon-synth", name: "NeonSynth", hover: "pop", semanticGravity: false },
+  { value: "blueprint-3d", name: "Blueprint3d", hover: "pop", semanticGravity: false },
+  { value: "cyber-cortex", name: "CyberCortex", hover: "pop", semanticGravity: false },
+  { value: "outline", name: "Outline" },
+  { value: "luminescence", name: "Luminescence" },
+  { value: "ethereal-canyon", name: "EtherealCanyon" },
+  { value: "geode", name: "Geode" },
+  { value: "lotus", name: "Lotus" },
+  { value: "fibonacci-spiral", name: "FibonacciSpiral" },
+]);
 
-    this.isCrystalView = false;
-    this.isWaterfallView = false;
-    this.isCascadeView = false;
-    this.isOrbitView = false;
-    this.isScatteredView = false;
-    this.isIsometricView = false;
-    this.isStackView = false;
-    this.isTimelineView = false;
-    this.isTunnelView = false;
-    this.isGridView = false;
-    this.isHelixView = false;
-    this.isMeteorView = false;
-    this.isTimeTunnelView = false;
-    this.isPinboardView = false;
-    this.isVortexView = false;
-    this.isConstellationView = false;
-    this.isPrismView = false;
-    this.isPrismSplitView = false;
-    this.isCoverflowView = false;
-    this.isRibbonView = false;
-    this.isWaveView = false;
-    this.isSphereView = false;
-    this.isBlackHoleView = false;
-    this.isRolodexView = false;
-    this.isCylinderView = false;
-    this.isGalaxyView = false;
-    this.isOrigamiView = false;
-    this.isDataHiveView = false;
-    this.isFractalView = false;
-    this.isSolarSystemView = false;
-    this.isNeonSynthView = false;
-    this.isTesseractView = false;
-    this.isBlueprint3dView = false;
-    this.isCyberCortexView = false;
-    this.isQuantumSuperpositionView = false;
-    this.isOutlineView = false;
-    this.isDnaHelixView = false;
-    this.isAccordionView = false;
-    this.isInfinityMirrorView = false;
-    this.isChronoRingView = false;
-    this.isArchwayView = false;
-    this.isCityscapeView = false;
-    this.isHouseOfCardsView = false;
-    this.isKaleidoscopeView = false;
-    this.isBookshelfView = false;
-    this.isCarouselView = false;
-    this.isCycloneView = false;
-    this.isMobiusView = false;
-    this.isAstrolabeView = false;
-    this.isDominoesView = false;
-    this.isHexagonMatrixView = false;
-    this.isStackDeckView = false;
-    this.isLuminescenceView = false;
-    this.isGeodeView = false;
-    this.isLotusView = false;
-    this.isFibonacciSpiralView = false;
-    this.isHypercubeView = false;
-    this.isShatteredGlassView = false;
-    this.isTheaterView = false;
-    this.isTornadoView = false;
-    this.isVenetianView = false;
-    this.isStaircaseView = false;
-    this.isCardSpreadView = false;
-    this.isAuroraView = false;
-    this.isPyramidView = false;
-    this.isTorusView = false;
-    this.isFloatingNexusView = false;
-    this.isPrismaticArrayView = false;
-    this.isHyperThreadView = false;
-    this.isSynapseWebView = false;
-    this.isAbyssalTrenchView = false;
-    this.isCelestialSphereView = false;
-    this.isZenithSpiralView = false;
-    this.isStarlightMeshView = false;
-    this.isAbyssalTrenchView = false;
-    this.isCelestialSphereView = false;
+/** @type {ReadonlyMap<string, ViewMode>} */
+const BY_VALUE = new Map(VIEW_MODES.map((m) => [m.value, m]));
 
-    document.body.classList.remove(
-      "cosmic-thread-active",
-      "luminous-cortex-active",
-      "hyper-thread-active",
-      "synapse-web-active",
-      "abyssal-trench-active",
-      "celestial-sphere-active",
-      "cascading-depth-active",
-      "holographic-cylinder-active",
-      "abyssal-trench-active",
-      "celestial-sphere-active",
-      "ethereal-canyon-active",
-      "zenith-spiral-active",
-      "starlight-mesh-active",
-      "shattered-glass-active",
-      "waterfall-active",
-      "cityscape-active",
-      "house-of-cards-active",
-      "quantum-web-active",
-      "cascade-active",
-      "orbit-active",
-      "scattered-active",
-      "isometric-active",
-      "stack-active",
-      "timeline-active",
-      "tunnel-active",
-      "grid-active",
-      "helix-active",
-      "meteor-active",
-      "pinboard-active",
-      "vortex-active",
-      "constellation-active",
-      "prism-active",
-      "prism-split-active",
-      "coverflow-active",
-      "wave-active",
-      "sphere-active",
-      "black-hole-active",
-      "rolodex-active",
-      "cylinder-active",
-      "galaxy-active",
-      "origami-active",
-      "data-hive-active",
-      "matrix-rain-active",
-      "fractal-active",
-      "solar-system-active",
-      "neon-synth-active",
-      "tesseract-active",
-      "fibonacci-spiral-active",
-      "blueprint-3d-active",
-      "cyber-cortex-active",
-      "quantum-superposition-active",
-      "outline-active",
-      "infinity-mirror-active",
-      "kaleidoscope-active",
-      "bookshelf-active",
-      "carousel-active",
-      "time-tunnel-active",
-      "accordion-active",
-      "chrono-ring-active",
-      "cyclone-active",
-      "mobius-active",
-      "torus-active",
-      "floating-nexus-active",
-      "astrolabe-active",
-      "dominoes-active",
-      "luminescence-active",
-      "geode-active",
-      "lotus-active",
-      "hypercube-active",
-      "theater-active",
-      "tornado-active",
-      "venetian-active",
-      "staircase-active",
-      "aurora-active",
-      "stack-deck-active",
-      "card-spread-active",
-      "pyramid-active"
-    );
+/**
+ * @param {string | null | undefined} value
+ * @returns {ViewMode | undefined}
+ */
+export function getViewMode(value) {
+  return value ? BY_VALUE.get(value) : undefined;
+}
 
-    this.isOrigamiView = false;
-    this.isDataHiveView = false;
-    this.isCardSpreadView = false;
+/**
+ * @param {ViewMode} mode
+ * @returns {string}
+ */
+export function bodyClassFor(mode) {
+  return mode.bodyClass ?? `${mode.value}-active`;
+}
 
-    [
-      "btn-waterfall-view",
-      "btn-cascade-view",
-      "btn-orbit-view",
-      "btn-scattered-view",
-      "btn-isometric-view",
-      "btn-stack-view",
-      "btn-timeline-view",
-      "btn-tunnel-view",
-      "btn-grid-view",
-      "btn-helix-view",
-      "btn-pinboard-view",
-      "btn-vortex-view",
-      "btn-constellation-view",
-      "btn-prism-view",
-      "btn-coverflow-view",
-      "btn-wave-view",
-      "btn-sphere-view",
-      "btn-rolodex-view",
-      "btn-data-hive-view",
-      "btn-matrix-rain-view",
-      "btn-fractal-view",
-      "btn-solar-system-view",
-      "btn-neon-synth-view",
-      "btn-tesseract-view",
-      "btn-blueprint-3d-view",
-      "btn-cyber-cortex-view",
-      "btn-hexagon-matrix-view",
-    ].forEach((id) => {
-      const btn = document.getElementById(id);
-      if (btn) btn.classList.remove("active");
-    });
-  },
-  toggleLotusView() {
-    const wasActive = this.isLotusView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isLotusView = true;
-      document.body.classList.add("lotus-active");
-    }
-    this._renderEchoes();
-  },
-  toggleCosmicThreadView() {
-    const wasActive = this.isCosmicThreadView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCosmicThreadView = true;
-      document.body.classList.add("cosmic-thread-active");
-    }
-    this._renderEchoes();
-  },
-  toggleLuminousCortexView() {
-    const wasActive = this.isLuminousCortexView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isLuminousCortexView = true;
-      document.body.classList.add("luminous-cortex-active");
-    }
-    this._renderEchoes();
-  },
-  toggleEtherealCanyonView() {
-    const wasActive = this.isEtherealCanyonView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isEtherealCanyonView = true;
-      document.body.classList.add("ethereal-canyon-active");
-    }
-    this._renderEchoes();
-  },
-  toggleSynapseWebView() {
-    const wasActive = this.isSynapseWebView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isSynapseWebView = true;
-      document.body.classList.add("synapse-web-active");
-    }
-    this._renderEchoes();
-  },
-  toggleStackDeckView() {
-    const wasActive = this.isStackDeckView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isStackDeckView = true;
-      document.body.classList.add("stack-deck-active");
-    }
-    this._renderEchoes();
-  },
-  toggleAbyssalTrenchView() {
-    const wasActive = this.isAbyssalTrenchView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isAbyssalTrenchView = true;
-      document.body.classList.add("abyssal-trench-active");
-    }
-    this._renderEchoes();
-  },
-  toggleCelestialSphereView() {
-    const wasActive = this.isCelestialSphereView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCelestialSphereView = true;
-      document.body.classList.add("celestial-sphere-active");
-    }
-    this._renderEchoes();
-  },
-  toggleFibonacciSpiralView() {
-    const wasActive = this.isFibonacciSpiralView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isFibonacciSpiralView = true;
-      document.body.classList.add("fibonacci-spiral-active");
-      const btn = document.getElementById("btn-fibonacci-spiral-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleChronoRingView() {
-    const wasActive = this.isChronoRingView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isChronoRingView = true;
-      document.body.classList.add("chrono-ring-active");
-    }
-    this._renderEchoes();
-  },
-  toggleDnaHelixView() {
-    const wasActive = this.isDnaHelixView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isDnaHelixView = true;
-      document.body.classList.add("dna-helix-active");
-    }
-    this._renderEchoes();
-  },
-  toggleCardSpreadView() {
-    const wasActive = this.isCardSpreadView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCardSpreadView = true;
-      document.body.classList.add("card-spread-active");
-      const btn = document.getElementById("btn-card-spread-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleMeteorView() {
-    const wasActive = this.isMeteorView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isMeteorView = true;
-      document.body.classList.add("meteor-active");
-      const btn = document.getElementById("btn-meteor-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleHyperThreadView() {
-    const wasActive = this.isHyperThreadView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isHyperThreadView = true;
-      document.body.classList.add("hyper-thread-active");
-    }
-    this._renderEchoes();
-  },
-  toggleStaircaseView() {
-    const wasActive = this.isStaircaseView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isStaircaseView = true;
-      document.body.classList.add("staircase-active");
-      const btn = document.getElementById("btn-staircase-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  togglePyramidView() {
-    const wasActive = this.isPyramidView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isPyramidView = true;
-      document.body.classList.add("pyramid-active");
-      const btn = document.getElementById("btn-pyramid-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleRibbonView() {
-    const wasActive = this.isRibbonView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isRibbonView = true;
-      document.body.classList.add("ribbon-active");
-      const btn = document.getElementById("btn-ribbon-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleHypercubeView() {
-    const wasActive = this.isHypercubeView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isHypercubeView = true;
-      document.body.classList.add("hypercube-active");
-    }
-    this._renderEchoes();
-  },
-  toggleShatteredGlassView() {
-    const wasActive = this.isShatteredGlassView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isShatteredGlassView = true;
-      document.body.classList.add("shattered-glass-active");
-    }
-    this._renderEchoes();
-  },
-  toggleTheaterView() {
-    const wasActive = this.isTheaterView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isTheaterView = true;
-      document.body.classList.add("theater-active");
-      const btn = document.getElementById("btn-theater-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleVenetianView() {
-    const wasActive = this.isVenetianView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isVenetianView = true;
-      document.body.classList.add("venetian-active");
-    }
-    this._renderEchoes();
-  },
-  toggleTornadoView() {
-    const wasActive = this.isTornadoView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isTornadoView = true;
-      document.body.classList.add("tornado-active");
-      const btn = document.getElementById("btn-tornado-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleHexagonMatrixView() {
-    const wasActive = this.isHexagonMatrixView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isHexagonMatrixView = true;
-      document.body.classList.add("hexagon-matrix-active");
-      const btn = document.getElementById("btn-hexagon-matrix-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleGeodeView() {
-    const wasActive = this.isGeodeView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isGeodeView = true;
-      document.body.classList.add("geode-active");
-    }
-    this._renderEchoes();
-  },
-  toggleNeonSynthView() {
-    const wasActive = this.isNeonSynthView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isNeonSynthView = true;
-      document.body.classList.add("neon-synth-active");
-      const btn = document.getElementById("btn-neon-synth-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleAstrolabeView() {
-    const wasActive = this.isAstrolabeView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isAstrolabeView = true;
-      document.body.classList.add("astrolabe-active");
-    }
-    this._renderEchoes();
-  },
-  toggleDominoesView() {
-    const wasActive = this.isDominoesView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isDominoesView = true;
-      document.body.classList.add("dominoes-active");
-    }
-    this._renderEchoes();
-  },
-  toggleBlueprint3dView() {
-    const wasActive = this.isBlueprint3dView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isBlueprint3dView = true;
-      document.body.classList.add("blueprint-3d-active");
-      const btn = document.getElementById("btn-blueprint-3d-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleCyberCortexView() {
-    const wasActive = this.isCyberCortexView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCyberCortexView = true;
-      document.body.classList.add("cyber-cortex-active");
-      const btn = document.getElementById("btn-cyber-cortex-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleQuantumSuperpositionView() {
-    const wasActive = this.isQuantumSuperpositionView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isQuantumSuperpositionView = true;
-      document.body.classList.add("quantum-superposition-active");
-    }
-    this._renderEchoes();
-  },
-  toggleOutlineView() {
-    const wasActive = this.isOutlineView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isOutlineView = true;
-      document.body.classList.add("outline-active");
-    }
-    this._renderEchoes();
-  },
-  toggleCycloneView() {
-    const wasActive = this.isCycloneView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCycloneView = true;
-      document.body.classList.add("cyclone-active");
-    }
-    this._renderEchoes();
-  },
-  toggleMobiusView() {
-    const wasActive = this.isMobiusView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isMobiusView = true;
-      document.body.classList.add("mobius-active");
-    }
-    this._renderEchoes();
-  },
-  toggleTesseractView() {
-    const wasActive = this.isTesseractView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isTesseractView = true;
-      document.body.classList.add("tesseract-active");
-      const btn = document.getElementById("btn-tesseract-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleCoverflowView() {
-    const wasActive = this.isCoverflowView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCoverflowView = true;
-      document.body.classList.add("coverflow-active");
-      const btn = document.getElementById("btn-coverflow-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleSolarSystemView() {
-    const wasActive = this.isSolarSystemView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isSolarSystemView = true;
-      document.body.classList.add("solar-system-active");
-      const btn = document.getElementById("btn-solar-system-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleBookshelfView() {
-    const wasActive = this.isBookshelfView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isBookshelfView = true;
-      document.body.classList.add("bookshelf-active");
-    }
-    this._renderEchoes();
-  },
-  toggleCarouselView() {
-    this._deactivateAllViews();
-    this.isCarouselView = true;
-    document.body.classList.add("carousel-active");
-    this._renderEchoes();
-  },
-  toggleArchwayView() {
-    this._deactivateAllViews();
-    this.isArchwayView = true;
-    document.body.classList.add("archway-active");
-    this._renderEchoes();
-  },
-  toggleAccordionView() {
-    this._deactivateAllViews();
-    this.isAccordionView = true;
-    document.body.classList.add("accordion-active");
-    this._renderEchoes();
-  },
-  toggleInfinityMirrorView() {
-    this._deactivateAllViews();
-    this.isInfinityMirrorView = true;
-    document.body.classList.add("infinity-mirror-active");
-    this._renderEchoes();
-  },
-  toggleKaleidoscopeView() {
-    this._deactivateAllViews();
-    this.isKaleidoscopeView = true;
-    document.body.classList.add("kaleidoscope-active");
-    this._renderEchoes();
-  },
-  toggleFractalView() {
-    const wasActive = this.isFractalView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isFractalView = true;
-      document.body.classList.add("fractal-active");
-      const btn = document.getElementById("btn-fractal-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleCrystalView() {
-    const wasActive = this.isCrystalView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCrystalView = true;
-      document.body.classList.add("crystal-active");
-      const btn = document.getElementById("btn-crystal-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleCityscapeView() {
-    const wasActive = this.isCityscapeView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCityscapeView = true;
-      document.body.classList.add("cityscape-active");
-    }
-    this._renderEchoes();
-  },
-  toggleHouseOfCardsView() {
-    const wasActive = this.isHouseOfCardsView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isHouseOfCardsView = true;
-      document.body.classList.add("house-of-cards-active");
-    }
-    this._renderEchoes();
-  },
-  toggleMatrixRainView() {
-    const wasActive = this.isMatrixRainView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isMatrixRainView = true;
-      document.body.classList.add("matrix-rain-active");
-      const btn = document.getElementById("btn-matrix-rain-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleOrigamiView() {
-    const wasActive = this.isOrigamiView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isOrigamiView = true;
-      document.body.classList.add("origami-active");
-    }
-    this._renderEchoes();
-  },
-  toggleDataHiveView() {
-    const wasActive = this.isDataHiveView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isDataHiveView = true;
-      document.body.classList.add("data-hive-active");
-    }
-    this._renderEchoes();
-  },
-  toggleGalaxyView() {
-    const wasActive = this.isGalaxyView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isGalaxyView = true;
-      document.body.classList.add("galaxy-active");
-    }
-    this._renderEchoes();
-  },
-  toggleBlackHoleView() {
-    const wasActive = this.isBlackHoleView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isBlackHoleView = true;
-      document.body.classList.add("black-hole-active");
-      const btn = document.getElementById("btn-black-hole-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleRolodexView() {
-    const wasActive = this.isRolodexView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isRolodexView = true;
-      document.body.classList.add("rolodex-active");
-      const btn = document.getElementById("btn-rolodex-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleCylinderView() {
-    const wasActive = this.isCylinderView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCylinderView = true;
-      document.body.classList.add("cylinder-active");
-      const btn = document.getElementById("btn-cylinder-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleSphereView() {
-    const wasActive = this.isSphereView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isSphereView = true;
-      document.body.classList.add("sphere-active");
-      const btn = document.getElementById("btn-sphere-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleWaveView() {
-    const wasActive = this.isWaveView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isWaveView = true;
-      document.body.classList.add("wave-active");
-      const btn = document.getElementById("btn-wave-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleAuroraView() {
-  const wasActive = this.isAuroraView;
-  this._deactivateAllViews();
-  if (!wasActive) {
-    this.isAuroraView = true;
-    document.body.classList.add("aurora-active");
-  }
-  this._renderEchoes();
-},
-  toggleFloatingNexusView() {
-  const wasActive = this.isFloatingNexusView;
-  this._deactivateAllViews();
-  if (!wasActive) {
-    this.isFloatingNexusView = true;
-    document.body.classList.add("floating-nexus-active");
-  }
-  this._renderEchoes();
-},
-  togglePrismSplitView() {
-    const wasActive = this.isPrismSplitView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isPrismSplitView = true;
-      document.body.classList.add("prism-split-active");
-    }
-    this._renderEchoes();
-  },
-    togglePrismaticArrayView() {
-    const wasActive = this.isPrismaticArrayView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isPrismaticArrayView = true;
-      document.body.classList.add("prismatic-array-active");
-    }
-    this._renderEchoes();
-  },
-  togglePrismView() {
-    const wasActive = this.isPrismView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isPrismView = true;
-      document.body.classList.add("prism-active");
-      const btn = document.getElementById("btn-prism-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleTimeTunnelView() {
-    const wasActive = this.isTimeTunnelView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isTimeTunnelView = true;
-      document.body.classList.add("time-tunnel-active");
-    }
-    this._renderEchoes();
-  },
-  toggleHelixView() {
-    const wasActive = this.isHelixView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isHelixView = true;
-      document.body.classList.add("helix-active");
-      const btn = document.getElementById("btn-helix-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleConstellationView() {
-    const wasActive = this.isConstellationView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isConstellationView = true;
-      document.body.classList.add("constellation-active");
-      const btn = document.getElementById("btn-constellation-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  togglePinboardView() {
-    const wasActive = this.isPinboardView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isPinboardView = true;
-      document.body.classList.add("pinboard-active");
-      const btn = document.getElementById("btn-pinboard-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleVortexView() {
-    const wasActive = this.isVortexView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isVortexView = true;
-      document.body.classList.add("vortex-active");
-      const btn = document.getElementById("btn-vortex-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleStackView() {
-    const wasActive = this.isStackView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isStackView = true;
-      document.body.classList.add("stack-active");
-      const btn = document.getElementById("btn-stack-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleTimelineView() {
-    const wasActive = this.isTimelineView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isTimelineView = true;
-      document.body.classList.add("timeline-active");
-      const btn = document.getElementById("btn-timeline-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleTunnelView() {
-    const wasActive = this.isTunnelView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isTunnelView = true;
-      document.body.classList.add("tunnel-active");
-      const btn = document.getElementById("btn-tunnel-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleGridView() {
-    const wasActive = this.isGridView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isGridView = true;
-      document.body.classList.add("grid-active");
-      const btn = document.getElementById("btn-grid-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleIsometricView() {
-    const wasActive = this.isIsometricView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isIsometricView = true;
-      document.body.classList.add("isometric-active");
-      const btn = document.getElementById("btn-isometric-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleScatteredView() {
-    const wasActive = this.isScatteredView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isScatteredView = true;
-      document.body.classList.add("scattered-active");
-      const btn = document.getElementById("btn-scattered-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleLuminescenceView() {
-    const wasActive = this.isLuminescenceView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isLuminescenceView = true;
-      document.body.classList.add("luminescence-active");
-    }
-    this._renderEchoes();
-  },
-  toggleTorusView() {
-    const wasActive = this.isTorusView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isTorusView = true;
-      document.body.classList.add("torus-active");
-    }
-    this._renderEchoes();
-  },
-  toggleWaterfallView() {
-    const wasActive = this.isWaterfallView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isWaterfallView = true;
-      document.body.classList.add("waterfall-active");
-      const btn = document.getElementById("btn-waterfall-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleCascadeView() {
-    const wasActive = this.isCascadeView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isCascadeView = true;
-      document.body.classList.add("cascade-active");
-      const btn = document.getElementById("btn-cascade-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  toggleOrbitView() {
-    const wasActive = this.isOrbitView;
-    this._deactivateAllViews();
-    if (!wasActive) {
-      this.isOrbitView = true;
-      document.body.classList.add("orbit-active");
-      const btn = document.getElementById("btn-orbit-view");
-      if (btn) btn.classList.add("active");
-    }
-    this._renderEchoes();
-  },
-  addFile(name, content = "", language = "javascript") {
-    const id = this._nextId++;
-    const isImage = language === "image";
+/**
+ * @param {ViewMode} mode
+ * @returns {string}
+ */
+export function toggleMethodFor(mode) {
+  return `toggle${mode.name}View`;
+}
 
-    let model = null;
-    if (!isImage) {
-      model = this.monaco.editor.createModel(content, language);
-    }
+/**
+ * @param {ViewMode} mode
+ * @returns {string}
+ */
+export function flagFor(mode) {
+  return `is${mode.name}View`;
+}
 
-    this.files.push({
-      id,
-      name,
-      model,
-      depth: 1,
-      isImage,
-      language,
-      url: isImage ? content : null,
-      dirty: false,
-      savedContent: isImage ? undefined : content,
-    });
-    this.workspaceSession?.watchFile?.(
-      this.files[this.files.length - 1],
-    );
-    this._renderTabs();
-    this._saveTabsToStorage();
-    return id;
-  },
-};
+/**
+ * @param {ViewMode} mode
+ * @returns {string}
+ */
+export function buttonIdFor(mode) {
+  return `btn-${mode.value}-view`;
+}
+
+/** Every body class any view mode can set (for clearing). */
+export const VIEW_MODE_BODY_CLASSES = Object.freeze(VIEW_MODES.map(bodyClassFor));
+
+/**
+ * Behavior knobs for the echo layer, with defaults applied.
+ * @param {string} value  "" = default view
+ * @returns {{ hover: EchoHover, semanticGravity: boolean, tint: number | null }}
+ */
+export function echoBehavior(value) {
+  const mode = getViewMode(value);
+  return {
+    hover: mode?.hover ?? "front",
+    semanticGravity: mode?.semanticGravity ?? true,
+    tint: mode?.tint ?? null,
+  };
+}

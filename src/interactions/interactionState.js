@@ -24,7 +24,7 @@ export const interactionState = {
   isOrbitalScrubberActive: false,
   // Explode view (interactions/explodeView).
   isExplodeViewActive: false,
-  // Depth scanning tools (echo/depthScanningTools, tabManager/echoLayouts).
+  // Depth scanning tools (echo/depthScanningTools, tabManager/layouts archway).
   archScrollOffset: 0,
   cursorZDepth: 0,
   depthCursorThrottle: false,

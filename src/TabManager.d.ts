@@ -1,8 +1,10 @@
 // Public type surface for the tab/depth manager. Authored declaration: the
-// runtime class is composed from tabManager/* mixins at load time, which
-// TypeScript cannot infer, so the trusted public API is declared here.
+// class body stays untyped JS, and its 81 `toggleXView` / `isXView` members
+// are generated from the view-mode registry at load time, so the trusted
+// public API is declared here. Keep in sync with src/TabManager.js.
 
 import type * as monaco from "monaco-editor";
+import type { EchoLayer } from "./tabManager/EchoLayer.js";
 
 /** An open document tracked by the TabManager. */
 export interface TabFile {
@@ -63,8 +65,8 @@ export class TabManager {
   cycleActiveTab(direction: number): void;
   /** Remove a document/tab by id. */
   removeFile(id: number): void;
-  /** Fetch a StorageAPI note and open it as a tab. */
-  openNoteAsTab(noteName: string): Promise<void>;
+  /** Fetch a StorageAPI note and open it as a tab; resolves to its id. */
+  openNoteAsTab(noteName: string): Promise<number>;
   /** Serialize open files for workspace session persistence. */
   serializeFiles(): object[];
   /** Persist hooks / workspace session controller (optional). */
@@ -75,20 +77,31 @@ export class TabManager {
     watchFile?(file: TabFile): void;
     markClean?(id: number): void;
   };
+  /** Active view-mode select value ("" = default). Single source of truth. */
+  viewMode: string;
+  /** Activate a view mode by select value ("" / unknown = default view). */
+  setViewMode(value: string): void;
+  /** Activate `value`, or return to the default view if it is active. */
+  toggleViewMode(value: string): void;
   /** Deactivate every 3D view mode. */
   _deactivateAllViews(): void;
+  /** Virtualized background echoes (null when there is no #echo-layer). */
+  echoLayer: EchoLayer | null;
+  /** Re-bind the echoes to the current inactive files. */
+  _renderEchoes(): void;
+  /** Recompute echo placements without rebinding (archway scroll, resize). */
+  relayoutEchoes(): void;
   /** Show a transient status toast. */
   _showToast(message: string, isError?: boolean): void;
 
   /**
-   * 25+ CSS-driven 3D view-mode toggles (waterfall, cascade, orbit, helix,
-   * vortex, coverflow, sphere, galaxy, outline, blackHole, …). All share the
-   * same nullary signature.
+   * CSS-driven 3D view-mode toggles generated from VIEW_MODES
+   * (src/tabManager/viewModes.js): toggleOrbitView, toggleHelixView, …
    */
   [method: `toggle${string}View`]: () => void;
 
-  /** Per-view boolean state flags (isCascadeView, isOrbitView, …). */
-  [flag: `is${string}View`]: boolean;
+  /** Read-only per-view flags (`viewMode === value`): isCascadeView, … */
+  readonly [flag: `is${string}View`]: boolean;
 }
 
 /** Shared singleton created in TabManager.js. */
