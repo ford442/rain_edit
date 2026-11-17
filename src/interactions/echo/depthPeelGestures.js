@@ -160,6 +160,7 @@ im.register({
   category: "depth",
   description: "Quantum depth inspect (hold Shift)",
   combo: { key: "Shift" },
+  sharedCombo: true,
   type: "hold",
   preventDefault: false,
   allowInEditor: true,

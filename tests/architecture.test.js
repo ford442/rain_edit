@@ -135,3 +135,27 @@ test("Monaco worker imports have one source of truth", () => {
 
   assert.deepEqual(workerImportFiles, ["src/editor/setupMonaco.js"]);
 });
+
+
+test("lenses stay in the catalog: no per-lens stylesheets or binding groups", () => {
+  const cssFiles = (dir) =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+      const p = join(dir, e.name);
+      return e.isDirectory() ? cssFiles(p) : e.name.endsWith(".css") ? [relative(repositoryRoot, p).split("\\").join("/")] : [];
+    });
+  const offenders = cssFiles(sourceRoot).filter(
+    (rel) => /\/extra-lenses-[^/]*\.css$/.test(rel) || /-lens(es)?\.css$/.test(rel),
+  );
+  assert.deepEqual(offenders, [], "add a row to src/interactions/lenses/catalog.js instead");
+  const groups = srcFiles().filter(({ rel }) => rel.startsWith("src/interactions/lensBindings/"));
+  assert.deepEqual(groups.map((f) => f.rel), []);
+  // Pre-freeze effects outside the catalog; shrink this list, never grow it.
+  const legacy = new Set(["xray-lens-active", "depth-lens-active"]);
+  const lensClasses = srcFiles().flatMap(({ rel, code }) =>
+    [...code.matchAll(/classList\.add\([^)]*?"([\w-]+-lens-active)"/g)]
+      .map((m) => m[1])
+      .filter((c) => !legacy.has(c))
+      .map((c) => `${rel}: ${c}`),
+  );
+  assert.deepEqual(lensClasses, [], "lenses use body[data-lens], not *-lens-active classes");
+});

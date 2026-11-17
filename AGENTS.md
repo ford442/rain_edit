@@ -76,9 +76,8 @@ root/
       echo/               # initEchoDocumentInteractions's feature modules: depthScanningTools,
                           # revealToggles, depthPeelGestures, pointerEffectsMousemove,
                           # lensAndScanEffects, spatialDispersionEffects
-      lensBindings.js     # Lens-family shortcuts (magnifier, x-ray, magnetic separation, …);
-                          # thin orchestrator over lensBindings/{groupA,groupB,groupC}.js
-      lensBindings/        # registerLensBindings's binding lists, split by line count only
+      lensBindings.js     # Registrar: loops lenses/catalog.js into InputManager ("lens" group)
+      lenses/catalog.js   # THE lens catalog (~12 rows: id, combo, description, effect kind+params)
       depthState.js       # Shared echo/mouse-math helpers for the depth gesture classes below
       AmbientCursorField.js, CinematicAutofocusTargeting.js, DepthSpotlightTargeting.js,
       EchoLayerParallax.js, ShiftLensGesture.js, WormholeGesture.js, PeelFanGesture.js,
@@ -118,11 +117,9 @@ root/
                            # (each module kept under ~700 lines)
     styles_echo/            # Per-view-mode echo-document effects and the outline symbol
                            # panel component — modules imported by styles_echo.css
-    styles_ui.css         # Dock, overlays, cheatsheet; the former styles_14.css lens rules are
-                           # @imported from styles_14/ (each module kept under 700 lines)
-    styles_14/             # Lens-effect CSS modules imported by styles_ui.css (fold/fracture,
-                           # view-mode, chromatic/motion, crystalline/hologram lenses, plus
-                           # extra-lenses-{a,b,c}.css split purely by line count)
+    styles_ui.css         # Dock, overlays, cheatsheet; @imports styles_14/ and styles/lenses.css
+    styles_14/             # View-mode effect CSS (fold/fracture, geometric, legacy effects) — no lenses
+    styles/lenses.css      # The only lens stylesheet: one rule set per effect *kind*
     shaders/
       simple.vert         # Basic fullscreen vertex shader
       water.frag          # Front rain fragment shader
@@ -378,6 +375,30 @@ under `src/interactions/`, built on the shared `InputManager` +
 echo/mouse math. See **`docs/depth-interactions.md`** for the full gesture
 list and which class owns each one, and `initDepthGestures.js` for where a
 new gesture gets wired up.
+
+### Lenses (frozen catalog)
+
+Lenses are hold-to-activate echo filters in the exclusive `"lens"` group.
+They are defined **only** as rows in `src/interactions/lenses/catalog.js`
+(`{ id, combo, description, effect: { kind, ...params } }`) and styled
+**only** by `src/styles/lenses.css`, which implements each `kind` via
+`body[data-lens-kind="…"]` plus CSS variables (`--lens-x/y`, `--lens-radius`,
+`--lens-amount`, `--lens-blur`, `--lens-tint`, `--lens-filter`).
+
+- **Do not add a new named CSS lens.** No new `*-lens(es).css` /
+  `extra-lenses-*` files, no `body.<name>-lens-active` classes, no
+  `lensBindings/` group files. Tune an existing row's params, extend a
+  `kind` in `lenses.css`, or build a weather/view-mode instead.
+- The catalog is capped at 14 rows. `npm run audit:lenses` (part of
+  `npm run check`) prints the inventory and fails on duplicate ids, duplicate
+  combos (within the catalog or against any other `combo:` in `src/`), the
+  cap, or a reappearing per-lens stylesheet.
+- `InputManager.register` throws on a duplicate **combo** as well as a
+  duplicate id. Only bindings that both pass `sharedCombo: true` (bare
+  modifier holds, `Escape`) may share one.
+- If a remaining effect needs real distortion (refraction, ripple), it goes in
+  a single fullscreen post pass owned by RainLayer/AppClock — not stacked
+  `backdrop-filter`s.
 
 ---
 
