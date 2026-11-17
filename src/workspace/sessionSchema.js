@@ -2,109 +2,27 @@
  * Workspace session schema + view-mode helpers (pure, Node-testable).
  */
 
+import { VIEW_MODES, bodyClassFor, toggleMethodFor } from "../tabManager/viewModes.js";
+
 export const SESSION_VERSION = 1;
 export const SESSION_STORAGE_KEY = "rain_edit_workspace_session";
 export const LEGACY_TABS_KEY = "rain_edit_open_tabs";
 export const REMOTE_SESSION_NOTE = "__rain_workspace_session__.json";
 export const REMOTE_SYNC_OPT_IN_KEY = "rain-edit:remoteSessionSync";
 
-/** Select value → TabManager toggle method name. */
-export const VIEW_MODE_TOGGLES = {
-  "hyper-thread": "toggleHyperThreadView",
-  "cosmic-thread": "toggleCosmicThreadView",
-  "luminous-cortex": "toggleLuminousCortexView",
-  "starlight-mesh": "toggleStarlightMeshView",
-  "zenith-spiral": "toggleZenithSpiralView",
-  "shattered-glass": "toggleShatteredGlassView",
-  theater: "toggleTheaterView",
-  tornado: "toggleTornadoView",
-  "quantum-web": "toggleQuantumWebView",
-  waterfall: "toggleWaterfallView",
-  cascade: "toggleCascadeView",
-  orbit: "toggleOrbitView",
-  scattered: "toggleScatteredView",
-  isometric: "toggleIsometricView",
-  stack: "toggleStackView",
-  timeline: "toggleTimelineView",
-  tunnel: "toggleTunnelView",
-  grid: "toggleGridView",
-  helix: "toggleHelixView",
-  "time-tunnel": "toggleTimeTunnelView",
-  pinboard: "togglePinboardView",
-  carousel: "toggleCarouselView",
-  "infinity-mirror": "toggleInfinityMirrorView",
-  archway: "toggleArchwayView",
-  kaleidoscope: "toggleKaleidoscopeView",
-  vortex: "toggleVortexView",
-  constellation: "toggleConstellationView",
-  prism: "togglePrismView",
-  coverflow: "toggleCoverflowView",
-  sphere: "toggleSphereView",
-  wave: "toggleWaveView",
-  "black-hole": "toggleBlackHoleView",
-  rolodex: "toggleRolodexView",
-  cylinder: "toggleCylinderView",
-  galaxy: "toggleGalaxyView",
-  origami: "toggleOrigamiView",
-  "matrix-rain": "toggleMatrixRainView",
-  "data-hive": "toggleDataHiveView",
-  crystal: "toggleCrystalView",
-  fractal: "toggleFractalView",
-  "solar-system": "toggleSolarSystemView",
-  "neon-synth": "toggleNeonSynthView",
-  "blueprint-3d": "toggleBlueprint3dView",
-  "cyber-cortex": "toggleCyberCortexView",
-  quantum: "toggleQuantumSuperpositionView",
-  "synapse-web": "toggleSynapseWebView",
-  outline: "toggleOutlineView",
-  tesseract: "toggleTesseractView",
-  "floating-nexus": "toggleFloatingNexusView",
-  cyclone: "toggleCycloneView",
-  mobius: "toggleMobiusView",
-  astrolabe: "toggleAstrolabeView",
-  dominoes: "toggleDominoesView",
-  "hexagon-matrix": "toggleHexagonMatrixView",
-  luminescence: "toggleLuminescenceView",
-  geode: "toggleGeodeView",
-  aurora: "toggleAuroraView",
-  stackdeck: "toggleStackDeckView",
-  "card-spread": "toggleCardSpreadView",
-  "dna-helix": "toggleDnaHelixView",
-  lotus: "toggleLotusView",
-  "fibonacci-spiral": "toggleFibonacciSpiralView",
-  "chrono-ring": "toggleChronoRingView",
-  staircase: "toggleStaircaseView",
-  pyramid: "togglePyramidView",
-  ribbon: "toggleRibbonView",
-  hypercube: "toggleHypercubeView",
-  venetian: "toggleVenetianView",
-  meteor: "toggleMeteorView",
-  bookshelf: "toggleBookshelfView",
-  accordion: "toggleAccordionView",
-  "prism-split": "togglePrismSplitView",
-  "cascading-depth": "toggleCascadingDepthView",
-  "holographic-cylinder": "toggleHolographicCylinderView",
-  "abyssal-trench": "toggleAbyssalTrenchView",
-  "celestial-sphere": "toggleCelestialSphereView",
-  "ethereal-canyon": "toggleEtherealCanyonView",
-};
+/**
+ * Select value → TabManager toggle method name, derived from the one view-mode
+ * registry (src/tabManager/viewModes.js).
+ * @type {Readonly<Record<string, string>>}
+ */
+export const VIEW_MODE_TOGGLES = Object.freeze(
+  Object.fromEntries(VIEW_MODES.map((m) => [m.value, toggleMethodFor(m)])),
+);
 
-/** Body CSS class suffix used by most view modes (value → `${value}-active`). */
-export const VIEW_MODE_BODY_CLASS = {
-  "hyper-thread": "hyper-thread-active",
-  "starlight-mesh": "starlight-mesh-active",
-  "zenith-spiral": "zenith-spiral-active",
-  quantum: "quantum-superposition-active",
-  stackdeck: "stack-deck-active",
-  "quantum-web": "quantum-web-active",
-  "cascading-depth": "cascading-depth-active",
-  "holographic-cylinder": "holographic-cylinder-active",
-  "abyssal-trench": "abyssal-trench-active",
-  "celestial-sphere": "celestial-sphere-active",
-  "ethereal-canyon": "ethereal-canyon-active",
-  "cosmic-thread": "cosmic-thread-active",
-  "luminous-cortex": "luminous-cortex-active",
-};
+/** Select value → body class the mode sets while active. */
+export const VIEW_MODE_BODY_CLASS = Object.freeze(
+  Object.fromEntries(VIEW_MODES.map((m) => [m.value, bodyClassFor(m)])),
+);
 
 /**
  * Detect the active view mode from document.body classes.
@@ -114,7 +32,7 @@ export const VIEW_MODE_BODY_CLASS = {
 export function detectViewMode(root = globalThis.document?.body) {
   if (!root?.classList) return "";
   for (const value of Object.keys(VIEW_MODE_TOGGLES)) {
-    const cls = VIEW_MODE_BODY_CLASS[value] || `${value}-active`;
+    const cls = VIEW_MODE_BODY_CLASS[value];
     if (root.classList.contains(cls)) return value;
   }
   return "";
@@ -122,11 +40,16 @@ export function detectViewMode(root = globalThis.document?.body) {
 
 /**
  * Apply a stored view mode on TabManager.
- * @param {{ _deactivateAllViews?: Function, [k: string]: unknown }} tabManager
+ * @param {{ setViewMode?: Function, _deactivateAllViews?: Function, [k: string]: unknown }} tabManager
  * @param {string} viewMode
  */
 export function applyViewMode(tabManager, viewMode) {
   if (!tabManager) return;
+  if (typeof tabManager.setViewMode === "function") {
+    // Idempotent: unknown/empty values fall back to the default view.
+    tabManager.setViewMode(VIEW_MODE_TOGGLES[viewMode] ? viewMode : "");
+    return;
+  }
   if (!viewMode) {
     tabManager._deactivateAllViews?.();
     return;

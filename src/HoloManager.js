@@ -69,14 +69,20 @@ export class HoloManager {
       if (item.type === "OPTIMIZE") icon = "🚀";
 
       // Escape HTML to prevent XSS
-      const safeText = item.text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-      el.innerHTML = `<span class="holo-icon">${icon}</span> <span class="holo-label">${item.type}</span> <span class="holo-text">${safeText}</span>`;
+      // textContent only: comment text comes straight from the document.
+      const span = (cls, text) => {
+        const node = document.createElement("span");
+        node.className = cls;
+        node.textContent = text;
+        return node;
+      };
+      el.replaceChildren(
+        span("holo-icon", icon),
+        " ",
+        span("holo-label", item.type),
+        " ",
+        span("holo-text", item.text),
+      );
 
       // Interaction
       el.addEventListener("click", (e) => {

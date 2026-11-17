@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { STORAGE_CATEGORIES } from "../StorageAPI.js";
+import { setColorizedHtml } from "../dom/sanitize.js";
 import {
   createGLContext,
   getGLContextInfo,
@@ -504,7 +505,8 @@ export const Cabinet3DMethodsMixin = {
       const cachedHtml = this._previewCacheHtml.get(cacheKey);
       const cached = this._previewCache.get(cacheKey);
       if (cachedHtml) {
-        contentEl.innerHTML = cachedHtml;
+        // Remote file source: Monaco tokens rebuilt from an allowlist only.
+        setColorizedHtml(contentEl, cachedHtml);
       } else if (cached && cached !== "Loading…") {
         contentEl.textContent = cached;
       } else {
@@ -606,7 +608,7 @@ export const Cabinet3DMethodsMixin = {
     const el = this._previewPanel?.querySelector("#pfp-content");
     if (!el) return;
     if (html) {
-      el.innerHTML = html;
+      setColorizedHtml(el, html);
     } else {
       el.textContent = text ?? "";
     }

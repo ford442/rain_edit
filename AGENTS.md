@@ -14,7 +14,7 @@ Key product features:
 - Dual WebGL rain layers (front and back) driven by a dynamic water-map simulation.
 - Reference layer: floating markdown note cards with lantern, spotlight, frost, and rain-shield effects.
 - Connection manager / holographic minimap: draws animated canvas lines and a radar view of reference cards and echo documents.
-- Tab manager: supports 25+ 3D view modes (waterfall, cascade, orbit, scattered, isometric, stack, timeline, tunnel, grid, helix, pinboard, vortex, constellation, prism, coverflow, sphere, wave, black hole, rolodex, cylinder, galaxy, data-hive, origami, matrix-rain, crystal, fractal).
+- Tab manager: 81 registry-driven 3D view modes (waterfall, cascade, orbit, scattered, isometric, stack, timeline, tunnel, grid, helix, pinboard, vortex, constellation, prism, coverflow, sphere, wave, black hole, rolodex, cylinder, galaxy, data-hive, origami, matrix-rain, crystal, fractal, …) over a virtualized echo layer.
 - 3D File Cabinet (Three.js): a "cube of cubes" browser that fetches categorized files from a remote FastAPI backend.
 - VPS File Browser: browse, open, and save files to a remote VPS path via the same backend.
 - Holographic comment parser: turns `// TODO:`, `// FIXME:`, etc. into floating UI badges.
@@ -87,13 +87,18 @@ root/
       initDepthGestures.js # Constructs + inits every class above; called once from boot/createApp.js
       initInteractions.js # Starts InputManager after all bindings register
     tabManager/
-      core.js             # Tab lifecycle (active file, depth, persistence)
-      viewModes.js        # 3D view-mode toggles and addFile
-      echoLayouts.js      # Per-view echo layout chunks
-      echoRender.js       # Echo DOM build + event binding
+      viewModes.js        # THE view-mode registry (value, name, body class, hover rule) (typed)
+      layouts/            # Pure echo layouts: index.js registry (value → fn) + family modules
+                          # (stacks, rings, curves, spheres, grids, scatter, solids); types.js (typed)
+      EchoLayer.js        # Virtualized echoes: ≤12 pooled cards, ≤8 colorized, stubs beyond (typed)
+      echoCard.js         # One recyclable .echo-document: DOM built + listeners bound once
+      symbols.js          # Regex symbol extraction for echo outlines
+      constants.js        # Depth z-indices/icons/titles, toast duration (typed)
+    dom/
+      sanitize.js         # escapeHtml + allowlist DOM rebuild (Monaco tokens, markdown) (typed)
     rendering/
       createGLContext.js  # Shared WebGL2-first context policy + DPR sizing
-    TabManager.js         # File tabs/depth shell composed with tabManager/* mixins
+    TabManager.js         # Real class: tabs, depth, persistence, notes; delegates echoes to EchoLayer
     ConnectionManager.js  # Radar/minimap canvas drawing (echo blips + reference cards)
     ReferenceManager.js   # Markdown note cards + visual effects (lantern, spotlight, frost, drag)
     FogManager.js         # Canvas fog that regenerates and is cleared by mouse
@@ -151,7 +156,7 @@ root/
 - **Shared state:** managers/DOM roots/rain layers live in `src/appContext.js` (import a named live binding, or pass `import * as appContext` as a `ctx` dependency). Mutable interaction flags live in `src/interactions/interactionState.js`. `window.tabManager` is the **only** window global the app installs — a documented debug alias. `tests/architecture.test.js` fails on any other `window.*` / `globalThis.*` assignment.
 - **Frame clock:** `src/runtime/AppClock.js` exports the single main-thread clock `appClock`. Per-frame work registers `appClock.register({ id, update?(dt, t), render?(dt, t), active?(), priority? })`; one-shot "next frame" work uses `appClock.nextFrame(cb)`. Each tick runs every active task's `update`, then every `render`, in registration order. The clock pauses while `document.hidden`, and drops to low LOD on sustained slow frames or a discharging battery under 20% (`?lod=auto|low|high`, `localStorage['rain-edit:lod']`): `priority: "decorative"` tasks (fog, matrix, dust, minimap) are skipped and rain DPR caps at 1. `requestAnimationFrame` may only appear in `AppClock.js` and worker files (`src/rain/rainSimWorker.js` keeps its own RAF on the worker thread) — enforced by `tests/architecture.test.js`. Inspect at runtime via `appContext.clock.getDiagnostics()`.
 - New or extracted interactions belong in `src/interactions/` as named classes/functions with explicit DOM or manager dependencies (`ctx`/`state` options, not `window`), an `init()`/`destroy()` lifecycle, and focused tests. Echo-document keyboard/mouse interactions live in `interactions/EchoDocumentInteractions.js`; the depth/reveal/lens gesture classes are documented in `docs/depth-interactions.md`. The legacy `main_vars_*` / `main_init_*` shards are gone and may not return.
-- `TabManager` owns the list of open files, switches active models in Monaco, manages per-file depth (0/1/2), and renders background echoes in `#echo-layer`. It implements 25+ CSS-driven 3D view modes.
+- `TabManager` owns the list of open files, switches active models in Monaco, manages per-file depth (0/1/2), and the active view mode (`viewMode`, one string). Background echoes in `#echo-layer` are rendered by `EchoLayer` — see **View modes & echo layouts** below.
 - `ReferenceManager` owns `#reference-layer` and `#reference-overlay`. It parses markdown into floating cards and handles lantern/spotlight/frost interactions, drag-and-drop, and rain-shield clearing.
 - `ConnectionManager` draws on the radar canvas (`#radar-canvas`) using 2D canvas. It receives reference card data from `ReferenceManager` and echo targets from the DOM.
 - `StorageAPI` is a thin REST client. It is consumed by `Cabinet3D`, `VPSFileBrowser`, and `main.js`.
@@ -245,14 +250,18 @@ How it works:
   `src/types/storage.d.ts`), `src/rendering/createGLContext.js`,
   `src/interactions/InputManager.js` + `InputRegistry.js`, the water-map sim
   seam `src/rain/WaterMapSim.js` + `optionsCodec.js` + `resolveBackend.js`, the
-  frame clock `src/runtime/AppClock.js`, and the boot seam
-  `src/boot/createApp.js` + `domRefs.js`. Do not put `// @ts-check` on a file
+  frame clock `src/runtime/AppClock.js`, the boot seam
+  `src/boot/createApp.js` + `domRefs.js`, the echo seam
+  `src/tabManager/EchoLayer.js` + `layouts/*.js` + `viewModes.js` +
+  `constants.js`, and `src/dom/sanitize.js`. Do not put `// @ts-check` on a file
   that doesn't pass — it is checked as soon as a typed seam imports it.
-- **Mixin-composed managers** (`TabManager`, `Cabinet3D`) and the WebGL-heavy
+- **Untyped manager bodies** (`TabManager`, the mixin-composed `Cabinet3D`) and the WebGL-heavy
   `RainLayer` have **authored sibling `.d.ts` files** (`TabManager.d.ts`,
   `Cabinet3D.d.ts`, `RainLayer.d.ts`) describing their trusted public APIs.
   TypeScript resolves imports of `./TabManager.js` to the `.d.ts` for types, so
-  agents get a reliable surface without type-checking the mixin bodies. Keep these
+  agents get a reliable surface without type-checking the class bodies
+  (TabManager's `toggleXView`/`isXView` members are generated from the
+  view-mode registry, which TS cannot see). Keep these
   declarations in sync when you change a public method. The same trick covers a
   plain untyped dependency: `src/vendor/raindrops.js` (the legacy prototype-based
   main-thread sim) has a `raindrops.d.ts` sibling describing only the handful of
@@ -309,7 +318,7 @@ python deploy.py
 ## Security Considerations
 
 - **`vite.config.js` allows FS access to `'..'`**. This is intentional for local development asset sharing but should be reviewed if the dev server is ever exposed.
-- The app fetches remote content from `https://storage.noahcohn.com` (configurable via `VITE_STORAGE_BASE_URL`). Be mindful of XSS when rendering remote file contents; the existing code does basic HTML escaping in some places but not all.
+- The app fetches remote content from `https://storage.noahcohn.com` (configurable via `VITE_STORAGE_BASE_URL`). File names (remote, VPS, cabinet) and file/note content are **untrusted**. Render them with `textContent`; when markup is unavoidable use `src/dom/sanitize.js`: `escapeHtml()` for strings, `setColorizedHtml()` for Monaco `colorize()` output, `setSanitizedHtml(el, html, MARKDOWN_POLICY)` for ReferenceManager markdown. Both rebuild DOM from a strict tag/attribute/class allowlist after inert `DOMParser` parsing. `tests/architecture.test.js` fails on any `innerHTML`/`outerHTML` assignment that is not an empty or static literal, and on `insertAdjacentHTML`/`document.write`. If a future feature needs general HTML (not the two fixed shapes), add `dompurify` rather than widening the allowlists.
 - `DEPLOY_TOKEN` is required for production deployment and must be supplied through the process environment. Store it in the project secret manager, rotate it immediately after any suspected exposure, and never commit it.
 - `deploy_old.py` is a legacy SFTP helper. It must prompt interactively for its password; never replace the prompt with a source-code literal.
 - A deploy token was previously committed. Removing it from the current tree does not remove it from Git history; coordinate a `git filter-repo` or BFG rewrite before force-pushing if the repository is or was public.
@@ -399,6 +408,37 @@ They are defined **only** as rows in `src/interactions/lenses/catalog.js`
 - If a remaining effect needs real distortion (refraction, ripple), it goes in
   a single fullscreen post pass owned by RainLayer/AppClock — not stacked
   `backdrop-filter`s.
+
+### View modes & echo layouts
+
+- **Registry:** `src/tabManager/viewModes.js` `VIEW_MODES` is the only list of
+  view modes. Each row's `value` is the `#view-mode-select` option and session
+  key; `toggle${name}View()` / read-only `is${name}View` are generated on
+  `TabManager.prototype`; the body class is `${value}-active` unless
+  `bodyClass` overrides; `hover` / `semanticGravity` / `tint` tune echo
+  behavior. `sessionSchema.VIEW_MODE_TOGGLES` is derived from it. State is the
+  single `tabManager.viewMode` string (`setViewMode(value)`,
+  `toggleViewMode(value)`, `_deactivateAllViews()`).
+- **Layouts:** each mode's echo positions are a pure function in
+  `src/tabManager/layouts/` (`LayoutInput { index, count, viewport, seed,
+  random, scroll, file } → Placement { tx, ty, tz, rotX, rotY, rotZ, stackZ?,
+  opacity?, transform?, vars? }`), registered in `layouts/index.js` `LAYOUTS`.
+  No DOM, `window`, or `Math.random()` (use `input.random`, seeded per file)
+  — enforced by `tests/architecture.test.js`; `tests/echo-layouts.test.js`
+  checks every layout is deterministic and finite for 1–40 documents. Modes
+  without an entry (aurora, card-spread, dna-helix, outline) use the default
+  `parallax` stack. Do not move layout math to WASM: the cost is node count
+  and style recalc, not trig.
+- **Virtualization:** `EchoLayer` renders at most `ECHO_POOL_SIZE` (12)
+  `.echo-document` cards, colorizes only the nearest `ECHO_RICH_COUNT` (8)
+  (cached per model version, rendered as DOM tokens), and draws up to
+  `ECHO_STUB_LIMIT` (48) transform-only `.echo-stub` placeholders beyond that.
+  Cards are recycled: listeners are bound once and read `card.file` at event
+  time; each sync resets the card's classes/inline style like a fresh node.
+  `tabManager.relayoutEchoes()` re-places without rebinding (archway scroll).
+  Inspect with `tabManager.echoLayer.getDiagnostics()`.
+- **Adding a view mode:** one `VIEW_MODES` row + one pure layout + its CSS +
+  an `<option>` in `index.html` (the test suite checks every option is wired).
 
 ---
 

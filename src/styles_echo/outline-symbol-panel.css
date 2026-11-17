@@ -204,3 +204,8 @@ body.outline-active .echo-document[data-depth="2"] {
   border-color: hsla(160deg, 100%, 65%, 0.65);
 }
 
+
+/* Pooled echo cards hide the outline when the bound file has no symbols. */
+.echo-symbol-outline[hidden] {
+  display: none !important;
+}

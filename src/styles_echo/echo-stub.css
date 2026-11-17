@@ -1,0 +1,47 @@
+/* Echo stubs — transform-only placeholders EchoLayer uses for far documents
+   (beyond the card pool). No blur, no backdrop-filter, no colorized content:
+   just a title + depth glyph at the layout's position. Not .echo-document, so
+   per-view echo rules and pointer interactions deliberately skip them. */
+.echo-stub {
+  position: absolute;
+  top: 45%;
+  left: 40%;
+  width: 20%;
+  min-width: 160px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  background: rgba(8, 14, 24, 0.55);
+  color: rgba(216, 245, 255, 0.7);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.35;
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), var(--tz, 0px))
+    rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg))
+    rotateZ(var(--rot-z, 0deg));
+  transition:
+    transform 0.5s ease-out,
+    opacity 0.2s ease-out;
+}
+
+.echo-stub:hover {
+  opacity: 0.85;
+}
+
+.echo-stub-depth {
+  color: #00e5ff;
+  flex: none;
+}
+
+.echo-stub-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

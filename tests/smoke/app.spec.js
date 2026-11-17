@@ -189,3 +189,139 @@ test("one AppClock drives every main-thread frame and pauses when hidden", async
     .poll(() => page.evaluate(() => __appCtx.clock.frame), { timeout: 15_000 })
     .toBeGreaterThan(hidden.start);
 });
+
+test("echo layer virtualizes 40 documents and every view mode lays out", async ({
+  page,
+}) => {
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await page.goto("/");
+  await exposeAppContext(page);
+  await page.waitForFunction(() => Boolean(__appCtx.workspaceSession && window.tabManager));
+
+  const counts = await page.evaluate(() => {
+    const tm = window.tabManager;
+    while (tm.files.length) tm.removeFile(tm.files[0].id);
+    const ids = [];
+    for (let i = 0; i < 40; i++) {
+      ids.push(tm.addFile(`doc-${i}.js`, `export function f${i}() {\n  return ${i};\n}\n`, "javascript"));
+    }
+    tm.setActive(ids[0]);
+    const layer = document.getElementById("echo-layer");
+    return {
+      cards: layer.querySelectorAll(".echo-document").length,
+      stubs: layer.querySelectorAll(".echo-stub").length,
+      diag: tm.echoLayer.getDiagnostics(),
+    };
+  });
+  expect(counts.cards).toBeLessThanOrEqual(12);
+  expect(counts.cards).toBe(12);
+  expect(counts.stubs).toBe(27);
+  expect(counts.diag.richCards).toBeLessThanOrEqual(8);
+
+  // Colorization lands as DOM tokens on the nearest cards only.
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        [...document.querySelectorAll("#echo-layer .echo-document code")].map(
+          (code) => code.querySelector("span[class^='mtk']") !== null,
+        ),
+      ),
+    )
+    .toEqual([...Array(8).fill(true), ...Array(4).fill(false)]);
+
+  // Cycle every registered view mode: no exceptions, cards stay pooled and
+  // placed, body class + flag follow the registry.
+  const results = await page.evaluate(async () => {
+    const { VIEW_MODES, bodyClassFor, flagFor, toggleMethodFor } = await import(
+      "/src/tabManager/viewModes.js"
+    );
+    const tm = window.tabManager;
+    const layer = document.getElementById("echo-layer");
+    const bad = [];
+    for (const mode of VIEW_MODES) {
+      tm[toggleMethodFor(mode)]();
+      const cards = layer.querySelectorAll(".echo-document");
+      const placed = [...cards].every((c) => c.style.getPropertyValue("--explode-x") !== "");
+      if (
+        tm.viewMode !== mode.value ||
+        !tm[flagFor(mode)] ||
+        !document.body.classList.contains(bodyClassFor(mode)) ||
+        cards.length > 12 ||
+        !placed
+      ) {
+        bad.push(mode.value);
+      }
+    }
+    const last = VIEW_MODES[VIEW_MODES.length - 1];
+    tm[toggleMethodFor(last)](); // toggling the active mode returns to default
+    return { bad, viewMode: tm.viewMode, total: VIEW_MODES.length };
+  });
+  expect(results.bad).toEqual([]);
+  expect(results.viewMode).toBe("");
+  expect(results.total).toBeGreaterThan(70);
+  expect(pageErrors).toEqual([]);
+});
+
+test("untrusted file names and content cannot inject HTML", async ({ page }) => {
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await page.goto("/");
+  await exposeAppContext(page);
+  await page.waitForFunction(() => Boolean(window.tabManager));
+
+  const result = await page.evaluate(async () => {
+    const { escapeHtml, sanitizeToFragment, MONACO_TOKENS_POLICY, MARKDOWN_POLICY } =
+      await import("/src/dom/sanitize.js");
+    window.__pwned = 0;
+    const payload = `<img src=x onerror="window.__pwned++">`;
+
+    const probe = document.createElement("div");
+    probe.innerHTML = escapeHtml(payload);
+    const escapedSurvives = probe.querySelector("img") !== null;
+    const escapedText = probe.textContent;
+
+    const tokens = document.createElement("div");
+    tokens.append(
+      sanitizeToFragment(
+        `<span class="mtk1" onclick="x()">a</span>${payload}<script>window.__pwned++</script>`,
+        MONACO_TOKENS_POLICY,
+      ),
+    );
+    const md = document.createElement("div");
+    md.append(sanitizeToFragment(`<b>ok</b><a href="javascript:x">l</a>${payload}`, MARKDOWN_POLICY));
+
+    const tm = window.tabManager;
+    const evil = tm.addFile(`${payload}.js`, `// </code>${payload}\nconst x = 1;\n`, "javascript");
+    const other = tm.addFile("safe.js", "const y = 2;\n", "javascript");
+    tm.setActive(other);
+    await new Promise((r) => setTimeout(r, 1500)); // let colorize + any onerror run
+
+    const card = document.querySelector(`#echo-layer .echo-document[data-id="${evil}"]`);
+    const cardName = card?.querySelector(".echo-file-name")?.textContent;
+    const cardCode = card?.querySelector("code")?.textContent ?? "";
+    tm.setActive(evil); // active tab title + tab strip (the card is recycled)
+    return {
+      escapedSurvives,
+      escapedText,
+      tokenHtml: tokens.innerHTML,
+      mdHtml: md.innerHTML,
+      cardName,
+      cardCodeHasPayload: cardCode.includes("onerror"),
+      imgsInEchoes: document.querySelectorAll("#echo-layer img").length,
+      imgsInTabs: document.querySelectorAll(".tabs-list img").length,
+      pwned: window.__pwned,
+    };
+  });
+
+  expect(result.escapedSurvives).toBe(false);
+  expect(result.escapedText).toBe(`<img src=x onerror="window.__pwned++">`);
+  expect(result.tokenHtml).toBe('<span class="mtk1">a</span>');
+  expect(result.mdHtml).toBe("<b>ok</b>l");
+  expect(result.cardName).toBe(`<img src=x onerror="window.__pwned++">.js`);
+  expect(result.cardCodeHasPayload).toBe(true); // rendered as text, not markup
+  expect(result.imgsInEchoes).toBe(0);
+  expect(result.imgsInTabs).toBe(0);
+  expect(result.pwned).toBe(0);
+  expect(pageErrors).toEqual([]);
+});
