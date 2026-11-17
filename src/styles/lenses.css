@@ -1,0 +1,124 @@
+/*
+ * Lens effects — one rule set per effect KIND, never per lens.
+ *
+ * Lenses are defined in src/interactions/lenses/catalog.js. While a lens is
+ * held, <body> gets data-lens="<id>", data-lens-kind="<kind>" and these
+ * custom properties (from the catalog row's `effect`):
+ *   --lens-x / --lens-y   cursor position
+ *   --lens-radius         px
+ *   --lens-amount         0..1
+ *   --lens-blur           px
+ *   --lens-tint           color
+ *   --lens-filter         filter list (kind "filter")
+ *
+ * Do not add per-lens selectors here (body[data-lens="…"]) unless a kind
+ * genuinely cannot express it; prefer a new param or a new kind.
+ */
+
+body[data-lens-kind] .echo-document {
+  transition: transform 0.35s ease, filter 0.35s ease, opacity 0.35s ease;
+}
+
+/* loupe: punch a circular window through the editor at the cursor */
+body[data-lens-kind="loupe"] #editor,
+body[data-lens-kind="xray"] #editor {
+  -webkit-mask-image: radial-gradient(circle var(--lens-radius, 140px) at var(--lens-x, 50%) var(--lens-y, 50%), transparent 98%, #000 100%);
+  mask-image: radial-gradient(circle var(--lens-radius, 140px) at var(--lens-x, 50%) var(--lens-y, 50%), transparent 98%, #000 100%);
+}
+body[data-lens-kind="loupe"] .echo-document {
+  filter: blur(var(--lens-blur, 0px));
+  opacity: 1;
+}
+
+/* xray: loupe + tinted high-contrast echoes */
+body[data-lens-kind="xray"] .echo-document {
+  filter: grayscale(1) contrast(1.4) drop-shadow(0 0 6px var(--lens-tint, #7fdcff));
+  opacity: 1;
+}
+
+/* separate: echoes drift outward, away from the editor */
+body[data-lens-kind="separate"] .echo-document {
+  transform: translateX(calc((var(--item-index, 0) - 2) * 40px * var(--lens-amount, 0.6)))
+    scale(calc(1 - 0.1 * var(--lens-amount, 0.6)));
+}
+
+/* fan: splay stacked echoes like cards */
+body[data-lens-kind="fan"] .echo-document {
+  transform: rotate(calc((var(--item-index, 0) - 2) * 6deg * var(--lens-amount, 1)))
+    translateY(calc(var(--item-index, 0) * -12px * var(--lens-amount, 1)));
+  transform-origin: 50% 120%;
+}
+
+/* filter: arbitrary filter list from the catalog (thermal, chromatic, …) */
+body[data-lens-kind="filter"] .echo-document {
+  filter: var(--lens-filter, none);
+  opacity: 1;
+}
+
+/* ripple: expanding rings from the cursor */
+body[data-lens-kind="ripple"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: repeating-radial-gradient(
+    circle at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 0 18px,
+    rgba(160, 220, 255, calc(0.18 * var(--lens-amount, 0.5))) 20px 22px
+  );
+  -webkit-mask-image: radial-gradient(circle var(--lens-radius, 260px) at var(--lens-x, 50%) var(--lens-y, 50%), #000 40%, transparent 100%);
+  mask-image: radial-gradient(circle var(--lens-radius, 260px) at var(--lens-x, 50%) var(--lens-y, 50%), #000 40%, transparent 100%);
+  animation: lens-ripple-pulse 1.6s linear infinite;
+}
+@keyframes lens-ripple-pulse {
+  from { background-size: 100% 100%; }
+  to { background-size: 110% 110%; }
+}
+
+/* outline: wireframe echoes */
+body[data-lens-kind="outline"] .echo-document {
+  background: transparent !important;
+  outline: 1px solid var(--lens-tint, #39ff9f);
+  color: var(--lens-tint, #39ff9f);
+  box-shadow: 0 0 8px var(--lens-tint, #39ff9f);
+}
+
+/* vortex: echoes rotate progressively by stack index */
+body[data-lens-kind="vortex"] .echo-document {
+  transform: rotate(calc(var(--item-index, 0) * 14deg * var(--lens-amount, 1)))
+    scale(calc(1 - var(--item-index, 0) * 0.04));
+  transform-origin: var(--lens-x, 50%) var(--lens-y, 50%);
+}
+
+/* pixelate: coarse previews */
+body[data-lens-kind="pixelate"] .echo-document {
+  image-rendering: pixelated;
+  filter: blur(var(--lens-blur, 3px)) contrast(2) saturate(1.4);
+}
+
+/* ghost: older echoes trail behind and fade */
+body[data-lens-kind="ghost"] .echo-document {
+  opacity: calc(1 - var(--item-index, 0) * 0.15 * var(--lens-amount, 0.5));
+  transform: translate(calc(var(--item-index, 0) * 10px), calc(var(--item-index, 0) * 6px));
+  filter: blur(calc(var(--item-index, 0) * 0.6px));
+}
+
+/* isolate: dim the world except a spotlight at the cursor */
+body[data-lens-kind="isolate"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: radial-gradient(
+    circle var(--lens-radius, 180px) at var(--lens-x, 50%) var(--lens-y, 50%),
+    transparent 90%,
+    rgba(0, 0, 0, var(--lens-amount, 0.85)) 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-lens-kind] .echo-document { transition: none; }
+  body[data-lens-kind="ripple"]::after { animation: none; }
+}

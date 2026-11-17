@@ -1,0 +1,81 @@
+/* Effects whose body classes are still set outside the lens catalog:
+   .ripple-displacement-active (spatialDispersionEffects.js) and
+   .hyper-thread-active (tabManager/viewModes.js). Not lenses — do not add lenses here. */
+/* ─── Ripple Displacement (Alt+Shift+R) ────────────────────────────────── */
+body.ripple-displacement-active #editor {
+  mask-image: radial-gradient(
+    circle 250px at var(--ripple-cx, 50%) var(--ripple-cy, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 30%,
+    black 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 250px at var(--ripple-cx, 50%) var(--ripple-cy, 50%),
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 30%,
+    black 100%
+  );
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  filter: blur(2px) contrast(1.2);
+}
+
+body.ripple-displacement-active .echo-document {
+  transition: opacity 0.3s ease, filter 0.3s ease, transform 0.1s linear;
+  opacity: 0.95 !important;
+  /* We use CSS variables to calculate the distance and wave effect */
+  --dx: calc(var(--tx, 0px) - var(--ripple-cx, 0px));
+  --dy: calc(var(--ty, 0px) - var(--ripple-cy, 0px));
+  /* Basic simulated distance logic */
+  transform: translate3d(
+      calc(var(--tx, 0px) + var(--part-tx, 0px) + var(--repel-tx, 0px) + var(--repulse-tx, 0px)),
+      calc(var(--ty, 0px) + var(--part-ty, 0px) + var(--repel-ty, 0px) + var(--repulse-ty, 0px)),
+      calc(var(--tz, 0px) + 150px)
+    )
+    rotateX(calc(var(--rot-x, 0deg) + (var(--ty, 0px) * 0.02deg)))
+    rotateY(calc(var(--rot-y, 0deg) + (var(--tx, 0px) * 0.02deg)))
+    rotateZ(calc(var(--rot-z, 0deg) + 5deg)) scale(1.1) !important;
+
+  box-shadow: 0 0 30px rgba(0, 191, 255, 0.4), inset 0 0 15px rgba(0, 191, 255, 0.2) !important;
+  border-color: rgba(0, 191, 255, 0.6) !important;
+  filter: hue-rotate(calc(var(--tx, 0px) * 0.1deg)) saturate(200%) brightness(1.2) !important;
+  z-index: 250 !important;
+}
+
+/* =========================================
+   HYPER-THREAD LENS (Ctrl+Alt+6)
+   ========================================= */
+body.hyper-thread-active #editor {
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 20%,
+    black 40%,
+    black 60%,
+    rgba(0, 0, 0, 0.4) 80%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 20%,
+    black 40%,
+    black 60%,
+    rgba(0, 0, 0, 0.4) 80%,
+    transparent 100%
+  );
+}
+
+body.hyper-thread-active .echo-document:not(.loupe-active) {
+  opacity: calc(0.9 - (var(--item-index) * 0.08)) !important;
+  filter: hue-rotate(calc(var(--item-index) * -20deg)) contrast(140%) brightness(1.2) drop-shadow(0 0 15px rgba(0, 200, 255, 0.6)) !important;
+  transform: translate3d(
+    calc(var(--tx, 0) + (var(--item-index) * 120px) - 60px),
+    calc(var(--ty, 0) + (sin(calc(var(--item-index) * 0.8rad)) * 50px)),
+    calc(var(--tz, -80px) - (var(--item-index) * 90px))
+  ) rotateY(calc(var(--item-index) * -15deg)) skewY(calc(var(--item-index) * 5deg)) !important;
+  transition: transform 0.4s cubic-bezier(0.17, 0.67, 0.2, 1), filter 0.4s ease, opacity 0.4s ease;
+  border-left: 3px solid rgba(0, 200, 255, 0.9) !important;
+  border-right: 3px solid rgba(0, 200, 255, 0.9) !important;
+  background: linear-gradient(90deg, rgba(0, 200, 255, 0.1) 0%, transparent 50%, rgba(0, 200, 255, 0.1) 100%) !important;
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.3) !important;
+}

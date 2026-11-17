@@ -37,6 +37,8 @@ import { InputRegistry } from "./InputRegistry.js";
  * @property {(event: KeyboardEvent | null, ctx: InputContext) => void} [onUp]
  * @property {boolean} [allowInEditor]
  * @property {boolean} [preventDefault]
+ * @property {boolean} [sharedCombo] opt in to sharing a combo with other
+ *   bindings that also opt in (modifier holds, Escape). Everything else must be unique.
  */
 
 /**
@@ -53,6 +55,8 @@ import { InputRegistry } from "./InputRegistry.js";
  * @property {((event: KeyboardEvent | null, ctx: InputContext) => void) | null} onUp
  * @property {boolean} allowInEditor
  * @property {boolean} preventDefault
+ * @property {boolean} sharedCombo
+ * @property {string} defaultSignature
  */
 
 /**
@@ -94,6 +98,24 @@ function normalizeCombo(combo = {}) {
     code: combo.code || null,
     key: combo.key || null,
   };
+}
+
+/**
+ * Canonical string for a combo, used to detect collisions.
+ * @param {Combo} combo
+ * @returns {string}
+ */
+export function comboSignature(combo) {
+  const key = combo.key && combo.key.length === 1 ? combo.key.toLowerCase() : combo.key;
+  return [
+    combo.ctrlOrMeta ? "ctrlOrMeta" : "",
+    combo.ctrl ? "ctrl" : "",
+    combo.meta ? "meta" : "",
+    combo.alt ? "alt" : "",
+    combo.shift ? "shift" : "",
+    combo.code ? `code:${combo.code}` : "",
+    key ? `key:${key}` : "",
+  ].filter(Boolean).join("+");
 }
 
 /**
@@ -205,6 +227,16 @@ export class InputManager {
     if (this.bindings.has(spec.id)) {
       throw new Error(`InputManager: duplicate binding id "${spec.id}"`);
     }
+    // Collisions are checked on the *default* combo so a user's stored
+    // rebind can never crash boot.
+    const defaultSignature = comboSignature(normalizeCombo(spec.combo));
+    for (const other of this.bindings.values()) {
+      if (other.defaultSignature !== defaultSignature) continue;
+      if (spec.sharedCombo && other.sharedCombo) continue;
+      throw new Error(
+        `InputManager: combo ${defaultSignature} for "${spec.id}" already bound to "${other.id}"`,
+      );
+    }
     const combo = normalizeCombo(this.overrides[spec.id] || spec.combo);
     const binding = {
       id: spec.id,
@@ -219,6 +251,8 @@ export class InputManager {
       onUp: spec.onUp || null,
       allowInEditor: !!spec.allowInEditor,
       preventDefault: spec.preventDefault !== false, // default true
+      sharedCombo: !!spec.sharedCombo,
+      defaultSignature,
     };
     this.bindings.set(spec.id, binding);
     return this;

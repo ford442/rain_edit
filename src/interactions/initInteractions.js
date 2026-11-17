@@ -37,6 +37,7 @@ export function initInteractions(manager = inputManager) {
       category: "help",
       description: "Close cheatsheet",
       combo: { key: "Escape" },
+      sharedCombo: true,
       type: "action",
       preventDefault: false,
       when: () => !!cheatsheet.el,

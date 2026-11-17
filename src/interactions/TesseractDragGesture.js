@@ -40,6 +40,7 @@ export class TesseractDragGesture {
       category: "navigation",
       description: "Exit tesseract view (Esc)",
       combo: { key: "Escape" },
+      sharedCombo: true,
       type: "action",
       preventDefault: false,
       allowInEditor: true,

@@ -34,6 +34,7 @@ im.register({
   category: "navigation",
   description: "Drawer peek (hold Shift)",
   combo: { key: "Shift" },
+  sharedCombo: true,
   type: "hold",
   preventDefault: false,
   allowInEditor: true,

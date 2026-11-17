@@ -3,6 +3,8 @@ import test from "node:test";
 
 import { InputManager, isTypingTarget } from "../src/interactions/InputManager.js";
 import { registerLensBindings } from "../src/interactions/lensBindings.js";
+import { LENSES } from "../src/interactions/lenses/catalog.js";
+import { audit, MAX_LENSES } from "../scripts/audit-lenses.mjs";
 
 
 class FakeClassList {
@@ -44,8 +46,10 @@ function harness() {
   const styles = new Map();
   const body = {
     classList: new FakeClassList(),
+    dataset: {},
     style: {
       setProperty: (name, value) => styles.set(name, value),
+      removeProperty: (name) => styles.delete(name),
     },
   };
   const doc = new FakeEventTarget();
@@ -97,12 +101,40 @@ test("lens group is mutually exclusive", () => {
   const h = harness();
   registerLensBindings(h.manager, { doc: { body: h.body, addEventListener() {} } });
 
-  // Activate magnifier, then nebula core (same "lens" group).
-  h.doc.dispatch("keydown", key({ altKey: true, code: "KeyC", key: "c" })); // X-Ray Core Lens
-  h.doc.dispatch("keydown", key({ altKey: true, shiftKey: true, code: "KeyM", key: "m" })); // Nebula Core Lens
+  h.doc.dispatch("keydown", key({ altKey: true, code: "KeyM", key: "m" })); // magnifier
+  assert.equal(h.body.dataset.lens, "magnifier");
+  assert.equal(h.body.dataset.lensKind, "loupe");
+  assert.equal(h.styles.get("--lens-radius"), "140px");
 
-  assert.equal(h.body.classList.contains("xray-core-active"), false, "xray released");
-  assert.equal(h.body.classList.contains("nebula-core-active"), true, "nebula core active");
+  h.doc.dispatch("keydown", key({ altKey: true, shiftKey: true, code: "KeyM", key: "M" })); // magnetic separation
+  assert.equal(h.body.dataset.lens, "magnetic-separation");
+  assert.equal(h.body.dataset.lensKind, "separate");
+  assert.equal(h.styles.has("--lens-radius"), false, "previous lens vars cleared");
+  assert.equal(h.styles.get("--lens-amount"), "0.6");
+});
+
+
+test("lens catalog stays small, unique, and collision-free", async () => {
+  assert.ok(LENSES.length <= MAX_LENSES, `catalog has ${LENSES.length} lenses`);
+  const { errors } = await audit();
+  assert.deepEqual(errors, []);
+});
+
+
+test("InputManager rejects duplicate combos unless both opt into sharing", () => {
+  const h = harness();
+  h.manager.register({ id: "a", combo: { alt: true, code: "KeyQ" } });
+  assert.throws(
+    () => h.manager.register({ id: "b", combo: { alt: true, code: "KeyQ" } }),
+    /combo alt\+code:KeyQ for "b" already bound to "a"/,
+  );
+  // Single-char keys compare case-insensitively.
+  h.manager.register({ id: "c", combo: { key: "v" } });
+  assert.throws(() => h.manager.register({ id: "d", combo: { key: "V" } }), /already bound/);
+  // Explicit opt-in on both sides allows a shared modifier hold.
+  h.manager.register({ id: "e", combo: { key: "Alt" }, sharedCombo: true });
+  h.manager.register({ id: "f", combo: { key: "Alt" }, sharedCombo: true });
+  assert.throws(() => h.manager.register({ id: "g", combo: { key: "Alt" } }), /already bound/);
 });
 
 
@@ -152,25 +184,6 @@ test("typing in Monaco never triggers a world interaction", () => {
   // Same key outside the editor does trigger it.
   h.doc.dispatch("keydown", key({ key: "i", target: { tagName: "BODY" } }));
   assert.equal(h.body.classList.contains("isolate"), true);
-});
-
-
-test("no two bindings share the same combo", () => {
-  const h = harness();
-  registerLensBindings(h.manager, { doc: { body: h.body, addEventListener() {} } });
-  // The test specifically registers KeyD combos to verify duplicate handling manually.
-  // However, I just added Prismatic Void Lens (Alt+Shift+D) to lensBindings.js.
-  // So adding `b` with Alt+Shift+D triggers the failure since the combo is already in lensBindings.
-  // I will just use dummy bindings that do not collide with lensBindings.js.
-  h.manager.register({ id: "a", combo: { alt: true, code: "F12" }, type: "hold" });
-  h.manager.register({ id: "b", combo: { alt: true, shift: true, code: "F12" }, type: "hold" });
-
-  const seen = new Set();
-  for (const binding of h.manager.bindings.values()) {
-    const sig = h.manager.formatCombo(binding.combo);
-    assert.equal(seen.has(sig), false, `duplicate combo: ${sig}`);
-    seen.add(sig);
-  }
 });
 
 
