@@ -12,10 +12,18 @@ import {
 /** @typedef {import('./optionsCodec.js').RainOptions} RainOptions */
 /** @typedef {'main' | 'js' | 'wasm'} RainSimBackend */
 /** @typedef {'auto' | RainSimBackend} RainSimPreference */
+/**
+ * Optional environment support of the running backend. Only the wasm
+ * worker implements wind and the shield SDF; JS backends report false and
+ * stay the visual-parity reference.
+ * @typedef {{ wind: boolean, shield: boolean }} SimFeatures
+ */
+/** @type {SimFeatures} */
+const NO_FEATURES = Object.freeze({ wind: false, shield: false });
 
 /**
  * @typedef {
- *   | { type: 'ready', backend: RainSimBackend }
+ *   | { type: 'ready', backend: RainSimBackend, features?: SimFeatures }
  *   | { type: 'frame', bitmap: ImageBitmap, backend: RainSimBackend }
  *   | { type: 'error', message?: string }
  *   | { type: 'stopped' }
@@ -103,6 +111,9 @@ export class WaterMapSim {
     this._destroyed = false;
     this._lastSimMainMs = 0;
     this._frameCount = 0;
+    /** @type {SimFeatures} */
+    this.features = NO_FEATURES;
+    this._environment = { wind: { vx: 0, vy: 0 }, shield: { x: 0, y: 0, r: 0 } };
 
     const opts = { ...DEFAULT_RAIN_OPTIONS, ...options };
     /** @type {RainOptions} */
@@ -176,6 +187,8 @@ export class WaterMapSim {
         if (msg.type === "ready") {
           settled = true;
           this._ready = true;
+          this.features = { ...NO_FEATURES, ...(msg.features || {}) };
+          this._postEnvironment();
           resolve(msg.backend);
         } else if (msg.type === "frame") {
           if (this._frame && typeof this._frame.close === "function") {
@@ -251,6 +264,7 @@ export class WaterMapSim {
   }
 
   _teardownWorker() {
+    this.features = NO_FEATURES;
     if (this._worker) {
       try {
         this._worker.postMessage({ type: "stop" });
@@ -315,6 +329,34 @@ export class WaterMapSim {
     this._worker?.postMessage({ type: "splash", x, y, count });
   }
 
+  /**
+   * Wind for backends that support it (`features.wind`); remembered across
+   * backend switches. A no-op on the JS reference backends.
+   * @param {number} vx
+   * @param {number} vy
+   */
+  setWind(vx, vy) {
+    this._environment.wind = { vx, vy };
+    this._postEnvironment();
+  }
+
+  /**
+   * Shield circle (CSS px, same space as clearDroplets) that drops slide
+   * around on backends with `features.shield`. `r <= 0` removes it.
+   * @param {number} x
+   * @param {number} y
+   * @param {number} r
+   */
+  setShield(x, y, r) {
+    this._environment.shield = { x, y, r };
+    this._postEnvironment();
+  }
+
+  _postEnvironment() {
+    if (!this._worker || !(this.features.wind || this.features.shield)) return;
+    this._worker.postMessage({ type: "environment", ...this._environment });
+  }
+
   clearDrops() {
     if (this._mainEngine) {
       this._mainEngine.clearDrops();
@@ -374,6 +416,11 @@ export class WaterMapSim {
       width: this.width,
       height: this.height,
       workerSupported: workerSimSupported(),
+      features: { ...this.features },
+      environment: {
+        wind: { ...this._environment.wind },
+        shield: { ...this._environment.shield },
+      },
     };
   }
 

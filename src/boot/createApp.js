@@ -33,7 +33,8 @@ import { CinematicFocus } from "../effects/CinematicFocus.js";
 import { Wiper } from "../effects/Wiper.js";
 import { PortalMasks } from "../effects/PortalMasks.js";
 import { Sonar } from "../effects/Sonar.js";
-import { Atmosphere } from "../effects/Atmosphere.js";
+import { Atmosphere } from "../rain/Atmosphere.js";
+import { DayCycle } from "../rain/DayCycle.js";
 import { resizeCanvasToDisplaySize } from "../rendering/createGLContext.js";
 import { get2DContextInfo, resolveDesync2D } from "../rendering/create2DContext.js";
 import { ShaderDebugOverlay } from "../rendering/ShaderDebugOverlay.js";
@@ -127,6 +128,11 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
   const weatherAudio = new WeatherAudio();
   const weatherSystem = new WeatherSystem();
   weatherSystem.attach({ audio: weatherAudio });
+  // Editor rain shield: rain calms around the focused editor.
+  weatherSystem.setShieldSource(() => editorEl.getBoundingClientRect());
+  const dayCycle = new DayCycle({
+    onTextures: (set) => rainScene.setStaticTextures(set),
+  });
 
   setAppContext({
     clock,
@@ -145,6 +151,7 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
     vpsBrowser,
     weatherSystem,
     weatherAudio,
+    dayCycle,
   });
   // Documented debug alias (smoke tests, manual automation). The only
   // window global createApp() installs.
@@ -194,7 +201,10 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
       setAppContext({ raindrops });
       referenceManager.setRaindrops(raindrops);
     },
-    onLayers: ({ bgLayer, fgLayer }) => setAppContext({ bgLayer, fgLayer }),
+    onLayers: ({ bgLayer, fgLayer }) => {
+      setAppContext({ bgLayer, fgLayer });
+      dayCycle.attachLayers(bgLayer, fgLayer);
+    },
     forceWebGL1,
     cabinetCompositing,
   });
@@ -203,11 +213,16 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
   const atmosphere = new Atmosphere({
     editor,
     monaco,
+    weatherSystem,
     echoLayerEl,
     referenceLayer: refs.referenceLayer,
     vignetteLayer: refs.vignetteLayer,
     lightningLayer: refs.lightningLayer,
+    win,
   });
+  // Thunder follows lightning (scheduled on the audio clock, delayed by distance).
+  atmosphere.onStrike((strike) => weatherAudio.thunder(strike));
+  setAppContext({ atmosphere });
   const matrixRain = new MatrixRain(refs.matrixLayer, { desynchronized: desync2d });
   const holoDust = new HoloDust(refs.dustLayerEl, {
     getIntensity: () => 1 + atmosphere.stormCharCount * 0.05,
@@ -232,6 +247,25 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
 
   const rainReady = rainScene.init().then(() => {
     weatherSystem.setManualIntensity(parseInt(refs.intensitySlider?.value ?? "30", 10));
+    // DayCycle texture sets: the loaded rain set, plus sunlit textures that
+    // are only fetched once a non-night time is chosen and only swapped in
+    // after they finish loading.
+    const rainSet = rainScene.getStaticTextures();
+    if (rainSet) dayCycle.textureSets.rain = rainSet;
+    const preloadSun = () => {
+      if (dayCycle.textureSets.sun || dayCycle.getMode() === "night") return;
+      const load = (/** @type {string} */ src) => {
+        const img = new Image();
+        img.src = src;
+        return img;
+      };
+      dayCycle.textureSets.sun = {
+        bg: load("./img/texture-sun-bg.png"),
+        fg: load("./img/texture-sun-fg.png"),
+      };
+    };
+    preloadSun();
+    dayCycle.onModeChange(preloadSun);
     return rainScene;
   });
   rainReady.catch((err) => console.error("[rain] failed to initialize", err));
@@ -290,6 +324,8 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
     connectionManager,
     weatherSystem,
     weatherAudio,
+    dayCycle,
+    atmosphere,
     ctx: appContext,
     focusDepth,
     cinematicFocus,
@@ -313,7 +349,7 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
   });
   focusDepth.updateVisuals();
   portals.scan();
-  atmosphere.start();
+  atmosphere.start(clock);
 
   registerAppBindings(inputManager, {
     tabManager,
@@ -355,6 +391,23 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
         }
       }
       referenceManager.render(time);
+    },
+  });
+  // Weather world: time-of-day ramp, and the audio listener (cursor pan +
+  // active tab depth). Atmosphere registered its own `atmosphere` task.
+  dayCycle.apply();
+  clock.register({ id: "day-cycle", update: (dt) => dayCycle.update(dt) });
+  win.addEventListener(
+    "pointermove",
+    (e) => weatherAudio.setPan(e.clientX / Math.max(1, win.innerWidth)),
+    { passive: true },
+  );
+  clock.register({
+    id: "weather-listener",
+    active: () => weatherAudio.isAudible(),
+    update: () => {
+      const active = tabManager.files.find((f) => f.id === tabManager.activeId);
+      weatherAudio.setDepth(active?.depth ?? 1);
     },
   });
   clock.register({ id: "fog", priority: "decorative", render: () => fogManager.render() });
@@ -426,6 +479,7 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
     vpsBrowser,
     weatherSystem,
     weatherAudio,
+    dayCycle,
     workspaceSession,
     localProject,
     rainScene,

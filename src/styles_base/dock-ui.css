@@ -16,7 +16,8 @@
   padding: 20px 24px;
 
   /* Enhanced Premium Glassmorphism */
-  background: rgba(10, 14, 22, 0.90);
+  /* --glass-tint (r, g, b) comes from src/rain/DayCycle.js; fallback = night. */
+  background: rgba(var(--glass-tint, 10, 14, 22), 0.90);
   backdrop-filter: var(--glass-blur-md) var(--glass-sat);
   -webkit-backdrop-filter: var(--glass-blur-md) var(--glass-sat);
   border: 1px solid rgba(0, 255, 255, 0.3);

@@ -46,6 +46,10 @@ export let veilExcavator = null;
 export let weatherSystem = null;
 /** @type {import('./audio/WeatherAudio.js').WeatherAudio | null} */
 export let weatherAudio = null;
+/** @type {import('./rain/DayCycle.js').DayCycle | null} */
+export let dayCycle = null;
+/** @type {import('./rain/Atmosphere.js').Atmosphere | null} */
+export let atmosphere = null;
 /** @type {import('./rain/WaterMapSim.js').WaterMapSim | null} */
 export let raindrops = null;
 /** @type {import('./RainLayer.js').default | null} */
@@ -75,6 +79,8 @@ const KEYS = /** @type {const} */ ([
   "veilExcavator",
   "weatherSystem",
   "weatherAudio",
+  "dayCycle",
+  "atmosphere",
   "raindrops",
   "bgLayer",
   "fgLayer",
@@ -112,6 +118,8 @@ export function setAppContext(partial) {
       case "veilExcavator": veilExcavator = value; break;
       case "weatherSystem": weatherSystem = value; break;
       case "weatherAudio": weatherAudio = value; break;
+      case "dayCycle": dayCycle = value; break;
+      case "atmosphere": atmosphere = value; break;
       case "raindrops": raindrops = value; break;
       case "bgLayer": bgLayer = value; break;
       case "fgLayer": fgLayer = value; break;

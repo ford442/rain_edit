@@ -52,6 +52,19 @@ can be checked in CI:
 Commit a crate change, the rebuilt wasm, and its manifest together. To bump
 Rust, change the channel, rebuild, and commit all three.
 
+### Environment exports (optional)
+
+The crate also exports `rain_sim_set_wind(ptr, vx, vy)` (moving drops drift by
+`wind × fall momentum × 0.25`) and `rain_sim_set_shield(ptr, x, y, r)` — a
+circular SDF in the same CSS-pixel space as `clear_droplets` that falling
+drops are pushed out of and deflected around, and that rain/droplets never
+spawn inside (`r <= 0` removes it). `wasmEngine.js` feature-detects both, so
+an older artifact still runs. The worker reports them in its `ready` message
+and `raindrops.getDiagnostics().features` (`{ wind, shield }`, false on the
+`js`/`main` backends, which stay the parity reference and ignore wind).
+`WaterMapSim.setWind()` / `setShield()` remember the last values and re-send
+them after a backend switch; only `WeatherSystem` calls them.
+
 Native work stays in this Rust crate (feature-detected, with JS worker parity).
 Do not add a C++/Emscripten port of the same integrator; the next GPU step is
 WGSL compute, after the shared compositing pass
@@ -59,8 +72,8 @@ WGSL compute, after the shared compositing pass
 
 ## Diagnostics
 
-`raindrops.getDiagnostics()` reports the active backend and
-`lastMainThreadSimMs`. Worker backends should keep that near 0 on desktop;
+`raindrops.getDiagnostics()` reports the active backend,
+`lastMainThreadSimMs`, `features`, and the last `environment` (wind/shield). Worker backends should keep that near 0 on desktop;
 `main` includes the full CPU canvas sim cost.
 
 ## Weather system
@@ -118,18 +131,77 @@ step for deterministic timing (see `tests/weather-system.test.js`).
   rain while the 3D file cabinet is open (replaces the old one-off
   `raindrops.options.rainChance = …` assignment).
 
+### Editor shield and wind
+
+- `setShieldSource(() => rect | null)` — `createApp` passes the editor's
+  bounding rect. While the editor is focused the shield strength ramps to 1
+  (~400 ms) and back to 0 on blur. At full strength it posts ~30 small,
+  centre-biased `clearDroplets` calls per second inside the rect
+  (`sampleShieldClear`) on every backend, and hands `shieldCircle(rect,
+  strength)` to `raindrops.setShield` so the wasm backend also deflects
+  falling drops around the editor. Only changes are posted.
+- Each mode has `wind: { calm, active }`; the damped value goes to
+  `raindrops.setWind(vx, 0)` when it changes by ≥ 0.01.
+
+### Atmosphere (lightning, hue, vignette)
+
+`src/rain/Atmosphere.js` is the AppClock `atmosphere` task (no
+`setInterval`/`setTimeout`). It owns the `--dynamic-hue` breathing (Monaco
+markers + typing charge), heat shimmer, reference-card storm intensity, rain
+streaks, the hyper-focus vignette, and lightning. Its `registerTyping(n)` is
+the editor's single typing entry point and forwards to
+`WeatherSystem.registerTyping`. Ambient strikes are spaced by the mode's
+`lightning: { minGapMs, maxGapMs }` (`null` in drizzle/clearing → none),
+plus a 20%/s chance of a close "surge" strike while typing hard. Every strike
+notifies `onStrike()` listeners — `createApp` routes them to
+`weatherAudio.thunder()`. A hidden tab pauses the clock, so lightning stops
+with it; `setMuted(true)` (dock **Mute World**) stops strikes and adds
+`.lightning-muted`; `prefers-reduced-motion` keeps strikes (thunder) but
+never flashes.
+
+### Time of day
+
+`src/rain/DayCycle.js` is the AppClock `day-cycle` task: a 0..1 phase
+(0 midnight, 0.25 dawn, 0.5 noon, 0.75 dusk) that ramps at 0.08/s toward the
+target, the short way round. It writes `--sky-0` / `--sky-1` (page gradient),
+`--glass-tint` (dock glass, an `r, g, b` triplet), `--day-phase`, and
+`u_brightness` on both rain layers. Choose from the dock **Time** select,
+`?time=clock|dawn|day|dusk|night`, or `localStorage['rain-edit:timeOfDay']`;
+`clock` follows local time. `night` (the default) is the original look
+exactly. Around noon the keyframes ask for the `sun` texture set
+(`public/img/texture-sun-*.png`): it is only fetched once a non-night mode is
+chosen, and `RainScene.setStaticTextures()` swaps it in only after both
+images finish loading, so the swap never stalls a frame.
+
 ### Ambient audio
 
-`src/audio/WeatherAudio.js` is an optional filtered-noise rain bed. It never
-touches `AudioContext` until `enable()` runs from a user gesture (the dock's
-**Ambient Audio** checkbox — starts unchecked/muted). `WeatherSystem` pushes
-the active mode's `audio: { gain, filterFrequency, filterQ }` profile into it
-on `attach()` and on every `setMode()`, and feeds the activity signal into
-`setIntensity()` each frame so the bed swells slightly while typing.
+`src/audio/WeatherAudio.js` is optional weather audio. It never touches
+`AudioContext` until `enable()` runs from a user gesture (the dock's
+**Ambient Audio** checkbox — starts unchecked/muted), and has no loop of its
+own: `WeatherSystem.update()` calls `audio.update(dt, activity)` each frame.
+One graph feeds a `StereoPannerNode` and a master gain:
+
+- **Bed** — looping filtered noise; the mode's `audio: { gain,
+  filterFrequency, filterQ }` profile and the activity signal set its level.
+- **Thunder** — `thunder({ distance, intensity })` schedules
+  `public/audio/thunder.opus` (10 KB; a synthesized rumble stands in until it
+  decodes, or if opus is unsupported) on the audio clock, 0.3–3 s after the
+  flash and darker with distance.
+- **Droplet ticks** — tiny noise bursts at ~0.4/s at rest up to ~2.5/s while
+  typing; skipped under `prefers-reduced-motion`.
+- **Spatial** — `setPan(x)` from the pointer's normalized X (±0.6 pan) and
+  `setDepth(0|1|2)` from the active tab's depth (the `weather-listener`
+  clock task): deeper tabs hear the rain muffled and quieter.
+
+The master gain is 0 and the context is suspended whenever audio is disabled,
+the world is muted (`setWorldMuted`, dock **Mute World**), or the tab is
+hidden (`visibilitychange`).
 
 ### Diagnostics
 
 `weatherSystem.getDiagnostics()` returns `{ mode, activity, focused,
-manualMultiplier, sceneMultiplier, audioEnabled, current }`, where `current`
-is the live damped value of every parameter above — useful from the console
+manualMultiplier, sceneMultiplier, shieldStrength, wind, audioEnabled,
+current }`, where `current` is the live damped value of every parameter above.
+`appContext.atmosphere`, `appContext.dayCycle` and `appContext.weatherAudio`
+each have a `getDiagnostics()` too — useful from the console
 or a future on-screen diagnostics readout.

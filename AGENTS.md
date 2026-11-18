@@ -62,7 +62,7 @@ root/
     runtime/
       AppClock.js         # The one main-thread RAF: tasks, visibility pause, nextFrame, LOD (typed)
     effects/              # Per-feature effects driven by AppClock tasks: MatrixRain, HoloDust,
-                          # FocusDepth, CinematicFocus, Wiper, PortalMasks, Sonar, Atmosphere,
+                          # FocusDepth, CinematicFocus, Wiper, PortalMasks, Sonar,
                           # particles, zScan, tearSound, editorResonance
     editor/
       setupMonaco.js      # Sole Monaco language/worker registration point
@@ -140,9 +140,11 @@ root/
       image-loader.js
       random.js
       times.js
-    rain/                 # Off-main-thread water-map (WaterMapSim, worker, wasm) + WeatherSystem;
+    rain/                 # Off-main-thread water-map (WaterMapSim, worker, wasm) + WeatherSystem
+                          # (modes, editor shield, wind); Atmosphere (hue, lightning, vignette)
+                          # and DayCycle (time of day) are AppClock tasks;
                           # RainScene.js = the AppClock `rain` task (sim, layers, cabinet upload)
-    audio/                # Optional ambient audio (WeatherAudio rain bed)
+    audio/                # Optional weather audio (WeatherAudio: bed, thunder, ticks, stereo pan)
     workspace/            # Session persist/restore, local project, export/import
   crates/
     rain-sim/             # Rust wasm32 droplet sim → src/rain/wasm/rain_sim.wasm
@@ -153,6 +155,7 @@ root/
     rendering-contexts.md # GL/2D context policy, shaders, diagnostics, cabinet compositing, Safari notes
     water-map-sim.md      # Water-map backends, wasm build + CI guard, weather system
   public/img/             # Local texture assets (drop-alpha, drop-color, textures, backgrounds)
+  public/audio/           # thunder.opus (WeatherAudio thunder sample)
   tests/                  # Focused Node tests for extracted domain modules
   Kimi_Agent/             # Agent workspace: patches and alternate file versions (not part of main build)
   .github/copilot-instructions.md  # Copilot guidance; references this file as primary architecture doc
@@ -173,7 +176,7 @@ root/
 - `RainLayer` caches texture sources and uniform values, idles the AppClock `rain` task on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy. Shader build failures don't throw: they land in `getDiagnostics().shaderLog` (and the `?shaderDebug=1` overlay). The cabinet has no loop of its own: the `rain` task renders it and — via `src/rendering/Compositor.js` — draws the front rain pass *inside the cabinet's WebGL2 context* (GPU copy of the cabinet frame, no cross-context upload; `#rain-front` is suspended meanwhile). `?cabinetCompositing=upload` keeps the old cross-context upload path. A fallback `cabinet` task renders it only when rain can't. Inspect with `rainScene.getCompositingDiagnostics()`.
 - `window.tabManager` is intentionally exposed on the global object for manual/debug automation. Smoke tests read everything else from the live `/src/appContext.js` module (`await import("/src/appContext.js")` in the page).
 - Water-map simulation lives behind `src/rain/WaterMapSim.js`. It prefers an off-main-thread worker (`js` OffscreenCanvas or `wasm` Rust pixel sim in `crates/rain-sim`), and falls back to `src/vendor/raindrops.js` on the main thread. Toggle with the dock **Rain Sim** control, `?rainSim=wasm|js|main|auto`, or `localStorage['rain-edit:rainSimBackend']`. Rebuild the wasm artifact with `npm run build:wasm` (Vite imports `src/rain/wasm/rain_sim.wasm` via `?url` — no public/ copy).
-- `src/rain/WeatherSystem.js` is the control surface for rain "feel": it drives `raindrops.options.{rainChance,dropletsRate,maxDrops,trailRate,globalTimeScale}` and the `RainLayer` refraction uniforms from a damped editor-activity signal (typing/cursor/focus) plus a `drizzle`/`steady`/`storm`/`clearing` weather-mode state machine (`src/rain/weatherModes.js`). Switch modes from the dock's **Weather** select, `?weather=`, or `localStorage['rain-edit:weatherMode']`. It is the single owner of those options — do not write `raindrops.options.rainChance`/`dropletsRate` elsewhere; use `setManualIntensity()`/`setSceneMultiplier()` instead. `src/audio/WeatherAudio.js` is an optional muted-by-default ambient rain bed that follows the mode. See `docs/water-map-sim.md` for the full API.
+- `src/rain/WeatherSystem.js` is the control surface for rain "feel": it drives `raindrops.options.{rainChance,dropletsRate,maxDrops,trailRate,globalTimeScale}` and the `RainLayer` refraction uniforms from a damped editor-activity signal (typing/cursor/focus) plus a `drizzle`/`steady`/`storm`/`clearing` weather-mode state machine (`src/rain/weatherModes.js`). Switch modes from the dock's **Weather** select, `?weather=`, or `localStorage['rain-edit:weatherMode']`. It is the single owner of those options — do not write `raindrops.options.rainChance`/`dropletsRate` elsewhere; use `setManualIntensity()`/`setSceneMultiplier()` instead. It also owns the **editor rain shield** (`setShieldSource`) and **wind** (wasm-only, feature-detected via `raindrops.getDiagnostics().features`). The "world" around it: `src/rain/Atmosphere.js` (AppClock `atmosphere` task — hue, lightning, vignette; the editor's one `registerTyping` entry point), `src/rain/DayCycle.js` (AppClock `day-cycle` task — dock **Time**, `?time=`, writes `--sky-0/--sky-1/--glass-tint` + `u_brightness`), and `src/audio/WeatherAudio.js` (muted-by-default bed + thunder + droplet ticks + stereo pan; silent and suspended when muted via dock **Mute World** or the tab is hidden). None of them owns a timer or RAF. See `docs/water-map-sim.md` for the full API.
 - Workspace sessions live in `src/workspace/` (`WorkspaceSession`, `LocalProject`). Refresh restores tabs (content + depth), view mode, and reference layouts from IndexedDB (localStorage fallback). Dirty tabs show `*`; `beforeunload` confirms. Optional remote sync writes note `__rain_workspace_session__.json` via StorageAPI. See `docs/workspace-session.md`.
 
 ---
@@ -259,6 +262,8 @@ How it works:
   `src/types/storage.d.ts`), `src/rendering/createGLContext.js`,
   `src/interactions/InputManager.js` + `InputRegistry.js`, the water-map sim
   seam `src/rain/WaterMapSim.js` + `optionsCodec.js` + `resolveBackend.js`, the
+  weather seam `src/rain/{weatherModes,WeatherSystem,Atmosphere,DayCycle}.js` +
+  `src/audio/WeatherAudio.js`, the
   frame clock `src/runtime/AppClock.js`, the boot seam
   `src/boot/createApp.js` + `domRefs.js`, the echo seam
   `src/tabManager/EchoLayer.js` + `layouts/*.js` + `viewModes.js` +

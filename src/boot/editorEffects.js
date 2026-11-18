@@ -28,7 +28,7 @@ function restartClass(echo, cls, ms) {
  *   fogManager: any,
  *   weatherSystem: import("../rain/WeatherSystem.js").WeatherSystem,
  *   rainScene: import("../rain/RainScene.js").RainScene,
- *   atmosphere: import("../effects/Atmosphere.js").Atmosphere,
+ *   atmosphere: import("../rain/Atmosphere.js").Atmosphere,
  *   portals: import("../effects/PortalMasks.js").PortalMasks,
  * }} deps
  */
@@ -177,8 +177,8 @@ export function bindEditorEffects(deps) {
 
   editor.onDidChangeModelContent((e) => {
     e.changes.forEach((change) => {
+      // Atmosphere forwards the keystroke to WeatherSystem (one call drives both).
       atmosphere.registerTyping(change.text.length);
-      weatherSystem.registerTyping(change.text.length || 1);
       if (change.text.length === 0) return;
       const position = editor.getPosition();
       const visible = position && editor.getScrolledVisiblePosition(position);

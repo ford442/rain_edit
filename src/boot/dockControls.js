@@ -2,6 +2,7 @@ import { toggleExplodeView } from "../interactions/explodeView.js";
 import { interactionState } from "../interactions/interactionState.js";
 import { triggerZScan } from "../effects/zScan.js";
 import { VIEW_MODE_TOGGLES } from "../workspace/sessionSchema.js";
+import { normalizeTimeMode } from "../rain/DayCycle.js";
 
 /**
  * @param {EventTarget | null} target
@@ -23,6 +24,8 @@ function on(target, type, handler) {
  *   connectionManager: any,
  *   weatherSystem: import("../rain/WeatherSystem.js").WeatherSystem,
  *   weatherAudio: import("../audio/WeatherAudio.js").WeatherAudio,
+ *   dayCycle: import("../rain/DayCycle.js").DayCycle,
+ *   atmosphere: import("../rain/Atmosphere.js").Atmosphere,
  *   ctx: Partial<typeof import("../appContext.js")>,
  *   focusDepth: import("../effects/FocusDepth.js").FocusDepth,
  *   cinematicFocus: import("../effects/CinematicFocus.js").CinematicFocus,
@@ -72,6 +75,15 @@ export function bindDockControls(deps) {
   on(refs.weatherAudioToggle, "change", (e) => {
     if (e.target.checked) weatherAudio.enable();
     else weatherAudio.disable();
+  });
+  if (refs.timeOfDaySelect) {
+    refs.timeOfDaySelect.value = deps.dayCycle.getMode();
+    on(refs.timeOfDaySelect, "change", (e) => deps.dayCycle.setMode(normalizeTimeMode(e.target.value)));
+  }
+  // Mute world: every weather audio layer and the lightning together.
+  on(refs.worldMuteToggle, "change", (e) => {
+    weatherAudio.setWorldMuted(e.target.checked);
+    deps.atmosphere.setMuted(e.target.checked);
   });
 
   on(refs.focusModeToggle, "change", bodyClassToggle("focus-readable"));

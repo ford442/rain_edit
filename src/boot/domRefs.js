@@ -64,6 +64,8 @@ export function queryDomRefs(doc = document) {
     themeSelect: select("theme-select"),
     weatherModeSelect: select("weather-mode"),
     weatherAudioToggle: input("weather-audio-toggle"),
+    timeOfDaySelect: select("time-of-day"),
+    worldMuteToggle: input("world-mute-toggle"),
     opacitySlider: required("editor-opacity", input("editor-opacity")),
     intensitySlider: input("storm-intensity"),
     theaterToggle: input("theater-mode"),

@@ -4,11 +4,12 @@ import {
   WEATHER_MODES,
   DEFAULT_WEATHER_MODE,
   computeWeatherTargets,
+  computeWind,
   normalizeWeatherMode,
   persistWeatherMode,
   readWeatherModeOverride,
 } from "../src/rain/weatherModes.js";
-import { WeatherSystem } from "../src/rain/WeatherSystem.js";
+import { WeatherSystem, sampleShieldClear, shieldCircle } from "../src/rain/WeatherSystem.js";
 
 test("normalizeWeatherMode accepts known modes and falls back to default", () => {
   assert.equal(normalizeWeatherMode("STORM"), "storm");
@@ -172,4 +173,110 @@ test("WeatherSystem.attach pushes the current mode's audio profile", () => {
   assert.equal(calls.length, 1);
   assert.equal(calls[0][0], "storm");
   assert.equal(calls[0][1], WEATHER_MODES.storm);
+});
+
+
+function shieldSim() {
+  return {
+    options: {},
+    clears: [],
+    shields: [],
+    winds: [],
+    clearDroplets(x, y, r) {
+      this.clears.push({ x, y, r });
+    },
+    setShield(x, y, r) {
+      this.shields.push({ x, y, r });
+    },
+    setWind(vx, vy) {
+      this.winds.push([vx, vy]);
+    },
+  };
+}
+
+const EDITOR = { left: 100, top: 50, width: 800, height: 400 };
+
+test("sampleShieldClear stays inside the editor rect, biased to the centre", () => {
+  let seed = 1;
+  const random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < 200; i++) {
+    const c = sampleShieldClear(EDITOR, random);
+    assert.ok(c.x >= EDITOR.left + EDITOR.width * 0.08 && c.x <= EDITOR.left + EDITOR.width * 0.92);
+    assert.ok(c.y >= EDITOR.top + EDITOR.height * 0.08 && c.y <= EDITOR.top + EDITOR.height * 0.92);
+    assert.ok(c.r >= 14 && c.r <= 26);
+  }
+  assert.deepEqual(sampleShieldClear(EDITOR, () => 0.5), { x: 500, y: 250, r: 20 });
+});
+
+test("shieldCircle is centred on the rect and scales with strength", () => {
+  assert.deepEqual(shieldCircle(EDITOR, 1), { x: 500, y: 250, r: 200 });
+  assert.equal(shieldCircle(EDITOR, 0.5).r, 100);
+  assert.equal(shieldCircle(EDITOR, 4).r, 200);
+});
+
+test("editor shield ramps up while focused, posts ~30 clears/s, and drops on blur", () => {
+  const ws = new WeatherSystem({ mode: "steady", random: () => 0.5 });
+  const sim = shieldSim();
+  ws.attach({ raindrops: sim });
+  ws.setShieldSource(() => EDITOR);
+
+  for (let i = 0; i < 125; i++) ws.update(16); // 2s
+  assert.ok(ws.getShieldStrength() > 0.95, `strength ${ws.getShieldStrength()}`);
+  const before = sim.clears.length;
+  for (let i = 0; i < 125; i++) ws.update(16); // 2s at full strength
+  const perSec = (sim.clears.length - before) / 2;
+  assert.ok(perSec > 27 && perSec < 32, `clears/s ${perSec}`);
+  assert.ok(sim.clears.every((c) => c.x === 500 && c.y === 250));
+  const last = sim.shields.at(-1);
+  assert.ok(last.r > 190 && last.x === 500, "deflection circle follows the editor");
+
+  ws.registerFocus(false);
+  for (let i = 0; i < 125; i++) ws.update(16);
+  assert.equal(ws.getShieldStrength(), 0);
+  assert.deepEqual(sim.shields.at(-1), { x: 0, y: 0, r: 0 }, "shield removed on blur");
+  const afterBlur = sim.clears.length;
+  ws.update(16);
+  assert.equal(sim.clears.length, afterBlur);
+});
+
+test("editor shield ignores an empty rect and works on sims without setShield", () => {
+  const ws = new WeatherSystem({ mode: "steady" });
+  const clears = [];
+  ws.attach({ raindrops: { options: {}, clearDroplets: (x, y, r) => clears.push(r) } });
+  ws.setShieldSource(() => ({ left: 0, top: 0, width: 0, height: 0 }));
+  for (let i = 0; i < 60; i++) ws.update(16);
+  assert.equal(clears.length, 0);
+  assert.equal(ws.getShieldStrength(), 0);
+});
+
+test("wind follows the mode and activity and is only posted when it changes", () => {
+  assert.equal(computeWind("drizzle", 0), 0);
+  assert.ok(computeWind("storm", 1) > computeWind("storm", 0));
+  assert.ok(computeWind("storm", 0) > computeWind("steady", 0));
+
+  const ws = new WeatherSystem({ mode: "storm" });
+  const sim = shieldSim();
+  ws.attach({ raindrops: sim });
+  for (let i = 0; i < 60; i++) ws.update(16);
+  const [vx, vy] = sim.winds.at(-1);
+  assert.ok(Math.abs(vx - WEATHER_MODES.storm.wind.calm) < 0.02);
+  assert.equal(vy, 0);
+  const posted = sim.winds.length;
+  for (let i = 0; i < 30; i++) ws.update(16);
+  assert.equal(sim.winds.length, posted, "steady wind is not re-posted every frame");
+});
+
+test("WeatherSystem.update drives audio.update(dt, activity) when available", () => {
+  const ws = new WeatherSystem({ mode: "steady" });
+  const calls = [];
+  ws.attach({ audio: { setMode() {}, update: (dt, a) => calls.push([dt, a]) } });
+  ws.update(20);
+  assert.deepEqual(calls, [[20, 0]]);
+});
+
+test("every weather mode defines wind and a lightning profile (or null)", () => {
+  for (const [name, profile] of Object.entries(WEATHER_MODES)) {
+    assert.equal(typeof profile.wind.calm, "number", name);
+    assert.ok(profile.lightning === null || profile.lightning.minGapMs < profile.lightning.maxGapMs, name);
+  }
 });

@@ -260,6 +260,17 @@ textarea:focus {
   transition: opacity 0.05s ease-out;
 }
 
+/* Dock "Mute World" (Atmosphere.setMuted) and reduced motion: no flashes. */
+#lightning-layer.lightning-muted {
+  opacity: 0 !important;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  #lightning-layer {
+    opacity: 0 !important;
+  }
+}
+
 /* Vignette Layer */
 #vignette-layer {
   position: absolute;
