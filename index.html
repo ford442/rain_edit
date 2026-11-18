@@ -301,9 +301,23 @@
               <option value="clearing">🌤️ Clearing</option>
             </select>
           </div>
-          <label title="Ambient rain audio bed that follows the weather mode (starts muted)"
+          <div title="Time of day: sky colours and rain brightness (Clock follows local time)">
+            <label for="time-of-day">Time</label>
+            <select id="time-of-day">
+              <option value="clock">🕰️ Clock</option>
+              <option value="dawn">🌅 Dawn</option>
+              <option value="day">☀️ Day</option>
+              <option value="dusk">🌇 Dusk</option>
+              <option value="night">🌃 Night</option>
+            </select>
+          </div>
+          <label title="Ambient rain, thunder and droplet audio that follows the weather mode (starts muted)"
             ><input id="weather-audio-toggle" type="checkbox" /> Ambient
             Audio</label
+          >
+          <label title="Mute world: silence all weather audio and stop lightning"
+            ><input id="world-mute-toggle" type="checkbox" /> Mute
+            World</label
           >
           <label title="Back Rain"
             ><input id="toggle-back" type="checkbox" checked /> Back Rain</label

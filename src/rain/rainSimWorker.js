@@ -92,6 +92,22 @@ function destroyEngines() {
 /**
  * @param {MessageEvent} event
  */
+// Last wind/shield from the main thread; re-applied whenever an engine is
+// (re)created so a backend switch keeps the environment.
+const environment = { wind: { vx: 0, vy: 0 }, shield: { x: 0, y: 0, r: 0 } };
+
+function applyEnvironment() {
+  if (!wasmEngine) return;
+  wasmEngine.setWind(environment.wind.vx, environment.wind.vy);
+  const { x, y, r } = environment.shield;
+  wasmEngine.setShield(x, y, r);
+}
+
+/** Environment support of the active engine (JS reference backend: none). */
+function engineFeatures() {
+  return wasmEngine ? { ...wasmEngine.features } : { wind: false, shield: false };
+}
+
 self.onmessage = async (event) => {
   const msg = event.data;
   if (!msg || typeof msg !== "object") return;
@@ -128,8 +144,9 @@ self.onmessage = async (event) => {
           );
         }
 
+        applyEnvironment();
         startLoop();
-        self.postMessage({ type: "ready", backend });
+        self.postMessage({ type: "ready", backend, features: engineFeatures() });
         break;
       }
 
@@ -164,14 +181,24 @@ self.onmessage = async (event) => {
             options,
           );
         }
+        applyEnvironment();
         startLoop();
-        self.postMessage({ type: "ready", backend });
+        self.postMessage({ type: "ready", backend, features: engineFeatures() });
         break;
       }
 
       case "options": {
         if (jsEngine) Object.assign(jsEngine.options, msg.options || {});
         if (wasmEngine) wasmEngine.setOptions(msg.options || {});
+        break;
+      }
+
+      case "environment": {
+        if (msg.wind) environment.wind = { vx: +msg.wind.vx || 0, vy: +msg.wind.vy || 0 };
+        if (msg.shield) {
+          environment.shield = { x: +msg.shield.x || 0, y: +msg.shield.y || 0, r: +msg.shield.r || 0 };
+        }
+        applyEnvironment();
         break;
       }
 

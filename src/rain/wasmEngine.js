@@ -19,6 +19,13 @@ const EXPORTS = [
   "rain_sim_drop_count",
 ];
 
+// Environment exports (wind / shield) are optional: an older artifact
+// without them still runs, it just ignores wind and the editor shield.
+const OPTIONAL_EXPORTS = {
+  wind: "rain_sim_set_wind",
+  shield: "rain_sim_set_shield",
+};
+
 /**
  * WASM water-map backend. Writes RGBA8 into wasm linear memory each step.
  */
@@ -42,6 +49,8 @@ export class WasmRainEngine {
     this._sim = 0;
     this._optionsPtr = 0;
     this._pixelView = null;
+    /** Which optional environment exports this artifact provides. */
+    this.features = { wind: false, shield: false };
   }
 
   async init() {
@@ -55,6 +64,10 @@ export class WasmRainEngine {
       }
     }
     this._exports = exports;
+    this.features = {
+      wind: typeof exports[OPTIONAL_EXPORTS.wind] === "function",
+      shield: typeof exports[OPTIONAL_EXPORTS.shield] === "function",
+    };
     this._memory = exports.memory;
     this._sim = exports.rain_sim_create(this.width, this.height, this.scale);
     this._optionsPtr = exports.alloc(22 * 4);
@@ -96,6 +109,16 @@ export class WasmRainEngine {
 
   splash(x, y, count = 5) {
     this._exports.rain_sim_splash(this._sim, x, y, count);
+  }
+
+  /** Lateral/vertical wind (no-op on artifacts without the export). */
+  setWind(vx, vy) {
+    if (this.features.wind) this._exports.rain_sim_set_wind(this._sim, vx, vy);
+  }
+
+  /** Circular shield in CSS px; r <= 0 removes it. */
+  setShield(x, y, r) {
+    if (this.features.shield) this._exports.rain_sim_set_shield(this._sim, x, y, r);
   }
 
   clearDrops() {

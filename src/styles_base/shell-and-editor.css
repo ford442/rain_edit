@@ -35,7 +35,8 @@ body,
   width: 100vw;
   overflow: hidden;
   font-family: var(--font-primary);
-  background: linear-gradient(135deg, rgba(8, 12, 18, 1) 0%, rgba(3, 4, 8, 1) 100%);
+  /* --sky-0/--sky-1 come from src/rain/DayCycle.js; fallbacks = night. */
+  background: linear-gradient(135deg, var(--sky-0, rgb(8, 12, 18)) 0%, var(--sky-1, rgb(3, 4, 8)) 100%);
 }
 
 #container {

@@ -226,7 +226,7 @@ export class RainScene {
 
   _update() {
     const raindrops = /** @type {WaterMapSim} */ (this.raindrops);
-    const { cabinet3D, referenceManager, tabManager } = this.ctx;
+    const { cabinet3D, referenceManager } = this.ctx;
 
     // Calm the rain while the cabinet is open.
     if (cabinet3D && cabinet3D.visible !== this._cabinetWasVisible) {
@@ -234,7 +234,8 @@ export class RainScene {
       this._cabinetWasVisible = cabinet3D.visible;
     }
 
-    // rainChance / dropletsRate / refraction from weather mode + editor activity.
+    // rainChance / dropletsRate / refraction from weather mode + editor
+    // activity, plus the editor shield and wind (see WeatherSystem).
     this.weatherSystem.update();
     raindrops.update();
     this.bgLayer?.bindTexture("u_waterMap", raindrops.canvas);
@@ -271,20 +272,6 @@ export class RainScene {
           );
         }
       }
-    }
-
-    // At depth 1 (editor between rain layers) stochastically clear small
-    // centre-biased patches (~30/s) to calm the storm where the user edits.
-    const active = tabManager?.files?.find((f) => f.id === tabManager.activeId);
-    if (active && (active.depth ?? 1) === 1 && Math.random() < 0.5) {
-      const r = this.editorEl.getBoundingClientRect();
-      const gx = (Math.random() + Math.random() - 1) * 0.42;
-      const gy = (Math.random() + Math.random() - 1) * 0.42;
-      raindrops.clearDroplets(
-        r.left + r.width * (0.5 + gx),
-        r.top + r.height * (0.5 + gy),
-        14 + Math.random() * 12,
-      );
     }
   }
 
@@ -366,6 +353,25 @@ export class RainScene {
     }
     cabinet3D.recordRainTextureUpload(performance.now() - uploadStart);
     this._usingCabinetBg = true;
+  }
+
+  /**
+   * Swap the static (non-cabinet) background/foreground textures, e.g. the
+   * DayCycle's sunlit set. Callers pass only fully-loaded images; while the
+   * cabinet upload path owns the textures the swap waits for its restore.
+   * @param {{ bg: HTMLImageElement, fg: HTMLImageElement }} set
+   */
+  setStaticTextures({ bg, fg }) {
+    this._staticBgImg = bg;
+    this._staticFgImg = fg;
+    if (!this._usingCabinetBg) this._restoreStaticTextures();
+  }
+
+  /** The texture set loaded at init (DayCycle's "rain" set). */
+  getStaticTextures() {
+    return this._staticBgImg && this._staticFgImg
+      ? { bg: this._staticBgImg, fg: this._staticFgImg }
+      : null;
   }
 
   _restoreStaticTextures() {

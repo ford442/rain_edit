@@ -5,6 +5,10 @@
 //! - [`SimState`] lives in wasm linear memory; host keeps the pointer.
 //! - Pixel output is RGBA8 in a buffer owned by the sim (`pixels_ptr`).
 //! - Optional drop-atlas: 255 sprites × 64×64 RGBA8 uploaded with [`set_atlas`].
+//! - Optional environment (feature-detected by the host, ignored by the JS
+//!   reference backend): lateral wind via [`rain_sim_set_wind`] and a circular
+//!   "shield" SDF via [`rain_sim_set_shield`] that falling drops slide around
+//!   and that rain/droplets never spawn inside (the focused editor's rect).
 
 #![allow(clippy::missing_safety_doc)]
 
@@ -14,6 +18,10 @@ use std::ptr;
 const DROP_SIZE: usize = 64;
 const ATLAS_COUNT: usize = 255;
 const MAX_DROPS: usize = 2048;
+/// Lateral drift per unit of fall momentum at wind = 1.0.
+const WIND_SLANT: f32 = 0.25;
+/// Sideways push (fraction of fall momentum) when a drop hits the shield.
+const SHIELD_DEFLECT: f32 = 0.35;
 
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -124,6 +132,11 @@ pub struct SimState {
     texture_cleaning_iterations: f32,
     rng_state: u32,
     last_render_ms: f64,
+    wind_x: f32,
+    wind_y: f32,
+    shield_x: f32,
+    shield_y: f32,
+    shield_r: f32,
 }
 
 impl SimState {
@@ -144,6 +157,11 @@ impl SimState {
             texture_cleaning_iterations: 0.0,
             rng_state: 0xC0FFEE ^ width ^ (height << 9),
             last_render_ms: 0.0,
+            wind_x: 0.0,
+            wind_y: 0.0,
+            shield_x: 0.0,
+            shield_y: 0.0,
+            shield_r: 0.0,
         }
     }
 
@@ -180,6 +198,50 @@ impl SimState {
 
     fn chance(&mut self, c: f32) -> bool {
         self.rand() <= c
+    }
+
+    /// Signed distance from (x, y) to the shield edge (negative inside).
+    /// `f32::INFINITY` when no shield is set.
+    fn shield_sdf(&self, x: f32, y: f32) -> f32 {
+        if self.shield_r <= 0.0 {
+            return f32::INFINITY;
+        }
+        let dx = x - self.shield_x;
+        let dy = y - self.shield_y;
+        (dx * dx + dy * dy).sqrt() - self.shield_r
+    }
+
+    /// Push a moving drop out of the shield and deflect it sideways, so rain
+    /// streams around the editor instead of through it.
+    fn collide_shield(&mut self, i: usize) {
+        let r = self.drops[i].r;
+        let d = self.shield_sdf(self.drops[i].x, self.drops[i].y);
+        if d >= r {
+            return;
+        }
+        let mut nx = self.drops[i].x - self.shield_x;
+        let ny = self.drops[i].y - self.shield_y;
+        if nx.abs() < 0.001 {
+            nx = if self.rand() < 0.5 { -1.0 } else { 1.0 };
+        }
+        let len = (nx * nx + ny * ny).sqrt().max(0.001);
+        let push = r - d;
+        self.drops[i].x += nx / len * push;
+        self.drops[i].y += ny / len * push;
+        let side = if nx < 0.0 { -1.0 } else { 1.0 };
+        self.drops[i].momentum_x += side * self.drops[i].momentum * SHIELD_DEFLECT;
+    }
+
+    fn set_wind(&mut self, vx: f32, vy: f32) {
+        self.wind_x = if vx.is_finite() { vx.clamp(-4.0, 4.0) } else { 0.0 };
+        self.wind_y = if vy.is_finite() { vy.clamp(-4.0, 4.0) } else { 0.0 };
+    }
+
+    fn set_shield(&mut self, x: f32, y: f32, r: f32) {
+        let ok = x.is_finite() && y.is_finite() && r.is_finite() && r > 0.0;
+        self.shield_x = if ok { x } else { 0.0 };
+        self.shield_y = if ok { y } else { 0.0 };
+        self.shield_r = if ok { r } else { 0.0 };
     }
 
     fn clear_pixels(&mut self) {
@@ -298,6 +360,9 @@ impl SimState {
                         * (self.options.droplets_size_max - self.options.droplets_size_min);
                 let x = self.random_range(0.0, self.width as f32 / self.scale);
                 let y = self.random_range(0.0, self.height as f32 / self.scale);
+                if self.shield_sdf(x, y) < r {
+                    continue;
+                }
                 let drop = Drop {
                     x,
                     y,
@@ -352,6 +417,9 @@ impl SimState {
                 (self.height as f32 / self.scale) * self.options.spawn_area_1,
             );
             let momentum = 1.0 + (r - self.options.min_r) * 0.1 + self.random_range(0.0, 2.0);
+            if self.shield_sdf(x, y) < r {
+                continue;
+            }
             let drop = Drop {
                 x,
                 y,
@@ -462,8 +530,11 @@ impl SimState {
 
             let moved = self.drops[i].momentum > 0.0;
             if moved && self.drops[i].killed == 0 {
-                self.drops[i].y += self.drops[i].momentum * self.options.global_time_scale;
-                self.drops[i].x += self.drops[i].momentum_x * self.options.global_time_scale;
+                let gts = self.options.global_time_scale;
+                let fall = self.drops[i].momentum;
+                self.drops[i].y += (fall + self.wind_y * fall * WIND_SLANT) * gts;
+                self.drops[i].x += (self.drops[i].momentum_x + self.wind_x * fall * WIND_SLANT) * gts;
+                self.collide_shield(i);
                 if self.drops[i].y > self.height as f32 / self.scale + self.drops[i].r {
                     self.drops[i].killed = 1;
                 }
@@ -806,10 +877,96 @@ pub unsafe extern "C" fn rain_sim_step(ptr: *mut SimState, now_ms: f64) {
     (*ptr).step(now_ms);
 }
 
+/// Lateral (vx) / vertical (vy) wind, clamped to ±4. Moving drops drift by
+/// `wind * fall momentum * 0.25` per step.
+#[no_mangle]
+pub unsafe extern "C" fn rain_sim_set_wind(ptr: *mut SimState, vx: f32, vy: f32) {
+    if ptr.is_null() {
+        return;
+    }
+    (*ptr).set_wind(vx, vy);
+}
+
+/// Circular shield in CSS-pixel sim space (same units as clear_droplets).
+/// `r <= 0` removes it.
+#[no_mangle]
+pub unsafe extern "C" fn rain_sim_set_shield(ptr: *mut SimState, x: f32, y: f32, r: f32) {
+    if ptr.is_null() {
+        return;
+    }
+    (*ptr).set_shield(x, y, r);
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn rain_sim_drop_count(ptr: *mut SimState) -> u32 {
     if ptr.is_null() {
         return 0;
     }
     (*ptr).drops.len() as u32
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn falling_drop(x: f32, y: f32) -> Drop {
+        Drop {
+            x,
+            y,
+            r: 20.0,
+            momentum: 6.0,
+            ..Drop::blank()
+        }
+    }
+
+    #[test]
+    fn wind_slants_falling_drops() {
+        let mut calm = SimState::new(400, 400, 1.0);
+        let mut windy = SimState::new(400, 400, 1.0);
+        windy.set_wind(1.0, 0.0);
+        for s in [&mut calm, &mut windy] {
+            s.options.raining = 0.0;
+            s.drops.push(falling_drop(200.0, 50.0));
+            s.update_drops(1.0);
+        }
+        assert!(windy.drops[0].x > calm.drops[0].x + 0.5);
+    }
+
+    #[test]
+    fn shield_pushes_drops_out_and_deflects_them() {
+        let mut s = SimState::new(400, 400, 1.0);
+        s.options.raining = 0.0;
+        s.set_shield(200.0, 200.0, 80.0);
+        s.drops.push(falling_drop(190.0, 150.0));
+        s.update_drops(1.0);
+        let d = &s.drops[0];
+        assert!(s.shield_sdf(d.x, d.y) >= d.r - 0.01);
+        assert!(d.momentum_x < 0.0, "drop left of centre slides left");
+    }
+
+    #[test]
+    fn invalid_or_zero_shield_is_removed() {
+        let mut s = SimState::new(100, 100, 1.0);
+        s.set_shield(50.0, 50.0, 20.0);
+        assert!(s.shield_sdf(50.0, 50.0) < 0.0);
+        s.set_shield(50.0, 50.0, 0.0);
+        assert_eq!(s.shield_sdf(50.0, 50.0), f32::INFINITY);
+        s.set_shield(f32::NAN, 1.0, 5.0);
+        assert_eq!(s.shield_r, 0.0);
+        s.set_wind(f32::NAN, 99.0);
+        assert_eq!((s.wind_x, s.wind_y), (0.0, 4.0));
+    }
+
+    #[test]
+    fn no_rain_spawns_inside_the_shield() {
+        let mut s = SimState::new(200, 200, 1.0);
+        s.options.rain_chance = 1.0;
+        s.options.rain_limit = 50.0;
+        s.set_shield(100.0, 100.0, 90.0);
+        for _ in 0..20 {
+            for d in s.update_rain(1.0) {
+                assert!(s.shield_sdf(d.x, d.y) >= d.r);
+            }
+        }
+    }
 }
