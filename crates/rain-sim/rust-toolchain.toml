@@ -1,0 +1,9 @@
+# Pinned so `npm run build:wasm` is byte-for-byte reproducible from any
+# checkout path. .github/workflows/wasm.yml rebuilds the crate and fails if
+# src/rain/wasm/rain_sim.wasm differs. To bump: change the channel, run
+# `npm run build:wasm`, and commit the crate change, the wasm, and its manifest
+# together.
+[toolchain]
+channel = "1.95.0"
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"

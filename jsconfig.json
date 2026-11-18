@@ -21,6 +21,11 @@
   "include": [
     "src/StorageAPI.js",
     "src/rendering/createGLContext.js",
+    "src/rendering/create2DContext.js",
+    "src/rendering/shaderProgram.js",
+    "src/rendering/ShaderDebugOverlay.js",
+    "src/rendering/Compositor.js",
+    "src/shaders/index.js",
     "src/interactions/InputRegistry.js",
     "src/interactions/InputManager.js",
     "src/rain/WaterMapSim.js",

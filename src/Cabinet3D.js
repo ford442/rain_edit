@@ -108,6 +108,8 @@ export class Cabinet3D {
     this._monacoApi = monacoApi;
     this._preserveDrawingBuffer = preserveDrawingBuffer;
     this._contextInfo = null;
+    /** @type {WebGL2RenderingContext | null} */
+    this._gl = null;
     this._rainTextureUploadStats = {
       samples: 0,
       totalMs: 0,

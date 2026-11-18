@@ -1,0 +1,60 @@
+name: wasm
+
+# Rebuild crates/rain-sim with the pinned toolchain and fail if the checked-in
+# src/rain/wasm/rain_sim.wasm (or its manifest) differs. Runs only when the
+# crate, the artifact, or the build tooling changes; the always-on manifest
+# check in `npm test` (tests/rain-wasm.test.js) covers every other PR.
+on:
+  pull_request:
+    paths:
+      - "crates/**"
+      - "src/rain/wasm/**"
+      - "src/rain/wasmEngine.js"
+      - "scripts/build-rain-wasm.mjs"
+      - "scripts/rain-wasm-manifest.mjs"
+      - ".github/workflows/wasm.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "crates/**"
+      - "src/rain/wasm/**"
+      - "src/rain/wasmEngine.js"
+      - "scripts/build-rain-wasm.mjs"
+      - "scripts/rain-wasm-manifest.mjs"
+      - ".github/workflows/wasm.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wasm-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rebuild:
+    name: rebuild rain-sim wasm
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install pinned Rust toolchain
+        working-directory: crates/rain-sim
+        run: |
+          channel="$(sed -n 's/^channel *= *"\(.*\)"/\1/p' rust-toolchain.toml)"
+          test -n "$channel"
+          rustup toolchain install "$channel" --profile minimal --target wasm32-unknown-unknown
+      - name: Rebuild wasm
+        run: npm run build:wasm
+      - name: Checked-in wasm matches the rebuild
+        run: |
+          if ! git diff --exit-code --stat -- src/rain/wasm/; then
+            echo "::error::src/rain/wasm/ is stale relative to crates/rain-sim. Run 'npm run build:wasm' and commit the wasm and manifest."
+            exit 1
+          fi
+      - name: Manifest and export surface
+        run: node --test tests/rain-wasm.test.js

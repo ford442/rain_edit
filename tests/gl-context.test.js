@@ -79,3 +79,72 @@ test("resizeCanvasToDisplaySize keeps CSS pixels separate from buffer pixels", (
   assert.equal(canvas.style.width, "320px");
   assert.equal(canvas.style.height, "180px");
 });
+
+
+// ── 2D contexts ───────────────────────────────────────────────────────────
+
+import {
+  DEFAULT_2D_ATTRIBUTES,
+  create2DContext,
+  get2DContextInfo,
+  resolveDesync2D,
+} from "../src/rendering/create2DContext.js";
+
+function fake2DCanvas(granted) {
+  const calls = [];
+  const ctx = granted === undefined ? {} : { getContextAttributes: () => granted };
+  return {
+    calls,
+    ctx,
+    getContext(name, attributes) {
+      calls.push({ name, attributes });
+      return name === "2d" ? ctx : null;
+    },
+  };
+}
+
+test("create2DContext applies the shared 2D policy and records what was granted", () => {
+  const canvas = fake2DCanvas({ alpha: true, desynchronized: false });
+  const ctx = create2DContext(canvas, { attributes: { desynchronized: true }, label: "matrix" });
+  assert.equal(ctx, canvas.ctx);
+  assert.deepEqual(canvas.calls, [
+    { name: "2d", attributes: { alpha: true, desynchronized: true, willReadFrequently: false } },
+  ]);
+  assert.deepEqual(get2DContextInfo(ctx), {
+    label: "matrix",
+    requested: { alpha: true, desynchronized: true, willReadFrequently: false },
+    attributes: { alpha: true, desynchronized: false },
+  });
+  assert.deepEqual(DEFAULT_2D_ATTRIBUTES, { alpha: true, desynchronized: false, willReadFrequently: false });
+});
+
+test("create2DContext keeps the first label when a canvas hands back its context", () => {
+  const canvas = fake2DCanvas();
+  create2DContext(canvas, { label: "first" });
+  create2DContext(canvas, { label: "second" });
+  assert.equal(get2DContextInfo(canvas.ctx).label, "first");
+  assert.equal(get2DContextInfo(canvas.ctx).attributes, null); // no getContextAttributes
+  assert.equal(get2DContextInfo(null), null);
+});
+
+test("create2DContext returns null instead of throwing", () => {
+  const warn = console.warn;
+  console.warn = () => {};
+  try {
+    assert.equal(create2DContext({ getContext: () => { throw new Error("nope"); } }), null);
+    assert.equal(create2DContext({ getContext: () => null }), null);
+  } finally {
+    console.warn = warn;
+  }
+});
+
+test("resolveDesync2D: query wins over localStorage, default off", () => {
+  const on = { getItem: () => "1" };
+  const off = { getItem: () => null };
+  assert.equal(resolveDesync2D("", off), false);
+  assert.equal(resolveDesync2D("", on), true);
+  assert.equal(resolveDesync2D("?desync2d=1", off), true);
+  assert.equal(resolveDesync2D("?desync2d=0", on), false);
+  assert.equal(resolveDesync2D("", { getItem: () => { throw new Error("blocked"); } }), false);
+  assert.equal(resolveDesync2D(), false);
+});

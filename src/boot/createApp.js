@@ -35,6 +35,8 @@ import { PortalMasks } from "../effects/PortalMasks.js";
 import { Sonar } from "../effects/Sonar.js";
 import { Atmosphere } from "../effects/Atmosphere.js";
 import { resizeCanvasToDisplaySize } from "../rendering/createGLContext.js";
+import { get2DContextInfo, resolveDesync2D } from "../rendering/create2DContext.js";
+import { ShaderDebugOverlay } from "../rendering/ShaderDebugOverlay.js";
 import { inputManager as sharedInputManager } from "../interactions/InputManager.js";
 import { initEchoDocumentInteractions } from "../interactions/EchoDocumentInteractions.js";
 import { initDepthGestures } from "../interactions/initDepthGestures.js";
@@ -64,6 +66,20 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
   const portalLayer = ensurePortalLayer(refs, doc);
   const { editorEl, echoLayerEl } = refs;
   const search = new URLSearchParams(win.location.search);
+  /** @type {Storage | null} */
+  let storage = null;
+  try {
+    storage = win.localStorage;
+  } catch {
+    // Storage blocked (private mode / sandbox): flags fall back to defaults.
+  }
+  // Rendering switches (docs/rendering-contexts.md): `?rainGL=webgl1` forces
+  // the GLSL ES 1.00 fallback, `?cabinetCompositing=upload` the legacy
+  // cross-context cabinet upload, `?desync2d=1` the low-latency 2D
+  // experiment, `?shaderDebug=1` the diagnostics overlay.
+  const forceWebGL1 = search.get("rainGL") === "webgl1";
+  const cabinetCompositing = search.get("cabinetCompositing") === "upload" ? "upload" : "shared";
+  const desync2d = resolveDesync2D(win.location.search, storage);
 
   // ── Managers ────────────────────────────────────────────────────────────
   monaco.editor.defineTheme("transparent-vs-dark", {
@@ -179,6 +195,8 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
       referenceManager.setRaindrops(raindrops);
     },
     onLayers: ({ bgLayer, fgLayer }) => setAppContext({ bgLayer, fgLayer }),
+    forceWebGL1,
+    cabinetCompositing,
   });
   setAppContext({ rainScene });
 
@@ -190,9 +208,10 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
     vignetteLayer: refs.vignetteLayer,
     lightningLayer: refs.lightningLayer,
   });
-  const matrixRain = new MatrixRain(refs.matrixLayer);
+  const matrixRain = new MatrixRain(refs.matrixLayer, { desynchronized: desync2d });
   const holoDust = new HoloDust(refs.dustLayerEl, {
     getIntensity: () => 1 + atmosphere.stormCharCount * 0.05,
+    desynchronized: desync2d,
   });
 
   const resizeCanvases = () => {
@@ -348,6 +367,24 @@ export function createApp({ doc = document, win = window, clock = appClock } = {
       active: () => minimap.active,
       render: () => minimap.render(),
     });
+  }
+
+  if (search.get("shaderDebug") === "1") {
+    const overlay = new ShaderDebugOverlay({
+      doc,
+      getSources: () => ({
+        layers: [
+          { label: "rain-back", diagnostics: appContext.bgLayer?.getDiagnostics() ?? null },
+          { label: "rain-front", diagnostics: appContext.fgLayer?.getDiagnostics() ?? null },
+        ],
+        compositing: rainScene.getCompositingDiagnostics(),
+        contexts2d: [matrixRain.ctx, holoDust.ctx, fogManager.ctx, minimap?.ctx].map((ctx) =>
+          get2DContextInfo(ctx),
+        ),
+      }),
+    }).init();
+    // Not decorative: diagnostics keep reporting under low LOD.
+    clock.register({ id: "shader-debug", render: (_dt, t) => overlay.tick(t) });
   }
 
   // Low LOD: decorative tasks stop (clear their canvases) and rain DPR caps at 1.

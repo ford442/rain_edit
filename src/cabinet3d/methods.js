@@ -7,6 +7,7 @@ import {
   createGLContext,
   getGLContextInfo,
 } from "../rendering/createGLContext.js";
+import { create2DContext } from "../rendering/create2DContext.js";
 import {
   CATEGORY_COLORS,
   CAT_CUBE_SIZE,
@@ -47,6 +48,14 @@ export const Cabinet3DMethodsMixin = {
   getRendererCanvas() {
     return this._renderer.domElement;
   },
+  /** The WebGL2 context Three renders with (shared with the rain Compositor pass). */
+  getGLContext() {
+    return this._gl;
+  },
+  /** Re-sync Three's GL state cache after raw GL calls in this context. */
+  resetGLState() {
+    this._renderer.resetState();
+  },
   recordRainTextureUpload(durationMs) {
     const stats = this._rainTextureUploadStats;
     stats.samples += 1;
@@ -54,13 +63,17 @@ export const Cabinet3DMethodsMixin = {
     stats.maxMs = Math.max(stats.maxMs, durationMs);
     stats.lastMs = durationMs;
   },
+  /**
+   * Cabinet-side facts. Which compositing path runs is RainScene's call; see
+   * `rainScene.getCompositingDiagnostics()`. The upload stats cover only the
+   * cross-context fallback (`?cabinetCompositing=upload`, or when the shared
+   * pass cannot run).
+   */
   getCompositingDiagnostics() {
     const stats = this._rainTextureUploadStats;
     return {
       context: this._contextInfo,
-      mode: "synchronized-cross-context-upload",
       preserveDrawingBuffer: this._preserveDrawingBuffer,
-      uploadCountPerFrame: 3,
       samples: stats.samples,
       averageUploadMs: stats.samples ? stats.totalMs / stats.samples : 0,
       maxUploadMs: stats.maxMs,
@@ -167,11 +180,16 @@ export const Cabinet3DMethodsMixin = {
     });
     if (!context) throw new Error("Cabinet3D requires WebGL2.");
 
+    this._gl = context;
     this._contextInfo = getGLContextInfo(context);
     const renderer = new THREE.WebGLRenderer({ canvas, context });
     renderer.setPixelRatio(window.devicePixelRatio);
     // Dark background so rain has something opaque to refract
-    renderer.setClearColor(0x020a14, 0.92);
+    const applyClearColor = () => renderer.setClearColor(0x020a14, 0.92);
+    applyClearColor();
+    // Three rebuilds its background state on context restore (resetting the
+    // clear colour to transparent black); this listener runs after Three's.
+    canvas.addEventListener("webglcontextrestored", applyClearColor);
     // Canvas sits between editor (z=5) and rain-front (z=10) so rain renders over it
     renderer.domElement.style.cssText =
       "position:fixed;inset:0;width:100%;height:100%;z-index:8;display:none;";
@@ -252,7 +270,7 @@ export const Cabinet3DMethodsMixin = {
     const canvas = document.createElement("canvas");
     canvas.width = 256;
     canvas.height = 64;
-    const ctx = canvas.getContext("2d");
+    const ctx = create2DContext(canvas, { label: "cabinet-category-label" });
     ctx.fillStyle = "rgba(0,0,0,0)";
     ctx.fillRect(0, 0, 256, 64);
     ctx.fillStyle = "#c0d0e0";
@@ -280,7 +298,7 @@ export const Cabinet3DMethodsMixin = {
     const canvas = document.createElement("canvas");
     canvas.width = 256;
     canvas.height = 48;
-    const ctx = canvas.getContext("2d");
+    const ctx = create2DContext(canvas, { label: "cabinet-file-label" });
     ctx.clearRect(0, 0, 256, 48);
     ctx.fillStyle = "#90b8d0";
     ctx.font = "bold 15px monospace";
@@ -720,7 +738,7 @@ export const Cabinet3DMethodsMixin = {
       const canvas = document.createElement("canvas");
       canvas.width = 64;
       canvas.height = 64;
-      const ctx = canvas.getContext("2d");
+      const ctx = create2DContext(canvas, { label: "cabinet-badge" });
 
       // Draw badge background (semi-transparent white circle)
       ctx.fillStyle = "rgba(255, 255, 255, 0.8)";

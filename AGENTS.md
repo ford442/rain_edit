@@ -32,7 +32,7 @@ Key product features:
 | Language       | Vanilla ES modules (JavaScript), no TypeScript                                                |
 | Editor         | `monaco-editor` v0.43.0 (workers configured in `src/editor/setupMonaco.js`)                  |
 | 3D graphics    | `three` v0.183.2 (used only in `Cabinet3D.js`)                                                |
-| Shaders        | Custom WebGL in `RainLayer.js`; GLSL source files compiled via a custom `glslify` Vite plugin |
+| Shaders        | Custom WebGL in `RainLayer.js`; GLSL ES 3.00 + ES 1.00 fallback copies imported with Vite `?raw` |
 | Styling        | `src/styles_{base,views,echo,ui}.css` (merged from legacy shards), heavy use of CSS variables |
 | Backend client | `StorageAPI.js` talks to a FastAPI backend at `https://storage.noahcohn.com`                  |
 | Dev server     | Vite (port 5173); configured to allow FS access to parent directory (`'..'`)                  |
@@ -45,7 +45,7 @@ Key product features:
 root/
   index.html              # SPA shell: many layered divs/canvases for effects
   package.json            # npm scripts: dev, test, check, smoke, build, preview, ci
-  vite.config.js          # Vite config + custom glslify plugin
+  vite.config.js          # Vite config (wasm assets, ES workers; shaders use built-in ?raw)
   git.sh                  # Simple helper: git add/commit/push
   src/
     main.js               # Entry point: imports and calls createApp() — nothing else
@@ -97,7 +97,11 @@ root/
     dom/
       sanitize.js         # escapeHtml + allowlist DOM rebuild (Monaco tokens, markdown) (typed)
     rendering/
-      createGLContext.js  # Shared WebGL2-first context policy + DPR sizing
+      createGLContext.js  # Shared WebGL2-first context policy + DPR sizing (typed)
+      create2DContext.js  # The 2D context policy (alpha/desynchronized/willReadFrequently) (typed)
+      shaderProgram.js    # ES 3.00/1.00 variant pick, compile/link → structured ShaderLog (typed)
+      Compositor.js       # Front rain pass inside the cabinet's WebGL2 context (typed)
+      ShaderDebugOverlay.js # ?shaderDebug=1 diagnostics panel (typed)
     TabManager.js         # Real class: tabs, depth, persistence, notes; delegates echoes to EchoLayer
     ConnectionManager.js  # Radar/minimap canvas drawing (echo blips + reference cards)
     ReferenceManager.js   # Markdown note cards + visual effects (lantern, spotlight, frost, drag)
@@ -126,9 +130,10 @@ root/
     styles_14/             # View-mode effect CSS (fold/fracture, geometric, legacy effects) — no lenses
     styles/lenses.css      # The only lens stylesheet: one rule set per effect *kind*
     shaders/
-      simple.vert         # Basic fullscreen vertex shader
-      water.frag          # Front rain fragment shader
-      water-back.frag     # Back rain fragment shader
+      index.js            # ?raw imports → { name, es300, es100 } bundles (typed)
+      simple.vert         # Fullscreen quad, GLSL ES 3.00 (+ simple.es100.vert for WebGL1)
+      water.frag          # Front rain pass, GLSL ES 3.00 (+ water.es100.frag)
+      water-back.frag     # Back rain pass, GLSL ES 3.00 (+ water-back.es100.frag)
     vendor/
       raindrops.js        # Original raindrop simulation (main-thread fallback)
       create-canvas.js
@@ -141,9 +146,12 @@ root/
     workspace/            # Session persist/restore, local project, export/import
   crates/
     rain-sim/             # Rust wasm32 droplet sim → src/rain/wasm/rain_sim.wasm
+                          # (toolchain pinned by rust-toolchain.toml; wasm + manifest checked in)
   docs/
     workspace-session.md  # Session schema, StorageAPI sync, local project mode
     depth-interactions.md # Depth/reveal/lens gesture families and which src/interactions/ class owns each
+    rendering-contexts.md # GL/2D context policy, shaders, diagnostics, cabinet compositing, Safari notes
+    water-map-sim.md      # Water-map backends, wasm build + CI guard, weather system
   public/img/             # Local texture assets (drop-alpha, drop-color, textures, backgrounds)
   tests/                  # Focused Node tests for extracted domain modules
   Kimi_Agent/             # Agent workspace: patches and alternate file versions (not part of main build)
@@ -161,8 +169,8 @@ root/
 - `ConnectionManager` draws on the radar canvas (`#radar-canvas`) using 2D canvas. It receives reference card data from `ReferenceManager` and echo targets from the DOM.
 - `StorageAPI` is a thin REST client. It is consumed by `Cabinet3D`, `VPSFileBrowser`, and `main.js`.
 - `Cabinet3D` dispatches a custom `fileCubeClicked` event on `window`; `boot/fileActions.js` handles it to open files and adjust depth focus.
-- `createGLContext` is the single context factory. Rain prefers WebGL2, falls back to WebGL1, and uses non-antialiased, non-preserved drawing buffers. Cabinet rendering is synchronized immediately before cross-context texture upload, so its drawing buffer is also non-preserved by default. See `docs/rendering-contexts.md` before changing this frame order.
-- `RainLayer` caches texture sources and uniform values, idles the AppClock `rain` task on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy. The cabinet has no loop of its own: the `rain` task renders it and uploads its canvas in the same tick, and a fallback `cabinet` task renders it only when rain can't.
+- `createGLContext` and `create2DContext` are the only context factories (`tests/architecture.test.js` fails on any other `getContext(`). Rain prefers WebGL2, falls back to WebGL1, and uses non-antialiased, non-preserved drawing buffers. Rain shaders are GLSL ES 3.00 on WebGL2 and the `*.es100.*` copies on WebGL1 — never rewritten at runtime; edit both copies together (`tests/shaders.test.js`). See `docs/rendering-contexts.md` before changing attributes or frame order.
+- `RainLayer` caches texture sources and uniform values, idles the AppClock `rain` task on context loss, rebuilds GPU resources on restoration, and resumes only after both rain contexts are healthy. Shader build failures don't throw: they land in `getDiagnostics().shaderLog` (and the `?shaderDebug=1` overlay). The cabinet has no loop of its own: the `rain` task renders it and — via `src/rendering/Compositor.js` — draws the front rain pass *inside the cabinet's WebGL2 context* (GPU copy of the cabinet frame, no cross-context upload; `#rain-front` is suspended meanwhile). `?cabinetCompositing=upload` keeps the old cross-context upload path. A fallback `cabinet` task renders it only when rain can't. Inspect with `rainScene.getCompositingDiagnostics()`.
 - `window.tabManager` is intentionally exposed on the global object for manual/debug automation. Smoke tests read everything else from the live `/src/appContext.js` module (`await import("/src/appContext.js")` in the page).
 - Water-map simulation lives behind `src/rain/WaterMapSim.js`. It prefers an off-main-thread worker (`js` OffscreenCanvas or `wasm` Rust pixel sim in `crates/rain-sim`), and falls back to `src/vendor/raindrops.js` on the main thread. Toggle with the dock **Rain Sim** control, `?rainSim=wasm|js|main|auto`, or `localStorage['rain-edit:rainSimBackend']`. Rebuild the wasm artifact with `npm run build:wasm` (Vite imports `src/rain/wasm/rain_sim.wasm` via `?url` — no public/ copy).
 - `src/rain/WeatherSystem.js` is the control surface for rain "feel": it drives `raindrops.options.{rainChance,dropletsRate,maxDrops,trailRate,globalTimeScale}` and the `RainLayer` refraction uniforms from a damped editor-activity signal (typing/cursor/focus) plus a `drizzle`/`steady`/`storm`/`clearing` weather-mode state machine (`src/rain/weatherModes.js`). Switch modes from the dock's **Weather** select, `?weather=`, or `localStorage['rain-edit:weatherMode']`. It is the single owner of those options — do not write `raindrops.options.rainChance`/`dropletsRate` elsewhere; use `setManualIntensity()`/`setSceneMultiplier()` instead. `src/audio/WeatherAudio.js` is an optional muted-by-default ambient rain bed that follows the mode. See `docs/water-map-sim.md` for the full API.
@@ -182,7 +190,8 @@ npm run dev
 # Production build -> dist/
 npm run build
 
-# Rebuild Rust water-map wasm into src/rain/wasm/ (optional; artifact is checked in)
+# Rebuild Rust water-map wasm + manifest into src/rain/wasm/ (artifact is checked in;
+# toolchain pinned in crates/rain-sim/rust-toolchain.toml; npm test fails if stale)
 npm run build:wasm
 
 # Focused Node tests
@@ -218,7 +227,7 @@ The Vite dev server is configured to allow file-system access to the parent dire
   ```
 - **Custom events** are used for cross-module communication when direct references would create awkward circular imports (e.g. `fileCubeClicked`, `echo-peek`, `document-splash`).
 - **CSS variables** drive many runtime visual effects (mouse coordinates, depth offsets, parallax, transforms, etc.). The JS frequently reads/writes inline styles and CSS custom properties.
-- **Shaders** are imported with a `?glslify` suffix, handled by a small custom Vite plugin in `vite.config.js`.
+- **Shaders** are plain GLSL files imported through `src/shaders/index.js` with Vite's built-in `?raw`; there is no shader preprocessor.
 - **No linting or formatting config** is present. Follow the existing 2-space indentation and keep lines reasonably short.
 - When adding new DOM elements from JS, create them with `document.createElement`, set classes/styles explicitly, and append. No JSX or template system is used.
 
@@ -253,7 +262,9 @@ How it works:
   frame clock `src/runtime/AppClock.js`, the boot seam
   `src/boot/createApp.js` + `domRefs.js`, the echo seam
   `src/tabManager/EchoLayer.js` + `layouts/*.js` + `viewModes.js` +
-  `constants.js`, and `src/dom/sanitize.js`. Do not put `// @ts-check` on a file
+  `constants.js`, `src/dom/sanitize.js`, and the rendering seam
+  `src/rendering/{create2DContext,shaderProgram,Compositor,ShaderDebugOverlay}.js`
+  + `src/shaders/index.js`. Do not put `// @ts-check` on a file
   that doesn't pass — it is checked as soon as a typed seam imports it.
 - **Untyped manager bodies** (`TabManager`, the mixin-composed `Cabinet3D`) and the WebGL-heavy
   `RainLayer` have **authored sibling `.d.ts` files** (`TabManager.d.ts`,
@@ -267,7 +278,7 @@ How it works:
   main-thread sim) has a `raindrops.d.ts` sibling describing only the handful of
   members `WaterMapSim` actually uses, so its untyped body never enters the
   type-checked program.
-- **Ambient shims** live in `src/types/globals.d.ts` (`*?glslify` shader imports,
+- **Ambient shims** live in `src/types/globals.d.ts` (`*?raw` shader imports,
   Vite's `*?worker` constructor imports, `import.meta.env`).
 
 ### Promoting a new file into `include`
@@ -291,7 +302,7 @@ How it works:
      implementation. TypeScript resolves the relative import to the `.d.ts` and
      never type-checks the `.js` body. Do **not** add the `.js` file itself to
      `include` in this case.
-   - A Vite-specific import suffix (`?worker`, `?glslify`, `?url`, …) needs a
+   - A Vite-specific import suffix (`?worker`, `?raw`, `?url`, …) needs a
      `declare module "*?suffix"` ambient shim in `src/types/globals.d.ts` if one
      doesn't already exist for it.
 4. Run `npm run typecheck` again and iterate until clean, then run `npm run ci`
@@ -358,11 +369,17 @@ window.dispatchEvent(
 
 ### Shader imports
 
+Add a GLSL ES 3.00 file and its ES 1.00 copy, then export a bundle from
+`src/shaders/index.js`:
+
 ```js
-import fragSrc from "./shaders/my.frag?glslify";
+import myFrag from "./my.frag?raw";          // starts with `#version 300 es`
+import myFrag100 from "./my.es100.frag?raw"; // WebGL1 fallback copy
+export const MY_PASS = Object.freeze({ name: "my.frag", es300: myFrag, es100: myFrag100 });
 ```
 
-The custom glslify plugin will compile the shader at build time and export it as a string.
+Pass the bundle to `new RainLayer(canvas, { fragment: MY_PASS })`. The source
+is compiled verbatim (`?raw`), so compile-log line numbers match the file.
 
 ### Depth system
 

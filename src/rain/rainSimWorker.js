@@ -6,6 +6,7 @@ import Raindrops from "../vendor/raindrops.js";
 import { bakeDropAtlas } from "./dropAtlas.js";
 import { DEFAULT_RAIN_OPTIONS } from "./optionsCodec.js";
 import { createWasmRainEngine } from "./wasmEngine.js";
+import { create2DContext } from "../rendering/create2DContext.js";
 
 /** @type {'js' | 'wasm' | null} */
 let backend = null;
@@ -30,7 +31,7 @@ function postFrame(bitmap) {
 function ensurePresentCanvas(w, h) {
   if (!presentCanvas || presentCanvas.width !== w || presentCanvas.height !== h) {
     presentCanvas = new OffscreenCanvas(w, h);
-    presentCtx = presentCanvas.getContext("2d");
+    presentCtx = create2DContext(presentCanvas, { label: "worker-present" });
   }
 }
 

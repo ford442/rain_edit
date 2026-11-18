@@ -1,3 +1,5 @@
+import { create2DContext } from "./rendering/create2DContext.js";
+
 export class FogManager {
   constructor(container) {
     this.container = container;
@@ -9,7 +11,7 @@ export class FogManager {
     this.canvas.style.height = "100%";
     this.canvas.style.pointerEvents = "none"; // Allow clicks to pass through
     this.container.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = create2DContext(this.canvas, { label: "fog" });
 
     this.resize();
     window.addEventListener("resize", () => this.resize());

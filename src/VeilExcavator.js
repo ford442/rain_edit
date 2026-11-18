@@ -1,5 +1,6 @@
 import { inputManager } from "./interactions/InputManager.js";
 import { appClock } from "./runtime/AppClock.js";
+import { create2DContext } from "./rendering/create2DContext.js";
 
 export class VeilExcavator {
   constructor(tabManager) {
@@ -7,7 +8,11 @@ export class VeilExcavator {
     this.isActive = false;
     this.isBrushing = false;
     this.maskCanvas = document.createElement("canvas");
-    this.maskCtx = this.maskCanvas.getContext("2d");
+    // Hit-tested with getImageData on every brush move.
+    this.maskCtx = create2DContext(this.maskCanvas, {
+      attributes: { willReadFrequently: true },
+      label: "veil-mask",
+    });
     this.brushSize = 80;
     this.particles = [];
 

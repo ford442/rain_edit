@@ -19,7 +19,6 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "glslify": "^7.1.1",
     "monaco-editor": "^0.43.0",
     "three": "^0.183.2"
   },

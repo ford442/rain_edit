@@ -1,3 +1,5 @@
+import { create2DContext } from "./rendering/create2DContext.js";
+
 /**
  * Radar sweep on `#radar-canvas`. Drawn by the AppClock `minimap` task
  * (registered in `createApp()`); `active` gates the task.
@@ -7,7 +9,7 @@ export class HolographicMinimap {
     this.canvas = document.getElementById(canvasId);
     this.active = Boolean(this.canvas);
     if (!this.canvas) return;
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = create2DContext(this.canvas, { label: "radar" });
     this.radarAngle = 0;
     this.render = this.render.bind(this);
   }
