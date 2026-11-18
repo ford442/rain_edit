@@ -66,6 +66,21 @@ test("requestAnimationFrame is only used by AppClock and worker threads", () => 
 });
 
 
+test("canvas contexts are only created by the rendering factories", () => {
+  const factories = ["src/rendering/createGLContext.js", "src/rendering/create2DContext.js"];
+  const offenders = srcFiles()
+    .filter(({ rel }) => !factories.includes(rel))
+    .filter(({ code }) => /\.getContext\s*\(/.test(code))
+    .map(({ rel }) => rel);
+
+  assert.deepEqual(
+    offenders,
+    [],
+    "use createGLContext() / create2DContext() so context attributes stay one policy",
+  );
+});
+
+
 // The only window globals the app may install. Keep this tiny.
 const WINDOW_ASSIGNMENT_ALLOWLIST = {
   // Documented debug alias for smoke tests / manual automation.

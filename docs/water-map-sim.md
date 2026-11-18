@@ -31,7 +31,31 @@ Do not copy it into `public/`. Regenerate the checked-in binary with:
 npm run build:wasm
 ```
 
-Requires a Rust toolchain with the `wasm32-unknown-unknown` target.
+The toolchain is pinned in `crates/rain-sim/rust-toolchain.toml` (rustup picks
+it up because cargo runs inside the crate; install it once with
+`rustup toolchain install 1.95.0 --profile minimal --target wasm32-unknown-unknown`).
+Pinned, the build is byte-for-byte reproducible from any checkout path, so it
+can be checked in CI:
+
+- `npm run build:wasm` also writes `src/rain/wasm/rain_sim.manifest.json`:
+  the sha256 of every crate input (`Cargo.toml`, `Cargo.lock`,
+  `rust-toolchain.toml`, `src/**/*.rs`), the wasm's sha256 and size, and the
+  `rustc --version` that built it.
+- `tests/rain-wasm.test.js` (part of `npm test`, no Rust needed) fails when the
+  crate changed without a rebuild, when the wasm was replaced without the build
+  script, when it was built with a different toolchain, or when
+  `wasmEngine.js` calls an export the wasm lacks.
+- `.github/workflows/wasm.yml` runs when `crates/**`, the artifact, or the
+  build scripts change: it installs the pinned toolchain, rebuilds, and fails
+  if `src/rain/wasm/` differs from what is committed.
+
+Commit a crate change, the rebuilt wasm, and its manifest together. To bump
+Rust, change the channel, rebuild, and commit all three.
+
+Native work stays in this Rust crate (feature-detected, with JS worker parity).
+Do not add a C++/Emscripten port of the same integrator; the next GPU step is
+WGSL compute, after the shared compositing pass
+(`docs/rendering-contexts.md`).
 
 ## Diagnostics
 

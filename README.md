@@ -36,8 +36,10 @@ there are no other verification scripts in the tree.
 
 - Vite bundles Monaco directly. Worker and language registration lives in
   `src/editor/setupMonaco.js`; no Monaco Vite plugin is installed.
-- Shader imports ending in `?glslify` are compiled by the custom plugin in
-  `vite.config.js`; no Rollup glslify plugin is installed.
+- Shaders are authored as GLSL ES 3.00 (`src/shaders/*.vert|frag`) with
+  GLSL ES 1.00 copies (`*.es100.*`) for the WebGL1 fallback, imported verbatim
+  with Vite's `?raw` through `src/shaders/index.js`. There is no shader
+  preprocessor (glslify was removed). See `docs/rendering-contexts.md`.
 - This demo reuses the original raindrops simulation from `../ra1n/src/raindrops.js` to drive the dynamic water map. The Vite dev server is configured to allow access to the parent folder (so assets can be referenced from the original project). If you prefer to copy images locally, put them under `public/img/`.
 
 ## Deployment

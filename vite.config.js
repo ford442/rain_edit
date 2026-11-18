@@ -1,34 +1,11 @@
 import { defineConfig } from "vite";
-import { readFileSync } from "fs";
-import glslify from "glslify";
 
-// Simple Vite plugin to compile shader files via glslify when imported with `?glslify`
-function glslifyPlugin() {
-  return {
-    name: "glslify-transform",
-    transform(code, id) {
-      if (!id.endsWith("?glslify")) return null;
-      const filePath = id.replace(/\?glslify$/, "");
-      const src = readFileSync(filePath, "utf8");
-      // glslify can process a file path using glslify.file or compile a source string
-      // Try file-based first, fallback to compile.
-      try {
-        const processed = glslify.file
-          ? glslify.file(filePath).toString()
-          : glslify(src);
-        return `export default ${JSON.stringify(processed)};`;
-      } catch (err) {
-        this.error(
-          "glslify processing failed for " + filePath + ": " + err.message,
-        );
-      }
-    },
-  };
-}
-
+// Shaders are imported with Vite's built-in `?raw` (src/shaders/index.js):
+// GLSL ES 3.00 for WebGL2 plus ES 1.00 copies for the WebGL1 fallback, no
+// preprocessing. Do not reintroduce glslify unless a shader genuinely needs
+// shared #pragma includes.
 export default defineConfig({
   base: "./",
-  plugins: [glslifyPlugin()],
   // Keep .wasm in the module graph so rain-sim imports resolve without a
   // manual public/ copy (see src/rain/wasmEngine.js `?url` import).
   assetsInclude: ["**/*.wasm"],

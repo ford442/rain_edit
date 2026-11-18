@@ -1,9 +1,12 @@
+#version 300 es
+// Front rain pass (refracted droplets above the editor). WebGL1 compiles
+// water.es100.frag; keep the two in step (tests/shaders.test.js checks the
+// uniform and function sets match).
 precision mediump float;
 uniform sampler2D u_waterMap;
 uniform sampler2D u_textureShine;
 uniform sampler2D u_textureFg;
 uniform sampler2D u_textureBg;
-varying vec2 v_texCoord;
 uniform vec2 u_resolution;
 uniform vec2 u_parallax;
 uniform float u_parallaxFg;
@@ -16,7 +19,8 @@ uniform float u_refractionDelta;
 uniform float u_brightness;
 uniform float u_alphaMultiply;
 uniform float u_alphaSubtract;
-// (Same shader as original repo, copied verbatim to preserve behavior)
+out vec4 fragColor;
+
 vec4 blend(vec4 bg, vec4 fg){
     vec3 bgm=bg.rgb*bg.a;
     vec3 fgm=fg.rgb*fg.a;
@@ -64,12 +68,11 @@ vec4 fgColor(float x, float y){
     (1.0-(1.0/scale.x))/2.0,
     (1.0-(1.0/scale.y))/2.0
     );
-    return texture2D(u_waterMap,
+    return texture(u_waterMap,
     (scaledTexCoord+offset)+(pixel()*vec2(x, y))+parallax(u_parallaxFg)
     );
 }
 void main() {
-    vec4 bg=texture2D(u_textureBg, scaledTexCoord()+parallax(u_parallaxBg));
     vec4 cur = fgColor(0.0, 0.0);
     float d=cur.b;
     float x=cur.g;
@@ -80,12 +83,12 @@ void main() {
     vec2 refractionPos = scaledTexCoord()
     + (pixel()*refraction*(u_minRefraction+(d*u_refractionDelta)))
     + refractionParallax;
-    vec4 tex=texture2D(u_textureFg, refractionPos);
+    vec4 tex=texture(u_textureFg, refractionPos);
     if (u_renderShine){
         float maxShine=490.0;
         float minShine=maxShine*0.18;
         vec2 shinePos=vec2(0.5, 0.5) + ((1.0/512.0)*refraction)* -(minShine+((maxShine-minShine)*d));
-        vec4 shine=texture2D(u_textureShine, shinePos);
+        vec4 shine=texture(u_textureShine, shinePos);
         tex=blend(tex, shine);
     }
     vec4 fg=vec4(tex.rgb*u_brightness, a);
@@ -97,5 +100,5 @@ void main() {
         vec4 border=vec4(0., 0., 0., borderAlpha);
         fg=blend(border, fg);
     }
-    gl_FragColor = fg;
+    fragColor = fg;
 }

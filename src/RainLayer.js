@@ -3,90 +3,59 @@ import {
   getGLContextInfo,
   resizeCanvasToDisplaySize,
 } from "./rendering/createGLContext.js";
-import vertSrc from "./shaders/simple.vert?glslify";
-import fragSrc from "./shaders/water.frag?glslify";
+import { buildProgram, formatShaderLog } from "./rendering/shaderProgram.js";
+import { RAIN_VERTEX, WATER_FRONT } from "./shaders/index.js";
 
+const now = () => globalThis.performance?.now?.() ?? Date.now();
 
-function prepareShaderSource(api, type, source) {
-  if (api !== "webgl2" || /^\s*#version\s+300\s+es/m.test(source)) {
-    return source;
-  }
-
-  let compatibleSource = source;
-  if (type === "vertex") {
-    compatibleSource = compatibleSource
-      .replace(/\battribute\b/g, "in")
-      .replace(/\bvarying\b/g, "out");
-  } else {
-    compatibleSource = compatibleSource
-      .replace(/\bvarying\b/g, "in")
-      .replace(/\btexture2D\s*\(/g, "texture(")
-      .replace(/\bgl_FragColor\b/g, "rainFragmentColor")
-      .replace(/\bvoid\s+main\s*\(/, "out vec4 rainFragmentColor;\nvoid main(");
-  }
-
-  return `#version 300 es\n${compatibleSource}`;
+function detectApi(gl) {
+  return typeof WebGL2RenderingContext !== "undefined" &&
+    gl instanceof WebGL2RenderingContext
+    ? "webgl2"
+    : "webgl1";
 }
 
-
-function createShader(gl, api, type, source) {
-  const shader = gl.createShader(type);
-  const shaderType = type === gl.VERTEX_SHADER ? "vertex" : "fragment";
-  gl.shaderSource(shader, prepareShaderSource(api, shaderType, source));
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const error = gl.getShaderInfoLog(shader);
-    gl.deleteShader(shader);
-    throw new Error(`${api} ${shaderType} shader compile error: ${error}`);
-  }
-  return shader;
-}
+const sameValue = (a, b) =>
+  a === b ||
+  (Array.isArray(a) &&
+    Array.isArray(b) &&
+    a.length === b.length &&
+    a.every((v, i) => v === b[i]));
 
 
-function createProgram(gl, api, vertexSource, fragmentSource) {
-  const vertexShader = createShader(
-    gl,
-    api,
-    gl.VERTEX_SHADER,
-    vertexSource,
-  );
-  const fragmentShader = createShader(
-    gl,
-    api,
-    gl.FRAGMENT_SHADER,
-    fragmentSource,
-  );
-  const program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.bindAttribLocation(program, 0, "a_position");
-  gl.linkProgram(program);
-  gl.deleteShader(vertexShader);
-  gl.deleteShader(fragmentShader);
-
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const error = gl.getProgramInfoLog(program);
-    gl.deleteProgram(program);
-    throw new Error(`${api} program link error: ${error}`);
-  }
-  return program;
-}
-
-
+/**
+ * One fullscreen rain pass.
+ *
+ * By default the layer owns its canvas's context (created through
+ * `createGLContext`) and replaces the canvas contents each frame. Pass `gl`
+ * to draw inside a context someone else owns (the cabinet's Three.js
+ * renderer, via `src/rendering/Compositor.js`), and `composite: "over"` to
+ * blend over what that owner already drew instead of clearing it.
+ */
 export default class RainLayer {
   constructor(
     canvas,
     {
-      vertex = vertSrc,
-      fragment = fragSrc,
+      vertex = RAIN_VERTEX,
+      fragment = WATER_FRONT,
       textures = {},
       options = {},
       context = {},
+      gl = null,
+      composite = "replace",
       onContextLost = null,
       onContextRestored = null,
     } = {},
   ) {
     this.canvas = canvas;
+    /** False when drawing into an injected, externally owned context. */
+    this.ownsContext = !gl;
+    /** "replace" clears then draws; "over" blends premultiplied over the framebuffer. */
+    this.composite = composite;
+    /** Mirrors setVisible(); the dock's front/back rain toggles. */
+    this.visible = true;
+    /** Framebuffer-copy texture sizes, keyed by sampler name. */
+    this._copySizes = {};
     this.vertexSrc = vertex;
     this.fragmentSrc = fragment;
     this.textureSources = { ...textures };
@@ -98,6 +67,16 @@ export default class RainLayer {
     this.contextLost = false;
     this.running = false;
     this.destroyed = false;
+    /** Structured compile/link log of the most recent program build. */
+    this.shaderLog = null;
+    /** Number of program builds (1 + one per context restoration). */
+    this.shaderBuilds = 0;
+    /** Summary of the last build failure, or null. */
+    this.error = null;
+    /** Per-sampler upload timing: { kind: "texImage2D" | "copy", count, lastMs, maxMs, totalMs }. */
+    this.uploadStats = {};
+    /** The most recent upload: { name, ms, kind }. */
+    this.lastUpload = null;
     this.onContextLost = onContextLost;
     this.onContextRestored = onContextRestored;
 
@@ -110,7 +89,7 @@ export default class RainLayer {
       false,
     );
 
-    this.gl = createGLContext(canvas, {
+    this.gl = gl ?? createGLContext(canvas, {
       ...context,
       attributes: {
         alpha: true,
@@ -129,23 +108,36 @@ export default class RainLayer {
       return;
     }
 
-    this.contextInfo = getGLContextInfo(this.gl);
-    this._initializeResources();
-    this.running = true;
+    this.contextInfo = getGLContextInfo(this.gl) ?? {
+      api: detectApi(this.gl),
+      attributes: this.gl.getContextAttributes?.() ?? null,
+      extensions: {},
+    };
+    this.running = this._initializeResources();
   }
 
+  /** Build program + buffers + textures. Returns false if shaders failed. */
   _initializeResources() {
     const gl = this.gl;
-    if (!gl) return;
+    if (!gl) return false;
 
-    this.program = createProgram(
-      gl,
-      this.contextInfo?.api ?? "webgl1",
-      this.vertexSrc,
-      this.fragmentSrc,
-    );
+    const { program, log } = buildProgram(gl, this.contextInfo?.api ?? "webgl1", {
+      vertex: this.vertexSrc,
+      fragment: this.fragmentSrc,
+    });
+    this.shaderBuilds += 1;
+    this.shaderLog = log;
+    this.program = program;
+    this.error = log.error;
+    if (!program) {
+      console.error(
+        `[RainLayer#${this.canvas.id || "canvas"}] ${log.error}\n${formatShaderLog(log)}`,
+      );
+      return false;
+    }
     this._initBuffers();
     this.textures = {};
+    this._copySizes = {};
     this._setupDefaultUniforms();
 
     for (const [name, source] of Object.entries(this.textureSources)) {
@@ -154,6 +146,7 @@ export default class RainLayer {
     for (const [name, value] of Object.entries(this.uniformValues)) {
       this._applyUniform(name, value);
     }
+    return true;
   }
 
   _initBuffers() {
@@ -205,9 +198,8 @@ export default class RainLayer {
     if (this.destroyed) return;
     try {
       this.contextInfo = getGLContextInfo(this.gl) ?? this.contextInfo;
-      this._initializeResources();
       this.contextLost = false;
-      this.running = true;
+      this.running = this._initializeResources();
       this.onContextRestored?.(this, event);
     } catch (error) {
       console.error("[RainLayer] Failed to rebuild restored context.", error);
@@ -232,6 +224,13 @@ export default class RainLayer {
     this._applyUniform(name, value);
   }
 
+  /** Apply many uniforms, skipping values that are already current. */
+  setUniforms(values) {
+    for (const [name, value] of Object.entries(values)) {
+      if (!sameValue(this.uniformValues[name], value)) this.setUniform(name, value);
+    }
+  }
+
   _applyUniform(name, value) {
     const gl = this.gl;
     if (!gl || this.contextLost || !this.program) return;
@@ -254,6 +253,54 @@ export default class RainLayer {
     const gl = this.gl;
     if (!gl || this.contextLost || !source) return false;
 
+    this._bindTextureForWrite(uniformName);
+    this._resetUnpackState();
+    const start = now();
+    try {
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        source,
+      );
+    } catch {
+      return false;
+    }
+    this._recordUpload(uniformName, now() - start);
+    return true;
+  }
+
+  /**
+   * Copy the context's current default framebuffer (what the owner just drew
+   * this frame) into the sampler `uniformName`. A GPU-side copy inside one
+   * context: no canvas readback, no cross-context upload, and it works with
+   * `preserveDrawingBuffer: false` because it runs before the frame is
+   * presented.
+   */
+  copyFramebufferTo(uniformName) {
+    const gl = this.gl;
+    if (!gl || this.contextLost) return false;
+    const width = gl.drawingBufferWidth;
+    const height = gl.drawingBufferHeight;
+    delete this.textureSources[uniformName]; // re-copied every frame, never cached
+    this._bindTextureForWrite(uniformName);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    const start = now();
+    const size = this._copySizes[uniformName];
+    if (size && size.width === width && size.height === height) {
+      gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
+    } else {
+      gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, width, height, 0);
+      this._copySizes[uniformName] = { width, height };
+    }
+    this._recordUpload(uniformName, now() - start, "copy");
+    return true;
+  }
+
+  _bindTextureForWrite(uniformName) {
+    const gl = this.gl;
     let texture = this.textures[uniformName];
     if (!texture) {
       texture = gl.createTexture();
@@ -264,19 +311,63 @@ export default class RainLayer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    try {
-      gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGBA,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        source,
-      );
-      return true;
-    } catch {
-      return false;
+    return texture;
+  }
+
+  /**
+   * Unpack defaults for texImage2D. A shared context's owner (Three.js sets
+   * UNPACK_FLIP_Y_WEBGL per texture) may have left these changed.
+   */
+  _resetUnpackState() {
+    const gl = this.gl;
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.BROWSER_DEFAULT_WEBGL);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
+    if (this.contextInfo?.api === "webgl2") {
+      gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, null);
+      gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0);
+      gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0);
+      gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0);
     }
+  }
+
+  /** Draw state this pass relies on, set explicitly (contexts may be shared). */
+  _resetDrawState() {
+    const gl = this.gl;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    if (this.contextInfo?.api === "webgl2") gl.bindVertexArray(null);
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.SCISSOR_TEST);
+    gl.disable(gl.STENCIL_TEST);
+    gl.colorMask(true, true, true, true);
+    if (this.composite === "over") {
+      // The pass outputs colour the page compositor treats as premultiplied
+      // (premultipliedAlpha: true), so "over" in-context is ONE, 1-srcAlpha:
+      // identical to the browser stacking a separate rain canvas on top.
+      gl.enable(gl.BLEND);
+      gl.blendEquation(gl.FUNC_ADD);
+      gl.blendFuncSeparate(gl.ONE, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    } else {
+      gl.disable(gl.BLEND);
+    }
+  }
+
+  _recordUpload(name, ms, kind = "texImage2D") {
+    const stats = (this.uploadStats[name] ??= {
+      kind,
+      count: 0,
+      lastMs: 0,
+      maxMs: 0,
+      totalMs: 0,
+    });
+    stats.count += 1;
+    stats.lastMs = ms;
+    stats.maxMs = Math.max(stats.maxMs, ms);
+    stats.totalMs += ms;
+    stats.kind = kind;
+    this.lastUpload = { name, ms, kind };
   }
 
   _bindTexturesForDraw() {
@@ -296,9 +387,12 @@ export default class RainLayer {
   render() {
     const gl = this.gl;
     if (!gl || !this.running || this.contextLost || !this.program) return;
+    this._resetDrawState();
     gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    if (this.composite !== "over") {
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
     gl.useProgram(this.program);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo);
     gl.enableVertexAttribArray(0);
@@ -312,17 +406,40 @@ export default class RainLayer {
     }
     this._bindTexturesForDraw();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    if (this.composite === "over") gl.disable(gl.BLEND);
   }
 
   setVisible(visible) {
+    this.visible = Boolean(visible);
     this.canvas.style.display = visible ? "block" : "none";
   }
 
   getDiagnostics() {
+    const uploads = {};
+    for (const [name, stats] of Object.entries(this.uploadStats)) {
+      uploads[name] = {
+        kind: stats.kind,
+        count: stats.count,
+        lastMs: stats.lastMs,
+        maxMs: stats.maxMs,
+        averageMs: stats.count ? stats.totalMs / stats.count : 0,
+      };
+    }
     return {
-      ...this.contextInfo,
+      api: this.contextInfo?.api ?? null,
+      ownsContext: this.ownsContext,
+      composite: this.composite,
+      visible: this.visible,
+      attributes: this.contextInfo?.attributes ?? null,
+      extensions: this.contextInfo?.extensions ?? {},
       contextLost: this.contextLost,
       running: this.running,
+      destroyed: this.destroyed,
+      error: this.error,
+      shaderLog: this.shaderLog,
+      shaderBuilds: this.shaderBuilds,
+      uploads,
+      lastTexImage2D: this.lastUpload ? { ...this.lastUpload } : null,
       drawingBuffer: {
         width: this.canvas.width,
         height: this.canvas.height,

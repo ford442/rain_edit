@@ -1,4 +1,5 @@
 import createCanvas from "../vendor/create-canvas.js";
+import { create2DContext } from "../rendering/create2DContext.js";
 
 const DROP_SIZE = 64;
 const ATLAS_COUNT = 255;
@@ -13,12 +14,16 @@ const ATLAS_COUNT = 255;
  */
 export function bakeDropAtlas(dropAlpha, dropColor) {
   const dropBuffer = createCanvas(DROP_SIZE, DROP_SIZE);
-  const dropBufferCtx = dropBuffer.getContext("2d");
+  const dropBufferCtx = create2DContext(dropBuffer, { label: "drop-atlas-buffer" });
   const atlas = new Uint8ClampedArray(ATLAS_COUNT * DROP_SIZE * DROP_SIZE * 4);
 
   for (let i = 0; i < ATLAS_COUNT; i++) {
     const drop = createCanvas(DROP_SIZE, DROP_SIZE);
-    const dropCtx = drop.getContext("2d");
+    // Read back with getImageData below.
+    const dropCtx = create2DContext(drop, {
+      attributes: { willReadFrequently: true },
+      label: "drop-atlas-sprite",
+    });
     dropBufferCtx.clearRect(0, 0, DROP_SIZE, DROP_SIZE);
     dropBufferCtx.globalCompositeOperation = "source-over";
     dropBufferCtx.drawImage(dropColor, 0, 0, DROP_SIZE, DROP_SIZE);

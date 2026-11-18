@@ -1,0 +1,14 @@
+{
+  "crate": "crates/rain-sim",
+  "toolchain": "1.95.0",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+  "sources": [
+    "Cargo.lock",
+    "Cargo.toml",
+    "rust-toolchain.toml",
+    "src/lib.rs"
+  ],
+  "sourceSha256": "db512a16af980e45349682e90c2cb6094afc54508fd7ee53cd7bba1a9f6b66b6",
+  "wasmSha256": "6b7d8e890aa265e2730a93d801b3a1a917381c4d12d1965a9c30fae0181c49c8",
+  "wasmBytes": 34638
+}

@@ -2,9 +2,8 @@ import RainLayer from "../RainLayer";
 import { WaterMapSim } from "./WaterMapSim.js";
 import { createRainEffects } from "./rainEffects.js";
 import { resizeCanvasToDisplaySize } from "../rendering/createGLContext.js";
-import backFrag from "../shaders/water-back.frag?glslify";
-import frontFrag from "../shaders/water.frag?glslify";
-import vertSrc from "../shaders/simple.vert?glslify";
+import { Compositor } from "../rendering/Compositor.js";
+import { RAIN_VERTEX, WATER_BACK, WATER_FRONT } from "../shaders/index.js";
 
 const RAIN_CHANCE_DEFAULT = 0.3;
 const RAIN_CHANCE_CABINET = 0.12;
@@ -26,10 +25,14 @@ function awaitImage(src) {
  * passes, and the per-frame droplet-clearing effects.
  *
  * Runs as the AppClock `rain` task. While the 3D cabinet is open the task
- * also renders the cabinet (`cabinet3D.renderFrame()`) and uploads its canvas
- * as the rain background texture in the same tick — see
- * `docs/rendering-contexts.md` for why render + upload must be adjacent.
- * The task idles while either WebGL context is lost and resumes once both are
+ * also renders the cabinet and, by default, composites the front rain pass
+ * *inside the cabinet's WebGL2 context* (`src/rendering/Compositor.js`): the
+ * cabinet frame is copied on the GPU and refracted by the drops, so no canvas
+ * crosses a context and `#rain-front` is suspended meanwhile.
+ * `?cabinetCompositing=upload` (or a pass that cannot build) falls back to
+ * uploading the cabinet canvas into both rain contexts in the same tick. See
+ * `docs/rendering-contexts.md` for the frame order.
+ * The task idles while either rain context is lost and resumes once both are
  * restored.
  */
 export class RainScene {
@@ -43,9 +46,26 @@ export class RainScene {
    *   ctx: Partial<typeof import("../appContext.js")>,
    *   onRaindrops?: (sim: WaterMapSim) => void,
    *   onLayers?: (layers: { bgLayer: RainLayer, fgLayer: RainLayer }) => void,
+   *   forceWebGL1?: boolean,
+   *   cabinetCompositing?: "shared" | "upload",
    * }} deps
+   *   `forceWebGL1` (`?rainGL=webgl1`) skips WebGL2 so the GLSL ES 1.00
+   *   fallback shaders can be exercised on any browser.
+   *   `cabinetCompositing` (`?cabinetCompositing=upload`) forces the legacy
+   *   cross-context upload path for A/B comparison.
    */
-  constructor({ backCanvas, frontCanvas, editorEl, clock, weatherSystem, ctx, onRaindrops, onLayers }) {
+  constructor({
+    backCanvas,
+    frontCanvas,
+    editorEl,
+    clock,
+    weatherSystem,
+    ctx,
+    onRaindrops,
+    onLayers,
+    forceWebGL1 = false,
+    cabinetCompositing = "shared",
+  }) {
     this.backCanvas = backCanvas;
     this.frontCanvas = frontCanvas;
     this.editorEl = editorEl;
@@ -54,6 +74,7 @@ export class RainScene {
     this.ctx = ctx;
     this.onRaindrops = onRaindrops;
     this.onLayers = onLayers;
+    this.forceWebGL1 = forceWebGL1;
     this.effects = createRainEffects();
     /** @type {WaterMapSim | null} */
     this.raindrops = null;
@@ -71,6 +92,14 @@ export class RainScene {
     this._staticFgImg = null;
     this._usingCabinetBg = false;
     this._cabinetWasVisible = false;
+    /** @type {"shared" | "upload"} */
+    this.cabinetCompositing = cabinetCompositing;
+    /** @type {Compositor | null} */
+    this._compositor = null;
+    /** True while the shared pass draws the drops and #rain-front is hidden. */
+    this._frontSuspended = false;
+    /** @type {"idle" | "shared-context-pass" | "cross-context-upload" | "cabinet-only"} */
+    this.compositingMode = "idle";
   }
 
   /** True when this tick's rain task will render the cabinet itself. */
@@ -123,6 +152,7 @@ export class RainScene {
     this._bindBackendSelect(raindrops);
 
     const lifecycle = {
+      context: { preferWebGL2: !this.forceWebGL1 },
       onContextLost: () => {
         this.contextPaused = true;
       },
@@ -133,15 +163,15 @@ export class RainScene {
     };
 
     this.bgLayer = new RainLayer(this.backCanvas, {
-      vertex: vertSrc,
-      fragment: backFrag,
+      vertex: RAIN_VERTEX,
+      fragment: WATER_BACK,
       textures: { u_waterMap: raindrops.canvas, u_textureBg: bgImg },
       options: { u_brightness: 1.0 },
       ...lifecycle,
     });
     this.fgLayer = new RainLayer(this.frontCanvas, {
-      vertex: vertSrc,
-      fragment: frontFrag,
+      vertex: RAIN_VERTEX,
+      fragment: WATER_FRONT,
       textures: {
         u_waterMap: raindrops.canvas,
         u_textureFg: fgImg,
@@ -208,7 +238,8 @@ export class RainScene {
     this.weatherSystem.update();
     raindrops.update();
     this.bgLayer?.bindTexture("u_waterMap", raindrops.canvas);
-    this.fgLayer?.bindTexture("u_waterMap", raindrops.canvas);
+    // While suspended, the shared cabinet pass uploads the water map instead.
+    if (!this._frontSuspended) this.fgLayer?.bindTexture("u_waterMap", raindrops.canvas);
 
     // Rain shield around the focused note card.
     const rect = referenceManager?.getFocusedNoteRect();
@@ -261,29 +292,109 @@ export class RainScene {
     const { bgLayer, fgLayer } = this;
     const cabinet3D = this.ctx.cabinet3D;
 
-    // While the cabinet is open, render it and upload its live canvas as the
-    // rain background in the same tick (no preserveDrawingBuffer needed).
+    /** @type {RainScene["compositingMode"]} */
+    let mode = "idle";
     if (cabinet3D && cabinet3D.visible) {
-      cabinet3D.renderFrame();
-      const cabCanvas = cabinet3D.getRendererCanvas();
-      const uploadStart = performance.now();
-      bgLayer?.bindTexture("u_textureBg", cabCanvas);
-      if (fgLayer) {
-        fgLayer.bindTexture("u_textureBg", cabCanvas);
-        fgLayer.bindTexture("u_textureFg", cabCanvas);
+      if ((fgLayer && !fgLayer.visible) || cabinet3D.getGLContext()?.isContextLost()) {
+        // Front rain switched off in the dock (no drops over the cabinet
+        // either), or the cabinet context is lost (nothing to composite or
+        // upload until Three restores it).
+        cabinet3D.renderFrame();
+        mode = "cabinet-only";
+      } else if (this.cabinetCompositing === "shared" && this._compositeCabinet(cabinet3D)) {
+        mode = "shared-context-pass";
+      } else {
+        this._uploadCabinetCanvas(cabinet3D);
+        mode = "cross-context-upload";
       }
-      cabinet3D.recordRainTextureUpload(performance.now() - uploadStart);
-      this._usingCabinetBg = true;
-    } else if (this._usingCabinetBg) {
-      if (this._staticBgImg) {
-        bgLayer?.bindTexture("u_textureBg", this._staticBgImg);
-        fgLayer?.bindTexture("u_textureBg", this._staticBgImg);
-      }
-      if (this._staticFgImg) fgLayer?.bindTexture("u_textureFg", this._staticFgImg);
-      this._usingCabinetBg = false;
     }
+    if (mode !== "cross-context-upload" && this._usingCabinetBg) this._restoreStaticTextures();
+    this._setFrontSuspended(mode === "shared-context-pass");
+    this.compositingMode = mode;
 
     bgLayer?.render();
-    fgLayer?.render();
+    if (!this._frontSuspended) fgLayer?.render();
+  }
+
+  /**
+   * Render the cabinet and composite the front rain over it inside the
+   * cabinet's own context. Returns false (cabinet not yet rendered) when the
+   * shared pass cannot run, so the caller can fall back.
+   * @param {NonNullable<RainScene["ctx"]["cabinet3D"]>} cabinet3D
+   */
+  _compositeCabinet(cabinet3D) {
+    const { raindrops, fgLayer } = this;
+    if (!raindrops || !fgLayer) return false;
+    try {
+      this._compositor ??= new Compositor({
+        host: cabinet3D,
+        createPass: (canvas, gl, { onContextRestored }) =>
+          new RainLayer(canvas, {
+            gl,
+            composite: "over",
+            vertex: RAIN_VERTEX,
+            fragment: WATER_FRONT,
+            options: { ...fgLayer.uniformValues },
+            onContextRestored,
+          }),
+      });
+      return this._compositor.frame({
+        waterMap: raindrops.canvas,
+        uniforms: fgLayer.uniformValues,
+      });
+    } catch (error) {
+      console.error("[rain] shared cabinet pass failed; using cross-context upload", error);
+      this.cabinetCompositing = "upload";
+      return false;
+    }
+  }
+
+  /**
+   * Legacy path: render the cabinet, then upload its live canvas into both
+   * rain contexts in the same tick (no preserveDrawingBuffer needed).
+   * @param {NonNullable<RainScene["ctx"]["cabinet3D"]>} cabinet3D
+   */
+  _uploadCabinetCanvas(cabinet3D) {
+    const { bgLayer, fgLayer } = this;
+    cabinet3D.renderFrame();
+    const cabCanvas = cabinet3D.getRendererCanvas();
+    const uploadStart = performance.now();
+    bgLayer?.bindTexture("u_textureBg", cabCanvas);
+    if (fgLayer) {
+      fgLayer.bindTexture("u_textureBg", cabCanvas);
+      fgLayer.bindTexture("u_textureFg", cabCanvas);
+    }
+    cabinet3D.recordRainTextureUpload(performance.now() - uploadStart);
+    this._usingCabinetBg = true;
+  }
+
+  _restoreStaticTextures() {
+    const { bgLayer, fgLayer } = this;
+    if (this._staticBgImg) {
+      bgLayer?.bindTexture("u_textureBg", this._staticBgImg);
+      fgLayer?.bindTexture("u_textureBg", this._staticBgImg);
+    }
+    if (this._staticFgImg) fgLayer?.bindTexture("u_textureFg", this._staticFgImg);
+    this._usingCabinetBg = false;
+  }
+
+  /** @param {boolean} suspended */
+  _setFrontSuspended(suspended) {
+    if (suspended === this._frontSuspended) return;
+    this._frontSuspended = suspended;
+    // `visibility`, not `display`: the dock's front-rain toggle owns display.
+    this.frontCanvas.style.visibility = suspended ? "hidden" : "";
+  }
+
+  /** How the cabinet and rain were composited on the last frame (`?shaderDebug=1`). */
+  getCompositingDiagnostics() {
+    return {
+      mode: this.compositingMode,
+      requested: this.cabinetCompositing,
+      frontSuspended: this._frontSuspended,
+      crossContextUploadsPerFrame: this.compositingMode === "cross-context-upload" ? 3 : 0,
+      cabinet: this.ctx.cabinet3D?.getCompositingDiagnostics() ?? null,
+      shared: this._compositor?.getDiagnostics() ?? null,
+    };
   }
 }

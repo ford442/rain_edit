@@ -1,3 +1,5 @@
+import { create2DContext } from "../rendering/create2DContext.js";
+
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?";
 
 /**
@@ -5,9 +7,14 @@ const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?";
  * (decorative priority: skipped under low LOD).
  */
 export class MatrixRain {
-  /** @param {HTMLCanvasElement | null} canvas */
-  constructor(canvas) {
+  /**
+   * @param {HTMLCanvasElement | null} canvas
+   * @param {{ desynchronized?: boolean }} [options] `desynchronized` is the
+   *   `?desync2d=1` low-latency experiment (see create2DContext.js).
+   */
+  constructor(canvas, { desynchronized = false } = {}) {
     this.canvas = canvas;
+    this.desynchronized = desynchronized;
     /** @type {CanvasRenderingContext2D | null} */
     this.ctx = null;
     /** @type {number[]} */
@@ -18,7 +25,10 @@ export class MatrixRain {
   /** Re-derive the column set after the canvas was resized. */
   resize() {
     if (!this.canvas) return;
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx ??= create2DContext(this.canvas, {
+      attributes: { desynchronized: this.desynchronized },
+      label: "matrix",
+    });
     const fontSize = 16 * (window.devicePixelRatio || 1);
     const columns = Math.floor(this.canvas.width / fontSize);
     // Re-seed only when the column count changed significantly.

@@ -45,12 +45,32 @@ export class Cabinet3D {
    * `cabinet` fallback task calls it when rain isn't running.
    */
   renderFrame(): void;
-  /** The Three.js canvas, for cross-context texture upload. */
+  /** The Three.js canvas (host of the shared-context rain pass). */
   getRendererCanvas(): HTMLCanvasElement;
+  /** The WebGL2 context Three renders with; the rain Compositor pass draws in it too. */
+  getGLContext(): WebGL2RenderingContext;
+  /** `renderer.resetState()`: re-sync Three's GL state cache after raw GL calls. */
+  resetGLState(): void;
   /** Screen-space position/radius of the hovered or pinned file cube. */
   getHoverScreenPos(): { x: number; y: number; r: number } | null;
   /** Record one rain-texture upload duration for compositing diagnostics. */
   recordRainTextureUpload(durationMs: number): void;
+  /** Cabinet context + cabinet-to-rain upload stats (`?shaderDebug=1`). */
+  getCompositingDiagnostics(): CabinetCompositingDiagnostics;
+}
+
+export interface CabinetCompositingDiagnostics {
+  context: {
+    api: "webgl2" | "webgl1";
+    attributes: WebGLContextAttributes;
+    extensions: Record<string, unknown>;
+  } | null | undefined;
+  preserveDrawingBuffer: boolean;
+  /** Cross-context fallback uploads only (`?cabinetCompositing=upload`). */
+  samples: number;
+  averageUploadMs: number;
+  maxUploadMs: number;
+  lastUploadMs: number;
 }
 
 export const CATEGORY_COLORS: readonly number[];

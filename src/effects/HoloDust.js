@@ -1,3 +1,5 @@
+import { create2DContext } from "../rendering/create2DContext.js";
+
 /**
  * Holographic dust particles on `#dust-layer`, with mouse parallax and a
  * typing-driven drift speed. Drawn by the AppClock `dust` task (decorative
@@ -6,10 +8,12 @@
 export class HoloDust {
   /**
    * @param {HTMLCanvasElement | null} canvas
-   * @param {{ getIntensity?: () => number, count?: number }} [options]
+   * @param {{ getIntensity?: () => number, count?: number, desynchronized?: boolean }} [options]
+   *   `desynchronized` is the `?desync2d=1` low-latency experiment.
    */
-  constructor(canvas, { getIntensity = () => 1, count = 100 } = {}) {
+  constructor(canvas, { getIntensity = () => 1, count = 100, desynchronized = false } = {}) {
     this.canvas = canvas;
+    this.desynchronized = desynchronized;
     this.getIntensity = getIntensity;
     /** @type {CanvasRenderingContext2D | null} */
     this.ctx = null;
@@ -20,7 +24,10 @@ export class HoloDust {
 
   init() {
     if (!this.canvas) return this;
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = create2DContext(this.canvas, {
+      attributes: { desynchronized: this.desynchronized },
+      label: "dust",
+    });
     for (let i = 0; i < this.count; i++) {
       this.particles.push({
         x: Math.random() * window.innerWidth,

@@ -1,6 +1,7 @@
 import loadImages from "./image-loader";
 import times from "./times.js";
 import createCanvas from "./create-canvas.js";
+import { create2DContext } from "../rendering/create2DContext.js";
 import { random, chance } from "./random";
 let dropSize = 64;
 const Drop = {
@@ -68,12 +69,12 @@ Raindrops.prototype = {
   options: null,
   init() {
     this.canvas = createCanvas(this.width, this.height);
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = create2DContext(this.canvas, { label: "water-map" });
     this.droplets = createCanvas(
       this.width * this.dropletsPixelDensity,
       this.height * this.dropletsPixelDensity,
     );
-    this.dropletsCtx = this.droplets.getContext("2d");
+    this.dropletsCtx = create2DContext(this.droplets, { label: "water-droplets" });
     this.drops = [];
     this.dropsGfx = [];
     this.renderDropsGfx();
@@ -100,10 +101,10 @@ Raindrops.prototype = {
   },
   renderDropsGfx() {
     let dropBuffer = createCanvas(dropSize, dropSize);
-    let dropBufferCtx = dropBuffer.getContext("2d");
+    let dropBufferCtx = create2DContext(dropBuffer, { label: "drop-buffer" });
     this.dropsGfx = Array.apply(null, Array(255)).map((cur, i) => {
       let drop = createCanvas(dropSize, dropSize);
-      let dropCtx = drop.getContext("2d");
+      let dropCtx = create2DContext(drop, { label: "drop-sprite" });
       dropBufferCtx.clearRect(0, 0, dropSize, dropSize);
       dropBufferCtx.globalCompositeOperation = "source-over";
       dropBufferCtx.drawImage(this.dropColor, 0, 0, dropSize, dropSize);
@@ -117,7 +118,7 @@ Raindrops.prototype = {
       return drop;
     });
     this.clearDropletsGfx = createCanvas(128, 128);
-    let clearDropletsCtx = this.clearDropletsGfx.getContext("2d");
+    let clearDropletsCtx = create2DContext(this.clearDropletsGfx, { label: "drop-clear" });
     clearDropletsCtx.fillStyle = "#000";
     clearDropletsCtx.beginPath();
     clearDropletsCtx.arc(64, 64, 64, 0, Math.PI * 2);

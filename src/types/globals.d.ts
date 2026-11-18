@@ -1,7 +1,7 @@
 // Ambient declarations shared across the type-checked seams.
 
-// glslify-compiled shader imports resolve to their compiled source string.
-declare module "*?glslify" {
+// Vite's built-in `?raw` suffix imports a file's text verbatim (shaders).
+declare module "*?raw" {
   const source: string;
   export default source;
 }
