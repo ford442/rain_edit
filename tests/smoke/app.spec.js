@@ -11,6 +11,44 @@ async function exposeAppContext(page) {
   });
 }
 
+test("controls remain reachable in a short viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 594 });
+  await page.goto("/");
+  await page.waitForFunction(() => Boolean(window.tabManager));
+  await page.evaluate(() => {
+    for (let i = 0; i < 12; i++) {
+      window.tabManager.addFile(`file-${i}.js`, "", "javascript");
+    }
+  });
+
+  for (const selector of ["#btn-depth-forward", "#btn-depth-back", "#view-mode-select"]) {
+    const control = page.locator(selector);
+    await expect(control).toBeInViewport({ ratio: 1 });
+  }
+  expect(await page.locator(".tabs-list").evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+
+  const dock = page.locator("#dock");
+  const dockBounds = await dock.boundingBox();
+  await page.mouse.move(dockBounds.x + dockBounds.width / 2, dockBounds.y + dockBounds.height / 2);
+  await expect(page.locator("#storm-intensity")).toBeInViewport({ ratio: 1 });
+  expect(await dock.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
+  await page.mouse.wheel(0, 500);
+  await expect.poll(() => dock.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+
+  await page.locator("#theme-select").selectOption("journal");
+  await expect(page.locator("body")).toHaveClass(/theme-journal/);
+  await page.locator("#btn-workspace-export").scrollIntoViewIfNeeded();
+  await expect(page.locator("#btn-workspace-export")).toBeInViewport({ ratio: 1 });
+  await page.locator("#toggle-back").uncheck();
+  await expect(page.locator("#toggle-back")).not.toBeChecked();
+  await page.locator("#btn-explode-view").scrollIntoViewIfNeeded();
+  await expect(page.locator("#btn-explode-view")).toBeInViewport({ ratio: 1 });
+
+  await page.mouse.move(10, 300);
+  await dock.focus();
+  await expect(page.locator("#storm-intensity")).toBeVisible();
+});
+
 test("initializes Monaco and both rain canvases", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));

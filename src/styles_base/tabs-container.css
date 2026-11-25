@@ -2,6 +2,16 @@
 
 /* ─── styles_4.css ─── */
 #tabs-container {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 10000;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
   background: rgba(10, 14, 22, 0.85);
   backdrop-filter: var(--glass-blur-md) var(--glass-sat);
   -webkit-backdrop-filter: var(--glass-blur-md) var(--glass-sat);
@@ -48,6 +58,7 @@
   align-items: center;
   gap: 10px;
   flex: 1;
+  min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -194,6 +205,8 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  max-width: 100%;
+  overflow-x: auto;
   background: rgba(0, 0, 0, 0.3);
   padding: 6px 12px;
   border-radius: 16px;
@@ -321,4 +334,3 @@
   border-color: rgba(255, 255, 255, 0.5);
   transform: scale(1.05);
 }
-
